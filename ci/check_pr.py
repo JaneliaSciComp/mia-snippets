@@ -31,12 +31,13 @@ class _Static(ast.NodeVisitor):
 
     def visit_Import(self, n):
         for a in n.names:
-            if a.name.split(".")[0] in BANNED_MODULES:
+            if a.name.split(".")[0] in BANNED_MODULES | {"snippets"}:
                 self.errors.append(f"line {n.lineno}: import of {a.name}")
 
     def visit_ImportFrom(self, n):
         root = (n.module or "").split(".")[0]
-        if n.level or root == "snippets" or root in BANNED_MODULES:
+        bad_os = root == "os" and any(re.fullmatch(r"\*|system|popen|exec\w*|spawn\w*", a.name) for a in n.names)
+        if n.level or root == "snippets" or root in BANNED_MODULES or bad_os:
             self.errors.append(f"line {n.lineno}: import from {'.' * n.level}{n.module or ''}")
 
     def visit_Call(self, n):
@@ -80,10 +81,12 @@ def _meta_errors(name: str, text: str, paths: set[str], allow: set[str]) -> list
         errs.append(f"snippet.yaml name {meta.get('name')!r} must equal the directory {name!r}")
     if meta.get("spec_version") != 1:
         errs.append(f"snippet.yaml spec_version must be 1, got {meta.get('spec_version')!r}")
-    req = meta.get("requires") or []
-    if not isinstance(req, list) or not set(req) <= allow:
+    req, tested = meta.get("requires") or [], meta.get("tested_on") or []
+    if not isinstance(req, list) or not all(isinstance(r, str) for r in req) or not set(req) <= allow:
         errs.append(f"snippet.yaml requires {req!r} is not within the allowlist {sorted(allow)}")
-    for t in meta.get("tested_on") or []:
+    if not isinstance(tested, list) or not all(isinstance(t, str) for t in tested):
+        return errs + [f"snippet.yaml tested_on must be a list of record ids, got {tested!r}"]
+    for t in tested:
         if f"snippets/{name}/examples/{t}.yaml" not in paths:
             errs.append(f"tested_on {t!r} has no examples/{t}.yaml")
     return errs
@@ -94,6 +97,8 @@ def check(changed: list[tuple[str, str]], author: str, existing_snippets: set[st
     """changed = [(status A|M|D|R, path)]. Returns error strings (empty = pass)."""
     allow = _allowlist() if allowlist is None else allowlist
     errs, new = [], {}
+    maintainers = {m.lower() for m in maintainers}
+    author = author.lower()
     for status, path in changed:
         parts = path.split("/")
         name = parts[1] if parts[0] == "snippets" and len(parts) > 2 else None
@@ -128,13 +133,13 @@ def main() -> int:
     ap.add_argument("--author", required=True)
     a = ap.parse_args()
     changed = []
-    for line in _git("diff", "--name-status", f"{a.base}...HEAD").splitlines():
+    for line in _git("-c", "core.quotepath=off", "diff", "--name-status", f"{a.base}...HEAD").splitlines():
         status, *paths = line.split("\t")
         if status[0] in "RC":   # a rename is a delete of the old path plus an add of the new
             changed += ([("D", paths[0])] if status[0] == "R" else []) + [("A", paths[1])]
         else:
             changed.append((status[0], paths[0]))
-    existing = {p.split("/")[1] for p in _git("ls-tree", "--name-only", a.base, "snippets/").split()}
+    existing = {p.split("/")[1] for p in _git("-c", "core.quotepath=off", "ls-tree", "--name-only", a.base, "snippets/").split()}
     lines = (ROOT / "ci" / "maintainers.txt").read_text().splitlines()
     maintainers = {l.strip() for l in lines if l.strip() and not l.startswith("#")}
     errs = check(changed, a.author, existing, maintainers, lambda p: (ROOT / p).read_text())

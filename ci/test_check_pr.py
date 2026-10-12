@@ -42,10 +42,20 @@ def test_reused_name_fails():
 
 
 def test_forbidden_code_fails():
-    for src in ["import subprocess\n", '__import__("socket")\n', "from os import path\nimport importlib.util\n",
+    for src in ["import subprocess\n", '__import__("socket")\n', "import importlib.util\n", "from os import system\n", "from os import *\n", "import snippets.old\n",
                 "import numpy as np\nnp.load('f', allow_pickle=True)\n", "from snippets.old import snippet\n",
                 "from . import x\n", "import os\nos.system('ls')\n", "import os\nos.execvp('a', [])\n"]:
         assert run(ADDED, files=with_py(OK_PY + src)), src
+
+
+def test_os_path_import_passes():
+    assert run(ADDED, files=with_py("from os import path\n" + OK_PY)) == []
+
+
+def test_maintainer_case_insensitive_and_bad_types():
+    assert run([("M", "harness/x.py")], author="Alice") == []
+    for y in ["requires: [[a]]", "requires: numpy", "tested_on: rec1", "tested_on: [[x]]"]:
+        assert run(ADDED, files={**FILES, "snippets/new-one/snippet.yaml": OK_YAML + y + "\n"}) , y
 
 
 def test_missing_contract_fails():
