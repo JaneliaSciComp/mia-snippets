@@ -1,0 +1,9 @@
+name: mrc-http
+spec_version: 1
+summary: One MRC/REC volume over range requests; header parsed by the snippet, rows of a plane per read.
+formats: [mrc]
+containers: [http, s3]
+params: {}
+requires: [numpy]   # no mrcfile: the header is parsed in snippet.py, so a read is one range request
+tested_on: [czcdp-10003-mpneumoniae-chloramphenicol-ribosomes-cryoet]
+supersedes: null

@@ -1,0 +1,11 @@
+record: czcdp-10003-mpneumoniae-chloramphenicol-ribosomes-cryoet
+record_commit: 5cb6b332f6483255a9bfb0efd9d31c2925ab9a0a
+snippets_commit: 9bf80b09cdf34942c6b8cdd3e263fef420a36baa
+raw:
+  - snippet: mrc-http
+    urls: ["https://files.cryoetdataportal.cziscience.com/10003/TS_01/Reconstructions/VoxelSpacing6.802/Tomograms/100/TS_01.mrc"]
+    params: {}
+labels: []
+reasons:
+  - "raw is run TS_01's tomogram, the record's sample URL matching path_pattern TS_*/Reconstructions/VoxelSpacing6.802/Tomograms/100/TS_*.mrc"
+  - "no labels: the curated annotations are oriented points (not a voxel label) and the membrane masks are automated"
