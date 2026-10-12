@@ -13,6 +13,7 @@ h5py = "*"
 pypng = "*"
 httpx = "*"
 pyyaml = "*"
+zarr = "*"
 pydantic = ">=2"
 
 [pypi-dependencies]
@@ -26,3 +27,4 @@ default = ["test"]
 
 [tasks]
 test = "pytest tests/"
+ci-test = { cmd = "python -m pytest -q", cwd = "../ci" }

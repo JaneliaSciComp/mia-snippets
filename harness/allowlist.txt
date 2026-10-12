@@ -1,0 +1,7 @@
+numpy
+tifffile
+imagecodecs
+mrcfile
+h5py
+zarr
+pyyaml
