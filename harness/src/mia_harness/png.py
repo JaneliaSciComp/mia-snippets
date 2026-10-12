@@ -4,6 +4,8 @@ from pathlib import Path
 import numpy as np
 import png
 
+from .api import CROP
+
 NONFINITE_MAX = 0.05     # more non-finite pixels than this and the patch is rejected
 CONST_MAX = 0.95         # share of finite pixels one value may hold
 STD_MIN = 1e-6           # std must exceed this * (range + 1)
@@ -48,8 +50,11 @@ def write_png(path: Path, a: np.ndarray, bitdepth: int) -> None:
 
 
 def read_png(path: Path) -> tuple[np.ndarray, int]:
+    """A CROP x CROP PNG; any other size is refused from the header, before a row is decoded."""
     with open(path, "rb") as f:
         w, h, rows, info = png.Reader(file=f).read()
+        if (w, h) != (CROP, CROP):
+            raise ValueError(f"{Path(path).name} is {w}x{h}, not {CROP}x{CROP}")
         a = np.array(list(rows), dtype=np.uint16 if info["bitdepth"] == 16 else np.uint8)
     return (a.reshape(h, w, -1) if info["planes"] > 1 else a), info["bitdepth"]
 

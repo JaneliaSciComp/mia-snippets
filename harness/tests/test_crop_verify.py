@@ -12,7 +12,7 @@ import yaml
 from rangeserver import RangeServer
 
 from mia_harness import cli
-from mia_harness.png import read_png
+from mia_harness.png import read_png, write_png
 
 SNAP = Path(__file__).parent
 IDS = [f"i12-e99-b1-{i:03d}" for i in range(4)]
@@ -149,6 +149,14 @@ def test_extra_files_fail_that_crop(ds, made, tmp_path):
     code, res = verify(ds, d)
     assert code == 1 and [c["ok"] for c in res["crops"]] == [True, False, True, True]
     assert res["crops"][1]["errors"] == ["evil.html is not a crop file", "labels/not-in-binding.png is not a crop file"]
+
+
+def test_wrong_size_png_is_that_crops_error(ds, made, tmp_path):
+    d = shutil.copytree(made[1], tmp_path / "out")
+    write_png(d / IDS[2] / "raw.png", np.zeros((1, 1), np.uint16), 16)
+    code, res = verify(ds, d)
+    assert code == 1 and [c["ok"] for c in res["crops"]] == [True, True, False, True]
+    assert res["crops"][2]["errors"] == ["ValueError: raw.png is 1x1, not 256x256"]
 
 
 def test_symlinks_fail_the_crop(ds, made, tmp_path):

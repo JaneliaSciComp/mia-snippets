@@ -1,3 +1,6 @@
+import struct
+import zlib
+
 import numpy as np
 import pytest
 
@@ -63,18 +66,34 @@ def test_labels():
 
 
 def test_roundtrip(tmp_path):
-    for i, a in enumerate([stretch_raw(rng.random((64, 64)).astype(np.float32))[0],
-                           encode_label(np.eye(64, dtype=np.uint8) * 255, "binary")[0],
-                           encode_label(np.eye(64, dtype=np.int32) * 40000, "instance")[0]]):
+    for i, a in enumerate([stretch_raw(rng.random((256, 256)).astype(np.float32))[0],
+                           encode_label(np.eye(256, dtype=np.uint8) * 255, "binary")[0],
+                           encode_label(np.eye(256, dtype=np.int32) * 40000, "instance")[0]]):
 
         bd = 8 if a.dtype == np.uint8 else 16
         write_png(tmp_path / f"{i}.png", a, bd)
         b, bd2 = read_png(tmp_path / f"{i}.png")
         assert bd2 == bd and b.dtype == a.dtype and (a == b).all()
-    rgb = rng.integers(0, 255, (16, 16, 3), dtype=np.uint8)
+    rgb = rng.integers(0, 255, (256, 256, 3), dtype=np.uint8)
     write_png(tmp_path / "rgb.png", rgb, 8)
     b, bd = read_png(tmp_path / "rgb.png")
     assert bd == 8 and (b == rgb).all()
+
+
+def _chunk(kind, data):
+    return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data))
+
+
+def test_read_png_refuses_other_sizes_before_decoding(tmp_path):
+    write_png(tmp_path / "tiny.png", np.zeros((1, 1), np.uint8), 8)
+    with pytest.raises(ValueError, match="tiny.png is 1x1, not 256x256"):
+        read_png(tmp_path / "tiny.png")
+    # a 100000x100000 16-bit header: decoding it would need ~20 GB, so it must be refused from the header alone
+    bomb = tmp_path / "bomb.png"
+    bomb.write_bytes(b"\x89PNG\r\n\x1a\n" + _chunk(b"IHDR", struct.pack(">IIBBBBB", 100000, 100000, 16, 0, 0, 0, 0))
+                     + _chunk(b"IDAT", zlib.compress(b"\0" * 1000)) + _chunk(b"IEND", b""))
+    with pytest.raises(ValueError, match="bomb.png is 100000x100000"):
+        read_png(bomb)
 
 
 def test_stats():
