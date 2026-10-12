@@ -1,0 +1,18 @@
+record: bbbc034-hipsc-nuclei-3d
+record_commit: 37e18f6e82f8881a2e598f05217158250ebc08c9
+snippets_commit: 86624a9a1de17da6c352104388c8a6743da5f2c0
+raw:
+  - snippet: tiff-zip-member
+    urls: ["https://data.broadinstitute.org/bbbc/BBBC034/BBBC034_v1_dataset.zip::AICS_12_134_C=2.tif"]
+    params: {}
+labels:
+  - snippet: tiff-zip-member
+    urls: ["https://data.broadinstitute.org/bbbc/BBBC034/BBBC034_v1_DatasetGroundTruth.zip::ground_truth_segmented.tif"]
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+reasons:
+  - "raw is the DNA channel C=2, the channel the record sampled and names as matching the ground truth (alignment_notes)"
+  - "label_key manual_gt-nucleus-instance: annotations.source manual, types instance-segmentation, nuclei"
+  - "axes zyx from the ImageJ metadata (images=52, slices=52), matches the record's zyx 52x1024x1024"

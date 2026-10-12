@@ -1,0 +1,10 @@
+name: tiff-zip-member
+spec_version: 1
+summary: One TIFF from a zip member or a plain URL; deflated members are fetched whole.
+formats: [tiff, ome-tiff]
+containers: [zip, http]
+params:
+  axes: {type: str, required: false, doc: "override when the TIFF's own axes are wrong: one czyx letter per axis of tifffile's series[0] after size-1 axes (other than y/x) are dropped; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [bbbc034-hipsc-nuclei-3d]
+supersedes: null
