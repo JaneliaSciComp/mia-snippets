@@ -4,6 +4,7 @@ import io
 import itertools
 import json
 import os
+import re
 from contextlib import closing
 from pathlib import Path
 from typing import BinaryIO, Iterator
@@ -120,6 +121,11 @@ class IO:
             if start is not None and r.status_code != 206:
                 raise NeedsFetch(f"{url}: server ignored Range (status {r.status_code}); "
                                  "io.fetch can get a whole file, but not a zip member")
+            if start is not None:
+                cr = r.headers.get("content-range", "")
+                m = re.match(r"bytes (\d+)-", cr)
+                if not m or int(m[1]) != start:
+                    raise OSError(f"{url}: Content-Range {cr!r} does not start at {start}")
             got = 0
             for chunk in r.iter_bytes():
                 got += len(chunk)

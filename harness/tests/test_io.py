@@ -105,6 +105,13 @@ def test_server_ignoring_range_raises_instead_of_downloading(server, make_io):
     assert io.fetch(server.url("/d.bin")).read_bytes() == DATA
 
 
+def test_206_for_another_offset_raises(server, make_io):
+    server.files["/d.bin"] = DATA
+    server.range_shift = 1
+    with pytest.raises(OSError, match=r"Content-Range 'bytes 1-.*' does not start at 0"):
+        make_io().open(server.url("/d.bin")).read(10)
+
+
 def test_validators_describe_the_identity_body(server, make_io):
     body = b"compressible " * 10000
     server.files["/t.txt"] = body

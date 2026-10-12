@@ -17,6 +17,7 @@ class RangeServer:
         self.files: dict[str, bytes] = {}        # path -> body
         self.redirects: dict[str, str] = {}      # path -> Location (302)
         self.ignore_range = False                # answer 200 with the whole body
+        self.range_shift = 0                     # answer a Range request this many bytes later than asked
         self.gzip = False                        # serve a gzip variant (own ETag) to clients that accept it
         self.requests: list[tuple[str, str]] = []  # (method, path), every request in order
         self._httpd = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
@@ -77,6 +78,7 @@ class _Handler(BaseHTTPRequestHandler):
         m = re.fullmatch(r"bytes=(\d+)-(\d*)", self.headers.get("Range") or "")
         if m and not s.ignore_range:
             start, end, status = int(m[1]), min(len(data), int(m[2]) + 1 if m[2] else len(data)), 206
+            start, end = start + s.range_shift, min(len(data), end + s.range_shift)
         self.send_response(status)
         self.send_header("Content-Length", str(end - start))
         self.send_header("Accept-Ranges", "bytes")
