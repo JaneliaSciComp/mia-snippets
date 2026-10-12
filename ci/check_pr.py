@@ -11,7 +11,6 @@ from typing import Callable
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent.parent
 BANNED_MODULES = {"socket", "subprocess", "requests", "urllib", "http", "httpx", "fsspec", "ftplib",
                   "pickle", "shelve", "ctypes", "importlib"}
 HARNESS_API = "mia_harness.api"     # the only harness module a snippet may import (SPEC 2)
@@ -69,8 +68,14 @@ def _static_errors(src: str) -> list[str]:
     return errs
 
 
-def _allowlist() -> set[str]:
-    return set((ROOT / "harness" / "allowlist.txt").read_text().split())
+def _root() -> Path:
+    # not __file__: CI runs a copy of this script taken from the base ref, outside the checkout
+    return Path(subprocess.run(["git", "rev-parse", "--show-toplevel"], check=True, capture_output=True,
+                               text=True).stdout.strip())
+
+
+def _allowlist(text: str | None = None) -> set[str]:
+    return set((text if text is not None else (_root() / "harness" / "allowlist.txt").read_text()).split())
 
 
 def _meta_errors(name: str, text: str, paths: set[str], allow: set[str]) -> list[str]:
@@ -128,25 +133,31 @@ def check(changed: list[tuple[str, str]], author: str, existing_snippets: set[st
 
 
 def _git(*args) -> str:
-    return subprocess.run(["git", *args], cwd=ROOT, check=True, capture_output=True, text=True).stdout
+    return subprocess.run(["git", *args], cwd=_root(), check=True, capture_output=True, text=True).stdout
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base", default="origin/main")
+    ap.add_argument("--base", help="ref the PR merges into (default origin/main). When given, the maintainers and "
+                    "the allowlist are read from it, so a PR cannot loosen its own check; when omitted (local "
+                    "runs only), they are read from the working tree.")
     ap.add_argument("--author", required=True)
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
+    base = a.base or "origin/main"
+    root = _root()
+    config = (lambda p: _git("show", f"{a.base}:{p}")) if a.base else (lambda p: (root / p).read_text())
     changed = []
-    for line in _git("-c", "core.quotepath=off", "diff", "--name-status", f"{a.base}...HEAD").splitlines():
+    for line in _git("-c", "core.quotepath=off", "diff", "--name-status", f"{base}...HEAD").splitlines():
         status, *paths = line.split("\t")
         if status[0] in "RC":   # a rename is a delete of the old path plus an add of the new
             changed += ([("D", paths[0])] if status[0] == "R" else []) + [("A", paths[1])]
         else:
             changed.append((status[0], paths[0]))
-    existing = {p.split("/")[1] for p in _git("-c", "core.quotepath=off", "ls-tree", "--name-only", a.base, "snippets/").split()}
-    lines = (ROOT / "ci" / "maintainers.txt").read_text().splitlines()
+    existing = {p.split("/")[1] for p in _git("-c", "core.quotepath=off", "ls-tree", "--name-only", base, "snippets/").split()}
+    lines = config("ci/maintainers.txt").splitlines()
     maintainers = {l.strip() for l in lines if l.strip() and not l.startswith("#")}
-    errs = check(changed, a.author, existing, maintainers, lambda p: (ROOT / p).read_text())
+    errs = check(changed, a.author, existing, maintainers, lambda p: (root / p).read_text(),
+                 _allowlist(config("harness/allowlist.txt")))
     for e in errs:
         print(f"error: {e}")
     return 1 if errs else 0

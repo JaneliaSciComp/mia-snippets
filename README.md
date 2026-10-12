@@ -9,7 +9,11 @@ Harness tests: `cd harness && pixi run test`.
 
 CI rules: `ci/check_pr.py` (stdlib + pyyaml) runs from `.github/workflows/check.yml`; its tests run with
 `cd harness && pixi run ci-test`. Maintainers (who may change anything outside `snippets/`) are listed in
-`ci/maintainers.txt`; the snippet `requires` allowlist is `harness/allowlist.txt`.
+`ci/maintainers.txt`; the snippet `requires` allowlist is `harness/allowlist.txt`. CI runs the checker,
+the maintainers and the allowlist as they are on `main` (`--base origin/main`), so a PR cannot loosen its own
+check by editing `ci/` or the allowlist; such edits take effect from the next PR. Changes to `.github/` itself
+(including the workflow that does this) remain guarded only by the required review and autodev's refusal of
+agent commits that touch `.github/`.
 
 ## Branch protection
 

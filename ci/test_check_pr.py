@@ -79,3 +79,34 @@ def test_only_the_harness_api_may_be_imported():
     for src in ["from mia_harness.io import NeedsFetch\n", "import mia_harness.io\n", "from mia_harness import io\n",
                 "import mia_harness\n", "from mia_harness.api import x\nfrom mia_harness import run\n"]:
         assert run(ADDED, files=with_py(src + OK_PY)), src
+
+
+def test_main_reads_maintainers_and_allowlist_from_base(tmp_path, monkeypatch):
+    import subprocess
+    from check_pr import main
+
+    def git(*a):
+        subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", *a], cwd=tmp_path, check=True,
+                       capture_output=True)
+
+    def write(p, s):
+        (tmp_path / p).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / p).write_text(s)
+
+    git("init", "-q", "-b", "main")
+    write("ci/maintainers.txt", "alice\n")
+    write("harness/allowlist.txt", "numpy\n")
+    write("snippets/old/snippet.py", OK_PY)
+    git("add", "-A"); git("commit", "-qm", "base")
+    git("checkout", "-qb", "pr")
+    write("ci/maintainers.txt", "alice\nbob\n")         # the PR tries to make its author a maintainer
+    write("harness/allowlist.txt", "numpy\nscipy\n")
+    git("commit", "-qam", "pr")
+    (tmp_path / "harness").mkdir(exist_ok=True)
+    monkeypatch.chdir(tmp_path / "harness")              # any subdirectory finds the repo root
+    assert main(["--base", "main", "--author", "bob"]) == 1
+    assert main(["--base", "main", "--author", "alice"]) == 0
+    for p, s in {"snippet.py": OK_PY, "snippet.yaml": OK_YAML.replace("[numpy]", "[scipy]").replace("[rec1]", "[]")}.items():
+        write(f"snippets/new-one/{p}", s)
+    git("add", "-A"); git("commit", "-qm", "snippet")
+    assert main(["--base", "main", "--author", "alice"]) == 1   # scipy is only on the PR's allowlist
