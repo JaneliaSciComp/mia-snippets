@@ -38,7 +38,10 @@ def load_snippet(snapshot_dir: Path, name: str, withdrawn: set[str], params: dic
         raise ValueError(f"bad snippet name {name!r}")
     if name in withdrawn:
         raise ValueError(f"snippet {name!r} is withdrawn")
-    d = Path(snapshot_dir) / "snippets" / name
+    d = Path(snapshot_dir).resolve() / "snippets" / name
+    for f in (d / "snippet.yaml", d / "snippet.py"):   # no symlink may lead out of snippets/<name>/
+        if f.resolve() != f:
+            raise ValueError(f"snippet {name!r}: {f.name} resolves outside snippets/{name}/ ({f.resolve()})")
     if not (d / "snippet.yaml").is_file():
         raise ValueError(f"snippet {name!r} has no snippet.yaml in {snapshot_dir}")
     meta = _yaml(d / "snippet.yaml")
@@ -48,7 +51,7 @@ def load_snippet(snapshot_dir: Path, name: str, withdrawn: set[str], params: dic
         raise ValueError(f"snippet directory {name!r} names itself {meta.get('name')!r}")
     _check_params(name, meta.get("params") or {}, params or {})
 
-    code = (d / "snippet.py").resolve()
+    code = d / "snippet.py"
     digest = hashlib.sha256(str(code).encode() + b"\0" + code.read_bytes()).hexdigest()[:16]
     modname = f"mia_snippet_{name.replace('-', '_')}_{digest}"
     if modname not in sys.modules:

@@ -49,9 +49,11 @@ def smoke(binding_path: Path, snapshot: Path, record_path: Path, io: IO) -> dict
             expected.setdefault(r.get("role"), set()).add(str(r.get("dtype")))
         for role, arrays in (("raw", raws), ("label", labels)):
             for i, a in enumerate(arrays):
-                if np.dtype(a.dtype).name not in expected.get(role, set()):
-                    out["warnings"].append(f"{role} {i}: dtype {np.dtype(a.dtype).name} is not the record's "
-                                           f"{sorted(expected.get(role, set()))}")
+                got = np.dtype(a.dtype).name
+                if role not in expected:
+                    out["warnings"].append(f"{role} {i}: record has no dtype for role {role!r}")
+                elif got not in expected[role]:
+                    out["warnings"].append(f"{role} {i}: dtype {got} is not the record's {sorted(expected[role])}")
         # 3. each label matches its raw on every axis but c
         for i, (lb, a) in enumerate(zip(binding.labels, labels)):
             want = {k: v for k, v in _sizes(raws[lb.pairs_with]).items() if k != "c"}

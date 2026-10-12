@@ -69,3 +69,18 @@ def test_catalog_hides_withdrawn_and_superseded(tmp_path):
 def test_missing_withdrawn_yaml_fails_closed(tmp_path):
     with pytest.raises(FileNotFoundError):
         withdrawn_names(tmp_path)
+
+
+@pytest.mark.parametrize("link", ["dir", "file"])
+def test_symlinks_out_of_the_snapshot_are_refused_before_import(tmp_path, link):
+    snap, outside = tmp_path / "snap", tmp_path / "outside"
+    snippet(outside, "evil", code="raise AssertionError('imported from outside the snapshot')\n")
+    if link == "dir":
+        (snap / "snippets").mkdir(parents=True)
+        (snap / "snippets" / "evil").symlink_to(outside / "snippets" / "evil")
+    else:
+        snippet(snap, "evil")
+        (snap / "snippets" / "evil" / "snippet.py").unlink()
+        (snap / "snippets" / "evil" / "snippet.py").symlink_to(outside / "snippets" / "evil" / "snippet.py")
+    with pytest.raises(ValueError, match="'evil'.*outside"):
+        load_snippet(snap, "evil", set())

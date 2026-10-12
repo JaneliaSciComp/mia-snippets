@@ -104,3 +104,10 @@ def test_cli_withdrawn_snippet_fails_and_placeholders_exit_2(tmp_path, monkeypat
                      "--work", str(tmp_path)]) == 1
     assert "is withdrawn" in json.loads(out.read_text())["errors"][0]
     assert cli.main(["crop", str(b), "--n", "3"]) == 2
+
+
+def test_record_without_the_role_says_so(tmp_path, io):
+    b, r = write(tmp_path, (300, 300))
+    r.write_text("technical: {arrays: []}\n")
+    out = smoke(b, SNAP, r, io)
+    assert out["ok"] and out["warnings"] == ["raw 0: record has no dtype for role 'raw'"]
