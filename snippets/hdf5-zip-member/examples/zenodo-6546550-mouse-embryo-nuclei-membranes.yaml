@@ -1,0 +1,31 @@
+record: zenodo-6546550-mouse-embryo-nuclei-membranes
+record_commit: 061ca28620c4c1cff05493e8251cc119440428ab
+snippets_commit: d2e0f04d112eb95b0b4780e55640877fe70ee838
+raw:
+  - snippet: hdf5-zip-member
+    urls: ["https://zenodo.org/records/6546550/files/MouseEmbryos.zip::Membrane/train/fused_paral_tp00073_raw_nuclei_membrane_crop_label_corrected_postprocessed_crop.h5"]
+    params: {key: raw}
+  - snippet: hdf5-zip-member
+    urls: ["https://zenodo.org/records/6546550/files/MouseEmbryos.zip::Nuclei/test/E7_Ab1.h5"]
+    params: {key: raw, ignore_element_size_um: true}
+labels:
+  - snippet: hdf5-zip-member
+    urls: ["https://zenodo.org/records/6546550/files/MouseEmbryos.zip::Membrane/train/fused_paral_tp00073_raw_nuclei_membrane_crop_label_corrected_postprocessed_crop.h5"]
+    params: {key: label}
+    pairs_with: 0
+    label_key: unknown-cell-labels
+    segmentation_type: instance
+  - snippet: hdf5-zip-member
+    urls: ["https://zenodo.org/records/6546550/files/MouseEmbryos.zip::Nuclei/test/E7_Ab1.h5"]
+    params: {key: label, ignore_element_size_um: true}
+    pairs_with: 1
+    label_key: unknown-cell-labels
+    segmentation_type: instance
+reasons:
+  - "hdf5-zip-member: the files are HDF5 inside a deflated zip (record technical.arrays, format hdf5); io.open raises NeedsFetch for the members, so each .h5 is staged once with io.fetch and both of its datasets are read from the cached file"
+  - "key raw / key label: each .h5 holds both datasets (path_pattern '<file>.h5 : /raw' and ': /label'), so one file is bound twice, once per key"
+  - "urls: the two .h5 members named in the record (technical.sample.urls and technical.notes), one light-sheet membrane crop (130x424x512) and one confocal nuclei volume (100x754x368); the archive holds 41 .h5 files under Nuclei/{train,test} and Membrane/{train,val}, all with raw+label"
+  - "axes zyx: default for rank 3, matches the record's zyx shapes (100x754x368, 130x424x512)"
+  - "ignore_element_size_um on E7_Ab1: its element_size_um attribute is a placeholder [1,1,1] µm that conflicts with the dataset README (0.207 or 0.23 x 1 µm), so the record's voxel size is kept and the file's is not reported; the membrane file has no element_size_um attribute, so nothing to ignore"
+  - "label_key unknown-cell-labels from downloads.json labels; annotations.source is unknown in the record. Nuclei files hold nucleus instance IDs, membrane files hold cell instance IDs; a human should confirm the per-file label key"
+  - "segmentation_type instance: record annotations.types instance-segmentation, label encoding instance-ids"

@@ -1,0 +1,12 @@
+name: hdf5-zip-member
+spec_version: 1
+summary: One HDF5 dataset (params.key) from a zip member or a plain URL, via h5py; deflated members are fetched whole.
+formats: [hdf5]
+containers: [zip, http, s3]
+params:
+  key: {type: str, required: true, doc: "HDF5 path of the dataset to read, e.g. 'raw' or '/label'; one array per key"}
+  axes: {type: str, required: false, doc: "one czyx letter per dataset dimension, in storage order; defaults to yx / zyx / czyx by rank; reason required in binding"}
+  ignore_element_size_um: {type: bool, required: false, doc: "true to report voxel_size_nm None when the file's element_size_um attribute is known to be wrong; reason required in binding"}
+requires: [numpy, h5py]
+tested_on: [zenodo-6546550-mouse-embryo-nuclei-membranes]
+supersedes: null
