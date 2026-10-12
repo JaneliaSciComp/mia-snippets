@@ -1,11 +1,12 @@
 import io as stdio
+import os
 import zipfile
 
 import pytest
 from rangeserver import server  # noqa: F401  (fixture)
 
 from mia_harness.cache import DatasetCache
-from mia_harness.io import IO
+from mia_harness.io import BLOCK, IO
 
 KEY = "0" * 64
 
@@ -87,3 +88,28 @@ def test_read_only_job_writes_nothing_shared(server, tmp_path):
     p = io.fetch(server.url("/f.bin"))
     assert p.parent == tmp_path / "j1" / "private" and not (tmp_path / "shared").exists()
     io.close()
+
+
+def test_member_hits_cost_only_the_directory_read(server, tmp_path):
+    members = {f"m{i}.bin": os.urandom(BLOCK + 1000 * i) for i in range(3)}
+    buf = stdio.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        for name, data in members.items():
+            z.writestr(name, data, compress_type=zipfile.ZIP_DEFLATED)
+    server.files["/z.zip"] = buf.getvalue()
+    z = server.url("/z.zip")
+    first = make_io(tmp_path, "j1")
+    first.list(z)
+    for name, data in members.items():         # a miss costs the local header and the compressed bytes
+        before = first.bytes_fetched
+        assert first.fetch(f"{z}::{name}").read_bytes() == data
+        info = zipfile.ZipFile(buf).getinfo(name)
+        assert first.bytes_fetched - before == 30 + info.compress_size
+    first.close()
+    second = make_io(tmp_path, "j2")
+    second.list(z)                              # the one central-directory tail read per zip per job
+    tail = second.bytes_fetched
+    for name, data in members.items():
+        assert second.fetch(f"{z}::{name}").read_bytes() == data
+    assert second.bytes_fetched == tail
+    second.close()

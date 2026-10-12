@@ -105,6 +105,17 @@ def test_server_ignoring_range_raises_instead_of_downloading(server, make_io):
     assert io.fetch(server.url("/d.bin")).read_bytes() == DATA
 
 
+def test_validators_describe_the_identity_body(server, make_io):
+    body = b"compressible " * 10000
+    server.files["/t.txt"] = body
+    server.gzip = True
+    io = make_io()
+    p = io.fetch(server.url("/t.txt"))
+    assert p.read_bytes() == body
+    v = io.validators[server.url("/t.txt")]
+    assert v["size"] == len(body) and not v["etag"].endswith('-gzip"')
+
+
 def test_zip64(server, make_io, monkeypatch):
     a, b = os.urandom(3000), b"zip64 " * 5000
     with monkeypatch.context() as m:            # force ZIP64 extras, EOCD64 record and locator on a small zip

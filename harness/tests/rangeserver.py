@@ -2,6 +2,7 @@
 
 The stdlib SimpleHTTPRequestHandler ignores Range, hence this.
 """
+import gzip
 import hashlib
 import re
 import threading
@@ -16,6 +17,7 @@ class RangeServer:
         self.files: dict[str, bytes] = {}        # path -> body
         self.redirects: dict[str, str] = {}      # path -> Location (302)
         self.ignore_range = False                # answer 200 with the whole body
+        self.gzip = False                        # serve a gzip variant (own ETag) to clients that accept it
         self.requests: list[tuple[str, str]] = []  # (method, path), every request in order
         self._httpd = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
         self._httpd.daemon_threads = True
@@ -67,6 +69,10 @@ class _Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", "0")
             self.end_headers()
             return
+        etag = hashlib.sha1(data).hexdigest()
+        gz = s.gzip and "gzip" in (self.headers.get("Accept-Encoding") or "")
+        if gz:
+            data, etag = gzip.compress(data, mtime=0), etag + "-gzip"
         start, end, status = 0, len(data), 200
         m = re.fullmatch(r"bytes=(\d+)-(\d*)", self.headers.get("Range") or "")
         if m and not s.ignore_range:
@@ -74,7 +80,10 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Length", str(end - start))
         self.send_header("Accept-Ranges", "bytes")
-        self.send_header("ETag", f'"{hashlib.sha1(data).hexdigest()}"')
+        self.send_header("ETag", f'"{etag}"')
+        self.send_header("Vary", "Accept-Encoding")
+        if gz:
+            self.send_header("Content-Encoding", "gzip")
         self.send_header("Last-Modified", formatdate(0, usegmt=True))
         if status == 206:
             self.send_header("Content-Range", f"bytes {start}-{end - 1}/{len(data)}")

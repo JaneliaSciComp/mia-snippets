@@ -16,14 +16,13 @@ def read_directory(f: BinaryIO) -> dict[str, ZipInfo]:
         return {i.filename: i for i in z.infolist()}
 
 
-def data_offset(f: BinaryIO, info: ZipInfo) -> int:
-    """Where the member's bytes start: after its local header, whose extra field may differ from the CD's."""
+def data_offset(header: bytes, info: ZipInfo) -> int:
+    """Where the member's bytes start, from the 30 bytes of its local header (whose extra field may differ
+    from the CD's)."""
     if info.flag_bits & 1:
         raise BadZipFile(f"{info.filename!r} is encrypted")
     if info.compress_type not in (ZIP_STORED, ZIP_DEFLATED):
         raise BadZipFile(f"{info.filename!r}: unsupported compression method {info.compress_type}")
-    f.seek(info.header_offset)
-    header = f.read(30)
     if len(header) != 30 or header[:4] != b"PK\x03\x04":
         raise BadZipFile(f"bad local header for {info.filename!r}")
     name_len, extra_len = struct.unpack("<2H", header[26:30])

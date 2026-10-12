@@ -41,7 +41,7 @@ class IO:
         self._client = client or httpx.Client(follow_redirects=False, timeout=60)
         self.bytes_fetched = 0
         self.validators: dict[str, dict] = {}   # url -> {"etag", "last_modified", "size"}
-        self._zips: dict[str, tuple[BinaryIO, dict]] = {}
+        self._zips: dict[str, dict] = {}         # zip url -> members by name
 
     def close(self) -> None:
         if self._own_client:
@@ -52,10 +52,10 @@ class IO:
         url, member = _split(url)
         if member is None:
             return _RangeFile(self, url, 0, self._size(url))
-        info, offset = self._member(url, member)
-        if info.compress_type != remotezip.ZIP_STORED:
+        info = self._member(url, member)
+        if info.compress_type == remotezip.ZIP_DEFLATED:
             raise NeedsFetch(f"{member!r} is compressed; use io.fetch")
-        return _RangeFile(self, url, offset, info.file_size)
+        return _RangeFile(self, url, self._data_offset(url, info), info.file_size)
 
     def fetch(self, url: str) -> Path:
         """Local path of the whole file, through the dataset cache; a hit costs 0 bytes."""
@@ -63,11 +63,14 @@ class IO:
         if member is None:
             key = _key(url, self._head(url))
             return self.cache.get(key) or self.cache.put(key, lambda p: _write(p, self._get(url)))
-        info, offset = self._member(url, member)
+        info = self._member(url, member)
         key = _key(f"{url}::{member}", self._head(url))
-        return (self.cache.get(key, check=lambda p: remotezip.crc_ok(p, info))
-                or self.cache.put(key, lambda p: remotezip.extract(
-                    self._get(url, offset, offset + info.compress_size), info, p)))
+
+        def write(p: Path) -> None:
+            offset = self._data_offset(url, info)
+            remotezip.extract(self._get(url, offset, offset + info.compress_size), info, p)
+
+        return self.cache.get(key, check=lambda p: remotezip.crc_ok(p, info)) or self.cache.put(key, write)
 
     def list(self, url: str) -> list[str]:
         """Member names of a zip."""
@@ -78,17 +81,25 @@ class IO:
 
     # -- zip members
 
+    # ponytail: member access needs Range; on a server that ignores it, even fetch(member) raises NeedsFetch.
+    # The fallback is downloading the whole zip into the dataset cache and reading members locally.
+
     def _directory(self, url: str) -> dict:
+        # ponytail: one central-directory tail read (a 1 MiB block) per zip per job, even when every member
+        # is a cache hit; cache the CD bytes (keyed by validators) to make those hits free
         if url not in self._zips:
-            f = _RangeFile(self, url, 0, self._size(url))
-            self._zips[url] = (f, remotezip.read_directory(f))
-        return self._zips[url][1]
+            self._zips[url] = remotezip.read_directory(_RangeFile(self, url, 0, self._size(url)))
+        return self._zips[url]
 
     def _member(self, url: str, member: str):
         info = self._directory(url).get(member)
         if info is None:
             raise KeyError(f"no member {member!r} in {url}")
-        return info, remotezip.data_offset(self._zips[url][0], info)
+        return info
+
+    def _data_offset(self, url: str, info) -> int:
+        """One 30-byte range request for the local header, not a 1 MiB block."""
+        return remotezip.data_offset(b"".join(self._get(url, info.header_offset, info.header_offset + 30)), info)
 
     # -- HTTP
 
@@ -114,13 +125,14 @@ class IO:
         if size is not None and self.bytes_fetched + size > self.byte_cap:
             raise BudgetExceeded(f"{url}: {size} more bytes would pass the cap "
                                  f"({self.bytes_fetched} of {self.byte_cap} used)")
-        headers = {"Accept-Encoding": "identity"}
+        headers = {}
         if start is not None:
             headers["Range"] = f"bytes={start}-{end - 1}"
         with closing(self._send("GET", url, headers)) as r:
             r.raise_for_status()
             if start is not None and r.status_code != 206:
-                raise NeedsFetch(f"{url}: server ignored Range (status {r.status_code}); use io.fetch")
+                raise NeedsFetch(f"{url}: server ignored Range (status {r.status_code}); "
+                                 "io.fetch can get a whole file, but not a zip member")
             got = 0
             for chunk in r.iter_bytes():
                 got += len(chunk)
@@ -133,6 +145,8 @@ class IO:
 
     def _send(self, method: str, url: str, headers: dict | None = None) -> httpx.Response:
         """A streamed response; redirects are followed here so every hop's host is checked first."""
+        # identity on every request, HEAD included, so validators and sizes describe the bytes we get
+        headers = {**(headers or {}), "Accept-Encoding": "identity"}
         chain = [url]
         for _ in range(MAX_REDIRECTS + 1):
             parts = urlsplit(url)
