@@ -6,6 +6,7 @@ import numpy as np
 
 SPEC_VERSION = 1
 AXES = "czyx"
+CROP = 256          # crop edge in y and x; a raw is eligible when Y and X are both >= CROP (SPEC §4.1)
 
 
 @dataclass(frozen=True)

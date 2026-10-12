@@ -1,0 +1,9 @@
+name: withdrawn-one
+spec_version: 1
+summary: TEST ONLY. The loader must refuse this before importing it.
+formats: [npy]
+containers: [local]
+params: {}
+requires: [numpy]
+tested_on: []
+supersedes: null

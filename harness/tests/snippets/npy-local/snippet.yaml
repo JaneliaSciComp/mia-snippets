@@ -1,0 +1,11 @@
+name: npy-local
+spec_version: 1
+summary: TEST ONLY. A .npy array from a local path (params.path) or from urls[0] through io.
+formats: [npy]
+containers: [local, http]
+params:
+  path: {type: str, required: false, doc: "absolute local path; when set, urls are ignored and io is not used"}
+  axes: {type: str, required: false, doc: "default zyx for 3-D, yx for 2-D"}
+requires: [numpy]
+tested_on: []
+supersedes: null

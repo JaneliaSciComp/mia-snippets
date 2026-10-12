@@ -1,0 +1,2 @@
+# The test snapshot's withdrawals (the snapshot root is harness/tests: snippets/ + this file).
+- {name: withdrawn-one, reason: "test fixture: always withdrawn", at: 2026-10-11, by: harness-tests}

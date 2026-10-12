@@ -1,0 +1,3 @@
+# withdrawn-one (test only)
+
+Harness test fixture: the loader must refuse it before import (its snippet.py raises if imported).
