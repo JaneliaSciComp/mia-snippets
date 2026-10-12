@@ -71,3 +71,11 @@ def test_bad_metadata_fails():
     for y in [OK_YAML.replace("new-one", "wrong"), OK_YAML.replace("version: 1", "version: 2"),
               OK_YAML.replace("[numpy]", "[numpy, scipy]")]:
         assert run(ADDED, files={**FILES, "snippets/new-one/snippet.yaml": y}), y
+
+
+def test_only_the_harness_api_may_be_imported():
+    ok = "from mia_harness.api import NeedsFetch\nimport mia_harness.api\nfrom mia_harness import api\n"
+    assert run(ADDED, files=with_py(ok + OK_PY)) == []
+    for src in ["from mia_harness.io import NeedsFetch\n", "import mia_harness.io\n", "from mia_harness import io\n",
+                "import mia_harness\n", "from mia_harness.api import x\nfrom mia_harness import run\n"]:
+        assert run(ADDED, files=with_py(src + OK_PY)), src

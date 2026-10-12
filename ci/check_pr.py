@@ -14,6 +14,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 BANNED_MODULES = {"socket", "subprocess", "requests", "urllib", "http", "httpx", "fsspec", "ftplib",
                   "pickle", "shelve", "ctypes", "importlib"}
+HARNESS_API = "mia_harness.api"     # the only harness module a snippet may import (SPEC 2)
 BANNED_CALLS = re.compile(r"os\.(system|popen|exec\w*|spawn\w*)|__import__|importlib\.import_module")
 
 
@@ -31,13 +32,16 @@ class _Static(ast.NodeVisitor):
 
     def visit_Import(self, n):
         for a in n.names:
-            if a.name.split(".")[0] in BANNED_MODULES | {"snippets"}:
+            root = a.name.split(".")[0]
+            if root in BANNED_MODULES | {"snippets"} or (root == "mia_harness" and a.name != HARNESS_API):
                 self.errors.append(f"line {n.lineno}: import of {a.name}")
 
     def visit_ImportFrom(self, n):
         root = (n.module or "").split(".")[0]
         bad_os = root == "os" and any(re.fullmatch(r"\*|system|popen|exec\w*|spawn\w*", a.name) for a in n.names)
-        if n.level or root == "snippets" or root in BANNED_MODULES or bad_os:
+        bad_harness = root == "mia_harness" and n.module != HARNESS_API and (
+            n.module != "mia_harness" or any(a.name != "api" for a in n.names))
+        if n.level or root == "snippets" or root in BANNED_MODULES or bad_os or bad_harness:
             self.errors.append(f"line {n.lineno}: import from {'.' * n.level}{n.module or ''}")
 
     def visit_Call(self, n):
