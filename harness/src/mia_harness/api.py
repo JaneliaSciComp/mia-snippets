@@ -9,6 +9,22 @@ AXES = "czyx"
 CROP = 256          # crop edge in y and x; a raw is eligible when Y and X are both >= CROP (SPEC §4.1)
 
 
+class BudgetExceeded(RuntimeError):
+    """The job's byte cap would be passed."""
+
+
+class HostNotAllowed(RuntimeError):
+    """A URL or redirect hop leaves the hosts the job was granted."""
+
+    def __init__(self, host: str, chain: list[str]):
+        super().__init__(f"host {host!r} is not allowed (requests: {' -> '.join(chain)})")
+        self.host, self.chain = host, chain
+
+
+class NeedsFetch(Exception):
+    """This file can't be read by range (a deflated zip member, a server ignoring Range): use `io.fetch`."""
+
+
 @dataclass(frozen=True)
 class Source:
     urls: tuple[str, ...]

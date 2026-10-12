@@ -12,24 +12,11 @@ from urllib.parse import urlsplit
 import httpx
 
 from . import remotezip
+from .api import BudgetExceeded, HostNotAllowed, NeedsFetch
 from .cache import DatasetCache
 
 BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB blocks
 MAX_REDIRECTS = 10
-
-
-class BudgetExceeded(RuntimeError):
-    pass
-
-
-class HostNotAllowed(RuntimeError):
-    def __init__(self, host: str, chain: list[str]):
-        super().__init__(f"host {host!r} is not allowed (requests: {' -> '.join(chain)})")
-        self.host, self.chain = host, chain
-
-
-class NeedsFetch(Exception):
-    """This file can't be read by range (a deflated zip member, a server ignoring Range): use `io.fetch`."""
 
 
 class IO:

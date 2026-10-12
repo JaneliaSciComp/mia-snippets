@@ -199,3 +199,13 @@ def test_readinto_fills_any_buffer_by_bytes(server, make_io):
     f = make_io().open(server.url("/d.bin"))
     a = np.empty(10, np.uint16)                 # tifffile reads uncompressed pages straight into an array
     assert f.readinto(a) == 20 and a.tobytes() == DATA[:20]
+
+
+def test_readinto_at_eof_is_short(server, make_io):
+    import numpy as np
+    server.files["/d.bin"] = DATA
+    f = make_io().open(server.url("/d.bin"))
+    f.seek(len(DATA) - 3)
+    b = bytearray(b"\0" * 8)
+    assert f.readinto(b) == 3 and bytes(b) == DATA[-3:] + b"\0" * 5
+    assert f.readinto(np.empty(4, np.uint16)) == 0

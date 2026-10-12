@@ -52,6 +52,9 @@ class Array(Protocol):                     # defined in harness/api.py
 
   `io` records each file's validators (ETag, Last-Modified, size) for provenance, and refuses a server that
   answers a range request with the whole body.
+- **Exceptions are part of the API.** `harness.api` defines `NeedsFetch` (raised by `io.open` for a file that
+  can't be read by range, e.g. a deflated zip member: catch it and use `io.fetch`), `HostNotAllowed` and
+  `BudgetExceeded`. Snippets import them from `mia_harness.api`, the only harness module a snippet may import.
 - **`io` follows redirects itself** and checks every hop's host against the hosts the job was granted
   (`MIA_HARNESS_ALLOWED_HOSTS`, set by the worker) before requesting it. A hop outside that set raises
   `HostNotAllowed`, with the host and the redirect chain so far, instead of failing later as a generic proxy or
