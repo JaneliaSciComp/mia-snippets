@@ -36,9 +36,13 @@ class Binding(_Strict):
 
     @model_validator(mode="after")
     def _pairs_in_range(self):
+        seen = set()
         for lb in self.labels:
             if lb.pairs_with >= len(self.raw):
                 raise ValueError(f"pairs_with {lb.pairs_with} out of range for {len(self.raw)} raw")
+            if (lb.pairs_with, lb.label_key) in seen:   # both would be written to labels/<label_key>.png
+                raise ValueError(f"label_key {lb.label_key!r} appears twice for raw {lb.pairs_with}")
+            seen.add((lb.pairs_with, lb.label_key))
         return self
 
 

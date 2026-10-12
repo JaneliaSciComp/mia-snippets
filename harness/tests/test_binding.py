@@ -51,10 +51,18 @@ def test_example_parses_and_hashes(tmp_path):
     lambda d: d["labels"][0].update(pairs_with=1),
     lambda d: d["labels"][0].update(pairs_with=-1),
     lambda d: d["labels"][0].update(segmentation_type="fuzzy"),
+    lambda d: d["labels"].append({**d["labels"][0], "segmentation_type": "semantic"}),   # same key, same raw
 ])
 def test_rejected(tmp_path, fn):
     with pytest.raises(ValidationError):
         load_binding(mutated(tmp_path, fn))
+
+
+def test_same_label_key_on_different_raws_is_fine(tmp_path):
+    def two_raws(d):
+        d["raw"].append(d["raw"][0])
+        d["labels"].append({**d["labels"][0], "pairs_with": 1})
+    assert len(load_binding(mutated(tmp_path, two_raws)).labels) == 2
 
 
 class A:
