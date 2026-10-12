@@ -7,6 +7,9 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
+LABEL_KEY = r"[A-Za-z0-9][A-Za-z0-9._-]*"   # becomes a file name, labels/<label_key>.png
+
+
 class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -19,7 +22,7 @@ class ArrayBinding(_Strict):
 
 class LabelBinding(ArrayBinding):
     pairs_with: int = Field(ge=0)
-    label_key: str
+    label_key: str = Field(pattern=f"^{LABEL_KEY}$")
     segmentation_type: Literal["instance", "semantic", "binary"]
 
 

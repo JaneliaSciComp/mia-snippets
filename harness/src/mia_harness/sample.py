@@ -6,6 +6,9 @@ from math import prod
 from typing import Callable, Iterable, Iterator
 
 
+OVERLAP_MAX = 0.25       # a crop may share at most this share of its area with another on the same plane
+
+
 @dataclass(frozen=True)
 class Volume:
     index: int
