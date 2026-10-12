@@ -24,12 +24,14 @@ mia-snippets/
 
 ```python
 # snippets/<name>/snippet.py
+from mia_harness.api import IO, Array, Source   # the only harness module a snippet may import
+
 SPEC_VERSION = 1
 
-def open_array(src: harness.Source, io: harness.IO) -> harness.Array:
+def open_array(src: Source, io: IO) -> Array:
     """Open one array (raw or label) described by `src`. Must not read voxel data yet."""
 
-class Array(Protocol):                     # defined in harness/api.py
+class Array(Protocol):                     # defined in harness/src/mia_harness/api.py
     axes: str                              # e.g. "zyx", "czyx", "yx": letters from "czyx", one per dimension
     shape: tuple[int, ...]
     dtype: numpy.dtype
@@ -38,6 +40,8 @@ class Array(Protocol):                     # defined in harness/api.py
     def read(self, region: dict[str, int | slice]) -> numpy.ndarray   # e.g. {"c": 0, "z": 17, "y": slice(…), "x": slice(…)}
 ```
 
+- **Type hints are required.** `open_array` is annotated exactly as above, and CI rejects it otherwise. Use
+  hints throughout the snippet; `Source`, `IO`, `Array` and the exceptions below all come from `mia_harness.api`.
 - **`Source`** holds:
   - `urls: list[str]`: one per file, sorted. There are several when the dataset is one file per Z slice.
     Zip members are written `<zip url>::<member>`.

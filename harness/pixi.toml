@@ -26,5 +26,5 @@ pytest = "*"
 default = ["test"]
 
 [tasks]
-test = "pytest tests/"
+test = "python -m pytest tests/"
 ci-test = { cmd = "python -m pytest -q", cwd = "../ci" }

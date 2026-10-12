@@ -1,6 +1,7 @@
 from check_pr import check
 
-OK_PY = "SPEC_VERSION = 1\nimport numpy as np\ndef open_array(src, io):\n    return np.zeros(1)\n"
+OK_PY = ("SPEC_VERSION = 1\nimport numpy as np\nfrom mia_harness.api import IO, Array, Source\n"
+         "def open_array(src: Source, io: IO) -> Array:\n    return np.zeros(1)\n")
 OK_YAML = "name: new-one\nspec_version: 1\nrequires: [numpy]\ntested_on: [rec1]\n"
 FILES = {"snippets/new-one/snippet.py": OK_PY, "snippets/new-one/snippet.yaml": OK_YAML}
 ADDED = [("A", p) for p in ["snippets/new-one/snippet.py", "snippets/new-one/snippet.yaml",
@@ -60,6 +61,11 @@ def test_maintainer_case_insensitive_and_bad_types():
 
 def test_missing_contract_fails():
     assert run(ADDED, files=with_py("def open_array(s, i): pass\n"))
+
+
+def test_open_array_without_type_hints_fails():
+    assert run(ADDED, files=with_py("SPEC_VERSION = 1\ndef open_array(src, io):\n    pass\n"))
+    assert run(ADDED, files=with_py("SPEC_VERSION = 1\ndef open_array(src: int, io: int):\n    pass\n"))
     assert run(ADDED, files=with_py("SPEC_VERSION = 1\n"))
 
 

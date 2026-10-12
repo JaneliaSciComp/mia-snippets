@@ -1,6 +1,8 @@
 """TEST ONLY: a .npy array from params.path (local, bypasses io) or from urls[0] through io."""
 import numpy as np
 
+from mia_harness.api import IO, Array, Source
+
 SPEC_VERSION = 1
 
 
@@ -15,7 +17,7 @@ class _Npy:
         return np.asarray(self.data[tuple(region.get(a, slice(None)) for a in self.axes)])
 
 
-def open_array(src, io):
+def open_array(src: Source, io: IO) -> Array:
     if "path" in src.params:
         data = np.load(src.params["path"], mmap_mode="r")
     else:

@@ -64,8 +64,11 @@ def _static_errors(src: str) -> list[str]:
     if not any(isinstance(s, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "SPEC_VERSION" for t in s.targets)
                and isinstance(s.value, ast.Constant) and s.value.value == 1 for s in tree.body):
         errs.append("snippet.py needs a module-level SPEC_VERSION = 1")
-    if not any(isinstance(s, ast.FunctionDef) and s.name == "open_array" for s in tree.body):
+    fn = next((s for s in tree.body if isinstance(s, ast.FunctionDef) and s.name == "open_array"), None)
+    if fn is None:
         errs.append("snippet.py needs a module-level open_array function")
+    elif len(fn.args.args) != 2 or not all(a.annotation for a in fn.args.args) or fn.returns is None:
+        errs.append("open_array must be `def open_array(src: Source, io: IO) -> Array` with type hints (SPEC 2)")
     return errs
 
 

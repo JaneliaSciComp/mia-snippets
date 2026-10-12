@@ -1,6 +1,7 @@
 """The snippet contract (SPEC.md section 2)."""
 from dataclasses import dataclass
-from typing import Literal, Protocol
+from pathlib import Path
+from typing import BinaryIO, Literal, Protocol
 
 import numpy as np
 
@@ -29,6 +30,15 @@ class NeedsFetch(Exception):
 class Source:
     urls: tuple[str, ...]
     params: dict
+
+
+class IO(Protocol):
+    """The only way a snippet reads bytes. Counts network bytes against the job's cap, checks every redirect
+    hop's host, records validators for provenance. Implemented by mia_harness.io.IO."""
+
+    def open(self, url: str) -> BinaryIO: ...     # seekable, range-backed; raises NeedsFetch when ranges won't do
+    def fetch(self, url: str) -> Path: ...        # the whole file, staged once
+    def list(self, url: str) -> list[str]: ...    # zip members of a zip url
 
 
 class Array(Protocol):
