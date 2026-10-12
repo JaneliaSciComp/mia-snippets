@@ -116,7 +116,7 @@ def test_same_seed_gives_byte_identical_pngs(ds, made, monkeypatch):
 
 def test_verify_passes_and_lists_checksums(ds, made):
     code, res = verify(ds, made[1])
-    assert code == 0 and res["ok_count"] == res["n"] == 4
+    assert code == 0 and res["ok_count"] == res["n"] == 4 and res["errors"] == []
     c = res["crops"][0]
     assert c["errors"] == [] and set(c["files"]) == {"crop.json", "raw.png", "labels/gt.png"}
     assert c["files"]["raw.png"] == sha(made[1] / IDS[0] / "raw.png")
@@ -130,6 +130,36 @@ def test_tampered_png_fails_that_crop(ds, made, tmp_path):
     p.write_bytes(bytes(b))
     code, res = verify(ds, d)
     assert code == 1 and res["ok_count"] == 3 and [c["ok"] for c in res["crops"]] == [True, False, True, True]
+
+
+def test_labels_missing_against_the_binding_fail_that_crop(ds, made, tmp_path):
+    d = shutil.copytree(made[1], tmp_path / "out")
+    m = meta(d, IDS[1])
+    (d / IDS[1] / "crop.json").write_text(json.dumps({**m, "labels": []}))   # crop job "forgot" gt
+    (d / IDS[2] / "labels" / "gt.png").unlink()
+    code, res = verify(ds, d)
+    assert code == 1 and [c["ok"] for c in res["crops"]] == [True, False, False, True]
+    assert "not the binding's" in res["crops"][1]["errors"][0] and "gt.png is missing" in res["crops"][2]["errors"][0]
+
+
+def test_symlinks_fail_the_crop(ds, made, tmp_path):
+    d = shutil.copytree(made[1], tmp_path / "out")
+    outside = shutil.copy(d / IDS[0] / "raw.png", tmp_path / "outside.png")
+    (d / IDS[0] / "raw.png").unlink()
+    (d / IDS[0] / "raw.png").symlink_to(outside)
+    shutil.move(d / IDS[3], tmp_path / "elsewhere")
+    (d / IDS[3]).symlink_to(tmp_path / "elsewhere")
+    code, res = verify(ds, d)
+    assert code == 1 and [c["ok"] for c in res["crops"]] == [False, True, True, False]
+    assert res["crops"][0]["errors"] == ["raw.png is a symlink"]
+    assert res["crops"][3]["errors"] == [f"{IDS[3]} is a symlink"] and res["crops"][3]["files"] == {}
+
+
+def test_malformed_report_is_a_run_level_error(ds, made, tmp_path):
+    d = shutil.copytree(made[1], tmp_path / "out")
+    (d / "report.json").write_text("{not json")
+    code, res = verify(ds, d)
+    assert code == 1 and res["n"] == 0 and "JSONDecodeError" in res["errors"][0]
 
 
 def test_duplicate_checksum_under_another_crop_id_fails(ds, made, tmp_path):
@@ -169,6 +199,14 @@ def test_preview_draws_label_boundaries(made, tmp_path):
                          & (lab[1:-1, 1:-1] == lab[1:-1, :-2]) & (lab[1:-1, 1:-1] == lab[1:-1, 2:]))[0] + 1
     assert list(ov[tuple(edge)]) != [raw[tuple(edge)]] * 3
     assert list(ov[tuple(inside)]) == [raw[tuple(inside)]] * 3
+
+
+def test_preview_skips_a_malformed_crop_and_draws_the_rest(made, tmp_path):
+    d = shutil.copytree(made[1], tmp_path / "out")
+    (d / IDS[2] / "crop.json").write_text("{not json")
+    out = tmp_path / "preview"
+    assert cli.main(["preview", str(d), "--out", str(out)]) == 1
+    assert sorted(p.parent.name for p in out.glob("*/overlay.png")) == [IDS[0], IDS[1], IDS[3]]
 
 
 def test_byte_cap_makes_nothing_and_reports_budget_exceeded(ds, monkeypatch):

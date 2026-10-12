@@ -21,12 +21,28 @@ def boundaries(lab: np.ndarray) -> np.ndarray:
     return b & (lab != 0)
 
 
-def preview(crops_dir: Path, out: Path) -> None:
+def _regular(p: Path) -> Path:
+    if p.is_symlink() or not p.is_file():
+        raise ValueError(f"{p} is not a regular file")
+    return p
+
+
+def preview(crops_dir: Path, out: Path) -> list[str]:
+    """Writes out/<crop_id>/overlay.png per crop; returns one error per crop it could not draw."""
+    errors = []
     for f in sorted(Path(crops_dir).glob("*/crop.json")):
         d = f.parent
-        rgb = np.repeat((read_png(d / "raw.png")[0] >> 8).astype(np.uint8)[..., None], 3, axis=2)
-        for i, lb in enumerate(json.loads(f.read_text())["labels"]):
-            if re.fullmatch(LABEL_KEY, lb["label_key"]):   # verify reports bad keys; never read outside labels/
-                rgb[boundaries(read_png(d / "labels" / f"{lb['label_key']}.png")[0])] = PALETTE[i % len(PALETTE)]
-        (Path(out) / d.name).mkdir(parents=True, exist_ok=True)
-        write_png(Path(out) / d.name / "overlay.png", rgb, 8)
+        try:
+            if d.is_symlink() or (d / "labels").is_symlink():
+                raise ValueError(f"{d} or its labels/ is a symlink")
+            rgb = np.repeat((read_png(_regular(d / "raw.png"))[0] >> 8).astype(np.uint8)[..., None], 3, axis=2)
+            for i, lb in enumerate(json.loads(_regular(f).read_text())["labels"]):
+                if not re.fullmatch(LABEL_KEY, lb["label_key"]):   # never read outside labels/
+                    raise ValueError(f"bad label_key {lb['label_key']!r}")
+                lab = read_png(_regular(d / "labels" / f"{lb['label_key']}.png"))[0]
+                rgb[boundaries(lab)] = PALETTE[i % len(PALETTE)]
+            (Path(out) / d.name).mkdir(parents=True, exist_ok=True)
+            write_png(Path(out) / d.name / "overlay.png", rgb, 8)
+        except Exception as e:   # one bad crop doesn't stop the others
+            errors.append(f"{d.name}: {type(e).__name__}: {e}")
+    return errors

@@ -155,7 +155,7 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
                 return "label"
             crop_id = f"{round_id}-b{batch}-{len(acc):03d}"
             d = out / crop_id
-            (d / "labels").mkdir(parents=True)
+            (d / "labels").mkdir(parents=True, exist_ok=True)
             img, mapping = stretch_raw(patch)
             write_png(d / "raw.png", img, 16)
             for (lb, _), (lab, depth, _) in zip(paired, encoded):

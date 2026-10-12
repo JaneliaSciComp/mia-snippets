@@ -1,6 +1,7 @@
 """`harness` command line (SPEC §6.1)."""
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from .io import from_env
@@ -42,10 +43,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "verify":
         result = verify(args.dir, args.binding, args.existing)
         args.out.write_text(json.dumps(result, indent=2) + "\n")
-        return 0 if result["ok_count"] == result["n"] else 1
+        return 0 if result["ok_count"] == result["n"] and not result["errors"] else 1
     if args.cmd == "preview":
-        preview(args.dir, args.out)
-        return 0
+        errors = preview(args.dir, args.out)
+        print(*errors, sep="\n", file=sys.stderr)
+        return 1 if errors else 0
     io = from_env(args.work)
     try:
         if args.cmd == "crop":
