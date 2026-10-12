@@ -191,3 +191,11 @@ def test_from_env(tmp_path, monkeypatch):
     assert io.cache.shared == tmp_path / "shared" and io.cache.writable
     assert io.staging_dir == tmp_path / "staging"
     io.close()
+
+
+def test_readinto_fills_any_buffer_by_bytes(server, make_io):
+    import numpy as np
+    server.files["/d.bin"] = DATA
+    f = make_io().open(server.url("/d.bin"))
+    a = np.empty(10, np.uint16)                 # tifffile reads uncompressed pages straight into an array
+    assert f.readinto(a) == 20 and a.tobytes() == DATA[:20]

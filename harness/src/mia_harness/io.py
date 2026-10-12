@@ -216,8 +216,9 @@ class _RangeFile(io.RawIOBase):
         return self.read()
 
     def readinto(self, b) -> int:
-        data = self.read(len(b))
-        b[:len(data)] = data
+        m = memoryview(b).cast("B")     # len and slicing in bytes, whatever b's item type (numpy arrays)
+        data = self.read(len(m))
+        m[:len(data)] = data
         return len(data)
 
 
