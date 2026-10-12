@@ -51,8 +51,8 @@ def _tree(d: Path) -> tuple[dict, list[str]]:
     return files, errs
 
 
-def _check(d: Path, binding: Binding, shapes: dict | None) -> tuple[dict | None, list[str]]:
-    """(crop.json if complete, this crop's own errors); the cross-crop checks are verify's."""
+def _check(d: Path, binding: Binding, shapes: dict | None, files: dict) -> tuple[dict | None, list[str]]:
+    """(crop.json if complete, this crop's own errors); the cross-crop checks are verify's. `files` is _tree's."""
     m = json.loads((d / "crop.json").read_text())
     errs = [f"crop.json lacks {k!r}" for k in REQUIRED if k not in m]
     if errs:
@@ -71,6 +71,9 @@ def _check(d: Path, binding: Binding, shapes: dict | None) -> tuple[dict | None,
         err("raw.png fails the content filter")
     i = m["source"]["raw_index"]
     want = {lb.label_key: lb.segmentation_type for lb in binding.labels if lb.pairs_with == i}   # from the binding
+    # the worker publishes every file listed, so a crop is exactly these files; missing ones fail below
+    errs += [f"{f} is not a crop file" for f in sorted(set(files) - {"crop.json", "raw.png"}
+                                                       - {f"labels/{k}.png" for k in want})]
     got = sorted(lb["label_key"] for lb in m["labels"])
     if got != sorted(want):
         err(f"crop.json labels {got} are not the binding's {sorted(want)} for raw {i}")
@@ -128,7 +131,7 @@ def verify(crops_dir: Path, binding_path: Path, existing: Path | None = None) ->
             else:
                 files, errs = _tree(d)
             if not errs:
-                m, errs = _check(d, binding, shapes)
+                m, errs = _check(d, binding, shapes, files)
         except Exception as ex:    # the crop job may have written anything
             m, errs = None, errs + [f"{type(ex).__name__}: {ex}"]
         results.append({"crop_id": e.name, "ok": False, "errors": errs, "files": files})

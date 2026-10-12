@@ -142,6 +142,15 @@ def test_labels_missing_against_the_binding_fail_that_crop(ds, made, tmp_path):
     assert "not the binding's" in res["crops"][1]["errors"][0] and "gt.png is missing" in res["crops"][2]["errors"][0]
 
 
+def test_extra_files_fail_that_crop(ds, made, tmp_path):
+    d = shutil.copytree(made[1], tmp_path / "out")
+    (d / IDS[1] / "evil.html").write_text("<script>")
+    shutil.copy(d / IDS[1] / "labels" / "gt.png", d / IDS[1] / "labels" / "not-in-binding.png")
+    code, res = verify(ds, d)
+    assert code == 1 and [c["ok"] for c in res["crops"]] == [True, False, True, True]
+    assert res["crops"][1]["errors"] == ["evil.html is not a crop file", "labels/not-in-binding.png is not a crop file"]
+
+
 def test_symlinks_fail_the_crop(ds, made, tmp_path):
     d = shutil.copytree(made[1], tmp_path / "out")
     outside = shutil.copy(d / IDS[0] / "raw.png", tmp_path / "outside.png")
