@@ -110,3 +110,13 @@ def test_main_reads_maintainers_and_allowlist_from_base(tmp_path, monkeypatch):
         write(f"snippets/new-one/{p}", s)
     git("add", "-A"); git("commit", "-qm", "snippet")
     assert main(["--base", "main", "--author", "alice"]) == 1   # scipy is only on the PR's allowlist
+
+
+def test_dynamic_code_and_interpreter_modules_fail():
+    for src in ["exec('import socket')\n", "eval('1')\n", "compile('x', 'f', 'exec')\n", "import sys\n",
+                "from sys import modules\n", "import builtins\n", "import runpy\n", "import code\n", "import pty\n",
+                "import numpy as np\nnp.load('f', allow_pickle=1)\n", "import numpy as np\nnp.load('f', allow_pickle='y')\n",
+                "import numpy as np\nnp.load('f', allow_pickle=flag)\n"]:
+        assert run(ADDED, files=with_py(OK_PY + src)), src
+    for src in ["import re\nre.compile('x')\n", "import numpy as np\nnp.load('f', allow_pickle=False)\n"]:
+        assert run(ADDED, files=with_py(OK_PY + src)) == [], src

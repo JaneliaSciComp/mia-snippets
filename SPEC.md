@@ -121,8 +121,10 @@ reasons: ["axes zyx from ImageJ metadata, matches record", …]   # one per non-
   touch `.github/`.
 - **Valid metadata.** `snippet.yaml` validates against the harness schema, `name` matches the directory and
   isn't already used, every `requires` is on the allowlist, and every `tested_on` has an example binding.
-- **Static import check.** It rejects network, subprocess and `os.system` imports, `__import__`, imports of other
-  snippets, and `pickle` or `np.load(allow_pickle=True)`. This supplements the sandbox; it doesn't replace it.
+- **Static import check.** It rejects network, subprocess and `os.system` imports, `__import__`, `exec`, `eval`
+  and `compile`, the interpreter modules `sys`, `builtins`, `runpy`, `code` and `pty`, imports of other snippets,
+  and `pickle` or any `allow_pickle` that is not a false constant. This supplements the sandbox; it doesn't
+  replace it.
 - **Real-data tests run on the cluster, not on the CI runner.** The mia-data worker publishes a
   `mia-data/crops` **commit status** on the exact PR head SHA, alongside a readable PR comment.
   - Branch protection requires both `check` and `mia-data/crops`, with the status restricted to the trusted

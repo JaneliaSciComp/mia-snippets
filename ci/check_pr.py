@@ -12,9 +12,9 @@ from typing import Callable
 import yaml
 
 BANNED_MODULES = {"socket", "subprocess", "requests", "urllib", "http", "httpx", "fsspec", "ftplib",
-                  "pickle", "shelve", "ctypes", "importlib"}
+                  "pickle", "shelve", "ctypes", "importlib", "sys", "builtins", "runpy", "code", "pty"}
 HARNESS_API = "mia_harness.api"     # the only harness module a snippet may import (SPEC 2)
-BANNED_CALLS = re.compile(r"os\.(system|popen|exec\w*|spawn\w*)|__import__|importlib\.import_module")
+BANNED_CALLS = re.compile(r"os\.(system|popen|exec\w*|spawn\w*)|__import__|exec|eval|compile|importlib\.import_module")
 
 
 def _dotted(node) -> str:
@@ -47,8 +47,9 @@ class _Static(ast.NodeVisitor):
         if BANNED_CALLS.fullmatch(_dotted(n.func)):
             self.errors.append(f"line {n.lineno}: call to {_dotted(n.func)}")
         for k in n.keywords:
-            if k.arg == "allow_pickle" and isinstance(k.value, ast.Constant) and k.value.value is True:
-                self.errors.append(f"line {n.lineno}: allow_pickle=True")
+            # only a falsy constant passes: allow_pickle=1 or allow_pickle=flag could unpickle
+            if k.arg == "allow_pickle" and not (isinstance(k.value, ast.Constant) and not k.value.value):
+                self.errors.append(f"line {n.lineno}: allow_pickle={ast.unparse(k.value)}")
         self.generic_visit(n)
 
 
