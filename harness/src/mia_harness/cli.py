@@ -1,6 +1,7 @@
 """`harness` command line (SPEC §6.1)."""
 import argparse
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -56,5 +57,6 @@ def main(argv: list[str] | None = None) -> int:
         result = smoke(args.binding, args.snippets, args.record, io)
     finally:
         io.close()
+        shutil.rmtree(io.staging_dir, ignore_errors=True)   # §6.2: staging goes when the command exits
     args.out.write_text(json.dumps(result, indent=2) + "\n")
     return 0 if result["ok"] else 1

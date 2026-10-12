@@ -95,6 +95,21 @@ def test_cli_redirect_to_disallowed_host_exits_1_with_host_not_allowed(tmp_path,
                                                                         "http://evil.invalid/a.npy"]}
 
 
+def test_cli_smoke_deletes_staging(tmp_path, server, monkeypatch):
+    monkeypatch.setenv("MIA_HARNESS_JOB_BYTES", str(1 << 30))
+    monkeypatch.setenv("MIA_HARNESS_ALLOWED_HOSTS", "127.0.0.1")
+    b, r = write(tmp_path, (300, 300))
+    d = yaml.safe_load(b.read_text())
+    server.files["/a.npy"] = Path(d["raw"][0]["params"]["path"]).read_bytes()
+    d["raw"][0].update(urls=[server.url("/a.npy")], params={})
+    b.write_text(yaml.safe_dump(d))
+    out = tmp_path / "smoke.json"
+    assert cli.main(["smoke", str(b), "--snippets", str(SNAP), "--record", str(r), "--out", str(out),
+                     "--work", str(tmp_path)]) == 0
+    assert json.loads(out.read_text())["bytes_fetched"] > 0     # it went through the block cache in staging
+    assert not (tmp_path / "staging").exists()
+
+
 def test_cli_withdrawn_snippet_fails_and_usage_errors_exit_2(tmp_path, monkeypatch):
     monkeypatch.setenv("MIA_HARNESS_JOB_BYTES", "1")
     b, r = write(tmp_path, (300, 300))
