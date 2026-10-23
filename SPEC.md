@@ -9,11 +9,15 @@ mia-snippets/
 ├── harness/                   executable side of the spec (human-owned)
 ├── ci/                        PR rules (human-owned, §5)
 ├── .github/workflows/check.yml
-└── snippets/<name>/           one directory per snippet, immutable once merged
-    ├── snippet.yaml           metadata (§3)
-    ├── snippet.py             the reader (§2)
-    ├── README.md              what it reads, how params are chosen, known limits
-    └── examples/<record-id>.yaml   ≥ 1 binding it was tested on (§4)
+├── snippets/<name>/           one directory per snippet, immutable once merged
+│   ├── snippet.yaml           metadata (§3)
+│   ├── snippet.py             the reader (§2)
+│   ├── README.md              what it reads, how params are chosen, known limits
+│   └── examples/<record-id>.yaml   ≥ 1 binding it was tested on (§4)
+└── tensorizers/<name>/        one directory per tensorizer, immutable once merged (§8)
+    ├── tensorizer.yaml        metadata: name, spec_version, summary, params, requires
+    ├── tensorizer.py          describe() and tensorize()
+    └── README.md              the sample it produces and its limits
 ```
 
 `<name>` is a lowercase slug that is never reused, e.g. `tiff-zip-member`, `mrc-http`, `tiff-slices-zip`,
@@ -119,7 +123,7 @@ reasons: ["axes zyx from ImageJ metadata, matches record", …]   # one per non-
 ## 5 Immutability and review (CI in `mia-snippets`)
 
 `check.yml` runs on every PR, and branch protection requires it:
-- **Only additions.** A PR may only add files under one new `snippets/<name>/`. It fails if it changes or
+- **Only additions.** A PR may only add files under one new `snippets/<name>/` or one new `tensorizers/<name>/`. It fails if it changes or
   deletes anything under an existing snippet, or touches `harness/`, `ci/`, `SPEC.md`, `WITHDRAWN.yaml` or
   `.github/`, unless the PR author is a listed human maintainer. autodev already refuses agent commits that
   touch `.github/`.
@@ -172,3 +176,26 @@ harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --levels 
 `--snippets` is a read-only snapshot of one exact commit, never a branch resolved again. Snippets are imported
 from that directory only. Every command takes its byte cap from the job environment; command-line options can't
 raise it.
+
+## 8 Tensorizers
+
+A tensorizer turns a stack of co-centred patches, one per pyramid level, into the arrays a model consumes. It is
+the second pluggable unit, reviewed and frozen like a snippet, and composed with readers only by the harness
+(`harness stage` writes pyramids through snippets; `harness tensorize` reads them and calls the tensorizer).
+
+```python
+# tensorizers/<name>/tensorizer.py
+from mia_harness.tensor_api import Sample, Stack, TensorSpec   # the only harness module a tensorizer may import
+
+SPEC_VERSION = 1
+
+def describe(params: dict) -> TensorSpec:
+    """Output arrays by key: (shape with the symbols L, C, P, dtype). A key ending "/*" matches any number of keys."""
+
+def tensorize(stack: Stack, params: dict) -> Sample:
+    """Pure: no I/O. Returns the described arrays plus a JSON-safe "meta" dict."""
+```
+
+`Stack.levels` are `LevelPatch(factor, img (C, P, P), labels {key: (P, P)}, scale_nm, translation_nm, start_px)`.
+The harness checks every output against `describe()` (shape, dtype, no undescribed keys) and fails the command on
+a mismatch. The first tensorizer is `muvit-2d`.
