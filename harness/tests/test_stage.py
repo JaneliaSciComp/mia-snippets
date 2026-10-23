@@ -25,7 +25,7 @@ def test_stage_writes_raw_and_label_pyramids(tmp_path, io):
     b, r = write(tmp_path, (2, 300, 300), (2, 300, 300))
     rep = stage(b, SNAP, r, io, levels=[1, 2], patch=64, out=tmp_path / "out", voxel_size_nm=VOX)
     assert rep["errors"] == [] and rep["ok"]
-    assert rep["volumes"][0]["labels"] == {"gt": "labels/gt"} and rep["checks"] == {"s0_chunks": 8, "level_blocks": 4}
+    assert rep["volumes"][0]["labels"] == {"gt": "labels/gt"} and rep["checks"] == {"s0_chunks": 16, "level_blocks": 8}
     assert rep["volumes"][0]["path"] == "v0.zarr" and rep["volumes"][0]["axes"] == "zyx" and rep["volumes"][0]["voxel_size_nm"] == VOX
     assert open_pyramid(tmp_path / "out" / "v0.zarr" / "raw").levels[1].shape == (2, 150, 150)
     assert open_pyramid(tmp_path / "out" / "v0.zarr" / "labels" / "gt").attrs["mia"]["label_key"] == "gt"
@@ -66,3 +66,12 @@ def test_voxel_size_merges_file_and_fallback_per_axis():
 
     assert _voxel_size(A(), None) is None
     assert _voxel_size(A(), {"z": 1.0, "y": 40.0, "x": 40.0}) == {"z": 1.0, "y": 45.0718, "x": 45.0718}
+
+
+def test_stage_verification_covers_labels(tmp_path, io, monkeypatch):
+    import mia_harness.pyramid as pyramid
+
+    b, r = write(tmp_path, (2, 300, 300), (2, 300, 300))
+    monkeypatch.setattr(pyramid, "stride", lambda plane, f: plane if f == 1 else np.zeros((plane.shape[0] // f, plane.shape[1] // f), plane.dtype))
+    rep = stage(b, SNAP, r, io, levels=[1, 2], patch=64, out=tmp_path / "out", voxel_size_nm=VOX)
+    assert not rep["ok"] and any("v0/gt s1" in e and "differs" in e for e in rep["errors"])

@@ -89,9 +89,12 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, leve
                 write_pyramid(arr, vdir / "labels" / lb.label_key, levels=levels, patch=patch, voxel_size_nm=vox, kind="label",
                               attrs={**provenance, "label_key": lb.label_key, "segmentation_type": lb.segmentation_type})
                 written[lb.label_key] = f"labels/{lb.label_key}"
-            checks = _verify(raw, vdir / "raw", patch, rng, f"v{i}", rep["errors"])
-            for key in checks:
-                rep["checks"][key] += checks[key]
+            verified = [(raw, vdir / "raw", f"v{i}")]
+            verified += [(arr, vdir / "labels" / lb.label_key, f"v{i}/{lb.label_key}")
+                         for lb, arr in zip(binding.labels, labels) if lb.pairs_with == i]
+            for source, pdir, name in verified:
+                for key, count in _verify(source, pdir, patch, rng, name, rep["errors"]).items():
+                    rep["checks"][key] += count
             rep["volumes"].append({
                 "path": vdir.name, "axes": info.axes, "shape": list(info.shape), "dtype": info.dtype,
                 "access": getattr(raw, "access", None), "voxel_size_nm": vox,

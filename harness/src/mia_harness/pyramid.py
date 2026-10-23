@@ -38,7 +38,7 @@ def block_mean(plane: np.ndarray, f: int) -> np.ndarray:
     if f == 1:
         return plane
     h, w = plane.shape[0] // f * f, plane.shape[1] // f * f
-    mean = plane[:h, :w].astype(np.float64).reshape(h // f, f, w // f, f).mean(axis=(1, 3))
+    mean = plane[:h, :w].reshape(h // f, f, w // f, f).mean(axis=(1, 3), dtype=np.float64)   # no float64 copy of the plane
     return (np.rint(mean) if np.issubdtype(plane.dtype, np.integer) else mean).astype(plane.dtype)
 
 

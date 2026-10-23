@@ -112,3 +112,14 @@ def test_block_mean_rounds_back_to_dtype():
     assert block_mean(plane, 2).dtype == np.uint8 and stride(plane, 2).shape == (1, 1)
     with pytest.raises(ValueError):
         block_mean(plane, 0)
+
+
+def test_block_mean_does_not_copy_the_plane_as_float64():
+    import tracemalloc
+
+    plane = np.arange(1024 * 1024, dtype=np.uint16).reshape(1024, 1024)
+    tracemalloc.start()
+    out = block_mean(plane, 2)
+    _, peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    assert out.shape == (512, 512) and peak < 3 * plane.nbytes   # a float64 copy of the plane alone would be 4×
