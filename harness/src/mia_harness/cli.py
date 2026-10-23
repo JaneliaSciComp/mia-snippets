@@ -9,7 +9,14 @@ from .io import from_env
 from .preview import preview
 from .run import crop, smoke
 from .stage import stage
+from .tensorize import tensorize
 from .verify import verify
+
+
+def _json_arg(text: str) -> dict:
+    """A JSON object given inline or as a file path."""
+    text = text.strip()
+    return json.loads(text if text.startswith("{") else Path(text).read_text())
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -42,6 +49,13 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--out", type=Path, required=True, help="directory for v<i>.zarr and stage.json")
     s.add_argument("--voxel-size-nm", help="z,y,x (or y,x) in nm when the files do not say")
     s.add_argument("--seed", type=int, default=0)
+    s = sub.add_parser("tensorize", help="one crop descriptor through a tensorizer: sample.npz + .json (buffers spec §4)")
+    s.add_argument("pyramid", type=Path, help="a staged v<i>.zarr directory (raw/ and labels/ inside)")
+    s.add_argument("--tensorizers", type=Path, required=True, help="tensorizer snapshot directory")
+    s.add_argument("--name", required=True)
+    s.add_argument("--descriptor", required=True, help="JSON text or a path to a JSON file")
+    s.add_argument("--params", help="JSON text or a path to a JSON file (default: {})")
+    s.add_argument("--out", type=Path, required=True, help="sample .npz; meta goes to the same name .json")
     s = sub.add_parser("verify", help="SPEC §6.4 checks; loads no snippet code")
     s.add_argument("dir", type=Path)
     s.add_argument("--binding", type=Path, required=True)
@@ -56,6 +70,17 @@ def main(argv: list[str] | None = None) -> int:
         result = verify(args.dir, args.binding, args.existing)
         args.out.write_text(json.dumps(result, indent=2) + "\n")
         return 0 if result["ok_count"] == result["n"] and not result["errors"] else 1
+    if args.cmd == "tensorize":
+        descriptor, params = _json_arg(args.descriptor), _json_arg(args.params) if args.params else {}
+        try:
+            sample = tensorize(args.pyramid, descriptor, args.tensorizers, args.name, params)
+        except ValueError as e:
+            print(f"tensorize failed: {e}", file=sys.stderr)
+            return 1
+        import numpy as np
+        np.savez(args.out, **{k: v for k, v in sample.items() if k != "meta"})
+        args.out.with_suffix(".json").write_text(json.dumps(sample.get("meta", {}), indent=2, default=str) + "\n")
+        return 0
     if args.cmd == "preview":
         errors = preview(args.dir, args.out)
         print(*errors, sep="\n", file=sys.stderr)

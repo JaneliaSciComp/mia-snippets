@@ -1,0 +1,8 @@
+name: muvit-2d
+spec_version: 1
+summary: "MuViT 2D sample: per-level percentile-normalised img (L, C, P, P) float32, bbox (L, 2, 2) nm, labels as int32."
+params:
+  normalize: {type: str, required: false, doc: "percentile (default) or none"}
+  range: {type: list, required: false, doc: "low and high percentiles, default [1, 99]"}
+  clip: {type: bool, required: false, doc: "clip to [0, 1] after scaling, default true"}
+requires: [numpy]
