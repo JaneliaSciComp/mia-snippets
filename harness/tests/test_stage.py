@@ -56,3 +56,13 @@ def test_stage_verification_catches_corruption(tmp_path, io, monkeypatch):
     monkeypatch.setattr(pyramid, "block_mean", lambda plane, f: plane if f == 1 else np.zeros((plane.shape[0] // f, plane.shape[1] // f), plane.dtype))
     rep = stage(b, SNAP, r, io, levels=[1, 2], patch=64, out=tmp_path / "out", voxel_size_nm=VOX)
     assert not rep["ok"] and any("s1" in e and "differs" in e for e in rep["errors"])
+
+
+def test_voxel_size_merges_file_and_fallback_per_axis():
+    from mia_harness.stage import _voxel_size
+
+    class A:
+        axes, voxel_size_nm = "zcyx", {"y": 45.0718, "x": 45.0718}
+
+    assert _voxel_size(A(), None) is None
+    assert _voxel_size(A(), {"z": 1.0, "y": 40.0, "x": 40.0}) == {"z": 1.0, "y": 45.0718, "x": 45.0718}

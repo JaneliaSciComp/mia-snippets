@@ -15,12 +15,11 @@ LEVEL_CHECKS = 4    # random blocks per coarser level recomputed from s0
 
 
 def _voxel_size(array: Array, fallback: dict[str, float] | None) -> dict[str, float] | None:
+    """Per axis: what the file says, else the fallback (the record's value, or 1.0 for a 2D stack's plane axis)."""
     spatial = [a for a in array.axes if a != "c"]
-    own = array.voxel_size_nm or {}
-    if all(a in own for a in spatial):
-        return {a: float(own[a]) for a in spatial}
-    if fallback and all(a in fallback for a in spatial):
-        return {a: float(fallback[a]) for a in spatial}
+    merged = {**(fallback or {}), **(array.voxel_size_nm or {})}
+    if all(a in merged for a in spatial):
+        return {a: float(merged[a]) for a in spatial}
     return None
 
 
