@@ -39,6 +39,8 @@ class IO:
         """Seekable file whose reads are range GETs, cached on disk in 1 MiB blocks."""
         url, member = _split(url)
         if member is None:
+            if (local := self.cache.get(_key(url, self._head(url)))) is not None:   # fetched before: no network
+                return open(local, "rb")
             return _RangeFile(self, url, 0, self._size(url))
         info = self._member(url, member)
         if info.compress_type == remotezip.ZIP_DEFLATED:

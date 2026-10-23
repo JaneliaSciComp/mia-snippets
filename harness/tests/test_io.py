@@ -216,3 +216,16 @@ def test_readinto_at_eof_is_short(server, make_io):
     b = bytearray(b"\0" * 8)
     assert f.readinto(b) == 3 and bytes(b) == DATA[-3:] + b"\0" * 5
     assert f.readinto(np.empty(4, np.uint16)) == 0
+
+
+def test_open_serves_a_fetched_file_locally(server, make_io):
+    server.files["/a.bin"] = bytes(range(256)) * 1000
+    io = make_io()
+    io.fetch(server.url("/a.bin"))
+    fetched = io.bytes_fetched
+    before = len(server.requests)
+    with io.open(server.url("/a.bin")) as f:
+        f.seek(1000)
+        assert f.read(3) == bytes([232, 233, 234])
+    assert io.bytes_fetched == fetched
+    assert [m for m, _ in server.requests[before:]] == ["HEAD"] or server.requests[before:] == []
