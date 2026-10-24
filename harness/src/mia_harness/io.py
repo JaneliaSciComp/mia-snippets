@@ -39,7 +39,7 @@ class IO:
         """Seekable file whose reads are range GETs, cached on disk in 1 MiB blocks."""
         url, member = _split(url)
         if member is None:
-            if (local := self.cache.get(_key(url, self._head(url)))) is not None:   # fetched before: no network
+            if (local := self._local(url)) is not None:   # fetched before, or dropped by hand: no network
                 return open(local, "rb")
             return _RangeFile(self, url, 0, self._size(url))
         info = self._member(url, member)
@@ -58,7 +58,7 @@ class IO:
 
         def write(p: Path) -> None:
             offset = self._data_offset(url, info)
-            remotezip.extract(self._get(url, offset, offset + info.compress_size), info, p)
+            remotezip.extract(self._bytes(url, offset, offset + info.compress_size), info, p)
 
         return self.cache.get(key, check=lambda p: remotezip.crc_ok(p, info)) or self.cache.put(key, write)
 
@@ -89,18 +89,45 @@ class IO:
 
     def _data_offset(self, url: str, info) -> int:
         """One 30-byte range request for the local header, not a 1 MiB block."""
-        return remotezip.data_offset(b"".join(self._get(url, info.header_offset, info.header_offset + 30)), info)
+        return remotezip.data_offset(b"".join(self._bytes(url, info.header_offset, info.header_offset + 30)), info)
+
+    def _local(self, url: str) -> Path | None:
+        """The whole file in the dataset cache (fetched before, or dropped by hand), or None."""
+        return self.cache.get(_key(url, self._head(url)))
+
+    def _bytes(self, url: str, start: int, end: int) -> Iterator[bytes]:
+        """Bytes [start, end): from the cached whole file when there is one, else a range GET."""
+        if (local := self._local(url)) is not None:
+            with open(local, "rb") as fh:
+                fh.seek(start)
+                yield fh.read(end - start)
+            return
+        yield from self._get(url, start, end)
 
     # -- HTTP
 
     def _head(self, url: str) -> dict:
+        """The URL's validators: a HEAD request when the host is allowed (so a changed upstream file is noticed),
+        recorded in files.json for later; otherwise files.json, which is how an offline job (no hosts: a dataset a
+        human dropped, or a re-stage from the cache) and every `manual://` URL resolve."""
         # ponytail: HEAD only; if a host refuses HEAD, take size/validators from a ranged GET's Content-Range
         if url not in self.validators:
-            with closing(self._send("HEAD", url)) as r:
-                r.raise_for_status()
-                size = r.headers.get("content-length")
-                self.validators[url] = {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
-                                        "size": int(size) if size is not None else None}
+            host = (urlsplit(url).hostname or "").lower()
+            offline = url.startswith("manual://") or host not in self.allowed_hosts
+            if offline and (known := self.cache.manifest_get(url)) is not None:
+                self.validators[url] = known
+            elif url.startswith("manual://"):
+                raise FileNotFoundError(f"{url}: not in the raw cache's files.json; a human has to drop this file "
+                                        "(buffers spec §3)")
+            else:   # a HEAD; for a host that is not allowed, _send raises HostNotAllowed
+                with closing(self._send("HEAD", url)) as r:
+                    r.raise_for_status()
+                    size = r.headers.get("content-length")
+                    self.validators[url] = {"etag": r.headers.get("etag"),
+                                            "last_modified": r.headers.get("last-modified"),
+                                            "size": int(size) if size is not None else None}
+                if self.cache.writable:
+                    self.cache.manifest_put(url, self.validators[url], "download")
         return self.validators[url]
 
     def _size(self, url: str) -> int:
@@ -160,8 +187,11 @@ class IO:
     # -- block cache (per job, under staging; distinct from the dataset cache)
 
     def _read(self, url: str, start: int, end: int) -> bytes:
-        """Bytes [start, end) of url via 1 MiB blocks; adjacent missing blocks share one request."""
+        """Bytes [start, end) of url via 1 MiB blocks; adjacent missing blocks share one request. A whole file
+        already in the dataset cache (fetched before, or dropped by hand) is read in place."""
         size = self._size(url)
+        if self._local(url) is not None:
+            return b"".join(self._bytes(url, start, end))
         d = self.staging_dir / "blocks" / _key(url, self._head(url))
         first, last = start // BLOCK, (end - 1) // BLOCK
         missing = [i for i in range(first, last + 1) if not (d / str(i)).is_file()]

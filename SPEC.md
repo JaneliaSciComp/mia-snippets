@@ -59,7 +59,12 @@ class Array(Protocol):                     # defined in harness/src/mia_harness/
   - `io.list(url)`: lists zip members
 
   `io` records each file's validators (ETag, Last-Modified, size) for provenance, and refuses a server that
-  answers a range request with the whole body.
+  answers a range request with the whole body. In a writable dataset cache it also records them in
+  `files.json` beside the entries; a job whose hosts do not include the URL's (a re-stage from the cache with no
+  network, or a dataset a human dropped: buffers spec §3) resolves the URL through that manifest instead of a
+  HEAD request and reads the cached whole file in place, range reads and zip members included. A
+  `manual://<record>/<name>` URL exists only through `files.json`; without an entry it raises
+  `FileNotFoundError` naming the drop.
 - **Exceptions are part of the API.** `harness.api` defines `NeedsFetch` (raised by `io.open` for a file that
   can't be read by range, e.g. a deflated zip member: catch it and use `io.fetch`), `HostNotAllowed` and
   `BudgetExceeded`. Snippets import them from `mia_harness.api`, the only harness module a snippet may import.
