@@ -68,3 +68,18 @@ def check_sample(sample: Sample, spec: TensorSpec, *, L: int, C: int, P: int) ->
             raise ValueError(f"{k}: not described by describe()")
     if not isinstance(sample.get("meta", {}), dict):
         raise ValueError("meta: must be a dict")
+
+
+# Channel recipes (buffers spec v0.5 §2): how a tensorizer turns the stored channels into the crop's. The plan row
+# names one; the harness only needs each op's output channel count for the contract check.
+RECIPE_CHANNELS = {"channel": 1, "mean": 1, "luminance": 1, "replicate": 3, "rgb": 3, "additive": 3}
+
+
+def recipe_channels(recipe: dict | None, stored: int) -> int:
+    """Channels a sample has after `recipe`; no recipe keeps the stored count."""
+    if not recipe:
+        return stored
+    op = recipe.get("op")
+    if op not in RECIPE_CHANNELS:
+        raise ValueError(f"unknown channel recipe op {op!r}")
+    return RECIPE_CHANNELS[op]

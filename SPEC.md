@@ -200,3 +200,8 @@ def tensorize(stack: Stack, params: dict) -> Sample:
 `Stack.levels` are `LevelPatch(factor, img (C, P, P), labels {key: (P, P)}, scale_nm, translation_nm, start_px)`.
 The harness checks every output against `describe()` (shape, dtype, no undescribed keys) and fails the command on
 a mismatch. The first tensorizer is `muvit-2d`.
+
+A plan row may carry a **channel recipe** (buffers spec v0.5 §2), passed to the tensorizer as the `channels` param:
+`{op: channel, index: k}`, `{op: mean}`, `{op: luminance}` make one channel; `{op: replicate}`, `{op: rgb}`,
+`{op: additive}` make three. `mia_harness.tensor_api.RECIPE_CHANNELS` is the vocabulary and the harness checks the
+sample's `C` against it; the arithmetic is the tensorizer's.

@@ -5,4 +5,5 @@ params:
   normalize: {type: str, required: false, doc: "percentile (default) or none"}
   range: {type: list, required: false, doc: "low and high percentiles, default [1, 99]"}
   clip: {type: bool, required: false, doc: "clip to [0, 1] after scaling, default true"}
+  channels: {type: dict, required: false, doc: "channel recipe from the plan row: {op: channel, index: k} | mean | luminance | replicate | rgb | additive; default keeps all channels"}
 requires: [numpy]

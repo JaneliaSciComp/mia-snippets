@@ -5,7 +5,7 @@ import numpy as np
 
 from .loader import load_snippet, withdrawn_names
 from .pyramid import Pyramid, open_pyramid
-from .tensor_api import LevelPatch, Sample, Stack, check_sample
+from .tensor_api import LevelPatch, Sample, Stack, check_sample, recipe_channels
 
 
 def _start(centre_nm: float, scale: float, shift: float, patch: int, n: int) -> int:
@@ -72,5 +72,6 @@ def tensorize(pyramid_dir: Path, descriptor: dict, snapshot: Path, name: str, pa
     spec = mod.describe(params)
     stack = read_stack(pyramid_dir, descriptor)
     sample = mod.tensorize(stack, params)
-    check_sample(sample, spec, L=len(stack.levels), C=stack.levels[0].img.shape[0], P=stack.patch)
+    channels = recipe_channels(params.get("channels"), stack.levels[0].img.shape[0])
+    check_sample(sample, spec, L=len(stack.levels), C=channels, P=stack.patch)
     return sample
