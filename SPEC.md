@@ -176,7 +176,9 @@ harness verify  DIR --binding <binding.yaml> [--existing MANIFEST]     # output 
 harness preview DIR --out PREVIEW                                      # label overlay PNG per crop
 harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --levels 1,2,4 --patch 256 --out DIR
                 [--voxel-size-nm z,y,x]                                # one verified NGFF pyramid per raw (buffers);
-                                                                       # stage.json checks cover raw and every label layer
+                                                                       # stage.json checks cover raw and every label layer;
+                                                                       # each volume carries intensity_sample (sorted
+                                                                       # level-0 values per channel, ≤4096 from 8 boxes)
 ```
 
 `--snippets` is a read-only snapshot of one exact commit, never a branch resolved again. Snippets are imported

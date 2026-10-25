@@ -25,7 +25,13 @@ def _normalise(img: np.ndarray, params: dict) -> np.ndarray:
         return x
     if method != "percentile":
         raise ValueError(f"normalize must be percentile or none, got {method!r}")
-    lo, hi = np.percentile(x, params.get("range", [1, 99]), axis=(1, 2), keepdims=True)
+    if stats := params.get("stats"):     # volume or dataset bounds from registration (buffers spec §3)
+        lo, hi = (np.asarray(stats[key], dtype=np.float32) for key in ("lo", "hi"))
+        if lo.shape != (x.shape[0],) or hi.shape != (x.shape[0],):
+            raise ValueError(f"stats give {lo.size} lo / {hi.size} hi bounds for {x.shape[0]} channels")
+        lo, hi = lo[:, None, None], hi[:, None, None]
+    else:
+        lo, hi = np.percentile(x, params.get("range", [1, 99]), axis=(1, 2), keepdims=True)
     x = (x - lo) / np.maximum(hi - lo, EPS)
     return np.clip(x, 0.0, 1.0) if params.get("clip", True) else x
 
@@ -72,5 +78,6 @@ def tensorize(stack: Stack, params: dict) -> Sample:
             sample[f"label/{key}"] = np.stack([lv.labels[key] for lv in levels]).astype(np.int32)
     sample["meta"] = {**stack.meta, "levels": [lv.factor for lv in levels], "patch": stack.patch,
                       "plane": stack.plane, "centre_nm": list(stack.centre_nm),
-                      "normalize": params.get("normalize", "percentile"), "channels": recipe}
+                      "normalize": params.get("normalize", "percentile"), "channels": recipe,
+                      "normalize_scope": params.get("scope", "patch")}
     return sample

@@ -75,3 +75,28 @@ def test_stage_verification_covers_labels(tmp_path, io, monkeypatch):
     monkeypatch.setattr(pyramid, "stride", lambda plane, f: plane if f == 1 else np.zeros((plane.shape[0] // f, plane.shape[1] // f), plane.dtype))
     rep = stage(b, SNAP, r, io, levels=[1, 2], patch=64, out=tmp_path / "out", voxel_size_nm=VOX)
     assert not rep["ok"] and any("v0/gt s1" in e and "differs" in e for e in rep["errors"])
+
+
+def test_stage_records_a_sorted_intensity_sample_per_channel(tmp_path, io):
+    b, r = write(tmp_path, (2, 300, 300), (2, 300, 300))
+    rep = stage(b, SNAP, r, io, levels=[1, 2], patch=64, out=tmp_path / "out", voxel_size_nm=VOX)
+    sample = rep["volumes"][0]["intensity_sample"]
+    assert len(sample) == 1 and 1 <= len(sample[0]) <= 4096 and sample[0] == sorted(sample[0])
+    assert all(isinstance(v, (int, float)) and 0 <= v < 2 * 300 * 300 for v in sample[0])
+    assert json.loads((tmp_path / "out" / "stage.json").read_text())["volumes"][0]["intensity_sample"] == sample
+
+
+def test_intensity_sample_is_per_channel():
+    from mia_harness.stage import intensity_sample
+
+    class FakePyramid:
+        axes = "czyx"
+        levels = [type("L", (), {"shape": (2, 3, 100, 100)})()]
+
+        def read(self, level, region):
+            c = region["c"]
+            ys, xs = region["y"], region["x"]
+            return np.full((ys.stop - ys.start, xs.stop - xs.start), 10 * (c + 1), dtype=np.uint8)
+
+    sample = intensity_sample(FakePyramid(), 64, np.random.default_rng(0))
+    assert len(sample) == 2 and set(sample[0]) == {10} and set(sample[1]) == {20} and len(sample[0]) == 4096

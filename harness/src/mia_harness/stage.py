@@ -12,6 +12,38 @@ from .run import open_arrays
 
 S0_CHECKS = 8       # random s0 chunks re-read through the snippet
 LEVEL_CHECKS = 4    # random blocks per coarser level recomputed from s0
+SAMPLE_BOXES = 8    # random s0 patch boxes per channel that feed the intensity sample
+SAMPLE_KEEP = 4096  # values kept per channel (sorted) in stage.json's intensity_sample
+
+
+def _random_box(rng: np.random.Generator, size: dict[str, int], level_shape: tuple[int, ...], edge: int,
+                fixed: dict | None = None) -> tuple[dict, int, int, int]:
+    """A random plane over the c/z axes (`fixed` pins some of them) and a random y/x box of side ≤ edge."""
+    plane = {a: int(rng.integers(size[a])) for a in size if a in "cz"}
+    plane.update(fixed or {})
+    ny, nx = level_shape[-2], level_shape[-1]
+    n = min(edge, ny, nx)
+    y0 = int(rng.integers(0, max(1, ny - n + 1)))
+    x0 = int(rng.integers(0, max(1, nx - n + 1)))
+    return plane, y0, x0, n
+
+
+def intensity_sample(p, patch: int, rng: np.random.Generator) -> list[list[float]]:
+    """Per channel, up to SAMPLE_KEEP level-0 values from SAMPLE_BOXES random patch boxes, sorted: what
+    registration turns into normalisation bounds for `normalize.scope: volume|dataset` (buffers spec §3).
+    `p` is an open Pyramid (axes, levels[0].shape, read)."""
+    size = dict(zip(p.axes, p.levels[0].shape))
+    out = []
+    for c in range(size.get("c", 1)):
+        values = []
+        for _ in range(SAMPLE_BOXES):
+            plane, y0, x0, n = _random_box(rng, size, p.levels[0].shape, patch, {"c": c} if "c" in size else None)
+            values.append(np.asarray(p.read(0, plane | {"y": slice(y0, y0 + n), "x": slice(x0, x0 + n)})).ravel())
+        pooled = np.concatenate(values)
+        if pooled.size > SAMPLE_KEEP:
+            pooled = rng.choice(pooled, SAMPLE_KEEP, replace=False)
+        out.append(np.sort(pooled).tolist())
+    return out
 
 
 def _voxel_size(array: Array, fallback: dict[str, float] | None) -> dict[str, float] | None:
@@ -29,16 +61,10 @@ def _verify(array: Array, pyramid_dir: Path, patch: int, rng: np.random.Generato
     p = open_pyramid(pyramid_dir)
     down = block_mean if p.attrs["mia"]["kind"] == "raw" else stride
     size = dict(zip(p.axes, p.levels[0].shape))
-    outer = [a for a in p.axes if a in "cz"]
     checks = {"s0_chunks": 0, "level_blocks": 0}
 
     def random_box(level_shape: tuple[int, ...], edge: int) -> tuple[dict, int, int, int]:
-        plane = {a: int(rng.integers(size[a])) for a in outer}
-        ny, nx = level_shape[-2], level_shape[-1]
-        n = min(edge, ny, nx)
-        y0 = int(rng.integers(0, max(1, ny - n + 1)))
-        x0 = int(rng.integers(0, max(1, nx - n + 1)))
-        return plane, y0, x0, n
+        return _random_box(rng, size, level_shape, edge)
 
     for _ in range(S0_CHECKS):
         plane, y0, x0, n = random_box(p.levels[0].shape, patch)
@@ -101,6 +127,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, leve
                 "levels": [{"path": lv.path, "factor": lv.factor, "shape": list(lv.shape), "scale_nm": lv.scale_nm,
                             "translation_nm": lv.translation_nm} for lv in info.levels],
                 "labels": written,
+                "intensity_sample": intensity_sample(open_pyramid(vdir / "raw"), patch, rng),
             })
     except HostNotAllowed as e:
         rep["errors"].append(str(e))

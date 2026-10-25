@@ -151,3 +151,20 @@ def test_recipe_channels():
     assert recipe_channels({"op": "additive"}, 2) == 3
     with pytest.raises(ValueError, match="unknown channel recipe op 'nope'"):
         recipe_channels({"op": "nope"}, 1)
+
+
+def test_stats_bounds_replace_patch_percentiles():
+    from mia_harness.tensor_api import LevelPatch, Stack
+
+    img = np.full((2, 8, 8), 100, dtype=np.uint16)
+    img[1] = 50
+    lv = LevelPatch(1, img, {}, (10.0, 10.0), (0.0, 0.0), (0, 0))
+    stack = Stack([lv], 8, {"z": 0}, (40.0, 40.0))
+    mod = load_snippet(TENSORIZERS, "muvit-2d", {}, {}, kind="tensorizers")
+    sample = mod.tensorize(stack, {"stats": {"lo": [0, 0], "hi": [200, 100]}, "scope": "volume"})
+    assert np.allclose(sample["img"][0, 0], 0.5) and np.allclose(sample["img"][0, 1], 0.5)
+    assert sample["meta"]["normalize_scope"] == "volume"
+    patch_only = mod.tensorize(stack, {})
+    assert np.allclose(patch_only["img"], 0.0) and patch_only["meta"]["normalize_scope"] == "patch"
+    with pytest.raises(ValueError, match="channels"):
+        mod.tensorize(stack, {"stats": {"lo": [0], "hi": [200]}})
