@@ -47,7 +47,8 @@ def intensity_sample(p, patch: int, rng: np.random.Generator) -> list[list[float
 
 
 def _voxel_size(array: Array, fallback: dict[str, float] | None) -> dict[str, float] | None:
-    """Per axis: what the file says, else the fallback (the record's value, or 1.0 for a 2D stack's plane axis)."""
+    """Per axis: what the file says, else the fallback from the caller (the record's value; mia-buffers adds 1 nm for
+    the plane axis a 2D stack keeps). None when an axis has neither: the caller decides, not a guess."""
     spatial = [a for a in array.axes if a != "c"]
     merged = {**(fallback or {}), **(array.voxel_size_nm or {})}
     if all(a in merged for a in spatial):
