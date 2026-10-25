@@ -168,3 +168,12 @@ def test_stats_bounds_replace_patch_percentiles():
     assert np.allclose(patch_only["img"], 0.0) and patch_only["meta"]["normalize_scope"] == "patch"
     with pytest.raises(ValueError, match="channels"):
         mod.tensorize(stack, {"stats": {"lo": [0], "hi": [200]}})
+
+
+def test_stats_and_scope_pass_the_loader_param_check(staged):
+    """The client sends `stats` and `scope` as params: tensorizer.yaml must declare them or load_snippet refuses."""
+    out = tensorize(staged, D, TENSORIZERS, "muvit-2d", {"stats": {"lo": [0], "hi": [65535]}, "scope": "volume"})
+    assert out["meta"]["normalize_scope"] == "volume"
+    np.testing.assert_allclose(out["img"][0, 0], read_stack(staged, D).levels[0].img[0] / 65535.0, rtol=1e-6)
+    none = tensorize(staged, D, TENSORIZERS, "muvit-2d", {"stats": None, "scope": "patch"})  # a patch-scope descriptor
+    assert none["meta"]["normalize_scope"] == "patch"
