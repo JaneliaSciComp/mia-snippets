@@ -5,6 +5,7 @@ import shutil
 import sys
 from pathlib import Path
 
+from .fetch import fetch
 from .io import from_env
 from .preview import preview
 from .run import crop, smoke
@@ -49,6 +50,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--out", type=Path, required=True, help="directory for v<i>.zarr and stage.json")
     s.add_argument("--voxel-size-nm", help="z,y,x (or y,x) in nm when the files do not say")
     s.add_argument("--seed", type=int, default=0)
+    s = sub.add_parser("fetch", help="every URL of a binding into the raw cache; fetch.json has per-file outcomes")
+    s.add_argument("binding", type=Path)
+    s.add_argument("--record", type=Path, required=True)
+    s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
+    s.add_argument("--out", type=Path, required=True, help="result JSON")
     s = sub.add_parser("tensorize", help="one crop descriptor through a tensorizer: sample.npz + .json (buffers spec §4)")
     s.add_argument("pyramid", type=Path, help="a staged v<i>.zarr directory (raw/ and labels/ inside)")
     s.add_argument("--tensorizers", type=Path, required=True, help="tensorizer snapshot directory")
@@ -94,6 +100,16 @@ def main(argv: list[str] | None = None) -> int:
                 vox = dict(zip("zyx"[-len(values):], values))
             return 0 if stage(args.binding, args.snippets, args.record, io, levels=[int(v) for v in args.levels.split(",")],
                               patch=args.patch, out=args.out, voxel_size_nm=vox, seed=args.seed)["ok"] else 1
+        if args.cmd == "fetch":
+            result: dict = {"ok": False, "partial": False, "bytes_fetched": io.bytes_fetched, "files": [], "errors": []}
+            try:
+                result = fetch(args.binding, args.record, io)
+            except BaseException as e:      # the report lands even when something escapes `fetch`
+                result["errors"].append(f"{type(e).__name__}: {e}")
+                raise
+            finally:
+                args.out.write_text(json.dumps(result, indent=2) + "\n")
+            return 0 if result["ok"] and not result["partial"] else 2 if result["partial"] else 1
         if args.cmd == "crop":
             return 0 if crop(args.binding, args.snippets, args.record, io, n=args.n, seed=args.seed,
                              round_id=args.round, batch=args.batch, out=args.out, existing=args.existing)["made"] else 1
