@@ -1,0 +1,12 @@
+name: tiff-zip-member-channel
+spec_version: 1
+summary: One TIFF from a zip member or a plain URL with its channel axis collapsed to one plane (one channel by index, or one-hot channels to class ids); deflated members are fetched whole.
+formats: [tiff, ome-tiff]
+containers: [zip, http]
+params:
+  channel: {type: int, required: false, doc: "0-based index on the file's channel axis (tifffile C or S) of the one channel to return, e.g. one class's binary mask from an ImageJ hyperstack that stores one mask per channel; exclusive with `channels`; reason required in binding"}
+  channels: {type: str, required: false, doc: "'onehot': each pixel is non-zero in exactly one channel; returns uint8 class ids 1..C in channel order, 0 where no channel is set, raises at read when several are. Exclusive with `channel`; reason required in binding"}
+  axes: {type: str, required: false, doc: "override when the TIFF's own axes are wrong: one czyx letter per axis of tifffile's series[0] after size-1 axes (other than y/x) are dropped, including the c being collapsed; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-15608267-factin-conformations-sted-neurons]
+supersedes: null
