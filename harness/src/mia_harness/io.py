@@ -42,6 +42,8 @@ class IO:
             if (local := self._local(url)) is not None:   # fetched before, or dropped by hand: no network
                 return open(local, "rb")
             return _RangeFile(self, url, 0, self._size(url))
+        if self._offline(url) and (local := self.cache.get(_member_key(url, member, self._head(url)))) is not None:
+            return open(local, "rb")   # a fetch extracted it: no directory read, which an offline job cannot make
         info = self._member(url, member)
         if info.compress_type == remotezip.ZIP_DEFLATED:
             raise NeedsFetch(f"{member!r} is compressed; use io.fetch")
@@ -53,8 +55,10 @@ class IO:
         if member is None:
             key = _key(url, self._head(url))
             return self.cache.get(key) or self.cache.put(key, lambda p: _write(p, self._get(url)))
+        key = _member_key(url, member, self._head(url))
+        if self._offline(url) and (local := self.cache.get(key)) is not None:
+            return local   # written whole and CRC-checked by the fetch; the zip's directory is out of reach anyway
         info = self._member(url, member)
-        key = _key(f"{url}::{member}", self._head(url))
 
         def write(p: Path) -> None:
             offset = self._data_offset(url, info)
@@ -95,6 +99,11 @@ class IO:
         """The whole file in the dataset cache (fetched before, or dropped by hand), or None."""
         return self.cache.get(_key(url, self._head(url)))
 
+    def _offline(self, url: str) -> bool:
+        """No request may go to this URL: a manual:// one, or a host the job is not allowed (a stage from the raw
+        cache). It resolves from files.json and the cache entries alone."""
+        return url.startswith("manual://") or (urlsplit(url).hostname or "").lower() not in self.allowed_hosts
+
     def _bytes(self, url: str, start: int, end: int) -> Iterator[bytes]:
         """Bytes [start, end): from the cached whole file when there is one, else a range GET."""
         if (local := self._local(url)) is not None:
@@ -112,9 +121,7 @@ class IO:
         human dropped, or a re-stage from the cache) and every `manual://` URL resolve."""
         # ponytail: HEAD only; if a host refuses HEAD, take size/validators from a ranged GET's Content-Range
         if url not in self.validators:
-            host = (urlsplit(url).hostname or "").lower()
-            offline = url.startswith("manual://") or host not in self.allowed_hosts
-            if offline and (known := self.cache.manifest_get(url)) is not None:
+            if self._offline(url) and (known := self.cache.manifest_get(url)) is not None:
                 self.validators[url] = known
             elif url.startswith("manual://"):
                 raise FileNotFoundError(f"{url}: not in the raw cache's files.json; a human has to drop this file "
@@ -264,6 +271,11 @@ def _write(path: Path, chunks: Iterator[bytes]) -> None:
 
 def _key(url: str, validators: dict) -> str:
     return hashlib.sha256(f"{url}\n{json.dumps(validators, sort_keys=True)}".encode()).hexdigest()
+
+
+def _member_key(url: str, member: str, validators: dict) -> str:
+    """A zip member's cache key: the member URL under the zip's validators."""
+    return _key(f"{url}::{member}", validators)
 
 
 def from_env(work: Path) -> IO:

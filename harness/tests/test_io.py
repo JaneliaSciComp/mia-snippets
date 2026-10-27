@@ -276,6 +276,21 @@ def test_zip_member_from_a_dropped_archive_needs_no_network(make_io, tmp_path):
     assert io.fetch(url + "::c.tif").read_bytes() == b"y" * 100 and io.bytes_fetched == 0
 
 
+def test_fetched_zip_members_are_served_offline_without_the_directory(server, make_io):
+    """A stage job has no host and the raw cache a fetch filled: members resolve from it, never from the zip."""
+    data = zip_bytes({"m.tif": (b"x" * 100, zipfile.ZIP_STORED), "c.tif": (b"y" * 100, zipfile.ZIP_DEFLATED)})
+    server.files["/a.zip"] = data
+    io1 = make_io()
+    io1.fetch(server.url("/a.zip") + "::m.tif")
+    io1.fetch(server.url("/a.zip") + "::c.tif")
+    gets = len(server.gets())
+    io2 = make_io(hosts=())
+    with io2.open(server.url("/a.zip") + "::m.tif") as member:
+        assert member.read() == b"x" * 100
+    assert io2.fetch(server.url("/a.zip") + "::c.tif").read_bytes() == b"y" * 100
+    assert io2.bytes_fetched == 0 and len(server.gets()) == gets
+
+
 def test_manual_url_without_manifest_entry_says_so(make_io):
     with pytest.raises(FileNotFoundError, match="files.json"):
         make_io(hosts=()).fetch("manual://rec/a.zip")
