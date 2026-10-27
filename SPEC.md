@@ -168,11 +168,13 @@ Withdrawing is human-only (§5) and never deletes the snippet. Its effects:
 ## 7. Harness CLI
 
 ```
-harness smoke   <binding.yaml> --snippets <dir> --record <record.yaml>   # open every array, check vs record,
-                                                                       # read one 256×256 patch per raw (+ labels)
+harness smoke   <binding.yaml> --snippets <dir> --record <record.yaml> [--size 256]   # open every array, check vs
+                                                                       # record, read one patch (+ labels)
 harness crop    <binding.yaml> --snippets <dir> --record <record.yaml> --n N --seed S --round R --batch B
-                --out DIR [--existing MANIFEST]                        # sample + write crops
-harness verify  DIR --binding <binding.yaml> [--existing MANIFEST]     # output checks; loads no snippet code
+                --out DIR [--existing MANIFEST] [--size 256]           # sample + write crops; a raw smaller than
+                                                                       # --size is cropped whole (no size verdict:
+                                                                       # a buffer plan decides what fits it)
+harness verify  DIR --binding <binding.yaml> [--existing MANIFEST] [--size 256]   # output checks; no snippet code
 harness preview DIR --out PREVIEW                                      # label overlay PNG per crop
 harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --levels 1,2,4 --patch 256 --out DIR
                 [--voxel-size-nm z,y,x]                                # one verified NGFF pyramid per raw (buffers);

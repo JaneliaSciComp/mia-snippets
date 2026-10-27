@@ -46,6 +46,7 @@ def test_per_file_grouping():
 def test_capacity_and_effective_n():
     assert capacity([V], 256) == 8
     assert effective_n(16, 8) == 4 and effective_n(2, 8) == 2
+    assert effective_n(4, 1) == 1 and effective_n(4, 2) == 1 and effective_n(4, 0) == 0
 
 
 def test_shared_budget_counts_by_kind():

@@ -5,6 +5,7 @@ import shutil
 import sys
 from pathlib import Path
 
+from .api import CROP
 from .fetch import fetch
 from .io import from_env
 from .preview import preview
@@ -31,6 +32,7 @@ def main(argv: list[str] | None = None) -> int:
         s.add_argument("--snippets", type=Path, required=True, help="snippet snapshot directory")
         s.add_argument("--record", type=Path, required=True)
         s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
+        s.add_argument("--size", type=int, default=CROP, help="crop edge in pixels; a smaller raw is cropped whole")
         if name == "smoke":
             s.add_argument("--out", type=Path, required=True, help="result JSON")
         else:
@@ -66,6 +68,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("dir", type=Path)
     s.add_argument("--binding", type=Path, required=True)
     s.add_argument("--existing", type=Path, help="published manifest.json")
+    s.add_argument("--size", type=int, default=CROP, help="the crop edge `crop` was given")
     s.add_argument("--out", type=Path, required=True, help="result JSON")
     s = sub.add_parser("preview", help="label overlay PNG per crop (SPEC §6.7)")
     s.add_argument("dir", type=Path)
@@ -73,7 +76,7 @@ def main(argv: list[str] | None = None) -> int:
     args = p.parse_args(argv)
 
     if args.cmd == "verify":
-        result = verify(args.dir, args.binding, args.existing)
+        result = verify(args.dir, args.binding, args.existing, size=args.size)
         args.out.write_text(json.dumps(result, indent=2) + "\n")
         return 0 if result["ok_count"] == result["n"] and not result["errors"] else 1
     if args.cmd == "tensorize":
@@ -112,8 +115,9 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if result["ok"] and not result["partial"] else 2 if result["partial"] else 1
         if args.cmd == "crop":
             return 0 if crop(args.binding, args.snippets, args.record, io, n=args.n, seed=args.seed,
-                             round_id=args.round, batch=args.batch, out=args.out, existing=args.existing)["made"] else 1
-        result = smoke(args.binding, args.snippets, args.record, io)
+                             round_id=args.round, batch=args.batch, out=args.out, existing=args.existing,
+                             size=args.size)["made"] else 1
+        result = smoke(args.binding, args.snippets, args.record, io, size=args.size)
     finally:
         io.close()
         shutil.rmtree(io.staging_dir, ignore_errors=True)   # §6.2: staging goes when the command exits

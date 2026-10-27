@@ -233,20 +233,28 @@ def test_byte_cap_makes_nothing_and_reports_budget_exceeded(ds, monkeypatch):
     assert not [p for p in out.iterdir() if p.is_dir()]
 
 
-def test_no_eligible_raw_writes_a_report_and_exits_1(tmp_path, monkeypatch):
+def test_a_raw_smaller_than_the_size_is_cropped_whole_and_verifies(tmp_path, monkeypatch):
     env(monkeypatch)
     p = tmp_path / "small.npy"
-    np.save(p, np.zeros((200, 200), np.uint16))
+    np.save(p, (np.indices((200, 200)).sum(0) * 100).astype(np.uint16))   # a gradient passes the content filter
     b = tmp_path / "binding.yaml"
     b.write_text(yaml.safe_dump({"record": "r", "record_commit": "0", "snippets_commit": "1", "reasons": [],
                                  "raw": [{"snippet": "npy-local", "urls": [], "params": {"path": str(p)}}],
                                  "labels": []}))
-    (tmp_path / "record.yaml").write_text("{}\n")
+    (tmp_path / "record.yaml").write_text("license: {spdx: CC0-1.0}\n")
     code = cli.main(["crop", str(b), "--snippets", str(SNAP), "--record", str(tmp_path / "record.yaml"), "--n", "4",
                      "--seed", "s", "--round", "i1-e1", "--batch", "1", "--out", str(tmp_path / "out"),
                      "--work", str(tmp_path)])
     rep = json.loads((tmp_path / "out" / "report.json").read_text())
-    assert code == 1 and rep["made"] == rep["capacity"] == 0 and "ineligible" in rep["errors"][0]
+    assert code == 0 and rep["capacity"] == 1 and rep["made"] == 1 and not rep["errors"]
+    crop_dir = next(d for d in (tmp_path / "out").iterdir() if d.is_dir())
+    meta = json.loads((crop_dir / "crop.json").read_text())
+    assert meta["box"] == {"y": 0, "x": 0, "h": 200, "w": 200}
+    assert read_png(crop_dir / "raw.png", 200)[0].shape == (200, 200)
+    code = cli.main(["verify", str(tmp_path / "out"), "--binding", str(b), "--out", str(tmp_path / "verify.json")])
+    result = json.loads((tmp_path / "verify.json").read_text())
+    # a local-path raw has no URL validators to record; every size check passed
+    assert result["errors"] == [] and result["crops"][0]["errors"] == ["crop.json has no source validators"], result
 
 
 def test_verify_and_preview_cannot_load_snippet_code():
