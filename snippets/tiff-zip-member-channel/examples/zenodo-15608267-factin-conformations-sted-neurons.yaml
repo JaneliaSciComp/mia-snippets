@@ -1,0 +1,34 @@
+record: zenodo-15608267-factin-conformations-sted-neurons
+record_commit: 127d83abc7b02915dafc11b11acc916ffc3072dd
+snippets_commit: fc16a01cd2731655e34804e920722e747e3f4826
+raw:
+  - snippet: tiff-zip-member
+    urls: ["https://zenodo.org/records/15608267/files/factin-conformations-dataset.zip::factin-conformations-dataset/d9c691d4-e6d3-3871-b0bd-db0660a5625e.tif"]
+    params: {}
+labels:
+  - snippet: tiff-zip-member-channel
+    urls: ["https://zenodo.org/records/15608267/files/factin-conformations-dataset.zip::factin-conformations-dataset/d9c691d4-e6d3-3871-b0bd-db0660a5625e_mask.tif"]
+    params: {channel: 0}
+    pairs_with: 0
+    label_key: manual_gt-nanocluster-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member-channel
+    urls: ["https://zenodo.org/records/15608267/files/factin-conformations-dataset.zip::factin-conformations-dataset/d9c691d4-e6d3-3871-b0bd-db0660a5625e_mask.tif"]
+    params: {channel: 1}
+    pairs_with: 0
+    label_key: manual_gt-compact_assembly-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member-channel
+    urls: ["https://zenodo.org/records/15608267/files/factin-conformations-dataset.zip::factin-conformations-dataset/d9c691d4-e6d3-3871-b0bd-db0660a5625e_mask.tif"]
+    params: {channel: 2}
+    pairs_with: 0
+    label_key: manual_gt-protrusion-semantic
+    segmentation_type: binary
+reasons:
+  - "one image/mask pair (d9c691d4), the pair record.yaml samples: the other 78 member names are uuids not listed in the record, and both snippets take exactly one url per array"
+  - "raw with tiff-zip-member: a single-page ImageJ TIFF, yx 512x512 uint16 (record technical.arrays), axes from the file, no override"
+  - "labels with tiff-zip-member-channel instead of tiff-zip-member: the mask is an ImageJ hyperstack cyx 3x512x512 uint16 whose three channels are three separate binary masks; tiff-zip-member exposes c and the harness reads c=0 only of a channelled label paired with a channel-less raw, so compact assemblies and protrusions would never reach a crop. The same file is bound three times, once per channel, each as a yx binary label"
+  - "channel 0 / 1 / 2 = nanoclusters / compact assemblies / protrusions: the record's classes (annotations.format, from the harvest); the files do not name their channels"
+  - "label_keys manual_gt-nanocluster-semantic, manual_gt-compact_assembly-semantic, manual_gt-protrusion-semantic: annotations.source manual, one key per class; encoding binary folds to semantic in the key"
+  - "segmentation_type binary for all three: each channel is a {0,1} mask (value_range 0..1, encoding binary)"
+  - "not channels: onehot (one class map): in 16 of the 79 masks the channels overlap (up to 387 pixels, e.g. nanoclusters inside protrusions), so argmax class ids would drop information and the one-hot check would raise on those files; per-channel binary labels keep every class"
