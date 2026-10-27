@@ -1,0 +1,11 @@
+name: tiff-zip-glob-rgb
+spec_version: 1
+summary: Single-page TIFF tiles from zip members chosen by glob (or plain URLs), stacked along z, with the RGB sample axis collapsed to one plane (grey copy, one-hot class ids, or one sample).
+formats: [tiff]
+containers: [zip, http]
+params:
+  samples: {type: str, required: false, doc: "how a file's sample (RGB) axis is collapsed to one plane: 'grey' (all samples identical, sample 0 is returned; differing samples raise) or 'onehot' (each pixel non-zero in exactly one sample; returns uint8 class ids 1..S in sample order, 0 where no sample is set, raises when several are). Needed when the files have a sample axis and `sample` is not given; reason required in binding"}
+  sample: {type: int, required: false, doc: "0-based index of the one sample to return, e.g. one class's one-hot plane for a binary mask; exclusive with `samples`; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-5553771-detecdiv-yeast-trap-segmentation]
+supersedes: null

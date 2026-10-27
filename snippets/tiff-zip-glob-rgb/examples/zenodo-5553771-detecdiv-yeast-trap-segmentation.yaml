@@ -1,0 +1,21 @@
+record: zenodo-5553771-detecdiv-yeast-trap-segmentation
+record_commit: 53cc3727d612ee9b5b23da7a8b8b08d11e0756f5
+snippets_commit: 5d4b7814ac9a20fd5cade42aadc2e6681add14d1
+raw:
+  - snippet: tiff-zip-glob-rgb
+    urls: ["https://zenodo.org/records/5553771/files/cellSegmentation.zip::trainingdataset/images/*.tif"]
+    params: {samples: grey}
+labels:
+  - snippet: tiff-zip-glob-rgb
+    urls: ["https://zenodo.org/records/5553771/files/cellSegmentation.zip::trainingdataset/labels/*.tif"]
+    params: {samples: onehot}
+    pairs_with: 0
+    label_key: manual_gt-cell-semantic
+    segmentation_type: semantic
+reasons:
+  - "tiff-zip-glob-rgb instead of tiff-zip-member: the tiles are plain RGB TIFFs (yxs 60x59x3 uint8, record technical.arrays) whose sample axis is not a channel axis; tiff-zip-member exposes it as c, so the harness would pair one one-hot label plane with each raw sample and write it as a class map"
+  - "urls with a member glob: trainingdataset/images/*.tif and trainingdataset/labels/*.tif (the record's path_pattern) expand to the 1,404 members each (listing_complete: true), sorted by name, stacked as z so the whole set is bound rather than the one pair record.yaml samples; both globs give the same sorted basenames, so z index k of the label is the mask of z index k of the raw (the record's pairing rule: same file name in images/ and labels/)"
+  - "samples grey on raw: the brightfield crop is grey stored as three identical samples (alignment_notes samples_identical: true); sample 0 is returned as yx after the snippet checks the samples agree, so each image yields one plane, not three duplicates"
+  - "samples onehot on label: every mask pixel is 255 in exactly one of the 3 samples (alignment_notes, checked in all 1,404 masks); argmax over the sample axis + 1 gives class ids 1 background, 2 mother, 3 other, the record's class ids and the Zenodo text's order"
+  - "label_key manual_gt-cell-semantic: annotations.source manual; background/mother/other mark yeast cells; a one-hot map over 3 classes is a semantic map, not instances"
+  - "segmentation_type semantic: the class ids 1..3 are written as they are (encode_label identity); the record notes the order of samples 1 and 2 (mother, other) is presumed from the Zenodo text, not documented"
