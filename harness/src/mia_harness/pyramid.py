@@ -1,4 +1,5 @@
 """NGFF 0.5 pyramids on zarr v3: written one plane at a time from an Array, read back in canonical czyx order."""
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -106,6 +107,23 @@ def write_pyramid(array: Array, out: Path, *, levels: list[int], patch: int, vox
     group.attrs["mia"] = {**attrs, "kind": kind, "levels": list(levels), "patch": patch, "source_axes": array.axes,
                           "access": getattr(array, "access", None)}
     return PyramidInfo(axes, tuple(size[a] for a in axes), np.dtype(array.dtype).name, infos)
+
+
+def write_volume_groups(vdir: Path, labels: list[str]) -> None:
+    """Make `vdir` one OME-Zarr image: the root group's `multiscales` points at raw/s*, and with labels the root
+    lists them and `labels/` is the spec's labels group. The arrays and the raw/label groups are untouched."""
+    raw = json.loads((vdir / "raw" / "zarr.json").read_text())["attributes"]["ome"]["multiscales"][0]
+    datasets = [{**d, "path": f"raw/{d['path']}"} for d in raw["datasets"]]
+    ome: dict = {"version": OME_VERSION,
+                 "multiscales": [{"name": raw.get("name", "raw"), "type": "image", "axes": raw["axes"], "datasets": datasets}]}
+    if labels:
+        ome["labels"] = list(labels)
+        _write_group(vdir / "labels", {"ome": {"version": OME_VERSION, "labels": list(labels)}})
+    _write_group(vdir, {"ome": ome})
+
+
+def _write_group(path: Path, attributes: dict) -> None:
+    (path / "zarr.json").write_text(json.dumps({"zarr_format": 3, "node_type": "group", "attributes": attributes}, indent=1))
 
 
 class Pyramid:

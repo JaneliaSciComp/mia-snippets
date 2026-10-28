@@ -30,6 +30,15 @@ def test_stage_writes_raw_and_label_pyramids(tmp_path, io):
     assert open_pyramid(tmp_path / "out" / "v0.zarr" / "raw").levels[1].shape == (2, 150, 150)
     assert open_pyramid(tmp_path / "out" / "v0.zarr" / "labels" / "gt").attrs["mia"]["label_key"] == "gt"
     assert json.loads((tmp_path / "out" / "stage.json").read_text())["ok"]
+    # the volume is one OME-Zarr image: root multiscales over raw/s*, the labels group listing its labels
+    root = json.loads((tmp_path / "out" / "v0.zarr" / "zarr.json").read_text())["attributes"]["ome"]
+    assert root["labels"] == ["gt"] and root["multiscales"][0]["type"] == "image"
+    assert [d["path"] for d in root["multiscales"][0]["datasets"]] == ["raw/s0", "raw/s1"]
+    assert root["multiscales"][0]["axes"] == [{"name": a, "type": "space", "unit": "nanometer"} for a in "zyx"]
+    labels = json.loads((tmp_path / "out" / "v0.zarr" / "labels" / "zarr.json").read_text())["attributes"]["ome"]
+    assert labels == {"version": "0.5", "labels": ["gt"]}
+    import zarr
+    assert sorted(zarr.open_group(tmp_path / "out" / "v0.zarr", mode="r").keys()) == ["labels", "raw"]
 
 
 def test_stage_without_voxel_size_fails(tmp_path, io):

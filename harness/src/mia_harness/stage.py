@@ -7,7 +7,7 @@ import numpy as np
 from .api import Array
 from .binding import binding_hash, load_binding
 from .io import IO, BudgetExceeded, HostNotAllowed
-from .pyramid import block_mean, open_pyramid, stride, write_pyramid
+from .pyramid import block_mean, open_pyramid, stride, write_pyramid, write_volume_groups
 from .run import open_arrays
 
 S0_CHECKS = 8       # random s0 chunks re-read through the snippet
@@ -116,6 +116,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, leve
                 write_pyramid(arr, vdir / "labels" / lb.label_key, levels=levels, patch=patch, voxel_size_nm=vox, kind="label",
                               attrs={**provenance, "label_key": lb.label_key, "segmentation_type": lb.segmentation_type})
                 written[lb.label_key] = f"labels/{lb.label_key}"
+            write_volume_groups(vdir, list(written))
             verified = [(raw, vdir / "raw", f"v{i}")]
             verified += [(arr, vdir / "labels" / lb.label_key, f"v{i}/{lb.label_key}")
                          for lb, arr in zip(binding.labels, labels) if lb.pairs_with == i]
