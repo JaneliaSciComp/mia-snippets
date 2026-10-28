@@ -79,11 +79,24 @@ class IO:
     # The fallback is downloading the whole zip into the dataset cache and reading members locally.
 
     def _directory(self, url: str) -> dict:
-        # ponytail: one central-directory tail read (a 1 MiB block) per zip per job, even when every member
-        # is a cache hit; cache the CD bytes (keyed by validators) to make those hits free
+        """Members by name, from the dataset cache when a fetch stored the directory there (an offline stage job
+        can expand a member glob from it), else one tail read of the zip, stored for the next job."""
         if url not in self._zips:
-            self._zips[url] = remotezip.read_directory(_RangeFile(self, url, 0, self._size(url)))
+            key = _key(f"{url}::", self._head(url))   # the directory's entry, under the zip's validators
+            if (local := self.cache.get(key)) is not None:
+                self._zips[url] = remotezip.directory_from_json(local.read_bytes())
+            else:
+                members = remotezip.read_directory(_RangeFile(self, url, 0, self._size(url)))
+                self.cache.put(key, lambda p: p.write_bytes(remotezip.directory_to_json(members)))
+                self._zips[url] = members
         return self._zips[url]
+
+    def note_fetched(self, url: str) -> None:
+        """Record in files.json that every member `url` names (`<zip>::<member or glob>`) is in the cache, so a
+        worker can tell a zip whose validators are known from one whose members are there."""
+        zip_url, member = _split(url)
+        if member is not None and self.cache.writable:
+            self.cache.manifest_put(f"{zip_url}::{member}", self._head(zip_url), "members")
 
     def _member(self, url: str, member: str):
         info = self._directory(url).get(member)

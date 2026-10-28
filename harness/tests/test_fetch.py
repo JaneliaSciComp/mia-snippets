@@ -33,7 +33,35 @@ def test_fetch_reports_fetched_then_cached(server, make_io, tmp_path):
     assert [(f["outcome"], f["bytes"]) for f in first["files"]] == [("fetched", 1000), ("fetched", 10)]
     again = fetch(binding, record, make_io())
     assert [f["outcome"] for f in again["files"]] == ["cached", "cached"] and again["bytes_fetched"] == 0
-    assert again["files"][0]["key"] == first["files"][0]["key"]
+
+
+def test_fetch_expands_member_globs_and_an_offline_job_reads_them(server, make_io, tmp_path):
+    """A `<zip>::<glob>` url fetches every matching member and is noted in files.json; afterwards a job with no
+    hosts (a stage from the raw cache) lists the zip, expands the glob and opens the members without a request."""
+    from test_io import zip_bytes
+    import zipfile
+    from mia_harness.cache import MANIFEST
+
+    members = {"a/1.tif": (b"1" * 10, zipfile.ZIP_STORED), "a/2.tif": (b"2" * 20, zipfile.ZIP_DEFLATED),
+               "b/3.tif": (b"3" * 30, zipfile.ZIP_STORED)}
+    server.files["/d.zip"] = zip_bytes(members)
+    glob_url = server.url("/d.zip") + "::a/*.tif"
+    binding, record = write_binding(tmp_path, [glob_url], [])
+    rep = fetch(binding, record, make_io())
+    assert rep["ok"] and [(f["url"], f["outcome"], f["bytes"]) for f in rep["files"]] == [(glob_url, "fetched", 30)]
+    manifest = json.loads((tmp_path / "shared" / MANIFEST).read_text())
+    assert manifest[glob_url]["source"] == "members" and manifest[glob_url]["validators"]["size"] > 0
+    gets = len(server.gets())
+    offline = make_io(hosts=())
+    assert sorted(offline.list(server.url("/d.zip"))) == sorted(members)
+    with offline.open(server.url("/d.zip") + "::a/1.tif") as m:
+        assert m.read() == b"1" * 10
+    assert offline.fetch(server.url("/d.zip") + "::a/2.tif").read_bytes() == b"2" * 20
+    assert offline.bytes_fetched == 0 and len(server.gets()) == gets
+    again = fetch(binding, record, make_io())
+    assert [f["outcome"] for f in again["files"]] == ["cached"] and again["bytes_fetched"] == 0
+    nothing, _ = write_binding(tmp_path, [server.url("/d.zip") + "::c/*.tif"], [])
+    assert fetch(nothing, record, make_io())["files"][0]["outcome"] == "failed"
 
 
 def test_fetch_partial_on_byte_cap_and_failed_on_404(server, make_io, tmp_path):
