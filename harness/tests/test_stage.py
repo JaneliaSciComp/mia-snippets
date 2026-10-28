@@ -3,7 +3,9 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from test_io import make_io  # noqa: F401  (fixture)
 from test_smoke import SNAP, write
+from rangeserver import server  # noqa: F401  (fixture)
 
 from mia_harness import cli
 from mia_harness.cache import DatasetCache
@@ -109,3 +111,27 @@ def test_intensity_sample_is_per_channel():
 
     sample = intensity_sample(FakePyramid(), 64, np.random.default_rng(0))
     assert len(sample) == 2 and set(sample[0]) == {10} and set(sample[1]) == {20} and len(sample[0]) == 4096
+
+
+def test_prefetch_expands_member_globs_so_an_offline_stage_reads_the_cache(tmp_path, make_io, server):
+    """The stage job's prefetch takes a `<zip>::<glob>` url the way `harness fetch` does: every member, offline,
+    from the directory and members the fetch cached; a glob no fetch cached fails naming the zip."""
+    import zipfile
+    from mia_harness.binding import load_binding
+    from mia_harness.fetch import fetch
+    from mia_harness.stage import prefetch
+    from test_fetch import write_binding
+    from test_io import zip_bytes
+
+    members = {f"train/{i}.tif": (bytes([i]) * 8, zipfile.ZIP_STORED) for i in range(3)}
+    server.files["/g.zip"] = zip_bytes(members)
+    glob_url = server.url("/g.zip") + "::train/*.tif"
+    binding, record = write_binding(tmp_path, [glob_url], [])
+    assert fetch(binding, record, make_io())["ok"]
+    gets = len(server.gets())
+    offline = make_io(hosts=())
+    prefetch(load_binding(binding), offline)   # the stage job: no hosts, every member a cache hit
+    assert offline.bytes_fetched == 0 and len(server.gets()) == gets
+    other, _ = write_binding(tmp_path, [server.url("/g.zip") + "::val/*.tif"], [])
+    with pytest.raises(ValueError, match="no member"):
+        prefetch(load_binding(other), offline)

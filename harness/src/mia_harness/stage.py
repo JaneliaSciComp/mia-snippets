@@ -6,6 +6,7 @@ import numpy as np
 
 from .api import Array
 from .binding import binding_hash, load_binding
+from .fetch import expand
 from .io import IO, BudgetExceeded, HostNotAllowed
 from .pyramid import block_mean, open_pyramid, stride, write_pyramid, write_volume_groups
 from .run import open_arrays
@@ -86,6 +87,15 @@ def _verify(array: Array, pyramid_dir: Path, patch: int, rng: np.random.Generato
     return checks
 
 
+def prefetch(binding, io: IO) -> None:
+    """Every file of the binding into the dataset cache (the raw cache), a `<zip>::<glob>` url as its members, so
+    the snippets then read locally; offline (a stage from the cache) each is a hit, or the error names it."""
+    for b in [*binding.raw, *binding.labels]:
+        for url in b.urls:
+            for piece in expand(url, io):
+                io.fetch(piece)
+
+
 def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, levels: list[int], patch: int,
           out: Path, voxel_size_nm: dict[str, float] | None = None, seed: int = 0) -> dict:
     """Fetch every file once, open the arrays, write v<i>.zarr per raw with its labels, verify, write stage.json."""
@@ -96,9 +106,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, leve
     rng = np.random.default_rng(seed)
     try:
         binding = load_binding(binding_path)
-        for b in [*binding.raw, *binding.labels]:
-            for url in b.urls:
-                io.fetch(url)       # into the shared dataset cache: the raw cache; io.open then reads it locally
+        prefetch(binding, io)
         raws, labels = open_arrays(binding, Path(snapshot), io)
         provenance = {"record": binding.record, "record_commit": binding.record_commit,
                       "snippets_commit": binding.snippets_commit, "binding_hash": binding_hash(binding_path)}
