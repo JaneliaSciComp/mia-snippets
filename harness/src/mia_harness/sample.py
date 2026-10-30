@@ -31,20 +31,29 @@ def _dims(v: Volume) -> tuple[dict, int, int]:
     return {k: n for k, n in d.items() if k in "cz"}, d["y"], d["x"]
 
 
-def positions(v: Volume, size: int) -> int:
+def _edge(size: int | dict, v: Volume) -> int:
+    """The crop edge of a volume: one size for all, or a dict by volume index (a raw smaller than the size is
+    cropped at its own extent)."""
+    return size[v.index] if isinstance(size, dict) else size
+
+
+def positions(v: Volume, size: int | dict) -> int:
     planes, Y, X = _dims(v)
-    return prod(planes.values()) * (Y - size + 1) * (X - size + 1)
+    s = _edge(size, v)
+    return prod(planes.values()) * (Y - s + 1) * (X - s + 1)
 
 
-def capacity(volumes: list[Volume], size: int) -> int:
-    return sum(prod(p.values()) * (Y // size) * (X // size) for p, Y, X in map(_dims, volumes))
+def capacity(volumes: list[Volume], size: int | dict) -> int:
+    return sum(prod(p.values()) * (Y // s) * (X // s) for v in volumes for p, Y, X, s in [(*_dims(v), _edge(size, v))])
 
 
 def effective_n(n: int, cap: int) -> int:
-    return min(n, cap // 2)
+    """At most half the capacity, so the overlap rule leaves room; a capacity of 1 or 2 (a whole-image crop) still
+    yields one."""
+    return min(n, max(cap // 2, 1 if cap else 0))
 
 
-def candidates(volumes: list[Volume], seed: str, *, size=256, per_plane=4, per_file=8) -> Iterator[CropSpec]:
+def candidates(volumes: list[Volume], seed: str, *, size: int | dict = 256, per_plane=4, per_file=8) -> Iterator[CropSpec]:
     """Endless and deterministic per seed. Volume ~ positions, plane and (y, x) uniform; plane access yields
     per_plane draws on one plane, file access per_file draws in one volume, chunk access redraws every time."""
     rng = random.Random(seed)
@@ -52,10 +61,11 @@ def candidates(volumes: list[Volume], seed: str, *, size=256, per_plane=4, per_f
     while True:
         v = rng.choices(volumes, weights)[0]
         planes, Y, X = _dims(v)
+        s = _edge(size, v)
         def plane(): return {k: rng.randrange(n) for k, n in planes.items()}
         fixed = plane() if v.access == "plane" else None
         for _ in range({"plane": per_plane, "file": per_file}.get(v.access, 1)):
-            yield CropSpec(v.index, fixed or plane(), rng.randrange(Y - size + 1), rng.randrange(X - size + 1), size)
+            yield CropSpec(v.index, fixed or plane(), rng.randrange(Y - s + 1), rng.randrange(X - s + 1), s)
 
 
 def overlap_frac(a: dict, b: dict, size: int) -> float:

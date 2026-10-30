@@ -72,6 +72,14 @@ Four layers, cheapest first. A snippet reaches production only by passing all of
 
 Comments and labels never authorise a merge; only the two required statuses and a review do.
 
+## Tensorizers
+
+`tensorizers/<name>/` holds the second kind of pluggable unit: a pure function from a stack of co-centred,
+multi-resolution patches to the arrays a model consumes (SPEC §8). The harness stages a dataset into an OME-Zarr
+pyramid through its reader snippet (`harness stage`), reads a crop descriptor's patches back (`harness tensorize`)
+and runs the tensorizer, checking its output against its own `describe()`. The same PR rules apply: one new
+directory, immutable once merged, no I/O, static import check. `muvit-2d` is the first.
+
 ## Harness
 
 `harness/` is a pip-installable package with a CLI (SPEC §7): `smoke` opens every array in a binding and

@@ -45,15 +45,15 @@ def io(tmp_path):
     i.close()
 
 
-def test_300_square_is_ok_and_eligible(tmp_path, io):
+def test_300_square_is_ok(tmp_path, io):
     out = run(tmp_path, io, (2, 300, 300), (2, 300, 300))
-    assert out == {"ok": True, "eligible": True, "shapes": {"raw": [[2, 300, 300]], "labels": [[2, 300, 300]]},
+    assert out == {"ok": True, "shapes": {"raw": [[2, 300, 300]], "labels": [[2, 300, 300]]},
                    "warnings": [], "errors": [], "bytes_fetched": 0}
 
 
-def test_200_square_is_ok_but_not_eligible(tmp_path, io):
+def test_200_square_is_ok_too_with_no_size_verdict(tmp_path, io):
     out = run(tmp_path, io, (200, 200))
-    assert out["ok"] and not out["eligible"] and out["shapes"]["raw"] == [[200, 200]]
+    assert out["ok"] and "eligible" not in out and out["shapes"]["raw"] == [[200, 200]]
 
 
 def test_mismatched_label_shape_is_an_error(tmp_path, io):
@@ -75,7 +75,7 @@ def test_reads_through_io_and_counts_bytes(tmp_path, io, server):
     d["raw"][0].update(urls=[server.url("/a.npy")], params={})
     b.write_text(yaml.safe_dump(d))
     out = smoke(b, SNAP, r, io)
-    assert out["ok"] and out["eligible"] and out["bytes_fetched"] == len(buf.read_bytes())
+    assert out["ok"] and out["bytes_fetched"] == len(buf.read_bytes())
 
 
 def test_cli_redirect_to_disallowed_host_exits_1_with_host_not_allowed(tmp_path, server, monkeypatch):

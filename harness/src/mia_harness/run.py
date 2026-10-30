@@ -33,15 +33,19 @@ def _sizes(a: Array) -> dict[str, int]:
     return dict(zip(a.axes, a.shape))
 
 
-def _patch(a: Array) -> np.ndarray:
-    """A CROP×CROP patch at the origin of plane 0."""
-    region = {"z": 0, "c": 0, "y": slice(0, CROP), "x": slice(0, CROP)}
+def _edge(a: Array, size: int) -> int:
+    """The crop edge for a raw: `size`, or the raw's own y/x extent when it is smaller (whole-image crops)."""
+    return min(size, _sizes(a)["y"], _sizes(a)["x"])
+
+
+def _patch(a: Array, edge: int) -> np.ndarray:
+    """An edge×edge patch at the origin of plane 0."""
+    region = {"z": 0, "c": 0, "y": slice(0, edge), "x": slice(0, edge)}
     return a.read({k: v for k, v in region.items() if k in a.axes})
 
 
-def smoke(binding_path: Path, snapshot: Path, record_path: Path, io: IO) -> dict:
-    out = {"ok": False, "eligible": False, "shapes": {"raw": [], "labels": []}, "warnings": [], "errors": [],
-           "bytes_fetched": 0}
+def smoke(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, size: int = CROP) -> dict:
+    out = {"ok": False, "shapes": {"raw": [], "labels": []}, "warnings": [], "errors": [], "bytes_fetched": 0}
     err = out["errors"].append
     try:
         binding = load_binding(binding_path)
@@ -67,17 +71,15 @@ def smoke(binding_path: Path, snapshot: Path, record_path: Path, io: IO) -> dict
             if got != want:
                 err(f"label {i} {a.axes} {list(a.shape)} does not match raw {lb.pairs_with} "
                     f"{raws[lb.pairs_with].axes} {list(raws[lb.pairs_with].shape)} outside c")
-        # 4. eligibility
-        eligible = [i for i, a in enumerate(raws) if _sizes(a)["y"] >= CROP and _sizes(a)["x"] >= CROP]
-        out["eligible"] = bool(eligible)
-        # 5. one patch from plane 0 of the first eligible raw and its labels
-        if eligible:
-            i = eligible[0]
-            for what, a in [(f"raw {i}", raws[i])] + [(f"label {j}", labels[j])
-                                                      for j, lb in enumerate(binding.labels) if lb.pairs_with == i]:
-                shape = _patch(a).shape
-                if shape != (CROP, CROP):
-                    err(f"{what}: a {CROP}x{CROP} patch read back as {list(shape)}")
+        # 4. one patch from plane 0 of the first raw and its labels; no size verdict: whether a dataset serves a
+        #    buffer is the buffer plan's decision (prep-and-buffering spec §12)
+        if raws:
+            edge = _edge(raws[0], size)
+            for what, a in [("raw 0", raws[0])] + [(f"label {j}", labels[j])
+                                                   for j, lb in enumerate(binding.labels) if lb.pairs_with == 0]:
+                shape = _patch(a, edge).shape
+                if shape != (edge, edge):
+                    err(f"{what}: a {edge}x{edge} patch read back as {list(shape)}")
     except HostNotAllowed as e:
         err(str(e))
         out["host_not_allowed"] = {"host": e.host, "chain": e.chain}
@@ -94,7 +96,7 @@ def _region(a: Array, plane: dict, y, x) -> dict:
 
 
 def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: int, seed: str, round_id: str,
-         batch: int, out: Path, existing: Path | None = None) -> dict:
+         batch: int, out: Path, existing: Path | None = None, size: int = CROP) -> dict:
     """Sample and write crops to out/<crop_id>/ and out/report.json; returns the report. Crops made before a
     BudgetExceeded, HostNotAllowed or snippet error are kept."""
     out = Path(out)
@@ -107,14 +109,9 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
         record = yaml.safe_load(Path(record_path).read_text()) or {}
         raws, labels = open_arrays(binding, Path(snapshot), io)
         rep["source_shapes"] = {str(i): {"axes": a.axes, "shape": list(a.shape)} for i, a in enumerate(raws)}
-        vols = []
-        for i, a in enumerate(raws):
-            Y, X = _sizes(a)["y"], _sizes(a)["x"]
-            if Y >= CROP and X >= CROP:
-                vols.append(Volume(i, a.axes, tuple(a.shape), a.access))
-            else:
-                rep["errors"].append(f"raw {i}: {Y}x{X} is smaller than {CROP}x{CROP} (ineligible)")
-        rep["capacity"] = capacity(vols, CROP)
+        vols = [Volume(i, a.axes, tuple(a.shape), a.access) for i, a in enumerate(raws)]
+        edges = {i: _edge(a, size) for i, a in enumerate(raws)}   # a raw smaller than size: whole-image crops
+        rep["capacity"] = capacity(vols, edges)
         rep["n"] = effective_n(n, rep["capacity"])
         prior = [box_of(e) for e in load_existing(existing) if e["record"] == binding.record]
         last = {}   # plane-access raws: the last plane read, {"key": (raw, plane), "plane": array}
@@ -125,16 +122,16 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
                 key = (c.raw, sorted(c.plane.items()))
                 if last.get("key") != key:
                     last.update(key=key, plane=np.asarray(a.read(_region(a, c.plane, slice(None), slice(None)))))
-                p = last["plane"][c.y:c.y + CROP, c.x:c.x + CROP]
+                p = last["plane"][c.y:c.y + c.size, c.x:c.x + c.size]
             else:   # chunk; and file, which the snippet staged at open
-                p = np.asarray(a.read(_region(a, c.plane, slice(c.y, c.y + CROP), slice(c.x, c.x + CROP))))
-            if p.shape != (CROP, CROP):
-                raise ValueError(f"raw {c.raw}: a {CROP}x{CROP} patch read back as {list(p.shape)}")
+                p = np.asarray(a.read(_region(a, c.plane, slice(c.y, c.y + c.size), slice(c.x, c.x + c.size))))
+            if p.shape != (c.size, c.size):
+                raise ValueError(f"raw {c.raw}: a {c.size}x{c.size} patch read back as {list(p.shape)}")
             return p
 
         def judge(c, acc) -> str | None:
             box = {"raw": c.raw, "plane": c.plane, "y": c.y, "x": c.x}
-            if any(overlap_frac(box, o, CROP) > OVERLAP_MAX for o in prior + [vars(a) for a in acc]):
+            if any(overlap_frac(box, o, c.size) > OVERLAP_MAX for o in prior + [vars(a) for a in acc]):
                 return "overlap"
             patch = patch_of(c)
             if not content_ok(patch):
@@ -143,8 +140,8 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
             try:
                 encoded = []
                 for lb, la in paired:
-                    lp = np.asarray(la.read(_region(la, c.plane, slice(c.y, c.y + CROP), slice(c.x, c.x + CROP))))
-                    if lp.shape != (CROP, CROP):
+                    lp = np.asarray(la.read(_region(la, c.plane, slice(c.y, c.y + c.size), slice(c.x, c.x + c.size))))
+                    if lp.shape != (c.size, c.size):
                         raise ValueError(f"read back as {list(lp.shape)}")
                     encoded.append(encode_label(lp, lb.segmentation_type))
             except (BudgetExceeded, HostNotAllowed):
@@ -169,9 +166,9 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
                            "validators": {u: io.validators[_split(u)[0]] for u in rb.urls
                                           if _split(u)[0] in io.validators}},
                 "plane": {"z": c.plane.get("z"), "c": c.plane.get("c")},
-                "box": {"y": c.y, "x": c.x, "h": CROP, "w": CROP},
+                "box": {"y": c.y, "x": c.x, "h": c.size, "w": c.size},
                 "voxel_size_nm": vs,
-                "extent_um": {"h": CROP * vs["y"] / 1000, "w": CROP * vs["x"] / 1000}
+                "extent_um": {"h": c.size * vs["y"] / 1000, "w": c.size * vs["x"] / 1000}
                 if vs and "y" in vs and "x" in vs else None,
                 "source_dtype": np.dtype(a.dtype).name, "mapping": mapping, "stats": stats(patch),
                 "labels": [{"label_key": lb.label_key, "segmentation_type": lb.segmentation_type, "mapping": m}
@@ -192,7 +189,7 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
             rej.update([kind] if kind else [])
             return kind
 
-        collect(candidates(vols, seed, size=CROP), rep["n"], reject)
+        collect(candidates(vols, seed, size=edges), rep["n"], reject)
     except HostNotAllowed as e:
         rep["errors"].append(str(e))
         rep["host_not_allowed"] = {"host": e.host, "chain": e.chain}
