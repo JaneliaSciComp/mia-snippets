@@ -1,4 +1,6 @@
+import hashlib
 import io as stdio
+import json
 import os
 import zipfile
 
@@ -216,3 +218,93 @@ def test_readinto_at_eof_is_short(server, make_io):
     b = bytearray(b"\0" * 8)
     assert f.readinto(b) == 3 and bytes(b) == DATA[-3:] + b"\0" * 5
     assert f.readinto(np.empty(4, np.uint16)) == 0
+
+
+def test_open_serves_a_fetched_file_locally(server, make_io):
+    server.files["/a.bin"] = bytes(range(256)) * 1000
+    io = make_io()
+    io.fetch(server.url("/a.bin"))
+    fetched = io.bytes_fetched
+    before = len(server.requests)
+    with io.open(server.url("/a.bin")) as f:
+        f.seek(1000)
+        assert f.read(3) == bytes([232, 233, 234])
+    assert io.bytes_fetched == fetched
+    assert [m for m, _ in server.requests[before:]] == ["HEAD"] or server.requests[before:] == []
+
+
+# -- files.json manifest and manual drops (buffers spec §3)
+
+
+def _manifest(tmp_path):
+    return json.loads((tmp_path / "shared" / "files.json").read_text())
+
+
+def test_manifest_entry_skips_head_and_serves_from_cache(server, make_io, tmp_path):
+    server.files["/d.bin"] = DATA
+    io1 = make_io()
+    io1.fetch(server.url("/d.bin"))
+    entry = _manifest(tmp_path)[server.url("/d.bin")]
+    assert entry["source"] == "download" and entry["validators"]["size"] == len(DATA)
+    heads = len(server.heads())
+    io2 = make_io(hosts=())  # no host allowed: any request would raise HostNotAllowed
+    assert io2.fetch(server.url("/d.bin")).read_bytes() == DATA and len(server.heads()) == heads
+
+
+def test_range_reads_come_from_a_cached_whole_file(server, make_io):
+    server.files["/d.bin"] = DATA
+    io1 = make_io()
+    io1.fetch(server.url("/d.bin"))
+    io2 = make_io(hosts=())
+    with io2.open(server.url("/d.bin")) as f:
+        f.seek(BLOCK + 3)
+        assert f.read(10) == DATA[BLOCK + 3:BLOCK + 13] and io2.bytes_fetched == 0
+    assert io2._read(server.url("/d.bin"), BLOCK - 2, BLOCK + 2) == DATA[BLOCK - 2:BLOCK + 2]  # the block path too
+
+
+def test_zip_member_from_a_dropped_archive_needs_no_network(make_io, tmp_path):
+    data = zip_bytes({"m.tif": (b"x" * 100, zipfile.ZIP_STORED), "c.tif": (b"y" * 100, zipfile.ZIP_DEFLATED)})
+    validators = {"size": len(data), "sha256": hashlib.sha256(data).hexdigest()}
+    url = "manual://rec/a.zip"
+    key = hashlib.sha256(f"{url}\n{json.dumps(validators, sort_keys=True)}".encode()).hexdigest()
+    (tmp_path / "shared").mkdir()
+    (tmp_path / "shared" / key).write_bytes(data)
+    (tmp_path / "shared" / "files.json").write_text(json.dumps({url: {"validators": validators, "source": "manual"}}))
+    io = make_io(hosts=())
+    with io.open(url + "::m.tif") as member:
+        assert member.read() == b"x" * 100
+    assert io.fetch(url + "::c.tif").read_bytes() == b"y" * 100 and io.bytes_fetched == 0
+
+
+def test_fetched_zip_members_are_served_offline_without_the_directory(server, make_io):
+    """A stage job has no host and the raw cache a fetch filled: members resolve from it, never from the zip."""
+    data = zip_bytes({"m.tif": (b"x" * 100, zipfile.ZIP_STORED), "c.tif": (b"y" * 100, zipfile.ZIP_DEFLATED)})
+    server.files["/a.zip"] = data
+    io1 = make_io()
+    io1.fetch(server.url("/a.zip") + "::m.tif")
+    io1.fetch(server.url("/a.zip") + "::c.tif")
+    gets = len(server.gets())
+    io2 = make_io(hosts=())
+    with io2.open(server.url("/a.zip") + "::m.tif") as member:
+        assert member.read() == b"x" * 100
+    assert io2.fetch(server.url("/a.zip") + "::c.tif").read_bytes() == b"y" * 100
+    assert io2.bytes_fetched == 0 and len(server.gets()) == gets
+
+
+def test_manual_url_without_manifest_entry_says_so(make_io):
+    with pytest.raises(FileNotFoundError, match="files.json"):
+        make_io(hosts=()).fetch("manual://rec/a.zip")
+
+
+def test_allowed_host_still_heads_so_upstream_changes_are_noticed(server, make_io, tmp_path):
+    server.files["/d.bin"] = DATA
+    make_io().fetch(server.url("/d.bin"))
+    server.files["/d.bin"] = b"changed"            # new ETag: the manifest entry is stale
+    assert make_io().fetch(server.url("/d.bin")).read_bytes() == b"changed"
+    assert _manifest(tmp_path)[server.url("/d.bin")]["validators"]["size"] == 7
+
+
+def test_read_only_cache_does_not_write_the_manifest(server, make_io, tmp_path):
+    server.files["/d.bin"] = DATA
+    make_io(writable=False).fetch(server.url("/d.bin"))
+    assert not (tmp_path / "shared" / "files.json").exists()

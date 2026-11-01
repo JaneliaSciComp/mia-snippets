@@ -30,30 +30,36 @@ def catalog(snapshot_dir: Path) -> list[dict]:
     return [m for m in metas if m["name"] not in hidden]
 
 
-def load_snippet(snapshot_dir: Path, name: str, withdrawn: set[str], params: dict | None = None) -> ModuleType:
-    """Import snippets/<name>/snippet.py from the snapshot only (spec_from_file_location, unique module name).
-    Refuse (ValueError): withdrawn, missing snippet.yaml, spec_version != SPEC_VERSION, name mismatch, `params`
-    not matching snippet.yaml's schema; after import, a module without SPEC_VERSION 1 and a callable open_array."""
+KINDS = {"snippets": ("snippet", ("open_array",)), "tensorizers": ("tensorizer", ("describe", "tensorize"))}
+
+
+def load_snippet(snapshot_dir: Path, name: str, withdrawn: set[str], params: dict | None = None,
+                 kind: str = "snippets") -> ModuleType:
+    """Import <kind>/<name>/<unit>.py from the snapshot only (spec_from_file_location, unique module name).
+    `kind` is "snippets" (unit snippet, needs open_array) or "tensorizers" (unit tensorizer, needs describe and
+    tensorize). Refuse (ValueError): withdrawn, missing <unit>.yaml, spec_version != SPEC_VERSION, name mismatch,
+    `params` not matching the yaml's schema; after import, a module without SPEC_VERSION 1 and the callables."""
+    unit, needed = KINDS[kind]
     if not _SLUG.fullmatch(name):
-        raise ValueError(f"bad snippet name {name!r}")
+        raise ValueError(f"bad {unit} name {name!r}")
     if name in withdrawn:
-        raise ValueError(f"snippet {name!r} is withdrawn")
-    d = Path(snapshot_dir).resolve() / "snippets" / name
-    for f in (d / "snippet.yaml", d / "snippet.py"):   # no symlink may lead out of snippets/<name>/
+        raise ValueError(f"{unit} {name!r} is withdrawn")
+    d = Path(snapshot_dir).resolve() / kind / name
+    for f in (d / f"{unit}.yaml", d / f"{unit}.py"):   # no symlink may lead out of <kind>/<name>/
         if f.resolve() != f:
-            raise ValueError(f"snippet {name!r}: {f.name} resolves outside snippets/{name}/ ({f.resolve()})")
-    if not (d / "snippet.yaml").is_file():
-        raise ValueError(f"snippet {name!r} has no snippet.yaml in {snapshot_dir}")
-    meta = _yaml(d / "snippet.yaml")
+            raise ValueError(f"{unit} {name!r}: {f.name} resolves outside {kind}/{name}/ ({f.resolve()})")
+    if not (d / f"{unit}.yaml").is_file():
+        raise ValueError(f"{unit} {name!r} has no {unit}.yaml in {snapshot_dir}")
+    meta = _yaml(d / f"{unit}.yaml")
     if meta.get("spec_version") != SPEC_VERSION:
-        raise ValueError(f"snippet {name!r} has spec_version {meta.get('spec_version')!r}, harness speaks {SPEC_VERSION}")
+        raise ValueError(f"{unit} {name!r} has spec_version {meta.get('spec_version')!r}, harness speaks {SPEC_VERSION}")
     if meta.get("name") != name:
-        raise ValueError(f"snippet directory {name!r} names itself {meta.get('name')!r}")
+        raise ValueError(f"{unit} directory {name!r} names itself {meta.get('name')!r}")
     _check_params(name, meta.get("params") or {}, params or {})
 
-    code = d / "snippet.py"
+    code = d / f"{unit}.py"
     digest = hashlib.sha256(str(code).encode() + b"\0" + code.read_bytes()).hexdigest()[:16]
-    modname = f"mia_snippet_{name.replace('-', '_')}_{digest}"
+    modname = f"mia_{unit}_{name.replace('-', '_')}_{digest}"
     if modname not in sys.modules:
         spec = importlib.util.spec_from_file_location(modname, code)
         mod = importlib.util.module_from_spec(spec)
@@ -64,8 +70,8 @@ def load_snippet(snapshot_dir: Path, name: str, withdrawn: set[str], params: dic
             del sys.modules[modname]
             raise
     mod = sys.modules[modname]
-    if getattr(mod, "SPEC_VERSION", None) != SPEC_VERSION or not callable(getattr(mod, "open_array", None)):
-        raise ValueError(f"snippet {name!r}: snippet.py needs SPEC_VERSION = {SPEC_VERSION} and an open_array")
+    if getattr(mod, "SPEC_VERSION", None) != SPEC_VERSION or not all(callable(getattr(mod, n, None)) for n in needed):
+        raise ValueError(f"{unit} {name!r}: {unit}.py needs SPEC_VERSION = {SPEC_VERSION} and {' and '.join(needed)}")
     return mod
 
 

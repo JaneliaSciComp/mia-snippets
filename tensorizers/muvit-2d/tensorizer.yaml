@@ -1,0 +1,11 @@
+name: muvit-2d
+spec_version: 1
+summary: "MuViT 2D sample: per-level percentile-normalised img (L, C, P, P) float32, bbox (L, 2, 2) nm, labels as int32."
+params:
+  normalize: {type: str, required: false, doc: "percentile (default) or none"}
+  range: {type: list, required: false, doc: "low and high percentiles, default [1, 99]"}
+  clip: {type: bool, required: false, doc: "clip to [0, 1] after scaling, default true"}
+  channels: {type: dict, required: false, doc: "channel recipe from the plan row: {op: channel, index: k} | mean | luminance | replicate | rgb | additive; default keeps all channels"}
+  stats: {type: dict, required: false, doc: "per-channel bounds {lo: [C], hi: [C]} from registration for normalize.scope volume|dataset; null or absent keeps per-patch percentiles"}
+  scope: {type: str, required: false, doc: "the spec's normalize.scope (patch | volume | dataset), echoed in meta.normalize_scope"}
+requires: [numpy]

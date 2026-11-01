@@ -51,22 +51,25 @@ def _tree(d: Path) -> tuple[dict, list[str]]:
     return files, errs
 
 
-def _check(d: Path, binding: Binding, shapes: dict | None, files: dict) -> tuple[dict | None, list[str]]:
-    """(crop.json if complete, this crop's own errors); the cross-crop checks are verify's. `files` is _tree's."""
+def _check(d: Path, binding: Binding, shapes: dict | None, files: dict, size: int) -> tuple[dict | None, list[str]]:
+    """(crop.json if complete, this crop's own errors); the cross-crop checks are verify's. `files` is _tree's.
+    A crop's edge is `size`, or the source's own y/x extent when that is smaller (run.py's rule)."""
     m = json.loads((d / "crop.json").read_text())
     errs = [f"crop.json lacks {k!r}" for k in REQUIRED if k not in m]
     if errs:
         return None, errs
     err = errs.append
+    sizes = dict(zip(m["source_shape"]["axes"], m["source_shape"]["shape"]))
+    edge = min(size, sizes.get("y", size), sizes.get("x", size))
     if m["crop_id"] != d.name:
         err(f"crop.json says crop_id {m['crop_id']!r}")
     if not m["licence"]:
         err("crop.json has no licence")
     if not m["source"].get("validators"):
         err("crop.json has no source validators")
-    raw, depth = read_png(d / "raw.png")
-    if raw.shape != (CROP, CROP) or depth != 16:
-        err(f"raw.png is {list(raw.shape)} {depth}-bit, not {CROP}x{CROP} 16-bit")
+    raw, depth = read_png(d / "raw.png", edge)
+    if raw.shape != (edge, edge) or depth != 16:
+        err(f"raw.png is {list(raw.shape)} {depth}-bit, not {edge}x{edge} 16-bit")
     elif not content_ok(raw):
         err("raw.png fails the content filter")
     i = m["source"]["raw_index"]
@@ -82,15 +85,14 @@ def _check(d: Path, binding: Binding, shapes: dict | None, files: dict) -> tuple
         if not p.is_file():
             err(f"labels/{key}.png is missing")
             continue
-        a, depth = read_png(p)
+        a, depth = read_png(p, edge)
         bits = 8 if seg == "binary" else 16
-        if a.shape != (CROP, CROP) or depth != bits:
-            err(f"labels/{key}.png is {list(a.shape)} {depth}-bit, not {CROP}x{CROP} {bits}-bit")
+        if a.shape != (edge, edge) or depth != bits:
+            err(f"labels/{key}.png is {list(a.shape)} {depth}-bit, not {edge}x{edge} {bits}-bit")
     if shapes is not None and shapes.get(str(i)) != m["source_shape"]:
         err(f"source_shape {m['source_shape']} is not report.json's {shapes.get(str(i))}")
-    sizes = dict(zip(m["source_shape"]["axes"], m["source_shape"]["shape"]))
     b = m["box"]
-    if not (b["h"] == b["w"] == CROP and 0 <= b["y"] <= sizes["y"] - CROP and 0 <= b["x"] <= sizes["x"] - CROP):
+    if not (b["h"] == b["w"] == edge and 0 <= b["y"] <= sizes["y"] - edge and 0 <= b["x"] <= sizes["x"] - edge):
         err(f"box {b} is outside the source {sizes}")
     for k in "zc":
         v, n = m["plane"].get(k), sizes.get(k)
@@ -105,7 +107,7 @@ def _check(d: Path, binding: Binding, shapes: dict | None, files: dict) -> tuple
     return m, errs
 
 
-def verify(crops_dir: Path, binding_path: Path, existing: Path | None = None) -> dict:
+def verify(crops_dir: Path, binding_path: Path, existing: Path | None = None, *, size: int = CROP) -> dict:
     """verify.json; `errors` holds run-level failures (binding, report.json, manifest), which fail every crop."""
     crops_dir = Path(crops_dir)
     try:
@@ -131,7 +133,7 @@ def verify(crops_dir: Path, binding_path: Path, existing: Path | None = None) ->
             else:
                 files, errs = _tree(d)
             if not errs:
-                m, errs = _check(d, binding, shapes, files)
+                m, errs = _check(d, binding, shapes, files, size)
         except Exception as ex:    # the crop job may have written anything
             m, errs = None, errs + [f"{type(ex).__name__}: {ex}"]
         results.append({"crop_id": e.name, "ok": False, "errors": errs, "files": files})
@@ -150,7 +152,7 @@ def verify(crops_dir: Path, binding_path: Path, existing: Path | None = None) ->
                 continue
             if osha and osha == sha:
                 r["errors"].append(f"raw.png has the same checksum as {cid}")
-            if record == m["record"] and overlap_frac(box, obox, CROP) > OVERLAP_MAX:
+            if record == m["record"] and overlap_frac(box, obox, m["box"]["h"]) > OVERLAP_MAX:
                 r["errors"].append(f"overlaps {cid} by more than {OVERLAP_MAX:.0%}")
     for r in results:
         r["ok"] = not r["errors"]

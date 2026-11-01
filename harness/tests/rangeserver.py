@@ -35,6 +35,9 @@ class RangeServer:
     def gets(self) -> list[str]:
         return [p for m, p in self.requests if m == "GET"]
 
+    def heads(self) -> list[str]:
+        return [p for m, p in self.requests if m == "HEAD"]
+
     def __enter__(self):
         self._thread.start()
         return self

@@ -1,4 +1,5 @@
 """Zip members over range reads: central directory from the tail, stored members by range, deflated by fetch."""
+import json
 import struct
 import zlib
 from pathlib import Path
@@ -14,6 +15,24 @@ def read_directory(f: BinaryIO) -> dict[str, ZipInfo]:
     """
     with ZipFile(f) as z:                       # closing a ZipFile leaves a passed-in file open
         return {i.filename: i for i in z.infolist()}
+
+
+_FIELDS = ("header_offset", "compress_type", "compress_size", "file_size", "CRC", "flag_bits")
+
+
+def directory_to_json(members: dict[str, ZipInfo]) -> bytes:
+    """The fields of each member that range reads, extraction and the CRC check need, as JSON for the cache."""
+    return json.dumps({name: [getattr(info, f) for f in _FIELDS] for name, info in members.items()}).encode()
+
+
+def directory_from_json(data: bytes) -> dict[str, ZipInfo]:
+    members = {}
+    for name, values in json.loads(data).items():
+        info = ZipInfo(name)
+        for field, value in zip(_FIELDS, values, strict=True):
+            setattr(info, field, value)
+        members[name] = info
+    return members
 
 
 def data_offset(header: bytes, info: ZipInfo) -> int:

@@ -49,12 +49,12 @@ def write_png(path: Path, a: np.ndarray, bitdepth: int) -> None:
         png.Writer(a.shape[1], a.shape[0], greyscale=not rgb, bitdepth=bitdepth).write(f, a.reshape(a.shape[0], -1).tolist())
 
 
-def read_png(path: Path) -> tuple[np.ndarray, int]:
-    """A CROP x CROP PNG; any other size is refused from the header, before a row is decoded."""
+def read_png(path: Path, edge: int = CROP) -> tuple[np.ndarray, int]:
+    """An edge x edge PNG; any other size is refused from the header, before a row is decoded."""
     with open(path, "rb") as f:
         w, h, rows, info = png.Reader(file=f).read()
-        if (w, h) != (CROP, CROP):
-            raise ValueError(f"{Path(path).name} is {w}x{h}, not {CROP}x{CROP}")
+        if (w, h) != (edge, edge):
+            raise ValueError(f"{Path(path).name} is {w}x{h}, not {edge}x{edge}")
         a = np.array(list(rows), dtype=np.uint16 if info["bitdepth"] == 16 else np.uint8)
     return (a.reshape(h, w, -1) if info["planes"] > 1 else a), info["bitdepth"]
 

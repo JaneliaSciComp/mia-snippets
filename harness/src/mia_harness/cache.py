@@ -1,8 +1,15 @@
-"""Per-dataset cache for whole-file fetches (SPEC §6.6): work_root/_cache/<record-id>/."""
+"""Per-dataset cache for whole-file fetches (SPEC §6.6): work_root/_cache/<record-id>/.
+
+Beside the entries, `files.json` records each URL's validators (the HEAD answer the key was built from, or the
+size and sha256 of a file a human dropped), so a later job finds the entry without the network (buffers spec §3).
+"""
+import json
 import os
 import re
 from pathlib import Path
 from typing import Callable
+
+MANIFEST = "files.json"
 
 
 class DatasetCache:
@@ -34,6 +41,32 @@ class DatasetCache:
         except BaseException:
             tmp.unlink(missing_ok=True)
             raise
+
+
+    def manifest_get(self, url: str) -> dict | None:
+        """The validators files.json records for `url` (shared first, then private), or None."""
+        for d in (self.shared, self.private):
+            entry = self._manifest(d).get(url)
+            if isinstance(entry, dict) and isinstance(entry.get("validators"), dict):
+                return entry["validators"]
+        return None
+
+    def manifest_put(self, url: str, validators: dict, source: str) -> None:
+        """Record `url`'s validators in the writable cache's files.json (atomic rewrite)."""
+        d = self.shared if self.writable else self.private
+        d.mkdir(parents=True, exist_ok=True)
+        merged = {**self._manifest(d), url: {"validators": validators, "source": source}}
+        tmp = d / f".{MANIFEST}.{os.getpid()}.tmp"
+        tmp.write_text(json.dumps(merged, indent=1, sort_keys=True) + "\n")
+        os.replace(tmp, d / MANIFEST)
+
+    @staticmethod
+    def _manifest(d: Path) -> dict:
+        try:
+            data = json.loads((d / MANIFEST).read_text())
+        except (OSError, ValueError):
+            return {}
+        return data if isinstance(data, dict) else {}
 
 
 def _checked(key: str) -> str:

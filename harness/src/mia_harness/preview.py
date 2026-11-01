@@ -35,11 +35,15 @@ def preview(crops_dir: Path, out: Path) -> list[str]:
         try:
             if d.is_symlink() or (d / "labels").is_symlink():
                 raise ValueError(f"{d} or its labels/ is a symlink")
-            rgb = np.repeat((read_png(_regular(d / "raw.png"))[0] >> 8).astype(np.uint8)[..., None], 3, axis=2)
-            for i, lb in enumerate(json.loads(_regular(f).read_text())["labels"]):
+            meta = json.loads(_regular(f).read_text())
+            edge = int(meta["box"]["h"])   # verify checked it against the source; the cap guards the decoder
+            if not 0 < edge <= 4096:
+                raise ValueError(f"box edge {edge} out of range")
+            rgb = np.repeat((read_png(_regular(d / "raw.png"), edge)[0] >> 8).astype(np.uint8)[..., None], 3, axis=2)
+            for i, lb in enumerate(meta["labels"]):
                 if not re.fullmatch(LABEL_KEY, lb["label_key"]):   # never read outside labels/
                     raise ValueError(f"bad label_key {lb['label_key']!r}")
-                lab = read_png(_regular(d / "labels" / f"{lb['label_key']}.png"))[0]
+                lab = read_png(_regular(d / "labels" / f"{lb['label_key']}.png"), edge)[0]
                 rgb[boundaries(lab)] = PALETTE[i % len(PALETTE)]
             (Path(out) / d.name).mkdir(parents=True, exist_ok=True)
             write_png(Path(out) / d.name / "overlay.png", rgb, 8)

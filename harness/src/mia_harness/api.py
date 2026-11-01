@@ -7,7 +7,7 @@ import numpy as np
 
 SPEC_VERSION = 1
 AXES = "czyx"
-CROP = 256          # crop edge in y and x; a raw is eligible when Y and X are both >= CROP (SPEC §4.1)
+CROP = 256          # default crop edge in y and x; a raw smaller than it is cropped at its own extent (SPEC §6.2)
 
 
 class BudgetExceeded(RuntimeError):

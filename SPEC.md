@@ -9,11 +9,15 @@ mia-snippets/
 ├── harness/                   executable side of the spec (human-owned)
 ├── ci/                        PR rules (human-owned, §5)
 ├── .github/workflows/check.yml
-└── snippets/<name>/           one directory per snippet, immutable once merged
-    ├── snippet.yaml           metadata (§3)
-    ├── snippet.py             the reader (§2)
-    ├── README.md              what it reads, how params are chosen, known limits
-    └── examples/<record-id>.yaml   ≥ 1 binding it was tested on (§4)
+├── snippets/<name>/           one directory per snippet, immutable once merged
+│   ├── snippet.yaml           metadata (§3)
+│   ├── snippet.py             the reader (§2)
+│   ├── README.md              what it reads, how params are chosen, known limits
+│   └── examples/<record-id>.yaml   ≥ 1 binding it was tested on (§4)
+└── tensorizers/<name>/        one directory per tensorizer, immutable once merged (§8)
+    ├── tensorizer.yaml        metadata: name, spec_version, summary, params, requires
+    ├── tensorizer.py          describe() and tensorize()
+    └── README.md              the sample it produces and its limits
 ```
 
 `<name>` is a lowercase slug that is never reused, e.g. `tiff-zip-member`, `mrc-http`, `tiff-slices-zip`,
@@ -55,7 +59,12 @@ class Array(Protocol):                     # defined in harness/src/mia_harness/
   - `io.list(url)`: lists zip members
 
   `io` records each file's validators (ETag, Last-Modified, size) for provenance, and refuses a server that
-  answers a range request with the whole body.
+  answers a range request with the whole body. In a writable dataset cache it also records them in
+  `files.json` beside the entries; a job whose hosts do not include the URL's (a re-stage from the cache with no
+  network, or a dataset a human dropped: buffers spec §3) resolves the URL through that manifest instead of a
+  HEAD request and reads the cached whole file in place, range reads and zip members included. A
+  `manual://<record>/<name>` URL exists only through `files.json`; without an entry it raises
+  `FileNotFoundError` naming the drop.
 - **Exceptions are part of the API.** `harness.api` defines `NeedsFetch` (raised by `io.open` for a file that
   can't be read by range, e.g. a deflated zip member: catch it and use `io.fetch`), `HostNotAllowed` and
   `BudgetExceeded`. Snippets import them from `mia_harness.api`, the only harness module a snippet may import.
@@ -119,7 +128,7 @@ reasons: ["axes zyx from ImageJ metadata, matches record", …]   # one per non-
 ## 5 Immutability and review (CI in `mia-snippets`)
 
 `check.yml` runs on every PR, and branch protection requires it:
-- **Only additions.** A PR may only add files under one new `snippets/<name>/`. It fails if it changes or
+- **Only additions.** A PR may only add files under one new `snippets/<name>/` or one new `tensorizers/<name>/`. It fails if it changes or
   deletes anything under an existing snippet, or touches `harness/`, `ci/`, `SPEC.md`, `WITHDRAWN.yaml` or
   `.github/`, unless the PR author is a listed human maintainer. autodev already refuses agent commits that
   touch `.github/`.
@@ -159,14 +168,49 @@ Withdrawing is human-only (§5) and never deletes the snippet. Its effects:
 ## 7. Harness CLI
 
 ```
-harness smoke   <binding.yaml> --snippets <dir> --record <record.yaml>   # open every array, check vs record,
-                                                                       # read one 256×256 patch per raw (+ labels)
+harness smoke   <binding.yaml> --snippets <dir> --record <record.yaml> [--size 256]   # open every array, check vs
+                                                                       # record, read one patch (+ labels)
 harness crop    <binding.yaml> --snippets <dir> --record <record.yaml> --n N --seed S --round R --batch B
-                --out DIR [--existing MANIFEST]                        # sample + write crops
-harness verify  DIR --binding <binding.yaml> [--existing MANIFEST]     # output checks; loads no snippet code
+                --out DIR [--existing MANIFEST] [--size 256]           # sample + write crops; a raw smaller than
+                                                                       # --size is cropped whole (no size verdict:
+                                                                       # a buffer plan decides what fits it)
+harness verify  DIR --binding <binding.yaml> [--existing MANIFEST] [--size 256]   # output checks; no snippet code
 harness preview DIR --out PREVIEW                                      # label overlay PNG per crop
+harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --levels 1,2,4 --patch 256 --out DIR
+                [--voxel-size-nm z,y,x]                                # one verified NGFF pyramid per raw (buffers);
+                                                                       # stage.json checks cover raw and every label layer;
+                                                                       # each volume carries intensity_sample (sorted
+                                                                       # level-0 values per channel, ≤4096 from 8 boxes)
 ```
 
 `--snippets` is a read-only snapshot of one exact commit, never a branch resolved again. Snippets are imported
 from that directory only. Every command takes its byte cap from the job environment; command-line options can't
 raise it.
+
+## 8 Tensorizers
+
+A tensorizer turns a stack of co-centred patches, one per pyramid level, into the arrays a model consumes. It is
+the second pluggable unit, reviewed and frozen like a snippet, and composed with readers only by the harness
+(`harness stage` writes pyramids through snippets; `harness tensorize` reads them and calls the tensorizer).
+
+```python
+# tensorizers/<name>/tensorizer.py
+from mia_harness.tensor_api import Sample, Stack, TensorSpec   # the only harness module a tensorizer may import
+
+SPEC_VERSION = 1
+
+def describe(params: dict) -> TensorSpec:
+    """Output arrays by key: (shape with the symbols L, C, P, dtype). A key ending "/*" matches any number of keys."""
+
+def tensorize(stack: Stack, params: dict) -> Sample:
+    """Pure: no I/O. Returns the described arrays plus a JSON-safe "meta" dict."""
+```
+
+`Stack.levels` are `LevelPatch(factor, img (C, P, P), labels {key: (P, P)}, scale_nm, translation_nm, start_px)`.
+The harness checks every output against `describe()` (shape, dtype, no undescribed keys) and fails the command on
+a mismatch. The first tensorizer is `muvit-2d`.
+
+A plan row may carry a **channel recipe** (buffers spec v0.5 §2), passed to the tensorizer as the `channels` param:
+`{op: channel, index: k}`, `{op: mean}`, `{op: luminance}` make one channel; `{op: replicate}`, `{op: rgb}`,
+`{op: additive}` make three. `mia_harness.tensor_api.RECIPE_CHANNELS` is the vocabulary and the harness checks the
+sample's `C` against it; the arithmetic is the tensorizer's.

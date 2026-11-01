@@ -126,3 +126,40 @@ def test_dynamic_code_and_interpreter_modules_fail():
         assert run(ADDED, files=with_py(OK_PY + src)), src
     for src in ["import re\nre.compile('x')\n", "import numpy as np\nnp.load('f', allow_pickle=False)\n"]:
         assert run(ADDED, files=with_py(OK_PY + src)) == [], src
+
+
+T_PY = ("SPEC_VERSION = 1\nimport numpy as np\nfrom mia_harness.tensor_api import Sample, Stack, TensorSpec\n"
+        "def describe(params: dict) -> TensorSpec:\n    return TensorSpec({})\n"
+        "def tensorize(stack: Stack, params: dict) -> Sample:\n    return {}\n")
+T_YAML = "name: tz\nspec_version: 1\nsummary: test\nparams: {}\nrequires: [numpy]\n"
+T_FILES = {"tensorizers/tz/tensorizer.py": T_PY, "tensorizers/tz/tensorizer.yaml": T_YAML, "tensorizers/tz/README.md": "x"}
+T_ADDED = [("A", p) for p in T_FILES]
+
+
+def test_good_new_tensorizer_passes():
+    assert run(T_ADDED, files=T_FILES) == []
+
+
+def test_snippet_and_tensorizer_in_one_pr_fail():
+    errs = run(ADDED + T_ADDED, files={**FILES, **T_FILES})
+    assert any("one" in e and "tz" in e for e in errs)
+    assert run(ADDED + T_ADDED, files={**FILES, **T_FILES}, author="alice") == []
+
+
+def test_tensorizer_missing_readme_fails():
+    files = {k: v for k, v in T_FILES.items() if not k.endswith("README.md")}
+    assert any("README.md" in e for e in run([("A", p) for p in files], files=files))
+
+
+def test_tensorizer_importing_reader_api_fails():
+    files = {**T_FILES, "tensorizers/tz/tensorizer.py": T_PY.replace("mia_harness.tensor_api", "mia_harness.api")}
+    assert any("import from mia_harness.api" in e for e in run(T_ADDED, files=files))
+
+
+def test_tensorizer_without_describe_fails():
+    files = {**T_FILES, "tensorizers/tz/tensorizer.py": T_PY.replace("def describe", "def described")}
+    assert any("describe" in e for e in run(T_ADDED, files=files))
+
+
+def test_existing_tensorizer_is_immutable():
+    assert run([("M", "tensorizers/tz/tensorizer.py")], files=T_FILES, existing=("tensorizers/tz",), author="alice")

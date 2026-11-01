@@ -1,0 +1,5 @@
+name: bad-shape
+spec_version: 1
+summary: TEST ONLY; returns one level too few so the harness contract check must fail.
+params: {}
+requires: [numpy]
