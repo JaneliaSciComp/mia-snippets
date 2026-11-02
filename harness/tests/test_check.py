@@ -40,7 +40,9 @@ def test_check_stage_passes_a_good_artifact_and_records_verification(staged_out)
     assert mia["verification"]["harness_commit"] == "h" * 40 and mia["verification"]["checks"]["geometry"]["samples"]
     for group in ("v0.zarr", "v0.zarr/labels/gt"):
         assert zarr.open_group(staged_out / group, mode="r").attrs["mia"]["verification"] == mia["verification"]
-    sj = json.loads((staged_out / "stage.json").read_text())
+    text = (staged_out / "stage.json").read_text()
+    assert "\n  " not in text   # the rewrite stays compact
+    sj = json.loads(text)
     raw_json = (staged_out / "v0.zarr/raw/zarr.json").read_bytes()
     assert sj["zarr_json_sha256"]["v0.zarr/raw/zarr.json"] == hashlib.sha256(raw_json).hexdigest()
     assert "v0.zarr/raw/s0/zarr.json" in sj["zarr_json_sha256"] and sj["ok"] and sj["verification"]["ok"]

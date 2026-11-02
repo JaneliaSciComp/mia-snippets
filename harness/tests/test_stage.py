@@ -86,7 +86,9 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
                               "commit": "c" * 40, "edge": "clip", "nearest_offset": "(L-1)//2"}
     assert mia["artifact"]["harness_commit"] == "c" * 40
     assert ms["coordinateSystems"][0]["name"] == "r.v0"
-    sj = json.loads((tmp_path / "out" / "stage.json").read_text())
+    text = (tmp_path / "out" / "stage.json").read_text()
+    assert "\n  " not in text   # compact: the consumer reads stage.json within a size limit
+    sj = json.loads(text)
     assert sj["artifact"]["id"] == "a" * 16 and sj["volumes"][0]["samples"].keys() == {"train", "val", "test"}
     assert sj["volumes"][0]["voxel_size_nm"] == {"z": 300.0, "y": 8.0, "x": 8.0} and sj["volumes"][0]["shape"] == list(SHAPE)
     assert sj["volumes"][0]["labels"] == {"gt": "labels/gt"} and sj["zarr_json_sha256"] == {}

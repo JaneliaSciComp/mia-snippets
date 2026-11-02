@@ -273,5 +273,5 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
         errors.append(f"{type(e).__name__}: {e}")
     report = stage_json(not errors, errors, artifact, volumes, io.bytes_fetched, {},
                         verification=Verification(checks={"geometry": merge_geometry(checks)})) | blocked
-    (out / "stage.json").write_text(json.dumps(report, indent=2) + "\n")
+    (out / "stage.json").write_text(json.dumps(report, separators=(",", ":")) + "\n")
     return report

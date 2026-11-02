@@ -113,3 +113,10 @@ def test_stage_plan_spans_only_the_stored_axes():
     assert with_channels.shape == (1, 64, 64) and with_channels.chunks == {(0, 0, 0)}
     with pytest.raises(ValueError, match="no samples planned"):
         stage_plan({"train": [], "val": []}, "yx", (600, 700), (1,), 64)
+
+
+def test_plan_digest_golden():   # mia-workflows pins the same hex from its own plan_digest(rule_dict)
+    rule = PlanRule(seed=0, patch=256, levels=(1, 2, 4), samples={"train": 1000, "val": 20, "test": 20},
+                    split={"policy": "fractions", "fractions": {"train": 0.8, "val": 0.1, "test": 0.1}, "seed": 0},
+                    channel_recipe=None)
+    assert rule.digest() == "2827e3d249deb0a8bb8ecc10cb579ce0f37c9a4d2667f04af2914388bc04ae74"

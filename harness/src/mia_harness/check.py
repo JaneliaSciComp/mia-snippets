@@ -140,6 +140,6 @@ def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
                for p in sorted(out_dir.rglob("zarr.json"))}
     stage |= {"ok": ok, "errors": stage_errors + [ERROR_PREFIX + e for e in errors], "zarr_json_sha256": digests,
               "verification": verification, "checks": checks}
-    (out_dir / "stage.json").write_text(json.dumps(stage, indent=2) + "\n")
+    (out_dir / "stage.json").write_text(json.dumps(stage, separators=(",", ":")) + "\n")
     return {"ok": ok, "errors": errors, "checks": checks, "zarr_json_sha256": digests,
             "harness_commit": harness_commit, "time": time, "schemas_commit": ngff.SCHEMAS_COMMIT}
