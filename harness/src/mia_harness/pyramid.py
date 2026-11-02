@@ -1,4 +1,5 @@
 """OME-Zarr pyramids on zarr v3: sparse 0.6 written from a stage plan, read back (0.5 or 0.6) in czyx order."""
+import itertools
 import json
 from collections import defaultdict
 from dataclasses import dataclass
@@ -7,13 +8,22 @@ from typing import Literal
 
 import numpy as np
 import zarr
+from zarr.core.sync import sync
 
 from .api import Array
-from .plan import StagePlan
+from .plan import StagePlan, start_index
 
 CANON = "czyx"
 UNIT_NM = {None: 1.0, "nanometer": 1.0, "nm": 1.0, "micrometer": 1e3, "um": 1e3, "µm": 1e3, "micron": 1e3,
            "millimeter": 1e6, "mm": 1e6}
+
+
+class NotStaged(LookupError):
+    """A sample's region leaves the staged level box or touches a chunk the plan never wrote; `keys` names them."""
+
+    def __init__(self, keys: list[str], message: str):
+        super().__init__(message)
+        self.keys = keys
 
 
 @dataclass(frozen=True)
@@ -169,12 +179,14 @@ def _write_group(path: Path, attributes: dict) -> None:
 
 
 class Pyramid:
-    """An NGFF multiscale group opened for reading; regions are addressed and returned in canonical axis order."""
+    """An NGFF multiscale group (0.5 or 0.6) opened for reading; regions are addressed and returned in canonical
+    axis order, in array indices of the level's (possibly sparse) box."""
 
     def __init__(self, path: Path):
         self.path = Path(path)
         group = zarr.open_group(self.path, mode="r")
         self.attrs = dict(group.attrs)
+        mia = self.attrs.get("mia") or {}
         ms = (self.attrs.get("ome") or self.attrs)["multiscales"][0]
         axes_meta = ms["axes"] if "axes" in ms else ms["coordinateSystems"][0]["axes"]   # 0.5, else 0.6
         self.storage_axes = [a["name"] for a in axes_meta]
@@ -183,30 +195,39 @@ class Pyramid:
         self.axes = _canonical("".join(self.storage_axes))
         self._perm = [self.storage_axes.index(a) for a in self.axes]   # storage position of each canonical axis
         units = {a["name"]: UNIT_NM[a.get("unit")] for a in axes_meta if a["name"] != "c"}
-        self._arrays, self.levels = [], []
+        self._arrays, transforms = [], []
         for ds in ms["datasets"]:
-            arr = group[ds["path"]]
             scale = translation = None
-            # ponytail: a 0.6 sequence is flattened, origin left 0 (translation_nm carries it); Task 5 reads it
-            flat = [u for t in ds["coordinateTransformations"] for u in t.get("transformations", [t])]
-            for t in flat:
+            # 0.6 nests scale and translation in a sequence; 0.5 lists them bare
+            for t in (u for t in ds["coordinateTransformations"] for u in t.get("transformations", [t])):
                 if t["type"] == "scale":
                     scale = t["scale"]
                 elif t["type"] == "translation":
                     translation = t["translation"]
+                elif t["type"] == "identity":
+                    scale = scale or [1.0] * len(self.storage_axes)
             if scale is None:
                 raise ValueError(f"{ds['path']}: no scale transformation")
             translation = translation or [0.0] * len(scale)
-            spatial = {a: scale[i] * units[a] for i, a in enumerate(self.storage_axes) if a != "c"}
-            shift = {a: translation[i] * units[a] for i, a in enumerate(self.storage_axes) if a != "c"}
-            self._arrays.append(arr)
-            origin = {a: 0 for a in self.axes if a != "c"}
-            shape = tuple(arr.shape[i] for i in self._perm)
-            self.levels.append(LevelInfo(ds["path"], 0, shape, spatial, shift, origin))
-        base = self.levels[0].scale_nm["x"]
-        self.levels = [LevelInfo(lv.path, int(round(lv.scale_nm["x"] / base)), lv.shape, lv.scale_nm, lv.translation_nm,
-                                 lv.origin)
-                       for lv in self.levels]
+            transforms.append(({a: scale[i] * units[a] for i, a in enumerate(self.storage_axes) if a != "c"},
+                               {a: translation[i] * units[a] for i, a in enumerate(self.storage_axes) if a != "c"}))
+            self._arrays.append(group[ds["path"]])
+        finest = tuple(self._arrays[0].shape[i] for i in self._perm)
+        geometry, voxel = mia.get("geometry") or {}, mia.get("voxel_size") or {}
+        self.sparse = "plan" in mia
+        self.raw_shape: dict[str, int] = (dict(zip(geometry["axes"], geometry["raw_shape"])) if "raw_shape" in geometry
+                                          else dict(zip(self.axes, finest)))
+        self.voxel_nm: dict[str, float] = {a: float(voxel[a]["nm"]) if a in voxel else transforms[0][0][a]
+                                           for a in self.axes if a != "c"}
+        self.levels = []
+        for ds, arr, (scale_nm, shift_nm) in zip(ms["datasets"], self._arrays, transforms):
+            factor = int(round(scale_nm["x"] / self.voxel_nm["x"]))
+            origin = {a: int(round(shift_nm[a] / self.voxel_nm[a] - ((factor - 1) / 2 if a in "yx" else 0)))
+                      for a in scale_nm}
+            self.levels.append(LevelInfo(ds["path"], factor, tuple(arr.shape[i] for i in self._perm), scale_nm,
+                                         shift_nm, origin))
+        # the chunk keys each level holds, listed once; dense pyramids may omit all-zero chunks, so they skip it
+        self._stored = [sync(_stored_keys(arr)) for arr in self._arrays] if self.sparse else None
         self.dtype = self._arrays[0].dtype
 
     def factor_of(self, level: int) -> int:
@@ -218,6 +239,56 @@ class Pyramid:
         kept = [a for a, i in zip(self.storage_axes, index) if isinstance(i, slice)]
         order = [kept.index(a) for a in self.axes if a in kept]
         return data.transpose(order) if order != list(range(len(order))) else data
+
+    def locate(self, level: int, centre_nm: tuple[float, float], patch: int, plane: dict) -> dict:
+        """The array region {"z": int, "y": slice, "x": slice} of the patch centred on centre_nm at `level`: the start
+        in the raw level grid (round then clamp, as the plan does) less the box origin. NotStaged when the region
+        leaves the array or, in a sparse pyramid, touches a chunk that is not on disk."""
+        info = self.levels[level]
+        size = dict(zip(self.axes, info.shape))
+        region: dict = {"z": int(plane.get("z", 0)) - info.origin["z"]} if "z" in self.axes else {}
+        for axis, centre in zip("yx", centre_nm):
+            start = (start_index(centre, self.voxel_nm[axis], info.factor, patch, self.raw_shape[axis])
+                     - info.origin[axis] // info.factor)
+            region[axis] = slice(start, start + patch)
+        spans = {"c": (0, size.get("c", 1)), "y": (region["y"].start, region["y"].stop),
+                 "x": (region["x"].start, region["x"].stop)}
+        if "z" in region:
+            spans["z"] = (region["z"], region["z"] + 1)
+        arr = self._arrays[level]
+        chunk = dict(zip(self.storage_axes, arr.chunks))
+        keys = [arr.metadata.chunk_key_encoding.encode_chunk_key(coords) for coords in itertools.product(
+            *(range(spans[a][0] // chunk[a], (spans[a][1] - 1) // chunk[a] + 1) for a in self.storage_axes))]
+        outside = [f"{a}={lo}" for a, (lo, hi) in spans.items() if a != "c" and not 0 <= lo <= size[a] - (hi - lo)]
+        if outside:
+            raise NotStaged(keys, f"{info.path}: region {', '.join(outside)} is outside the staged box {info.shape}")
+        absent = [key for key in keys if key not in self._stored[level]] if self._stored is not None else []
+        if absent:
+            raise NotStaged(absent, f"{info.path}: chunks {absent} were not staged")
+        return region
+
+    def bbox_nm(self, level: int, region: dict, patch: int) -> np.ndarray:
+        """[[y0, x0], [y1, x1]] in nm of the region's first and last pixel (MuViT's convention, as bbox_of)."""
+        info = self.levels[level]
+        start = np.array([region["y"].start, region["x"].start], dtype=np.float64)
+        scale = np.array([info.scale_nm["y"], info.scale_nm["x"]])
+        shift = np.array([info.translation_nm["y"], info.translation_nm["x"]])
+        return np.stack([start * scale + shift, (start + patch - 1) * scale + shift])
+
+    def raw_index_box(self, level: int, region: dict) -> dict[str, tuple[int, int]]:
+        """The region as half-open boxes in raw index space: y/x scaled by the level factor, z one plane."""
+        info = self.levels[level]
+        box = {a: (info.origin[a] + region[a].start * info.factor, info.origin[a] + region[a].stop * info.factor)
+               for a in "yx"}
+        if "z" in region:
+            box["z"] = (info.origin["z"] + region["z"], info.origin["z"] + region["z"] + 1)
+        return box
+
+
+async def _stored_keys(arr: zarr.Array) -> set[str]:
+    """Every key stored under the array, relative to it (chunk keys plus zarr.json)."""
+    prefix = arr.path + "/"
+    return {key[len(prefix):] async for key in arr.store.list_prefix(prefix)}
 
 
 def open_pyramid(path: Path) -> Pyramid:

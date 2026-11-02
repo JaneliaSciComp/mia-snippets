@@ -3,12 +3,14 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+from test_pyramid import write_sparse
 from test_smoke import SNAP, write
 
 from mia_harness import cli
 from mia_harness.cache import DatasetCache
 from mia_harness.io import IO
 from mia_harness.loader import load_snippet
+from mia_harness.pyramid import NotStaged, block_mean, open_pyramid
 from mia_harness.stage import stage
 from mia_harness.tensor_api import bbox_of, check_sample
 from mia_harness.tensorize import read_stack, tensorize
@@ -28,6 +30,37 @@ def staged(tmp_path):
         io.close()
     assert rep["ok"], rep["errors"]
     return tmp_path / "out" / "v0.zarr"
+
+
+@pytest.fixture
+def sparse_volume(tmp_path):
+    return tmp_path / "v0.zarr", write_sparse(tmp_path / "v0.zarr")
+
+
+@pytest.fixture
+def staged_sparse(sparse_volume):
+    return sparse_volume[0]
+
+
+@pytest.fixture
+def source(sparse_volume):
+    return sparse_volume[1]
+
+
+def test_stack_from_a_sparse_pyramid_matches_the_source(staged_sparse, source):
+    s = read_stack(staged_sparse, D)
+    p = open_pyramid(staged_sparse / "raw")
+    for i, lv in enumerate(s.levels):
+        region = p.locate(i, tuple(D["centre_nm"]), D["patch"], D["plane"])
+        box = p.raw_index_box(i, region)
+        fresh = source[1, box["y"][0]:box["y"][1], box["x"][0]:box["x"][1]]
+        np.testing.assert_array_equal(lv.img[0], block_mean(fresh, lv.factor))
+        assert lv.labels["gt"].shape == (64, 64)
+
+
+def test_unplanned_descriptor_raises_not_staged(staged_sparse):
+    with pytest.raises(NotStaged):
+        read_stack(staged_sparse, {**D, "centre_nm": [5950.0, 6950.0]})
 
 
 def test_stack_is_co_centred_and_bbox_is_in_nm(staged):

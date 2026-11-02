@@ -1,14 +1,18 @@
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
 import zarr
 
 from mia_harness.plan import dense_plan, stage_plan, start_index
-from mia_harness.pyramid import LevelInfo, block_mean, open_pyramid, stride, write_pyramid, write_volume_groups
+from mia_harness.pyramid import (LevelInfo, NotStaged, block_mean, open_pyramid, stride, write_pyramid,
+                                 write_volume_groups)
 from mia_harness.schemas import ngff
 
 VOX = {"z": 300.0, "y": 10.0, "x": 10.0}
+FIXTURES = Path(__file__).parent / "fixtures"
+PLANNED_CENTRES = [(3000.0, 3500.0), (500.0, 6500.0)]
 
 
 class NpArray:
@@ -207,3 +211,86 @@ def test_block_mean_does_not_copy_the_plane_as_float64():
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
     assert out.shape == (512, 512) and peak < 3 * plane.nbytes   # a float64 copy of the plane alone would be 4×
+
+
+def write_sparse(vdir: Path) -> np.ndarray:
+    """A sparse 0.6 volume at `vdir` (raw plus label gt) planned over PLANNED_CENTRES on z=1; returns the raw data."""
+    shape, levels, patch = (3, 600, 700), (1, 2, 4), 64
+    samples = {"train": [{"plane": {"z": 1}, "centre_nm": list(c), "levels": list(levels), "patch": patch,
+                          "starts": {str(L): [start_index(c[0], 10.0, L, patch, shape[1]),
+                                              start_index(c[1], 10.0, L, patch, shape[2])] for L in levels}}
+                         for c in PLANNED_CENTRES]}
+    plan = stage_plan(samples, "zyx", shape, levels, patch)
+    mia = {"plan": {"samples": samples}, "geometry": {"raw_shape": list(shape), "axes": "zyx"},
+           "voxel_size": {a: {"nm": v} for a, v in VOX.items()}}
+    raw, label = volume(), volume(dtype=np.uint8)
+    write_pyramid(raw, vdir / "raw", plan=plan, voxel_size_nm=VOX, kind="raw", coordinate_system="r.v0", mia=mia,
+                  downsampling_metadata={})
+    write_pyramid(label, vdir / "labels" / "gt", plan=plan, voxel_size_nm=VOX, kind="label", coordinate_system="r.v0",
+                  mia={**mia, "label_key": "gt"}, downsampling_metadata={})
+    write_volume_groups(vdir, ["gt"], {})
+    return raw.data
+
+
+@pytest.fixture
+def staged_sparse(tmp_path):
+    write_sparse(tmp_path / "v0.zarr")
+    return tmp_path / "v0.zarr"
+
+
+def test_reads_0_5_pyramid_written_by_the_old_writer():
+    p = open_pyramid(FIXTURES / "pyramid-0.5" / "raw")
+    assert not p.sparse and [lv.factor for lv in p.levels] == [1, 2, 4] and p.levels[1].origin == {"z": 0, "y": 0, "x": 0}
+    assert p.raw_shape == {"z": 2, "y": 128, "x": 128} and p.voxel_nm == VOX
+
+
+def test_legacy_dense_pyramid_is_exempt_from_presence_check(tmp_path):
+    g = zarr.open_group(tmp_path / "d", mode="w", zarr_format=3)
+    a = g.create_array("s0", shape=(1, 256, 256), chunks=(1, 64, 64), dtype="uint8")   # default write_empty_chunks=False
+    a[0, :64, :64] = 7
+    g.attrs["ome"] = {"version": "0.5", "multiscales": [{
+        "axes": [{"name": ax, "type": "space", "unit": "nanometer"} for ax in "zyx"],
+        "datasets": [{"path": "s0", "coordinateTransformations": [{"type": "scale", "scale": [1.0, 10.0, 10.0]}]}]}]}
+    p = open_pyramid(tmp_path / "d")
+    region = p.locate(0, (2000.0, 2000.0), 64, {"z": 0})   # an all-zero, never-written chunk
+    assert p.read(0, region).sum() == 0
+
+
+def test_sparse_pyramid_reads_its_plan_and_origins(staged_sparse):
+    p = open_pyramid(staged_sparse / "raw")
+    assert p.sparse and p.raw_shape == {"z": 3, "y": 600, "x": 700} and p.voxel_nm == VOX
+    assert [lv.factor for lv in p.levels] == [1, 2, 4]
+    assert [lv.origin for lv in p.levels] == [{"z": 1, "y": 18, "x": 318}, {"z": 1, "y": 0, "x": 286},
+                                              {"z": 1, "y": 0, "x": 220}]
+
+
+def test_sparse_locate_raises_not_staged_with_keys(staged_sparse):
+    p = open_pyramid(staged_sparse / "raw")
+    with pytest.raises(NotStaged) as e:
+        p.locate(0, (5950.0, 6950.0), 64, {"z": 1})        # the far corner, never planned
+    assert e.value.keys and all(k.startswith("c/") for k in e.value.keys)
+
+
+def test_sparse_locate_refuses_an_absent_chunk_inside_the_box(staged_sparse):
+    p = open_pyramid(staged_sparse / "raw")
+    with pytest.raises(NotStaged) as e:
+        p.locate(0, (3000.0, 6500.0), 64, {"z": 1})        # inside the level-0 box, between the two planned samples
+    assert e.value.keys == ["c/0/3/4", "c/0/3/5", "c/0/4/4", "c/0/4/5"]
+
+
+def test_inverse_mapping_round_trips_over_edges(staged_sparse):
+    p = open_pyramid(staged_sparse / "raw")
+    located, clamped = 0, 0
+    for level in range(3):
+        for centre in PLANNED_CENTRES + [(0.0, 0.0), (1e9, 1e9)]:
+            try:
+                region = p.locate(level, centre, 64, {"z": 1})
+            except NotStaged:
+                continue
+            located += 1
+            box = p.raw_index_box(level, region)
+            L = p.levels[level].factor
+            assert (box["y"][1] - box["y"][0]) == 64 * L and box["y"][0] % L == 0 and box["z"] == (1, 2)
+            np.testing.assert_allclose(p.bbox_nm(level, region, 64)[0], [(box["y"][0] + (L - 1) / 2) * 10.0, (box["x"][0] + (L - 1) / 2) * 10.0])
+            clamped += box["y"][0] == 0 or box["x"][1] == 700 // L * L
+    assert located == len(PLANNED_CENTRES) * 3 and clamped >= 2     # (500, 6500) clamps at levels 2 and 4
