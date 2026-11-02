@@ -1,4 +1,7 @@
-from mia_harness.plan import PlanRule, capacity, derive_samples, split_planes, start_index
+import pytest
+
+from mia_harness.plan import (PlanRule, capacity, derive_samples, planned_bytes, split_planes, stage_plan,
+                              start_index)
 from mia_harness.sample import OVERLAP_MAX, overlap_frac
 
 RULE = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 10, "val": 3, "test": 3},
@@ -56,3 +59,40 @@ def test_eval_overlap_rule_rejects_what_train_accepts():
 
     assert len(drawn["val"]) >= 2 and max(overlaps(drawn["val"])) <= OVERLAP_MAX
     assert max(overlaps(drawn["train"])) > OVERLAP_MAX   # same fixture without the rule overlaps, so the rule did work
+
+
+def test_stage_plan_boxes_align_and_only_touched_chunks_are_planned():
+    samples = {"train": [{"plane": {"z": 2}, "centre_nm": [0, 0], "levels": [1, 2, 4], "patch": 64,
+                          "starts": {"1": [100, 200], "2": [50, 100], "4": [25, 50]}}]}
+    plan = stage_plan(samples, "zyx", (10, 600, 700), (1, 2, 4), 64)
+    l4 = plan.levels[2]
+    assert l4.origin == {"z": 2, "y": 100, "x": 200} and l4.origin["y"] % 4 == 0
+    assert l4.extent == {"z": 1, "y": 64 * 4, "x": 64 * 4}
+    assert l4.shape == (1, 64, 64) and l4.planned_planes == (2,) and l4.chunks == {(0, 0, 0)}
+    l1 = plan.levels[0]
+    # a chunk grid aligned to the box origin
+    assert l1.origin == {"z": 2, "y": 100, "x": 200} and l1.chunks == {(0, 0, 0)}
+    assert planned_bytes(plan, 2, 1) == 3 * 64 * 64 * 2
+
+
+def test_unplanned_planes_between_planned_ones_have_no_chunks_and_overlaps_dedupe():
+    s = lambda z, y0: {"plane": {"z": z}, "centre_nm": [0, 0], "levels": [1], "patch": 64, "starts": {"1": [y0, 0]}}
+    plan = stage_plan({"train": [s(1, 0), s(4, 32), s(4, 40)]}, "zyx", (10, 600, 700), (1,), 64)
+    l1 = plan.levels[0]
+    assert l1.origin == {"z": 1, "y": 0, "x": 0} and l1.extent["z"] == 4 and l1.planned_planes == (1, 4)
+    # plane 4 is box index 3; y 32..104 touches chunk rows 0 and 1
+    assert l1.chunks == {(0, 0, 0), (3, 0, 0), (3, 1, 0)}
+
+
+def test_stage_plan_spans_only_the_stored_axes():
+    samples = {"train": [{"plane": {}, "centre_nm": [0, 0], "levels": [1, 2], "patch": 64,
+                          "starts": {"1": [64, 0], "2": [40, 100]}}], "val": []}
+    plan = stage_plan(samples, "yx", (600, 700), (1, 2), 64)
+    l1, l2 = plan.levels
+    assert l1.origin == {"y": 64, "x": 0} and l1.shape == (64, 64) and l1.chunks == {(0, 0)}
+    assert l1.planned_planes == ()
+    assert l2.origin == {"y": 80, "x": 200} and l2.extent == {"y": 128, "x": 128} and l2.chunks == {(0, 0)}
+    with_channels = stage_plan(samples, "cyx", (3, 600, 700), (1, 2), 64).levels[0]
+    assert with_channels.shape == (1, 64, 64) and with_channels.chunks == {(0, 0, 0)}
+    with pytest.raises(ValueError, match="no samples planned"):
+        stage_plan({"train": [], "val": []}, "yx", (600, 700), (1,), 64)

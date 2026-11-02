@@ -1,6 +1,7 @@
 """Sparse staging plan: a plan rule plus a volume's real shape become a finite, deterministic list of samples."""
 import dataclasses
 import hashlib
+import itertools
 import json
 import random
 from dataclasses import dataclass
@@ -124,3 +125,59 @@ def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: t
                              "starts": starts})
         out[split] = accepted
     return out
+
+
+@dataclass(frozen=True)
+class LevelPlan:
+    """One level's box (origin and extent in raw index space), its stored shape and the chunks its samples touch.
+    `shape` and the chunk tuples span the stored axes; `c` is 1 and 0 here, the writer expands it per channel."""
+    factor: int
+    origin: dict[str, int]
+    extent: dict[str, int]
+    shape: tuple[int, ...]
+    planned_planes: tuple[int, ...]
+    chunks: frozenset[tuple[int, ...]]
+
+
+@dataclass(frozen=True)
+class StagePlan:
+    """The per-level plans in the order of the rule's levels; `patch` is the chunk edge on y and x."""
+    levels: tuple[LevelPlan, ...]
+    patch: int
+
+
+def stage_plan(samples: dict[str, list[dict]], axes: str, shape: tuple[int, ...], levels: tuple[int, ...],
+               patch: int) -> StagePlan:
+    """Per level, the smallest box holding every sample (whole level blocks, origin on a sample start) and the set
+    of chunks, on a patch-sized grid anchored at the box origin, that some sample touches."""
+    drawn = [sample for split in samples.values() for sample in split]
+    if not drawn:
+        raise ValueError("no samples planned")
+    planes = [sample["plane"]["z"] for sample in drawn] if "z" in axes else []
+    out = []
+    for factor in levels:
+        starts = [sample["starts"][str(factor)] for sample in drawn]
+        origin: dict[str, int] = {"z": min(planes)} if planes else {}
+        extent: dict[str, int] = {"z": max(planes) - min(planes) + 1} if planes else {}
+        for index, axis in enumerate("yx"):
+            origin[axis] = min(start[index] * factor for start in starts) // factor * factor
+            extent[axis] = max((start[index] + patch) * factor for start in starts) - origin[axis]
+            if origin[axis] + extent[axis] > shape[axes.index(axis)]:
+                raise ValueError(f"level {factor} box ends past the raw {axis} extent {shape[axes.index(axis)]}")
+        level_shape = {"c": 1, "z": extent.get("z", 0), "y": extent["y"] // factor, "x": extent["x"] // factor}
+        chunks = set()
+        for sample, start in zip(drawn, starts):
+            touched = {"c": [0], "z": [sample["plane"].get("z", 0) - origin.get("z", 0)]}
+            for index, axis in enumerate("yx"):
+                offset = start[index] - origin[axis] // factor
+                touched[axis] = range(offset // patch, (offset + patch - 1) // patch + 1)
+            chunks.update(itertools.product(*(touched[axis] for axis in axes)))
+        out.append(LevelPlan(factor=factor, origin=origin, extent=extent,
+                             shape=tuple(level_shape[axis] for axis in axes),
+                             planned_planes=tuple(sorted(set(planes))), chunks=frozenset(chunks)))
+    return StagePlan(levels=tuple(out), patch=patch)
+
+
+def planned_bytes(plan: StagePlan, itemsize: int, channels: int) -> int:
+    """Bytes the planned chunks hold once written: every chunk times channels, patch squared and the item size."""
+    return sum(len(level.chunks) for level in plan.levels) * channels * plan.patch * plan.patch * itemsize
