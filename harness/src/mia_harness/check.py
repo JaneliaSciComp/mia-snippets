@@ -19,38 +19,59 @@ def _group_errors(rel: str, attributes: dict, names: tuple[str, ...]) -> list[st
     return [f"{rel}/zarr.json: {name}: {e}" for name in names for e in ngff.errors(name, attributes)]
 
 
+def _read_object(path: Path) -> dict:
+    """A JSON object from `path`; ValueError (with the reason) when it is missing, unparsable or not an object."""
+    try:
+        document = json.loads(path.read_text())
+    except (OSError, ValueError) as e:      # JSONDecodeError is a ValueError
+        raise ValueError(f"cannot read: {type(e).__name__}: {e}") from e
+    if not isinstance(document, dict):
+        raise ValueError(f"not a JSON object but {type(document).__name__}")
+    return document
+
+
 def _coverage(rel: str, group: Path, mia: dict) -> tuple[int, int, list[dict]]:
     """Every planned sample of the group located at every level: (samples, levels, misses)."""
     pyramid = open_pyramid(group)
     samples = [s for split in mia["plan"]["samples"].values() for s in split]
     missing = []
-    for k, sample in enumerate(samples):
+    for sample_index, sample in enumerate(samples):
         for level in range(len(pyramid.levels)):
             try:
                 pyramid.locate(level, tuple(sample["centre_nm"]), sample["patch"], sample["plane"])
             except NotStaged as e:
-                missing.append({"group": rel, "sample": k, "level": level, "keys": e.keys})
+                missing.append({"group": rel, "sample": sample_index, "level": level, "keys": e.keys})
     return len(samples), len(pyramid.levels), missing
 
 
 def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
     """Check a `harness stage` output directory and record the result in every group's `mia.verification` and in
     stage.json (with the sha256 of every zarr.json as left on disk). Returns the report; `ok` iff schemas,
-    coverage, geometry and artifact ids all pass and the stage itself succeeded."""
+    coverage, geometry and artifact ids all pass and the stage itself succeeded. Broken input is an error line,
+    never an exception; an unreadable stage.json is reported and nothing is written."""
     out_dir = Path(out_dir)
     if harness_commit is None:
         harness_commit = os.environ.get("MIA_HARNESS_COMMIT")
-    stage = json.loads((out_dir / "stage.json").read_text())
-    stage_errors = [e for e in stage["errors"] if not e.startswith(ERROR_PREFIX)]   # a previous run's lines go
-    artifact_id = (stage.get("artifact") or {}).get("id")
+    time = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    try:
+        stage = _read_object(out_dir / "stage.json")
+    except ValueError as e:
+        return {"ok": False, "errors": [f"stage.json: {e}"], "checks": {}, "zarr_json_sha256": {},
+                "harness_commit": harness_commit, "time": time, "schemas_commit": ngff.SCHEMAS_COMMIT}
     errors: list[str] = []
+    stage_errors = [e for e in stage.get("errors") or [] if not str(e).startswith(ERROR_PREFIX)]  # earlier runs' go
+    if stage_errors:
+        errors.append(f"stage.json reports {len(stage_errors)} errors")
+    artifact_id = (stage.get("artifact") or {}).get("id")
     schemas: dict = {"errors": [], "applied": {}, "skipped": {}}
     strict: dict = {"image": [], "label": []}
     coverage: dict = {"samples": 0, "levels": 0, "missing": []}
-    documents: list[Path] = []     # the zarr.json of every group with a `mia`, to receive the verification
+    documents: list[Path] = []     # the zarr.json of every readable group, to receive the verification
 
     volumes = sorted(out_dir.glob("v*.zarr"))
-    listed = sorted(v["path"] for v in stage["volumes"])
+    if not volumes:
+        errors.append("no volumes")
+    listed = sorted(str(v.get("path")) for v in stage.get("volumes") or [] if isinstance(v, dict))
     if [v.name for v in volumes] != listed:
         errors.append(f"volumes on disk {[v.name for v in volumes]} != stage.json {listed}")
     for vdir in volumes:
@@ -60,15 +81,22 @@ def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
             schemas["skipped"][f"{vdir.name}/labels/zarr.json"] = LABELS_GROUP_SKIP
         for group, kind in groups:
             rel = group.relative_to(out_dir).as_posix()
-            attributes = json.loads((group / "zarr.json").read_text()).get("attributes", {})
+            try:
+                attributes = _read_object(group / "zarr.json").get("attributes")
+            except ValueError as e:
+                errors.append(f"{rel}/zarr.json: {e}")
+                continue
+            if not isinstance(attributes, dict):
+                errors.append(f"{rel}/zarr.json: no attributes object")
+                continue
             names = ("image", "ome_zarr") if kind == "image" else ("image", "label", "ome_zarr")
             schemas["applied"][f"{rel}/zarr.json"] = list(names)
             schemas["errors"] += _group_errors(rel, attributes, names)
             strict["image"] += _group_errors(rel, attributes, ("strict_image",))
             if kind == "label":
                 strict["label"] += _group_errors(rel, attributes, ("strict_label",))
-            mia = attributes.get("mia") or {}
             documents.append(group / "zarr.json")
+            mia = attributes.get("mia") if isinstance(attributes.get("mia"), dict) else {}
             group_id = (mia.get("artifact") or {}).get("id")
             if group_id != artifact_id:
                 errors.append(f"{rel}: artifact id {group_id} != stage.json {artifact_id}")
@@ -85,17 +113,20 @@ def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
     errors += schemas["errors"]
     errors += [f"{m['group']}: sample {m['sample']} level {m['level']} not staged: {m['keys']}"
                for m in coverage["missing"]]
-    geometry = (stage.get("checks") or {}).get("geometry") or {"mismatches": ["stage.json has no geometry check"]}
-    if geometry["mismatches"]:
+    geometry = (stage.get("checks") or {}).get("geometry")
+    geometry = geometry if isinstance(geometry, dict) else {}
+    if not isinstance(geometry.get("mismatches"), list):
+        errors.append("stage.json has no geometry check")
+    elif geometry["mismatches"]:
         errors.append(f"geometry: {len(geometry['mismatches'])} mismatches")
-    ok = not errors and not stage_errors and bool(volumes)
+    ok = not errors
     checks = {"schemas": schemas, "strict": strict, "coverage": coverage, "geometry": geometry}
-    time = datetime.now(timezone.utc).isoformat(timespec="seconds")
     verification = Verification(checks=checks, ok=ok, harness_commit=harness_commit, time=time,
                                 schemas_commit=ngff.SCHEMAS_COMMIT).model_dump(mode="json")
     for path in documents:
         document = json.loads(path.read_text())
-        document["attributes"].setdefault("mia", {})["verification"] = verification
+        mia = document["attributes"].get("mia")
+        document["attributes"]["mia"] = {**(mia if isinstance(mia, dict) else {}), "verification": verification}
         path.write_text(json.dumps(document, indent=2))
     digests = {p.relative_to(out_dir).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                for p in sorted(out_dir.rglob("zarr.json"))}

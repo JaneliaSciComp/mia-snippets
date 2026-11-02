@@ -2,6 +2,7 @@ import hashlib
 import inspect
 import json
 import re
+import shutil
 import subprocess
 import sys
 
@@ -63,6 +64,8 @@ def test_check_stage_fails_on_a_removed_chunk_and_on_bad_metadata(staged_out):
     rep = check_stage(staged_out)
     assert not rep["ok"] and rep["checks"]["coverage"]["missing"]
     assert rep["checks"]["coverage"]["missing"][0]["group"] == "v0.zarr/raw"
+    deleted = chunk.relative_to(staged_out / "v0.zarr/raw/s0").as_posix()
+    assert any(deleted in miss["keys"] for miss in rep["checks"]["coverage"]["missing"] if miss["level"] == 0)
     sj = json.loads((staged_out / "stage.json").read_text())
     assert not sj["ok"] and any(e.startswith("check-stage: ") for e in sj["errors"])
     z = staged_out / "v0.zarr/raw/zarr.json"
@@ -81,6 +84,35 @@ def test_check_stage_flags_an_artifact_id_that_disagrees_with_stage_json(staged_
     (staged_out / "stage.json").write_text(json.dumps(sj))
     rep = check_stage(staged_out)
     assert not rep["ok"] and f"v0.zarr/raw: artifact id {'a' * 16} != stage.json {'b' * 16}" in rep["errors"]
+
+
+def test_check_stage_reports_a_missing_stage_json_without_writing(staged_out):
+    (staged_out / "stage.json").unlink()
+    rep = check_stage(staged_out)
+    assert not rep["ok"] and rep["errors"][0].startswith("stage.json: cannot read: FileNotFoundError")
+    assert not (staged_out / "stage.json").exists()
+    assert zarr.open_group(staged_out / "v0.zarr/raw", mode="r").attrs["mia"]["verification"]["ok"] is None  # untouched
+
+
+def test_check_stage_reports_a_partly_written_volume(staged_out):
+    (staged_out / "v0.zarr/raw/zarr.json").unlink()
+    rep = check_stage(staged_out)
+    assert not rep["ok"] and any(e.startswith("v0.zarr/raw/zarr.json: cannot read: FileNotFoundError")
+                                 for e in rep["errors"])
+    sj = json.loads((staged_out / "stage.json").read_text())
+    assert not sj["ok"] and "v0.zarr/raw/zarr.json" not in sj["zarr_json_sha256"]
+    assert zarr.open_group(staged_out / "v0.zarr/labels/gt", mode="r").attrs["mia"]["verification"]["ok"] is False
+
+
+def test_check_stage_says_why_when_the_stage_failed_or_left_no_volumes(staged_out):
+    sj = json.loads((staged_out / "stage.json").read_text())
+    sj["errors"], sj["ok"] = ["raw 0: boom"], False
+    (staged_out / "stage.json").write_text(json.dumps(sj))
+    assert "stage.json reports 1 errors" in check_stage(staged_out)["errors"]
+    sj = json.loads((staged_out / "stage.json").read_text())
+    assert sj["errors"][0] == "raw 0: boom" and "check-stage: stage.json reports 1 errors" in sj["errors"]
+    shutil.rmtree(staged_out / "v0.zarr")
+    assert "no volumes" in check_stage(staged_out)["errors"]
 
 
 def test_check_stage_cli(staged_out, monkeypatch, capsys):
