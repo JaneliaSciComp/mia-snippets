@@ -21,5 +21,6 @@ def open_array(src: Source, io: IO) -> Array:
     if "path" in src.params:
         data = np.load(src.params["path"], mmap_mode="r")
     else:
-        data = np.load(io.open(src.urls[0]))  # ponytail: reads the whole file at open; fine for a test snippet
+        with io.open(src.urls[0]) as fh:   # ponytail: reads the whole file at open; fine for a test snippet
+            data = np.load(fh)
     return _Npy(data, src.params.get("axes") or {2: "yx", 3: "zyx"}[data.ndim])

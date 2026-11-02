@@ -176,12 +176,20 @@ harness crop    <binding.yaml> --snippets <dir> --record <record.yaml> --n N --s
                                                                        # a buffer plan decides what fits it)
 harness verify  DIR --binding <binding.yaml> [--existing MANIFEST] [--size 256]   # output checks; no snippet code
 harness preview DIR --out PREVIEW                                      # label overlay PNG per crop
-harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --levels 1,2,4 --patch 256 --out DIR
-                [--voxel-size-nm z,y,x]                                # one verified NGFF pyramid per raw (buffers);
-                                                                       # stage.json checks cover raw and every label layer;
-                                                                       # each volume carries intensity_sample (sorted
-                                                                       # level-0 values per channel, ≤4096 from 8 boxes)
+harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan plan-rule.json
+                --voxel-size voxel_size.json --out DIR [--seed N]      # one sparse OME-Zarr 0.6 image per raw: only
+                                                                       # the plan's chunks, refused over
+                                                                       # MIA_HARNESS_STAGE_BYTES; provenance under
+                                                                       # attributes.mia; geometry check of 8 planned
+                                                                       # samples per group; intensity_sample from 8
+                                                                       # written level-0 chunks per channel
+harness check-stage DIR   # 0.6 schemas, sample coverage and zarr.json digests of a stage output, recorded in it;
+                          # loads no snippet code
 ```
+
+The stage CLI changed its inputs in this version (`--plan`/`--voxel-size` replace `--levels/--patch/--voxel-size-nm`),
+so a worker pinned to this harness must send the new flags. Do not advance a deployment's harness checkout to this
+commit before the worker that writes `plan-rule.json` and `voxel_size.json` is deployed.
 
 `--snippets` is a read-only snapshot of one exact commit, never a branch resolved again. Snippets are imported
 from that directory only. Every command takes its byte cap from the job environment; command-line options can't
@@ -209,6 +217,11 @@ def tensorize(stack: Stack, params: dict) -> Sample:
 `Stack.levels` are `LevelPatch(factor, img (C, P, P), labels {key: (P, P)}, scale_nm, translation_nm, start_px)`.
 The harness checks every output against `describe()` (shape, dtype, no undescribed keys) and fails the command on
 a mismatch. The first tensorizer is `muvit-2d`.
+
+A `Stack` comes from a sparse 0.6 artifact: the harness resolves each level's patch from the dataset transform
+(`Pyramid.locate`), and `LevelPatch.start_px` is the array index inside the staged box. A descriptor whose patch is
+not covered by the planned chunks raises `NotStaged` (a `LookupError` with `.keys`) instead of returning fill values.
+Legacy dense 0.5 artifacts still read as before.
 
 A plan row may carry a **channel recipe** (buffers spec v0.5 §2), passed to the tensorizer as the `channels` param:
 `{op: channel, index: k}`, `{op: mean}`, `{op: luminance}` make one channel; `{op: replicate}`, `{op: rgb}`,

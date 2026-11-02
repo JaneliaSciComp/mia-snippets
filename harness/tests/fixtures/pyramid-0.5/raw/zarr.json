@@ -1,0 +1,100 @@
+{
+  "attributes": {
+    "ome": {
+      "version": "0.5",
+      "multiscales": [
+        {
+          "name": "raw",
+          "axes": [
+            {
+              "name": "z",
+              "type": "space",
+              "unit": "nanometer"
+            },
+            {
+              "name": "y",
+              "type": "space",
+              "unit": "nanometer"
+            },
+            {
+              "name": "x",
+              "type": "space",
+              "unit": "nanometer"
+            }
+          ],
+          "datasets": [
+            {
+              "path": "s0",
+              "coordinateTransformations": [
+                {
+                  "type": "scale",
+                  "scale": [
+                    300.0,
+                    10.0,
+                    10.0
+                  ]
+                }
+              ]
+            },
+            {
+              "path": "s1",
+              "coordinateTransformations": [
+                {
+                  "type": "scale",
+                  "scale": [
+                    300.0,
+                    20.0,
+                    20.0
+                  ]
+                },
+                {
+                  "type": "translation",
+                  "translation": [
+                    0.0,
+                    5.0,
+                    5.0
+                  ]
+                }
+              ]
+            },
+            {
+              "path": "s2",
+              "coordinateTransformations": [
+                {
+                  "type": "scale",
+                  "scale": [
+                    300.0,
+                    40.0,
+                    40.0
+                  ]
+                },
+                {
+                  "type": "translation",
+                  "translation": [
+                    0.0,
+                    15.0,
+                    15.0
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "mia": {
+      "record": "r",
+      "kind": "raw",
+      "levels": [
+        1,
+        2,
+        4
+      ],
+      "patch": 32,
+      "source_axes": "zyx",
+      "access": "chunk"
+    }
+  },
+  "zarr_format": 3,
+  "node_type": "group"
+}

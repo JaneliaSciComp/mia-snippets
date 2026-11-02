@@ -15,3 +15,6 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 filterwarnings = ["error"]
+
+[tool.setuptools.package-data]
+mia_harness = ["schemas/ngff-0.6/*"]

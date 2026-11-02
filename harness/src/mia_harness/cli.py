@@ -6,9 +6,12 @@ import sys
 from pathlib import Path
 
 from .api import CROP
+from .check import check_stage
 from .fetch import fetch
 from .io import from_env
+from .plan import load_plan
 from .preview import preview
+from .provenance import VoxelAxis
 from .run import crop, smoke
 from .stage import stage
 from .tensorize import tensorize
@@ -42,15 +45,16 @@ def main(argv: list[str] | None = None) -> int:
             s.add_argument("--batch", type=int, required=True)
             s.add_argument("--out", type=Path, required=True, help="crop directory; report.json goes in it")
             s.add_argument("--existing", type=Path, help="published manifest.json")
-    s = sub.add_parser("stage", help="write one verified NGFF pyramid per raw volume, labels alongside (buffers spec §3)")
+    s = sub.add_parser("stage", help="write one sparse OME-Zarr 0.6 image per raw volume from a plan rule, labels "
+                                     "alongside (staging spec §4.1)")
     s.add_argument("binding", type=Path)
     s.add_argument("--snippets", type=Path, required=True, help="snippet snapshot directory")
     s.add_argument("--record", type=Path, required=True)
     s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
-    s.add_argument("--levels", required=True, help="pyramid factors for y and x, e.g. 1,2,4")
-    s.add_argument("--patch", type=int, required=True, help="chunk edge in pixels")
+    s.add_argument("--plan", type=Path, required=True, help="plan-rule.json: the rule and the artifact id inputs")
+    s.add_argument("--voxel-size", type=Path, required=True,
+                   help='voxel_size.json: {"<axis>": {"nm", "source", "basis"?, "range"?}}; the file wins per axis')
     s.add_argument("--out", type=Path, required=True, help="directory for v<i>.zarr and stage.json")
-    s.add_argument("--voxel-size-nm", help="z,y,x (or y,x) in nm when the files do not say")
     s.add_argument("--seed", type=int, default=0)
     s = sub.add_parser("fetch", help="every URL of a binding into the raw cache; fetch.json has per-file outcomes")
     s.add_argument("binding", type=Path)
@@ -70,6 +74,9 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--existing", type=Path, help="published manifest.json")
     s.add_argument("--size", type=int, default=CROP, help="the crop edge `crop` was given")
     s.add_argument("--out", type=Path, required=True, help="result JSON")
+    s = sub.add_parser("check-stage", help="0.6 schemas, sample coverage and zarr.json digests of a stage output, "
+                                           "recorded in it; loads no snippet code")
+    s.add_argument("dir", type=Path, help="the directory `stage --out` wrote")
     s = sub.add_parser("preview", help="label overlay PNG per crop (SPEC §6.7)")
     s.add_argument("dir", type=Path)
     s.add_argument("--out", type=Path, required=True, help="directory for <crop_id>/overlay.png")
@@ -79,6 +86,10 @@ def main(argv: list[str] | None = None) -> int:
         result = verify(args.dir, args.binding, args.existing, size=args.size)
         args.out.write_text(json.dumps(result, indent=2) + "\n")
         return 0 if result["ok_count"] == result["n"] and not result["errors"] else 1
+    if args.cmd == "check-stage":
+        report = check_stage(args.dir)
+        print(json.dumps(report, indent=1))
+        return 0 if report["ok"] else 1
     if args.cmd == "tensorize":
         descriptor, params = _json_arg(args.descriptor), _json_arg(args.params) if args.params else {}
         try:
@@ -97,12 +108,16 @@ def main(argv: list[str] | None = None) -> int:
     io = from_env(args.work)
     try:
         if args.cmd == "stage":
-            vox = None
-            if args.voxel_size_nm:
-                values = [float(v) for v in args.voxel_size_nm.split(",")]
-                vox = dict(zip("zyx"[-len(values):], values))
-            return 0 if stage(args.binding, args.snippets, args.record, io, levels=[int(v) for v in args.levels.split(",")],
-                              patch=args.patch, out=args.out, voxel_size_nm=vox, seed=args.seed)["ok"] else 1
+            try:
+                path = args.plan
+                plan = load_plan(path)
+                path = args.voxel_size
+                voxel = {axis: VoxelAxis(**value) for axis, value in json.loads(path.read_text()).items()}
+            except (OSError, AttributeError, TypeError, KeyError, ValueError) as e:  # incl. Validation, JSONDecode
+                print(f"{path}: {type(e).__name__}: {e}", file=sys.stderr)
+                return 1
+            return 0 if stage(args.binding, args.snippets, args.record, io, plan=plan, voxel=voxel, out=args.out,
+                              seed=args.seed)["ok"] else 1
         if args.cmd == "fetch":
             result: dict = {"ok": False, "partial": False, "bytes_fetched": io.bytes_fetched, "files": [], "errors": []}
             try:

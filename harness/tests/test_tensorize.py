@@ -3,12 +3,17 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import zarr
+from test_pyramid import write_sparse
 from test_smoke import SNAP, write
+from rangeserver import server  # noqa: F401  (fixture)
+from test_stage import VOXEL, plan_input, served
 
 from mia_harness import cli
 from mia_harness.cache import DatasetCache
 from mia_harness.io import IO
 from mia_harness.loader import load_snippet
+from mia_harness.pyramid import NotStaged, block_mean, open_pyramid
 from mia_harness.stage import stage
 from mia_harness.tensor_api import bbox_of, check_sample
 from mia_harness.tensorize import read_stack, tensorize
@@ -19,56 +24,114 @@ D = {"plane": {"z": 1}, "centre_nm": [3000.0, 3500.0], "levels": [1, 2, 4], "pat
 
 
 @pytest.fixture
-def staged(tmp_path):
+def staged(tmp_path, server):
     b, r = write(tmp_path, (3, 600, 700), (3, 600, 700))
-    io = IO(DatasetCache(tmp_path / "shared", tmp_path / "private", True), tmp_path / "staging", 1 << 30, set())
+    served(server, b)
+    io = IO(DatasetCache(tmp_path / "shared", tmp_path / "private", True), tmp_path / "staging", 1 << 30, {"127.0.0.1"})
     try:
-        rep = stage(b, SNAP, r, io, levels=[1, 2, 4], patch=64, out=tmp_path / "out", voxel_size_nm={"z": 300.0, "y": 10.0, "x": 10.0})
+        rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 4, "val": 1, "test": 1}), voxel=VOXEL,
+                    out=tmp_path / "out")
     finally:
         io.close()
     assert rep["ok"], rep["errors"]
     return tmp_path / "out" / "v0.zarr"
 
 
-def test_stack_is_co_centred_and_bbox_is_in_nm(staged):
-    s = read_stack(staged, D)
-    assert [lv.start_px for lv in s.levels] == [(268, 318), (118, 143), (43, 55)]
-    np.testing.assert_allclose(bbox_of(s.levels[1], 64), [[118 * 20 + 5, 143 * 20 + 5], [(118 + 63) * 20 + 5, (143 + 63) * 20 + 5]])
+@pytest.fixture
+def planned(staged):
+    """A descriptor for the first planned train sample of `staged`: the stage only wrote planned samples."""
+    sample = zarr.open_group(staged / "raw", mode="r").attrs["mia"]["plan"]["samples"]["train"][0]
+    return {**sample, "channel": None}
+
+
+@pytest.fixture
+def sparse_volume(tmp_path):
+    return tmp_path / "v0.zarr", write_sparse(tmp_path / "v0.zarr")
+
+
+@pytest.fixture
+def staged_sparse(sparse_volume):
+    return sparse_volume[0]
+
+
+@pytest.fixture
+def source(sparse_volume):
+    return sparse_volume[1]
+
+
+def test_stack_from_a_sparse_pyramid_matches_the_source(staged_sparse, source):
+    s = read_stack(staged_sparse, D)
+    p = open_pyramid(staged_sparse / "raw")
+    for i, lv in enumerate(s.levels):
+        region = p.locate(i, tuple(D["centre_nm"]), D["patch"], D["plane"])
+        box = p.raw_index_box(i, region)
+        fresh = source[1, box["y"][0]:box["y"][1], box["x"][0]:box["x"][1]]
+        np.testing.assert_array_equal(lv.img[0], block_mean(fresh, lv.factor))
+        assert lv.labels["gt"].shape == (64, 64)
+
+
+def test_an_absent_label_chunk_under_a_planned_sample_is_not_staged(staged_sparse):
+    p = open_pyramid(staged_sparse / "labels" / "gt")
+    region = p.locate(0, tuple(D["centre_nm"]), D["patch"], D["plane"])
+    key = f"c/{region['z']}/{region['y'].start // 64}/{region['x'].start // 64}"
+    (staged_sparse / "labels" / "gt" / "s0" / key).unlink()
+    with pytest.raises(NotStaged) as e:
+        read_stack(staged_sparse, D)
+    assert key in e.value.keys
+
+
+def test_stack_record_falls_back_to_the_artifact_block(staged, planned):
+    assert read_stack(staged, planned).meta["record"] == "r"     # 0.6 keeps the record under mia.artifact
+
+
+def test_unplanned_descriptor_raises_not_staged(staged_sparse):
+    with pytest.raises(NotStaged):
+        read_stack(staged_sparse, {**D, "centre_nm": [5950.0, 6950.0]})
+
+
+def test_stack_is_co_centred_and_bbox_is_in_nm(staged, planned):
+    s = read_stack(staged, planned)
+    p = open_pyramid(staged / "raw")
+    for lv, info in zip(s.levels, p.levels):
+        start = planned["starts"][str(lv.factor)]     # in the raw level grid; the array holds the box from its origin
+        assert lv.start_px == (start[0] - info.origin["y"] // lv.factor, start[1] - info.origin["x"] // lv.factor)
+    # bbox lands in the raw frame: raw-grid start × 16 nm + the half-pixel shift of factor 2
+    y1, x1 = planned["starts"]["2"]
+    np.testing.assert_allclose(bbox_of(s.levels[1], 64), [[y1 * 16 + 4, x1 * 16 + 4], [(y1 + 63) * 16 + 4, (x1 + 63) * 16 + 4]])
     assert s.levels[0].img.shape == (1, 64, 64) and s.levels[0].labels["gt"].shape == (64, 64)
-    assert s.levels[2].scale_nm == (40.0, 40.0) and s.levels[2].translation_nm == (15.0, 15.0)
-    # the coarse patch really is the mean of the fine data at the same place
-    fine = s.levels[0].img[0]
-    assert s.levels[0].img.dtype == np.uint16 and fine.shape == (64, 64)
+    origin = p.levels[2].origin
+    assert s.levels[2].scale_nm == (32.0, 32.0) and s.levels[2].translation_nm == ((origin["y"] + 1.5) * 8, (origin["x"] + 1.5) * 8)
+    assert s.levels[0].img.dtype == np.uint16
 
 
-def test_edge_centre_clamps(staged):
-    low = read_stack(staged, {**D, "centre_nm": [0.0, 0.0]})
-    assert [lv.start_px for lv in low.levels] == [(0, 0)] * 3
-    high = read_stack(staged, {**D, "centre_nm": [1e9, 1e9]})
-    assert [lv.start_px for lv in high.levels] == [(536, 636), (236, 286), (86, 111)]
-    np.testing.assert_allclose(bbox_of(high.levels[0], 64)[0], [5360.0, 6360.0])
+def test_unplanned_edge_centres_are_not_staged(staged, planned):
+    """Samples are drawn at least a coarsest half footprint from the edges, so the clamped edge patches were never
+    written: the reader refuses them instead of serving fill values."""
+    for centre in ([0.0, 0.0], [1e9, 1e9]):
+        with pytest.raises(NotStaged):
+            read_stack(staged, {**planned, "centre_nm": centre})
 
 
-def test_muvit_2d_sample(staged):
-    out = tensorize(staged, D, TENSORIZERS, "muvit-2d", {})
+def test_muvit_2d_sample(staged, planned):
+    out = tensorize(staged, planned, TENSORIZERS, "muvit-2d", {})
     assert out["img"].shape == (3, 1, 64, 64) and out["img"].dtype == np.float32
     assert 0.0 <= float(out["img"].min()) and float(out["img"].max()) <= 1.0
     assert out["bbox"].shape == (3, 2, 2) and out["bbox"].dtype == np.float32
     assert out["label/gt"].dtype == np.int32 and out["label/gt"].shape == (3, 64, 64)
-    assert out["pixel_size"].tolist() == [[10, 10], [20, 20], [40, 40]]
-    assert out["meta"]["levels"] == [1, 2, 4] and out["meta"]["plane"] == {"z": 1}
-    none = tensorize(staged, D, TENSORIZERS, "muvit-2d", {"normalize": "none"})
-    np.testing.assert_allclose(none["img"][0, 0], read_stack(staged, D).levels[0].img[0] / 65535.0, rtol=1e-6)
+    assert out["pixel_size"].tolist() == [[8, 8], [16, 16], [32, 32]]
+    assert out["meta"]["levels"] == [1, 2, 4] and out["meta"]["plane"] == planned["plane"]
+    none = tensorize(staged, planned, TENSORIZERS, "muvit-2d", {"normalize": "none"})
+    np.testing.assert_allclose(none["img"][0, 0], read_stack(staged, planned).levels[0].img[0] / 65535.0, rtol=1e-6)
 
 
-def test_single_channel_descriptor(staged):
-    out = tensorize(staged, {**D, "channel": 0}, TENSORIZERS, "muvit-2d", {})
+def test_single_channel_descriptor(staged, planned):
+    out = tensorize(staged, {**planned, "channel": 0}, TENSORIZERS, "muvit-2d", {})
     assert out["img"].shape == (3, 1, 64, 64)
 
 
-def test_bad_tensorizer_fails_contract(staged):
+def test_bad_tensorizer_fails_contract(staged, planned):
     with pytest.raises(ValueError, match=r"img: expected shape \(3, 1, 64, 64\)"):
-        tensorize(staged, D, TEST_TENSORIZERS, "bad-shape", {})
+        tensorize(staged, planned, TEST_TENSORIZERS, "bad-shape", {})
 
 
 def test_check_sample_rejects_wrong_dtype_and_unknown_key():
@@ -93,16 +156,16 @@ def test_loader_kind_tensorizers():
         load_snippet(TENSORIZERS, "muvit-2d", set(), {"bogus": 1}, kind="tensorizers")
 
 
-def test_tensorize_cli(staged, tmp_path):
+def test_tensorize_cli(staged, planned, tmp_path):
     out = tmp_path / "sample.npz"
     code = cli.main(["tensorize", str(staged), "--tensorizers", str(TENSORIZERS), "--name", "muvit-2d",
-                     "--descriptor", json.dumps(D), "--out", str(out)])
+                     "--descriptor", json.dumps(planned), "--out", str(out)])
     assert code == 0
     with np.load(out) as z:
         assert z["img"].shape == (3, 1, 64, 64) and z["label/gt"].shape == (3, 64, 64)
     assert json.loads(out.with_suffix(".json").read_text())["levels"] == [1, 2, 4]
     assert cli.main(["tensorize", str(staged), "--tensorizers", str(TEST_TENSORIZERS), "--name", "bad-shape",
-                     "--descriptor", json.dumps(D), "--out", str(tmp_path / "bad.npz")]) == 1
+                     "--descriptor", json.dumps(planned), "--out", str(tmp_path / "bad.npz")]) == 1
 
 
 def _muvit():
@@ -134,13 +197,13 @@ def test_channel_recipe_ops():
         apply(rgb, {"op": "swizzle"})
 
 
-def test_channel_recipe_in_tensorize(staged):
-    plain = tensorize(staged, D, TENSORIZERS, "muvit-2d", {})
-    rep = tensorize(staged, D, TENSORIZERS, "muvit-2d", {"channels": {"op": "replicate"}})
+def test_channel_recipe_in_tensorize(staged, planned):
+    plain = tensorize(staged, planned, TENSORIZERS, "muvit-2d", {})
+    rep = tensorize(staged, planned, TENSORIZERS, "muvit-2d", {"channels": {"op": "replicate"}})
     assert rep["img"].shape == (3, 3, 64, 64) and rep["meta"]["channels"] == {"op": "replicate"}
     for c in range(3):
         np.testing.assert_array_equal(rep["img"][:, c], plain["img"][:, 0])
-    add = tensorize(staged, D, TENSORIZERS, "muvit-2d", {"channels": {"op": "additive"}})
+    add = tensorize(staged, planned, TENSORIZERS, "muvit-2d", {"channels": {"op": "additive"}})
     assert add["img"].shape == (3, 3, 64, 64) and add["img"][:, 1:].max() == 0.0
 
 
@@ -170,10 +233,10 @@ def test_stats_bounds_replace_patch_percentiles():
         mod.tensorize(stack, {"stats": {"lo": [0], "hi": [200]}})
 
 
-def test_stats_and_scope_pass_the_loader_param_check(staged):
+def test_stats_and_scope_pass_the_loader_param_check(staged, planned):
     """The client sends `stats` and `scope` as params: tensorizer.yaml must declare them or load_snippet refuses."""
-    out = tensorize(staged, D, TENSORIZERS, "muvit-2d", {"stats": {"lo": [0], "hi": [65535]}, "scope": "volume"})
+    out = tensorize(staged, planned, TENSORIZERS, "muvit-2d", {"stats": {"lo": [0], "hi": [65535]}, "scope": "volume"})
     assert out["meta"]["normalize_scope"] == "volume"
-    np.testing.assert_allclose(out["img"][0, 0], read_stack(staged, D).levels[0].img[0] / 65535.0, rtol=1e-6)
-    none = tensorize(staged, D, TENSORIZERS, "muvit-2d", {"stats": None, "scope": "patch"})  # a patch-scope descriptor
+    np.testing.assert_allclose(out["img"][0, 0], read_stack(staged, planned).levels[0].img[0] / 65535.0, rtol=1e-6)
+    none = tensorize(staged, planned, TENSORIZERS, "muvit-2d", {"stats": None, "scope": "patch"})  # a patch-scope descriptor
     assert none["meta"]["normalize_scope"] == "patch"
