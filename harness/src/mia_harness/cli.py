@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from .api import CROP
+from .check import check_stage
 from .fetch import fetch
 from .io import from_env
 from .plan import load_plan
@@ -73,6 +74,9 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--existing", type=Path, help="published manifest.json")
     s.add_argument("--size", type=int, default=CROP, help="the crop edge `crop` was given")
     s.add_argument("--out", type=Path, required=True, help="result JSON")
+    s = sub.add_parser("check-stage", help="0.6 schemas, sample coverage and zarr.json digests of a stage output, "
+                                           "recorded in it; loads no snippet code")
+    s.add_argument("dir", type=Path, help="the directory `stage --out` wrote")
     s = sub.add_parser("preview", help="label overlay PNG per crop (SPEC §6.7)")
     s.add_argument("dir", type=Path)
     s.add_argument("--out", type=Path, required=True, help="directory for <crop_id>/overlay.png")
@@ -82,6 +86,10 @@ def main(argv: list[str] | None = None) -> int:
         result = verify(args.dir, args.binding, args.existing, size=args.size)
         args.out.write_text(json.dumps(result, indent=2) + "\n")
         return 0 if result["ok_count"] == result["n"] and not result["errors"] else 1
+    if args.cmd == "check-stage":
+        report = check_stage(args.dir)
+        print(json.dumps(report, indent=1))
+        return 0 if report["ok"] else 1
     if args.cmd == "tensorize":
         descriptor, params = _json_arg(args.descriptor), _json_arg(args.params) if args.params else {}
         try:
