@@ -100,9 +100,16 @@ def main(argv: list[str] | None = None) -> int:
     io = from_env(args.work)
     try:
         if args.cmd == "stage":
-            voxel = {axis: VoxelAxis(**value) for axis, value in json.loads(args.voxel_size.read_text()).items()}
-            return 0 if stage(args.binding, args.snippets, args.record, io, plan=load_plan(args.plan), voxel=voxel,
-                              out=args.out, seed=args.seed)["ok"] else 1
+            try:
+                path = args.plan
+                plan = load_plan(path)
+                path = args.voxel_size
+                voxel = {axis: VoxelAxis(**value) for axis, value in json.loads(path.read_text()).items()}
+            except (OSError, AttributeError, TypeError, KeyError, ValueError) as e:  # incl. Validation, JSONDecode
+                print(f"{path}: {type(e).__name__}: {e}", file=sys.stderr)
+                return 1
+            return 0 if stage(args.binding, args.snippets, args.record, io, plan=plan, voxel=voxel, out=args.out,
+                              seed=args.seed)["ok"] else 1
         if args.cmd == "fetch":
             result: dict = {"ok": False, "partial": False, "bytes_fetched": io.bytes_fetched, "files": [], "errors": []}
             try:

@@ -47,7 +47,7 @@ class _Volume:
     groups: list[_Group]
 
 
-def intensity_sample(p, level_plan: LevelPlan, patch: int, rng: np.random.Generator) -> list[list[float]]:
+def intensity_sample(p: Pyramid, level_plan: LevelPlan, patch: int, rng: np.random.Generator) -> list[list[float]]:
     """Per channel, up to SAMPLE_KEEP values from SAMPLE_CHUNKS random written level-0 chunks, sorted: what
     registration turns into normalisation bounds for `normalize.scope: volume|dataset` (buffers spec §3). Only
     chunks the plan wrote are read, so no fill value enters the sample. `p` is an open Pyramid."""
@@ -84,6 +84,7 @@ def _shape(array: Array) -> tuple[int, ...]:
 
 
 def _channels(array: Array) -> int:
+    """The array's channel count (1 without a c axis)."""
     return dict(zip(array.axes, array.shape)).get("c", 1)
 
 
@@ -115,6 +116,11 @@ def _plan_volume(i: int, raw: Array, binding: Binding, labels: list[Array], rule
 
     groups = [group("raw", raw, binding.raw[i], "raw", f"v{i}")]
     groups += [group("label", arr, lb, f"labels/{lb.label_key}", f"v{i}/{lb.label_key}") for lb, arr in mine]
+    unrecorded = [f"raw {i}" + (f": label {g.binding.label_key}" if isinstance(g.binding, LabelBinding) else "")
+                  for g in groups if not g.binding.urls]
+    if unrecorded:   # derived_from is the only record of which bytes were staged; it may not be empty
+        errors.extend(f"{where}: no source URLs to record" for where in unrecorded)
+        return None
     return _Volume(i, vox, samples, groups)
 
 
@@ -157,6 +163,7 @@ def _derived_from(b: ArrayBinding, access: str, snippets_commit: str, io: IO) ->
 
 
 def _level_records(plan: StagePlan, info: PyramidInfo, channels: int, itemsize: int) -> list[LevelRecord]:
+    """Per written level: the plan's box and chunk count, the array's shape, the uncompressed bytes written."""
     return [LevelRecord(factor=lp.factor, path=li.path, origin=dict(lp.origin), extent=dict(lp.extent),
                         shape=list(li.shape), planned_planes=list(lp.planned_planes),
                         chunks_written=len(lp.chunks) * channels,
@@ -223,8 +230,9 @@ def prefetch(binding, io: IO) -> None:
 
 def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan: PlanInput,
           voxel: dict[str, VoxelAxis], out: Path, seed: int = 0, stage_bytes: int | None = None) -> dict:
-    """Open the arrays and plan every raw; refuse a plan over `stage_bytes` before any file is fetched or voxel read;
-    then fetch, write v<i>.zarr per raw with its labels, check the geometry, write provenance and stage.json."""
+    """Fetch every source once (bounded by the job's byte cap, cached for a rebuild), open the arrays, plan every
+    raw and refuse a plan over `stage_bytes` before any voxel is written; then write v<i>.zarr per raw with its
+    labels, check the geometry, write provenance and stage.json."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     if stage_bytes is None:
@@ -241,6 +249,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
                             plan_digest=plan.rule.digest(), harness_commit=plan.harness_commit,
                             env_digest=plan.env_digest, snippets_commit=binding.snippets_commit,
                             record=binding.record, record_commit=binding.record_commit)
+        prefetch(binding, io)
         raws, labels = open_arrays(binding, Path(snapshot), io)
         planned = [v for i, raw in enumerate(raws)
                    if (v := _plan_volume(i, raw, binding, labels, plan, voxel, errors)) is not None]
@@ -249,7 +258,6 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
         if budget > stage_bytes:
             errors.insert(0, f"plan exceeds stage cap: {budget} > {stage_bytes} bytes")
         else:
-            prefetch(binding, io)
             for volume in planned:
                 summary_, volume_checks = _write_volume(volume, out, binding, artifact, plan, io, rng, errors)
                 volumes.append(summary_)

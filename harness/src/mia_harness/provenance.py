@@ -57,6 +57,7 @@ class LevelRecord(_Strict):
 
 
 class Geometry(_Strict):
+    """The raw extent and axis orders, the stored dtype and every written level."""
     raw_shape: list[int]    # stored (canonical) axis order
     source_axes: str        # the raw array's own axis order
     axes: str
@@ -65,6 +66,7 @@ class Geometry(_Strict):
 
 
 class Downsampling(_Strict):
+    """How coarser levels were made: block means for raw, nearest samples for labels, remainders clipped."""
     raw: str = "mean"
     label: str = "nearest"
     edge: str = "clip"
@@ -72,12 +74,14 @@ class Downsampling(_Strict):
 
 
 class Plan(_Strict):
+    """The plan rule verbatim, its digest and the samples derived from it per split."""
     digest: str
     rule: dict
     samples: dict[str, list[dict]]
 
 
 class Verification(_Strict):
+    """Check results: the stage's geometry check, then check-stage's schemas, coverage and digests."""
     checks: dict[str, Any] = {}
     ok: bool | None = None
     harness_commit: str | None = None

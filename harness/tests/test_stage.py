@@ -14,7 +14,7 @@ from mia_harness import cli
 from mia_harness.binding import binding_hash
 from mia_harness.cache import DatasetCache
 from mia_harness.io import IO
-from mia_harness.plan import LevelPlan, PlanInput, PlanRule
+from mia_harness.plan import LevelPlan, PlanInput, PlanRule, derive_samples, planned_bytes, stage_plan
 from mia_harness.provenance import VoxelAxis
 from mia_harness.stage import stage
 
@@ -41,14 +41,19 @@ def io(tmp_path):
     i.close()
 
 
-def served(tmp_path, server, binding: Path) -> bytes:
-    """Serve the binding's raw .npy over HTTP and point the binding at it, so validators get recorded."""
+def served(server, binding: Path) -> int:
+    """Serve every array of the binding over HTTP and point the binding at it, as production bindings are (URLs
+    are what derived_from records). Returns the bytes served."""
     d = yaml.safe_load(binding.read_text())
-    body = Path(d["raw"][0]["params"]["path"]).read_bytes()
-    server.files["/raw.npy"] = body
-    d["raw"][0].update(urls=[server.url("/raw.npy")], params={})
+    total = 0
+    for role in ("raw", "labels"):
+        for n, entry in enumerate(d[role]):
+            body = Path(entry["params"].pop("path")).read_bytes()
+            server.files[f"/{role}{n}.npy"] = body
+            entry["urls"] = [server.url(f"/{role}{n}.npy")]
+            total += len(body)
     binding.write_text(yaml.safe_dump(d))
-    return body
+    return total
 
 
 # five planes, so every split of 0.6/0.2/0.2 gets one (three planes leave test none)
@@ -57,15 +62,17 @@ SHAPE = (5, 600, 700)
 
 def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server):
     b, r = write(tmp_path, SHAPE, SHAPE)
-    body = served(tmp_path, server, b)
+    source_bytes = served(server, b)
+    raw_bytes = len(server.files["/raw0.npy"])
     plan = plan_input((1, 2, 4), 64, {"train": 4, "val": 1, "test": 1})
     rep = stage(b, SNAP, r, io, plan=plan, voxel=VOXEL, out=tmp_path / "out")
     assert rep["ok"], rep["errors"]
+    assert rep["bytes_fetched"] == source_bytes   # each source fetched once, then read from the cache
     mia = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["mia"]
     assert mia["schema"] == 1 and mia["artifact"]["id"] == "a" * 16 and mia["artifact"]["plan_digest"] == plan.rule.digest()
     assert mia["artifact"]["binding_hash"] == binding_hash(b) and mia["artifact"]["record_commit"] == "0" * 40
     assert mia["derived_from"][0]["snippet"] == {"name": "npy-local", "commit": "1" * 40}
-    assert mia["derived_from"][0]["access"] == "chunk" and mia["derived_from"][0]["validators"]["size"] == len(body)
+    assert mia["derived_from"][0]["access"] == "chunk" and mia["derived_from"][0]["validators"]["size"] == raw_bytes
     assert mia["voxel_size"]["y"] == {"nm": 8.0, "source": "assumed", "basis": "test", "range": None}
     assert sum(len(v) for v in mia["plan"]["samples"].values()) == 6 and mia["geometry"]["raw_shape"] == list(SHAPE)
     assert mia["verification"]["checks"]["geometry"]["mismatches"] == []
@@ -87,29 +94,32 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server):
     assert root["mia"]["plan"] == {"digest": plan.rule.digest()} and root["ome"]["labels"] == ["gt"]
 
 
-def test_stage_refuses_a_plan_over_the_byte_cap(tmp_path, io, monkeypatch):
-    import mia_harness.stage as stage_module
-
-    monkeypatch.setattr(stage_module, "prefetch", lambda *a: pytest.fail("fetched before the budget check"))
+def test_stage_refuses_a_plan_over_the_byte_cap(tmp_path, io, server):
     b, r = write(tmp_path, (3, 600, 700))
-    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 50}), voxel=VOXEL, out=tmp_path / "out",
-                stage_bytes=1000)
-    assert not rep["ok"] and rep["errors"][0].startswith("plan exceeds stage cap: ") and io.bytes_fetched == 0
+    source_bytes = served(server, b)
+    plan = plan_input((1, 2, 4), 64, {"train": 50})
+    samples = derive_samples(plan.rule, "r", 0, "zyx", (3, 600, 700), {a: v.nm for a, v in VOXEL.items()})
+    budget = planned_bytes(stage_plan(samples, "zyx", (3, 600, 700), (1, 2, 4), 64), 2, 1)
+    rep = stage(b, SNAP, r, io, plan=plan, voxel=VOXEL, out=tmp_path / "out", stage_bytes=1000)
+    assert not rep["ok"] and rep["errors"][0] == f"plan exceeds stage cap: {budget} > 1000 bytes"
     assert not (tmp_path / "out" / "v0.zarr" / "raw" / "s0").exists()
+    assert 0 < io.bytes_fetched <= source_bytes   # the sources once (kept for a rebuild), never twice
 
 
-def test_stage_byte_cap_defaults_to_the_environment(tmp_path, io, monkeypatch):
+def test_stage_byte_cap_defaults_to_the_environment(tmp_path, io, server, monkeypatch):
     b, r = write(tmp_path, (3, 600, 700))
+    served(server, b)
     monkeypatch.setenv("MIA_HARNESS_STAGE_BYTES", "1000")
     rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 4}), voxel=VOXEL, out=tmp_path / "out")
     assert rep["errors"][0].startswith("plan exceeds stage cap: ") and rep["errors"][0].endswith("> 1000 bytes")
 
 
-def test_stage_pairs_a_channel_raw_with_a_label_without_channels(tmp_path, io):
+def test_stage_pairs_a_channel_raw_with_a_label_without_channels(tmp_path, io, server):
     b, r = write(tmp_path, (2, 600, 700), (600, 700))
     d = yaml.safe_load(b.read_text())
     d["raw"][0]["params"]["axes"] = "cyx"
     b.write_text(yaml.safe_dump(d))
+    served(server, b)
     rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 3}), voxel=VOXEL, out=tmp_path / "out")
     assert rep["ok"], rep["errors"]
     raw = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["mia"]["geometry"]
@@ -117,6 +127,14 @@ def test_stage_pairs_a_channel_raw_with_a_label_without_channels(tmp_path, io):
     assert raw["axes"] == "cyx" and lab["axes"] == "yx" and len(rep["volumes"][0]["intensity_sample"]) == 2
     assert [lv["chunks_written"] for lv in raw["levels"]] == [2 * lv["chunks_written"] for lv in lab["levels"]]
     assert [lv["origin"] for lv in raw["levels"]] == [lv["origin"] for lv in lab["levels"]]
+
+
+def test_stage_refuses_a_binding_without_source_urls(tmp_path, io):
+    b, r = write(tmp_path, (3, 600, 700), (3, 600, 700))     # params.path only: nothing for derived_from
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 2}), voxel=VOXEL, out=tmp_path / "out")
+    assert not rep["ok"] and rep["errors"] == ["raw 0: no source URLs to record",
+                                               "raw 0: label gt: no source URLs to record"]
+    assert not (tmp_path / "out" / "v0.zarr").exists()
 
 
 def test_stage_without_voxel_size_fails(tmp_path, io):
@@ -137,9 +155,10 @@ def test_stage_with_nothing_to_sample_says_so(tmp_path, io):
     assert rep["errors"] == ["raw 0: no samples planned"]
 
 
-def test_stage_cli(tmp_path, monkeypatch):
+def test_stage_cli(tmp_path, monkeypatch, server, capsys):
     b, r = write(tmp_path, SHAPE)
-    monkeypatch.setenv("MIA_HARNESS_JOB_BYTES", "1000000")
+    served(server, b)
+    monkeypatch.setenv("MIA_HARNESS_JOB_BYTES", str(1 << 24))   # the 4.2 MB source, fetched once
     monkeypatch.setenv("MIA_HARNESS_ALLOWED_HOSTS", "127.0.0.1")
     monkeypatch.delenv("MIA_HARNESS_STAGE_BYTES", raising=False)
     plan = write_plan(tmp_path / "plan-rule.json", plan_input((1, 2), 64, {"train": 2, "val": 1, "test": 1}),
@@ -153,6 +172,14 @@ def test_stage_cli(tmp_path, monkeypatch):
     args = ["stage", str(b), "--snippets", str(SNAP), "--record", str(r), "--work", str(tmp_path / "work"),
             "--plan", str(plan), "--out", str(tmp_path / "out")]
     assert cli.main(args + ["--voxel-size", str(unknown)]) == 1  # no voxel size anywhere
+    malformed = tmp_path / "bad_voxel.json"
+    malformed.write_text(json.dumps({"y": 8.0}))
+    assert cli.main(args + ["--voxel-size", str(malformed)]) == 1
+    assert capsys.readouterr().err.startswith(f"{malformed}: ")
+    bad_plan = tmp_path / "bad-plan.json"
+    bad_plan.write_text(json.dumps({"artifact_id": "a" * 16, "rule": {}}))
+    assert cli.main([str(bad_plan) if arg == str(plan) else arg for arg in args] + ["--voxel-size", str(voxel)]) == 1
+    assert capsys.readouterr().err.startswith(f"{bad_plan}: ")
     assert cli.main(args + ["--voxel-size", str(voxel)]) == 0
     sj = json.loads((tmp_path / "out" / "stage.json").read_text())
     assert sj["volumes"][0]["levels"][1]["factor"] == 2 and sj["artifact"]["levels_key"] == "p64-l1-2-4"
@@ -161,10 +188,11 @@ def test_stage_cli(tmp_path, monkeypatch):
         cli.main(args + ["--voxel-size", str(voxel), "--levels", "1,2"])
 
 
-def test_stage_verification_catches_corruption(tmp_path, io, monkeypatch):
+def test_stage_verification_catches_corruption(tmp_path, io, server, monkeypatch):
     import mia_harness.pyramid as pyramid
 
     b, r = write(tmp_path, (3, 600, 700))
+    served(server, b)
     monkeypatch.setattr(pyramid, "block_mean", lambda plane, f: plane if f == 1 else np.zeros((plane.shape[0] // f, plane.shape[1] // f), plane.dtype))
     rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 2}), voxel=VOXEL, out=tmp_path / "out")
     assert not rep["ok"] and any("v0 s1" in e and "differs" in e for e in rep["errors"])
@@ -172,10 +200,11 @@ def test_stage_verification_catches_corruption(tmp_path, io, monkeypatch):
     assert mismatches and all(m["level"] == 1 and m["max_abs_diff"] > 0 for m in mismatches)
 
 
-def test_stage_verification_covers_labels(tmp_path, io, monkeypatch):
+def test_stage_verification_covers_labels(tmp_path, io, server, monkeypatch):
     import mia_harness.pyramid as pyramid
 
     b, r = write(tmp_path, (3, 600, 700), (3, 600, 700))
+    served(server, b)
     monkeypatch.setattr(pyramid, "stride", lambda plane, f: plane if f == 1 else np.zeros((plane.shape[0] // f, plane.shape[1] // f), plane.dtype))
     rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 2}), voxel=VOXEL, out=tmp_path / "out")
     assert not rep["ok"] and any("v0/gt s1" in e and "differs" in e for e in rep["errors"])
@@ -193,8 +222,9 @@ def test_voxel_size_merges_file_and_argument_per_axis():
                                         "x": VoxelAxis(45.0718, "file")}
 
 
-def test_stage_records_a_sorted_intensity_sample_per_channel(tmp_path, io):
+def test_stage_records_a_sorted_intensity_sample_per_channel(tmp_path, io, server):
     b, r = write(tmp_path, (3, 600, 700))
+    served(server, b)
     rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 2}), voxel=VOXEL, out=tmp_path / "out")
     sample = rep["volumes"][0]["intensity_sample"]
     assert len(sample) == 1 and 1 <= len(sample[0]) <= 4096 and sample[0] == sorted(sample[0])

@@ -6,7 +6,8 @@ import pytest
 import zarr
 from test_pyramid import write_sparse
 from test_smoke import SNAP, write
-from test_stage import VOXEL, plan_input
+from rangeserver import server  # noqa: F401  (fixture)
+from test_stage import VOXEL, plan_input, served
 
 from mia_harness import cli
 from mia_harness.cache import DatasetCache
@@ -23,9 +24,10 @@ D = {"plane": {"z": 1}, "centre_nm": [3000.0, 3500.0], "levels": [1, 2, 4], "pat
 
 
 @pytest.fixture
-def staged(tmp_path):
+def staged(tmp_path, server):
     b, r = write(tmp_path, (3, 600, 700), (3, 600, 700))
-    io = IO(DatasetCache(tmp_path / "shared", tmp_path / "private", True), tmp_path / "staging", 1 << 30, set())
+    served(server, b)
+    io = IO(DatasetCache(tmp_path / "shared", tmp_path / "private", True), tmp_path / "staging", 1 << 30, {"127.0.0.1"})
     try:
         rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 4, "val": 1, "test": 1}), voxel=VOXEL,
                     out=tmp_path / "out")
