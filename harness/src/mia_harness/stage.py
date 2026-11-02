@@ -8,7 +8,8 @@ from .api import Array
 from .binding import binding_hash, load_binding
 from .fetch import expand
 from .io import IO, BudgetExceeded, HostNotAllowed
-from .pyramid import block_mean, open_pyramid, stride, write_pyramid, write_volume_groups
+from .plan import dense_plan
+from .pyramid import _canonical, block_mean, open_pyramid, stride, write_pyramid, write_volume_groups
 from .run import open_arrays
 
 S0_CHECKS = 8       # random s0 chunks re-read through the snippet
@@ -116,15 +117,21 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, leve
                 rep["errors"].append(f"raw {i}: voxel size unknown")
                 continue
             vdir = out / f"v{i}.zarr"
-            info = write_pyramid(raw, vdir / "raw", levels=levels, patch=patch, voxel_size_nm=vox, kind="raw", attrs=provenance)
+            axes, size = _canonical(raw.axes), dict(zip(raw.axes, raw.shape))
+            plan = dense_plan(axes, tuple(size[a] for a in axes), tuple(levels), patch)
+            system = f"{binding.record}.v{i}"
+            info = write_pyramid(raw, vdir / "raw", plan=plan, voxel_size_nm=vox, kind="raw", coordinate_system=system,
+                                 mia={**provenance, "kind": "raw"}, downsampling_metadata={})
             written = {}
             for lb, arr in zip(binding.labels, labels):
                 if lb.pairs_with != i:
                     continue
-                write_pyramid(arr, vdir / "labels" / lb.label_key, levels=levels, patch=patch, voxel_size_nm=vox, kind="label",
-                              attrs={**provenance, "label_key": lb.label_key, "segmentation_type": lb.segmentation_type})
+                write_pyramid(arr, vdir / "labels" / lb.label_key, plan=plan, voxel_size_nm=vox, kind="label",
+                              coordinate_system=system, mia={**provenance, "kind": "label", "label_key": lb.label_key,
+                                                             "segmentation_type": lb.segmentation_type},
+                              downsampling_metadata={})
                 written[lb.label_key] = f"labels/{lb.label_key}"
-            write_volume_groups(vdir, list(written))
+            write_volume_groups(vdir, list(written), provenance)
             verified = [(raw, vdir / "raw", f"v{i}")]
             verified += [(arr, vdir / "labels" / lb.label_key, f"v{i}/{lb.label_key}")
                          for lb, arr in zip(binding.labels, labels) if lb.pairs_with == i]
