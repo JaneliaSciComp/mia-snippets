@@ -95,17 +95,18 @@ def start_index(centre_nm: float, voxel_nm: float, factor: int, patch: int, exte
 def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],
                    voxel_size_nm: dict[str, float]) -> dict[str, list[dict]]:
     """Sample descriptors per split; one Random per split, so a larger count extends a smaller count's list.
+    A split asks for at most its capacity: non-overlapping coarsest footprints times the planes it holds (spec §2.5).
     Val and test reject a sample whose coarsest footprint overlaps an accepted one by more than OVERLAP_MAX;
     every split drops exact duplicates. Each split spends at most 8 draws per wanted sample."""
     planes = shape[axes.index("z")] if "z" in axes else 1
     extents = [shape[axes.index(axis)] for axis in ("y", "x")]
     coarsest = max(rule.levels)
     half = rule.patch * coarsest // 2
-    count_cap = capacity(*extents, planes, rule.patch, rule.levels)
-    planes_by_split = split_planes(f"{record}/v{volume}", planes, rule.split)
+    # the registry's volume id (record/<volume dir>), so both repos put every plane in the same split
+    planes_by_split = split_planes(f"{record}/v{volume}.zarr", planes, rule.split)
     out: dict[str, list[dict]] = {}
     for split, planes_of_split in planes_by_split.items():
-        count = min(rule.samples.get(split, 0), count_cap) if planes_of_split else 0
+        count = min(rule.samples.get(split, 0), capacity(*extents, len(planes_of_split), rule.patch, rule.levels))
         rng = random.Random(f"{rule.seed}:{record}:v{volume}:{split}")
         accepted: list[dict] = []
         footprints: list[dict] = []

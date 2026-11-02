@@ -21,12 +21,13 @@ def read_stack(pyramid_dir: Path, descriptor: dict) -> Stack:
     raw = open_pyramid(pyramid_dir / "raw")
     labels = {d.name: open_pyramid(d) for d in sorted((pyramid_dir / "labels").glob("*")) if (d / "zarr.json").is_file()}
     patch, (cy, cx) = int(descriptor["patch"]), descriptor["centre_nm"]
+    plane = descriptor.get("plane") or {}
     channel = descriptor.get("channel")
     levels = []
     for factor in descriptor["levels"]:
         i = _level_index(raw, factor)
         lv = raw.levels[i]
-        box = raw.locate(i, (cy, cx), patch, descriptor.get("plane") or {})   # NotStaged propagates
+        box = raw.locate(i, (cy, cx), patch, plane)   # NotStaged propagates
         region = dict(box)
         if "c" in raw.axes:
             region["c"] = slice(None) if channel is None else int(channel)
@@ -35,13 +36,16 @@ def read_stack(pyramid_dir: Path, descriptor: dict) -> Stack:
             img = img[None]
         found = {}
         for key, lp in labels.items():
-            # a label holds the same boxes as its raw by construction, so the raw's region addresses it too
-            lregion = box | ({"c": 0} if "c" in lp.axes else {})
-            found[key] = np.asarray(lp.read(_level_index(lp, factor), lregion))
+            # located on its own, so a label chunk the stage never wrote raises NotStaged instead of reading fill
+            j = _level_index(lp, factor)
+            lregion = lp.locate(j, (cy, cx), patch, plane) | ({"c": 0} if "c" in lp.axes else {})
+            found[key] = np.asarray(lp.read(j, lregion))
         levels.append(LevelPatch(factor, img, found, (lv.scale_nm["y"], lv.scale_nm["x"]),
                                  (lv.translation_nm["y"], lv.translation_nm["x"]), (box["y"].start, box["x"].start)))
-    meta = {"pyramid": str(pyramid_dir), "record": (raw.attrs.get("mia") or {}).get("record"), "descriptor": descriptor}
-    return Stack(levels, patch, dict(descriptor.get("plane") or {}), (float(cy), float(cx)), meta)
+    mia = raw.attrs.get("mia") or {}
+    record = mia.get("record") or (mia.get("artifact") or {}).get("record")   # 0.5 top level, 0.6 under artifact
+    meta = {"pyramid": str(pyramid_dir), "record": record, "descriptor": descriptor}
+    return Stack(levels, patch, dict(plane), (float(cy), float(cx)), meta)
 
 
 def tensorize(pyramid_dir: Path, descriptor: dict, snapshot: Path, name: str, params: dict) -> Sample:

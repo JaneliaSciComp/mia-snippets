@@ -16,7 +16,7 @@ def test_digest_is_stable_and_record_local():
 
 
 def test_split_planes_golden():   # part B asserts the same numbers in tests/test_buffers_register.py
-    assert split_planes("r/v0", 10, RULE.split) == {"train": [0, 1, 2, 4, 5, 9], "val": [6, 8], "test": [3, 7]}
+    assert split_planes("r/v0.zarr", 10, RULE.split) == {"train": [0, 1, 4, 5, 7, 8], "val": [3, 6], "test": [2, 9]}
 
 
 def test_start_index_rounds_then_clamps():
@@ -32,7 +32,23 @@ def test_derive_is_deterministic_and_a_prefix():
     more = derive_samples(more_rule, "r", 0, "zyx", (10, 600, 700), VOX)
     assert more["train"][:10] == a["train"]
     for s in a["train"]:
-        assert set(s["starts"]) == {"1", "2", "4"} and s["plane"]["z"] in split_planes("r/v0", 10, RULE.split)["train"]
+        assert set(s["starts"]) == {"1", "2", "4"}
+
+
+def test_derived_planes_are_the_registry_split_of_the_volume_dir():
+    """The registry splits `<record>/<volume path>` (v<i>.zarr); a sample on another split's plane would leak."""
+    for volume in (0, 1):
+        derived = derive_samples(RULE, "r", volume, "zyx", (10, 600, 700), VOX)
+        by_split = split_planes(f"r/v{volume}.zarr", 10, RULE.split)
+        for split, samples in derived.items():
+            assert samples and all(s["plane"]["z"] in by_split[split] for s in samples)
+
+
+def test_capacity_counts_the_planes_of_each_split():
+    """2x2 coarsest tiles per plane: val and test hold 2 planes each, so they cap at 8 though train holds 6."""
+    greedy = PlanRule(**{**RULE.__dict__, "samples": {"train": 100, "val": 100, "test": 100}})
+    derived = derive_samples(greedy, "r", 0, "zyx", (10, 600, 700), VOX)
+    assert len(derived["train"]) == 2 * 2 * 6 and len(derived["val"]) <= 2 * 2 * 2 and len(derived["test"]) <= 8
 
 
 def test_capacity_caps_and_eval_rejects_overlap():
@@ -44,7 +60,8 @@ def test_capacity_caps_and_eval_rejects_overlap():
 
 
 def test_2d_volume_has_no_plane_key():
-    assert derive_samples(RULE, "r", 0, "yx", (600, 700), {"y": 10.0, "x": 10.0})["train"][0]["plane"] == {}
+    drawn = derive_samples(RULE, "r", 0, "yx", (600, 700), {"y": 10.0, "x": 10.0})   # the one plane is in one split
+    assert [s["plane"] for samples in drawn.values() for s in samples[:1]] == [{}]
 
 
 def test_eval_overlap_rule_rejects_what_train_accepts():

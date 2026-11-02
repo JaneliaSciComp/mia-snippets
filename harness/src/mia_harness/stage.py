@@ -189,7 +189,8 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
         info = write_pyramid(group.array, vdir / group.path, plan=group.plan, voxel_size_nm=nm, kind=group.kind,
                              coordinate_system=f"{binding.record}.v{volume.index}", mia=provisional,
                              downsampling_metadata={"method": "mean" if group.kind == "raw" else "nearest",
-                                                    "factors": list(rule.levels), "edge": "clip",
+                                                    "factors": list(rule.levels), "module": "mia_harness.pyramid",
+                                                    "commit": artifact.harness_commit, "edge": "clip",
                                                     "nearest_offset": "(L-1)//2"})
         infos.append(info)
         p = open_pyramid(vdir / group.path)
@@ -246,7 +247,8 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
     try:
         binding = load_binding(binding_path)
         artifact = Artifact(id=plan.artifact_id, levels_key=plan.levels_key, binding_hash=binding_hash(binding_path),
-                            plan_digest=plan.rule.digest(), harness_commit=plan.harness_commit,
+                            plan_digest=plan.rule.digest(),
+                            harness_commit=plan.harness_commit or os.environ.get("MIA_HARNESS_COMMIT", ""),
                             env_digest=plan.env_digest, snippets_commit=binding.snippets_commit,
                             record=binding.record, record_commit=binding.record_commit)
         prefetch(binding, io)

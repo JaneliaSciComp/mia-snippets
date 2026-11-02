@@ -78,6 +78,19 @@ def test_check_stage_fails_on_a_removed_chunk_and_on_bad_metadata(staged_out):
     assert json.loads(z.read_text())["attributes"]["ome"]["version"] == "0.5"   # the rewrite keeps the document
 
 
+def test_check_stage_flags_a_sample_located_off_its_planned_start(staged_out):
+    z = staged_out / "v0.zarr/raw/zarr.json"
+    d = json.loads(z.read_text())
+    sample = d["attributes"]["mia"]["plan"]["samples"]["train"][0]
+    planned = sample["starts"]["2"] = [sample["starts"]["2"][0] + 1, sample["starts"]["2"][1]]
+    z.write_text(json.dumps(d))
+    rep = check_stage(staged_out)
+    misses = [m for m in rep["checks"]["coverage"]["missing"] if m["reason"] == "starts"]
+    assert not rep["ok"] and [(m["group"], m["sample"], m["level"]) for m in misses] == [("v0.zarr/raw", 0, 1)]
+    assert misses[0]["planned"] == planned and misses[0]["located"] == [planned[0] - 1, planned[1]]
+    assert f"v0.zarr/raw: sample 0 level 1 located at {misses[0]['located']}, planned at {planned}" in rep["errors"]
+
+
 def test_check_stage_flags_an_artifact_id_that_disagrees_with_stage_json(staged_out):
     sj = json.loads((staged_out / "stage.json").read_text())
     sj["artifact"]["id"] = "b" * 16

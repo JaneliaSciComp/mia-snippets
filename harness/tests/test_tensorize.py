@@ -70,6 +70,20 @@ def test_stack_from_a_sparse_pyramid_matches_the_source(staged_sparse, source):
         assert lv.labels["gt"].shape == (64, 64)
 
 
+def test_an_absent_label_chunk_under_a_planned_sample_is_not_staged(staged_sparse):
+    p = open_pyramid(staged_sparse / "labels" / "gt")
+    region = p.locate(0, tuple(D["centre_nm"]), D["patch"], D["plane"])
+    key = f"c/{region['z']}/{region['y'].start // 64}/{region['x'].start // 64}"
+    (staged_sparse / "labels" / "gt" / "s0" / key).unlink()
+    with pytest.raises(NotStaged) as e:
+        read_stack(staged_sparse, D)
+    assert key in e.value.keys
+
+
+def test_stack_record_falls_back_to_the_artifact_block(staged, planned):
+    assert read_stack(staged, planned).meta["record"] == "r"     # 0.6 keeps the record under mia.artifact
+
+
 def test_unplanned_descriptor_raises_not_staged(staged_sparse):
     with pytest.raises(NotStaged):
         read_stack(staged_sparse, {**D, "centre_nm": [5950.0, 6950.0]})

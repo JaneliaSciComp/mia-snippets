@@ -187,6 +187,10 @@ harness check-stage DIR   # 0.6 schemas, sample coverage and zarr.json digests o
                           # loads no snippet code
 ```
 
+The stage CLI changed its inputs in this version (`--plan`/`--voxel-size` replace `--levels/--patch/--voxel-size-nm`),
+so a worker pinned to this harness must send the new flags. Do not advance a deployment's harness checkout to this
+commit before the worker that writes `plan-rule.json` and `voxel_size.json` is deployed.
+
 `--snippets` is a read-only snapshot of one exact commit, never a branch resolved again. Snippets are imported
 from that directory only. Every command takes its byte cap from the job environment; command-line options can't
 raise it.

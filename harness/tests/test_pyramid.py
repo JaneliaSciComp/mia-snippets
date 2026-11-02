@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import zarr
 
-from mia_harness.plan import LevelPlan, StagePlan, stage_plan, start_index
+from mia_harness.plan import LevelPlan, StagePlan, patch_start, stage_plan, start_index
 from mia_harness.pyramid import (LevelInfo, NotStaged, block_mean, open_pyramid, stride, write_pyramid,
                                  write_volume_groups)
 from mia_harness.schemas import ngff
@@ -170,7 +170,7 @@ def test_channels_axis_and_2d(tmp_path):
     g = zarr.open_group(tmp_path / "c", mode="r")
     assert g["s0"].chunks == (1, 32, 32) and info.levels[1].shape == (3, 50, 60)
     ms = g.attrs["ome"]["multiscales"][0]
-    assert ms["coordinateSystems"][0]["axes"][0] == {"name": "c", "type": "channel"}
+    assert ms["coordinateSystems"][0]["axes"][0] == {"name": "c", "type": "channel", "discrete": True}
     assert ms["datasets"][0]["coordinateTransformations"][0]["transformations"] == [
         {"type": "scale", "scale": [1.0, 45.0, 45.0]}, {"type": "translation", "translation": [0.0, 0.0, 0.0]}]
     np.testing.assert_array_equal(g["s1"][2], block_mean(arr.data[2], 2))
@@ -273,6 +273,46 @@ def test_legacy_dense_pyramid_is_exempt_from_presence_check(tmp_path):
     p = open_pyramid(tmp_path / "d")
     region = p.locate(0, (2000.0, 2000.0), 64, {"z": 0})   # an all-zero, never-written chunk
     assert p.read(0, region).sum() == 0
+
+
+def test_scale_only_0_5_pyramid_keeps_the_pre_0_6_read_path(tmp_path):
+    """ome-zarr-py writes scale only; deriving a box origin from it would give -2 at L=4 and shift every read."""
+    g = zarr.open_group(tmp_path / "d", mode="w", zarr_format=3)
+    for path, (nz, n) in {"s0": (4, 256), "s1": (4, 128), "s2": (2, 64)}.items():
+        g.create_array(path, shape=(nz, n, n), chunks=(1, 32, 32), dtype="uint8")
+    g.attrs["ome"] = {"version": "0.5", "multiscales": [{
+        "axes": [{"name": ax, "type": "space", "unit": "nanometer"} for ax in "zyx"],
+        "datasets": [{"path": path, "coordinateTransformations": [{"type": "scale", "scale": scale}]}
+                     for path, scale in (("s0", [300.0, 10.0, 10.0]), ("s1", [300.0, 20.0, 20.0]),
+                                         ("s2", [600.0, 40.0, 40.0]))]}]}
+    p = open_pyramid(tmp_path / "d")
+    assert not p.sparse and [lv.factor for lv in p.levels] == [1, 2, 4]
+    assert all(lv.origin == {"z": 0, "y": 0, "x": 0} for lv in p.levels)
+    region = p.locate(2, (1000.0, 1500.0), 32, {"z": 3})
+    old = [patch_start(c, 40.0, 0.0, 32, 64) for c in (1000.0, 1500.0)]   # tensorize._start before the 0.6 work
+    assert old == [9, 22] and (region["y"].start, region["x"].start) == tuple(old)
+    assert region["z"] == 1                                              # level-0 z 3 // z factor 2, as _plane_index
+
+
+def test_sparse_locate_checks_only_the_touched_chunks(staged_sparse, monkeypatch):
+    """No listing of the store: a sample costs one exists() per chunk it touches."""
+    calls = []
+    real_exists = zarr.storage.LocalStore.exists
+
+    def refuse(*args, **kwargs):
+        raise AssertionError("listed the store")
+
+    async def counting_exists(self, key):
+        calls.append(key)
+        return await real_exists(self, key)
+
+    monkeypatch.setattr(zarr.storage.LocalStore, "list_prefix", refuse)
+    monkeypatch.setattr(zarr.storage.LocalStore, "list_dir", refuse)
+    p = open_pyramid(staged_sparse / "raw")
+    monkeypatch.setattr(zarr.storage.LocalStore, "exists", counting_exists)
+    p.locate(0, PLANNED_CENTRES[0], 64, {"z": 1})
+    assert 1 <= len(calls) <= 4 and all(key.startswith("s0/c/0/") for key in calls)
+    assert all((staged_sparse / "raw" / key).is_file() for key in calls)   # the store key is the chunk on disk
 
 
 def test_sparse_pyramid_reads_its_plan_and_origins(staged_sparse):

@@ -31,16 +31,23 @@ def _read_object(path: Path) -> dict:
 
 
 def _coverage(rel: str, group: Path, mia: dict) -> tuple[int, int, list[dict]]:
-    """Every planned sample of the group located at every level: (samples, levels, misses)."""
+    """Every planned sample of the group located at every level, at the start the plan recorded for it:
+    (samples, levels, misses). A miss's `reason` is "not staged" (with the absent `keys`) or "starts"."""
     pyramid = open_pyramid(group)
     samples = [s for split in mia["plan"]["samples"].values() for s in split]
     missing = []
     for sample_index, sample in enumerate(samples):
-        for level in range(len(pyramid.levels)):
+        for level, info in enumerate(pyramid.levels):
+            miss = {"group": rel, "sample": sample_index, "level": level}
             try:
-                pyramid.locate(level, tuple(sample["centre_nm"]), sample["patch"], sample["plane"])
+                region = pyramid.locate(level, tuple(sample["centre_nm"]), sample["patch"], sample["plane"])
             except NotStaged as e:
-                missing.append({"group": rel, "sample": sample_index, "level": level, "keys": e.keys})
+                missing.append(miss | {"reason": "not staged", "keys": e.keys})
+                continue
+            located = [region[a].start + info.origin[a] // info.factor for a in "yx"]
+            planned = sample["starts"].get(str(info.factor))
+            if located != planned:
+                missing.append(miss | {"reason": "starts", "keys": [], "located": located, "planned": planned})
     return len(samples), len(pyramid.levels), missing
 
 
@@ -111,8 +118,9 @@ def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
             coverage["levels"] += levels
             coverage["missing"] += missing
     errors += schemas["errors"]
-    errors += [f"{m['group']}: sample {m['sample']} level {m['level']} not staged: {m['keys']}"
-               for m in coverage["missing"]]
+    errors += [f"{m['group']}: sample {m['sample']} level {m['level']} " + (
+        f"not staged: {m['keys']}" if m["reason"] == "not staged"
+        else f"located at {m['located']}, planned at {m['planned']}") for m in coverage["missing"]]
     geometry = (stage.get("checks") or {}).get("geometry")
     geometry = geometry if isinstance(geometry, dict) else {}
     if not isinstance(geometry.get("mismatches"), list):

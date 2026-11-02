@@ -60,7 +60,8 @@ def served(server, binding: Path) -> int:
 SHAPE = (5, 600, 700)
 
 
-def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server):
+def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, monkeypatch):
+    monkeypatch.setenv("MIA_HARNESS_COMMIT", "c" * 40)    # plan-rule.json names none: the environment's is recorded
     b, r = write(tmp_path, SHAPE, SHAPE)
     source_bytes = served(server, b)
     raw_bytes = len(server.files["/raw0.npy"])
@@ -81,7 +82,9 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server):
     assert lab["kind"] == "label" and lab["geometry"]["levels"] == mia["geometry"]["levels"]   # same boxes, same chunks
     assert lab["label_key"] == "gt" and lab["statistics"] is None
     ms = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["ome"]["multiscales"][0]
-    assert ms["metadata"] == {"method": "mean", "factors": [1, 2, 4], "edge": "clip", "nearest_offset": "(L-1)//2"}
+    assert ms["metadata"] == {"method": "mean", "factors": [1, 2, 4], "module": "mia_harness.pyramid",
+                              "commit": "c" * 40, "edge": "clip", "nearest_offset": "(L-1)//2"}
+    assert mia["artifact"]["harness_commit"] == "c" * 40
     assert ms["coordinateSystems"][0]["name"] == "r.v0"
     sj = json.loads((tmp_path / "out" / "stage.json").read_text())
     assert sj["artifact"]["id"] == "a" * 16 and sj["volumes"][0]["samples"].keys() == {"train", "val", "test"}
@@ -120,7 +123,9 @@ def test_stage_pairs_a_channel_raw_with_a_label_without_channels(tmp_path, io, s
     d["raw"][0]["params"]["axes"] = "cyx"
     b.write_text(yaml.safe_dump(d))
     served(server, b)
-    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 3}), voxel=VOXEL, out=tmp_path / "out")
+    # one plane lands in one split; asking every split keeps the test off which one it is
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 3, "val": 3, "test": 3}), voxel=VOXEL,
+                out=tmp_path / "out")
     assert rep["ok"], rep["errors"]
     raw = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["mia"]["geometry"]
     lab = zarr.open_group(tmp_path / "out" / "v0.zarr" / "labels" / "gt", mode="r").attrs["mia"]["geometry"]
