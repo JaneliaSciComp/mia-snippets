@@ -1,3 +1,4 @@
+import itertools
 import json
 from pathlib import Path
 
@@ -5,7 +6,7 @@ import numpy as np
 import pytest
 import zarr
 
-from mia_harness.plan import dense_plan, stage_plan, start_index
+from mia_harness.plan import LevelPlan, StagePlan, stage_plan, start_index
 from mia_harness.pyramid import (LevelInfo, NotStaged, block_mean, open_pyramid, stride, write_pyramid,
                                  write_volume_groups)
 from mia_harness.schemas import ngff
@@ -38,6 +39,24 @@ def plan_for(shape, levels=(1, 2, 4), patch=64, centres=((3000.0, 3500.0),), z=(
                           "starts": {str(L): [start_index(c[0], 10.0, L, patch, shape[-2]), start_index(c[1], 10.0, L, patch, shape[-1])] for L in levels}}
                          for zz in z for c in centres]}
     return stage_plan(samples, "zyx", shape, tuple(levels), patch)
+
+
+def dense_plan(axes: str, shape: tuple[int, ...], levels: tuple[int, ...], patch: int) -> StagePlan:
+    """The whole volume as a plan (origin 0, every plane and chunk, y/x trimmed to whole level blocks): the writer's
+    dense edge cases without deriving samples."""
+    size = dict(zip(axes, shape))
+    planes = tuple(range(size["z"])) if "z" in size else ()
+    out = []
+    for factor in levels:
+        level_size = {"c": 1, "z": size.get("z", 0), "y": size["y"] // factor, "x": size["x"] // factor}
+        grid = {"c": range(1), "z": range(level_size["z"]), "y": range(-(-level_size["y"] // patch)),
+                "x": range(-(-level_size["x"] // patch))}
+        out.append(LevelPlan(factor=factor, origin={axis: 0 for axis in axes if axis != "c"},
+                             extent={axis: size[axis] if axis == "z" else level_size[axis] * factor
+                                     for axis in axes if axis != "c"},
+                             shape=tuple(level_size[axis] for axis in axes), planned_planes=planes,
+                             chunks=frozenset(itertools.product(*(grid[axis] for axis in axes)))))
+    return StagePlan(levels=tuple(out), patch=patch)
 
 
 def test_writes_0_6_sparse_levels(tmp_path):

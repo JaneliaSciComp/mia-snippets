@@ -28,18 +28,22 @@ class PlanRule:
 
 @dataclass(frozen=True)
 class PlanInput:
-    """The contents of plan-rule.json: the rule and the artifact it stages."""
+    """The contents of plan-rule.json: the rule and the artifact block inputs only the worker knows."""
     rule: PlanRule
     artifact_id: str
     levels_key: str
+    harness_commit: str = ""
+    env_digest: str = ""       # sha256 of the harness pixi.lock
 
 
 def load_plan(path: Path) -> PlanInput:
-    """Read plan-rule.json: {"artifact_id", "levels_key", "rule": {seed, patch, levels, samples, split, ...}}."""
+    """Read plan-rule.json: {"artifact_id", "levels_key", "harness_commit"?, "env_digest"?,
+    "rule": {seed, patch, levels, samples, split, channel_recipe}}."""
     document = json.loads(Path(path).read_text())
     rule = dict(document["rule"])
     return PlanInput(rule=PlanRule(**{**rule, "levels": tuple(rule["levels"])}),
-                     artifact_id=document["artifact_id"], levels_key=document["levels_key"])
+                     artifact_id=document["artifact_id"], levels_key=document["levels_key"],
+                     harness_commit=document.get("harness_commit", ""), env_digest=document.get("env_digest", ""))
 
 
 def split_counts(n: int, fractions: dict[str, float]) -> dict[str, int]:
@@ -181,21 +185,3 @@ def stage_plan(samples: dict[str, list[dict]], axes: str, shape: tuple[int, ...]
 def planned_bytes(plan: StagePlan, itemsize: int, channels: int) -> int:
     """Bytes the planned chunks hold once written: every chunk times channels, patch squared and the item size."""
     return sum(len(level.chunks) for level in plan.levels) * channels * plan.patch * plan.patch * itemsize
-
-
-def dense_plan(axes: str, shape: tuple[int, ...], levels: tuple[int, ...], patch: int) -> StagePlan:
-    """The whole volume as a plan: origin 0, every plane and every chunk, y/x trimmed to whole level blocks."""
-    # ponytail: bridge until stage() derives real plans (Task 6 removes it)
-    size = dict(zip(axes, shape))
-    planes = tuple(range(size["z"])) if "z" in size else ()
-    out = []
-    for factor in levels:
-        level_size = {"c": 1, "z": size.get("z", 0), "y": size["y"] // factor, "x": size["x"] // factor}
-        grid = {"c": range(1), "z": range(level_size["z"]), "y": range(-(-level_size["y"] // patch)),
-                "x": range(-(-level_size["x"] // patch))}
-        out.append(LevelPlan(factor=factor, origin={axis: 0 for axis in axes if axis != "c"},
-                             extent={axis: size[axis] if axis == "z" else level_size[axis] * factor
-                                     for axis in axes if axis != "c"},
-                             shape=tuple(level_size[axis] for axis in axes), planned_planes=planes,
-                             chunks=frozenset(itertools.product(*(grid[axis] for axis in axes)))))
-    return StagePlan(levels=tuple(out), patch=patch)

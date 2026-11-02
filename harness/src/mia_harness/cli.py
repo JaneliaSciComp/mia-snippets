@@ -8,7 +8,9 @@ from pathlib import Path
 from .api import CROP
 from .fetch import fetch
 from .io import from_env
+from .plan import load_plan
 from .preview import preview
+from .provenance import VoxelAxis
 from .run import crop, smoke
 from .stage import stage
 from .tensorize import tensorize
@@ -42,15 +44,16 @@ def main(argv: list[str] | None = None) -> int:
             s.add_argument("--batch", type=int, required=True)
             s.add_argument("--out", type=Path, required=True, help="crop directory; report.json goes in it")
             s.add_argument("--existing", type=Path, help="published manifest.json")
-    s = sub.add_parser("stage", help="write one verified NGFF pyramid per raw volume, labels alongside (buffers spec §3)")
+    s = sub.add_parser("stage", help="write one sparse OME-Zarr 0.6 image per raw volume from a plan rule, labels "
+                                     "alongside (staging spec §4.1)")
     s.add_argument("binding", type=Path)
     s.add_argument("--snippets", type=Path, required=True, help="snippet snapshot directory")
     s.add_argument("--record", type=Path, required=True)
     s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
-    s.add_argument("--levels", required=True, help="pyramid factors for y and x, e.g. 1,2,4")
-    s.add_argument("--patch", type=int, required=True, help="chunk edge in pixels")
+    s.add_argument("--plan", type=Path, required=True, help="plan-rule.json: the rule and the artifact id inputs")
+    s.add_argument("--voxel-size", type=Path, required=True,
+                   help='voxel_size.json: {"<axis>": {"nm", "source", "basis"?, "range"?}}; the file wins per axis')
     s.add_argument("--out", type=Path, required=True, help="directory for v<i>.zarr and stage.json")
-    s.add_argument("--voxel-size-nm", help="z,y,x (or y,x) in nm when the files do not say")
     s.add_argument("--seed", type=int, default=0)
     s = sub.add_parser("fetch", help="every URL of a binding into the raw cache; fetch.json has per-file outcomes")
     s.add_argument("binding", type=Path)
@@ -97,12 +100,9 @@ def main(argv: list[str] | None = None) -> int:
     io = from_env(args.work)
     try:
         if args.cmd == "stage":
-            vox = None
-            if args.voxel_size_nm:
-                values = [float(v) for v in args.voxel_size_nm.split(",")]
-                vox = dict(zip("zyx"[-len(values):], values))
-            return 0 if stage(args.binding, args.snippets, args.record, io, levels=[int(v) for v in args.levels.split(",")],
-                              patch=args.patch, out=args.out, voxel_size_nm=vox, seed=args.seed)["ok"] else 1
+            voxel = {axis: VoxelAxis(**value) for axis, value in json.loads(args.voxel_size.read_text()).items()}
+            return 0 if stage(args.binding, args.snippets, args.record, io, plan=load_plan(args.plan), voxel=voxel,
+                              out=args.out, seed=args.seed)["ok"] else 1
         if args.cmd == "fetch":
             result: dict = {"ok": False, "partial": False, "bytes_fetched": io.bytes_fetched, "files": [], "errors": []}
             try:
