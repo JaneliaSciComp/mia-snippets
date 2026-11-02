@@ -75,7 +75,7 @@ Comments and labels never authorise a merge; only the two required statuses and 
 ## Tensorizers
 
 `tensorizers/<name>/` holds the second kind of pluggable unit: a pure function from a stack of co-centred,
-multi-resolution patches to the arrays a model consumes (SPEC §8). The harness stages a dataset into an OME-Zarr
+multi-resolution patches to the arrays a model consumes (SPEC §8). The harness stages a dataset into a sparse OME-Zarr 0.6
 pyramid through its reader snippet (`harness stage`), reads a crop descriptor's patches back (`harness tensorize`)
 and runs the tensorizer, checking its output against its own `describe()`. The same PR rules apply: one new
 directory, immutable once merged, no I/O, static import check. `muvit-2d` is the first.

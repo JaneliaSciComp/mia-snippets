@@ -183,6 +183,8 @@ harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan pl
                                                                        # attributes.mia; geometry check of 8 planned
                                                                        # samples per group; intensity_sample from 8
                                                                        # written level-0 chunks per channel
+harness check-stage DIR   # 0.6 schemas, sample coverage and zarr.json digests of a stage output, recorded in it;
+                          # loads no snippet code
 ```
 
 `--snippets` is a read-only snapshot of one exact commit, never a branch resolved again. Snippets are imported
@@ -211,6 +213,11 @@ def tensorize(stack: Stack, params: dict) -> Sample:
 `Stack.levels` are `LevelPatch(factor, img (C, P, P), labels {key: (P, P)}, scale_nm, translation_nm, start_px)`.
 The harness checks every output against `describe()` (shape, dtype, no undescribed keys) and fails the command on
 a mismatch. The first tensorizer is `muvit-2d`.
+
+A `Stack` comes from a sparse 0.6 artifact: the harness resolves each level's patch from the dataset transform
+(`Pyramid.locate`), and `LevelPatch.start_px` is the array index inside the staged box. A descriptor whose patch is
+not covered by the planned chunks raises `NotStaged` (a `LookupError` with `.keys`) instead of returning fill values.
+Legacy dense 0.5 artifacts still read as before.
 
 A plan row may carry a **channel recipe** (buffers spec v0.5 §2), passed to the tensorizer as the `channels` param:
 `{op: channel, index: k}`, `{op: mean}`, `{op: luminance}` make one channel; `{op: replicate}`, `{op: rgb}`,
