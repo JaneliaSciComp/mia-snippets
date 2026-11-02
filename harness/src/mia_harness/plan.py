@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .sample import OVERLAP_MAX, overlap_frac
-from .tensorize import _start
 
 
 @dataclass(frozen=True)
@@ -76,9 +75,16 @@ def capacity(extent_y: int, extent_x: int, planes: int, patch: int, levels: tupl
     return (extent_y // footprint) * (extent_x // footprint) * planes
 
 
+def patch_start(centre_nm: float, scale: float, shift: float, patch: int, n: int) -> int:
+    """First index of a patch centred on centre_nm on a level grid of n voxels (scale and shift in nm), clamped."""
+    if n < patch:
+        raise ValueError(f"patch {patch} is larger than the level's extent {n}")
+    return int(min(max(round((centre_nm - shift) / scale - patch / 2), 0), n - patch))
+
+
 def start_index(centre_nm: float, voxel_nm: float, factor: int, patch: int, extent_raw: int) -> int:
-    """First index of a patch centred on centre_nm at a level `factor` times coarser than raw (tensorize's formula)."""
-    return _start(centre_nm, factor * voxel_nm, (factor - 1) / 2 * voxel_nm, patch, extent_raw // factor)
+    """First index of a patch centred on centre_nm at a level `factor` times coarser than raw."""
+    return patch_start(centre_nm, factor * voxel_nm, (factor - 1) / 2 * voxel_nm, patch, extent_raw // factor)
 
 
 def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],

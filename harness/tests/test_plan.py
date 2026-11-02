@@ -1,4 +1,5 @@
 from mia_harness.plan import PlanRule, capacity, derive_samples, split_planes, start_index
+from mia_harness.sample import OVERLAP_MAX, overlap_frac
 
 RULE = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 10, "val": 3, "test": 3},
                 split={"policy": "fractions", "fractions": {"train": 0.6, "val": 0.2, "test": 0.2}, "seed": 0},
@@ -41,3 +42,17 @@ def test_capacity_caps_and_eval_rejects_overlap():
 
 def test_2d_volume_has_no_plane_key():
     assert derive_samples(RULE, "r", 0, "yx", (600, 700), {"y": 10.0, "x": 10.0})["train"][0]["plane"] == {}
+
+
+def test_eval_overlap_rule_rejects_what_train_accepts():
+    dense = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 8, "val": 8},
+                     split={"policy": "fractions", "fractions": {"train": 0.5, "val": 0.5}, "seed": 0},
+                     channel_recipe=None)
+    drawn = derive_samples(dense, "r", 0, "zyx", (2, 512, 512), VOX)
+
+    def overlaps(samples):
+        footprints = [{"raw": 0, "plane": s["plane"], "y": s["starts"]["4"][0], "x": s["starts"]["4"][1]} for s in samples]
+        return [overlap_frac(a, b, 64) for i, a in enumerate(footprints) for b in footprints[i + 1:]]
+
+    assert len(drawn["val"]) >= 2 and max(overlaps(drawn["val"])) <= OVERLAP_MAX
+    assert max(overlaps(drawn["train"])) > OVERLAP_MAX   # same fixture without the rule overlaps, so the rule did work

@@ -4,14 +4,9 @@ from pathlib import Path
 import numpy as np
 
 from .loader import load_snippet, withdrawn_names
+from .plan import patch_start
 from .pyramid import Pyramid, open_pyramid
 from .tensor_api import LevelPatch, Sample, Stack, check_sample, recipe_channels
-
-
-def _start(centre_nm: float, scale: float, shift: float, patch: int, n: int) -> int:
-    if n < patch:
-        raise ValueError(f"patch {patch} is larger than the level's extent {n}")
-    return int(min(max(round((centre_nm - shift) / scale - patch / 2), 0), n - patch))
 
 
 def _level_index(p: Pyramid, factor: int) -> int:
@@ -43,8 +38,8 @@ def read_stack(pyramid_dir: Path, descriptor: dict) -> Stack:
         i = _level_index(raw, factor)
         lv = raw.levels[i]
         ny, nx = lv.shape[raw.axes.index("y")], lv.shape[raw.axes.index("x")]
-        y0 = _start(cy, lv.scale_nm["y"], lv.translation_nm["y"], patch, ny)
-        x0 = _start(cx, lv.scale_nm["x"], lv.translation_nm["x"], patch, nx)
+        y0 = patch_start(cy, lv.scale_nm["y"], lv.translation_nm["y"], patch, ny)
+        x0 = patch_start(cx, lv.scale_nm["x"], lv.translation_nm["x"], patch, nx)
         box = {"y": slice(y0, y0 + patch), "x": slice(x0, x0 + patch)}
         plane = _plane_index(raw, i, descriptor.get("plane") or {})
         region = plane | box
