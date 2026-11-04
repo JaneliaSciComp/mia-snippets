@@ -2,7 +2,7 @@ import pytest
 
 from mia_harness.plan import (PlanRule, capacity, derive_samples, planned_bytes, split_planes, stage_plan,
                               start_index)
-from mia_harness.sample import OVERLAP_MAX, overlap_frac
+from mia_harness.sample import overlap_frac
 
 RULE = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 10, "val": 3, "test": 3},
                 split={"policy": "fractions", "fractions": {"train": 0.6, "val": 0.2, "test": 0.2}, "seed": 0},
@@ -48,15 +48,15 @@ def test_capacity_counts_the_planes_of_each_split():
     """2x2 coarsest tiles per plane: val and test hold 2 planes each, so they cap at 8 though train holds 6."""
     greedy = PlanRule(**{**RULE.__dict__, "samples": {"train": 100, "val": 100, "test": 100}})
     derived = derive_samples(greedy, "r", 0, "zyx", (10, 600, 700), VOX)
-    assert len(derived["train"]) == 2 * 2 * 6 and len(derived["val"]) <= 2 * 2 * 2 and len(derived["test"]) <= 8
+    assert len(derived["train"]) == 2 * 2 * 6 and len(derived["val"]) == 2 * 2 * 2 and len(derived["test"]) == 8
 
 
-def test_capacity_caps_and_eval_rejects_overlap():
+def test_capacity_caps_and_a_split_fills_it_exactly():
     assert capacity(600, 700, 10, 64, (1, 2, 4)) == 2 * 2 * 10
     tiny = derive_samples(RULE, "r", 0, "yx", (256, 256), {"y": 10.0, "x": 10.0})
     assert sum(len(v) for v in tiny.values()) == 1   # one plane, one position: one sample in one split
     evals = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX)["val"]
-    assert len({(s["plane"]["z"], tuple(s["starts"]["4"])) for s in evals}) == len(evals)
+    assert len(evals) == 3 and len({(s["plane"]["z"], tuple(s["starts"]["4"])) for s in evals}) == 3
 
 
 def test_2d_volume_has_no_plane_key():
@@ -64,18 +64,31 @@ def test_2d_volume_has_no_plane_key():
     assert [s["plane"] for samples in drawn.values() for s in samples[:1]] == [{}]
 
 
-def test_eval_overlap_rule_rejects_what_train_accepts():
+def test_no_two_samples_of_a_split_overlap_at_any_level():
+    """Every split fills its capacity with disjoint coarsest footprints; finer crops sit inside them."""
     dense = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 8, "val": 8},
                      split={"policy": "fractions", "fractions": {"train": 0.5, "val": 0.5}, "seed": 0},
                      channel_recipe=None)
-    drawn = derive_samples(dense, "r", 0, "zyx", (2, 512, 512), VOX)
+    drawn = derive_samples(dense, "r", 0, "zyx", (2, 512, 512), VOX)   # 2x2 tiles per plane, one plane per split
+    for split, samples in drawn.items():
+        assert len(samples) == 4
+        for factor in ("1", "2", "4"):
+            size = 64 * int(factor)
+            boxes = [{"raw": 0, "plane": s["plane"], "y": s["starts"][factor][0] * int(factor),
+                      "x": s["starts"][factor][1] * int(factor)} for s in samples]
+            assert all(overlap_frac(a, b, size) == 0 for i, a in enumerate(boxes) for b in boxes[i + 1:])
+        for s in samples:   # a finer crop lies inside the coarsest footprint
+            (y4, x4), (y1, x1) = s["starts"]["4"], s["starts"]["1"]
+            assert 4 * y4 <= y1 and y1 + 64 <= 4 * y4 + 256 and 4 * x4 <= x1 and x1 + 64 <= 4 * x4 + 256
 
-    def overlaps(samples):
-        footprints = [{"raw": 0, "plane": s["plane"], "y": s["starts"]["4"][0], "x": s["starts"]["4"][1]} for s in samples]
-        return [overlap_frac(a, b, 64) for i, a in enumerate(footprints) for b in footprints[i + 1:]]
 
-    assert len(drawn["val"]) >= 2 and max(overlaps(drawn["val"])) <= OVERLAP_MAX
-    assert max(overlaps(drawn["train"])) > OVERLAP_MAX   # same fixture without the rule overlaps, so the rule did work
+def test_grid_offset_is_random_but_shared_within_a_split():
+    drawn = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX)
+    for samples in drawn.values():
+        starts = {tuple(s["starts"]["4"][i] % 64 for i in (0, 1)) for s in samples}
+        assert len(starts) == 1   # one grid per split
+    other = derive_samples(PlanRule(**{**RULE.__dict__, "seed": 1}), "r", 0, "zyx", (10, 600, 700), VOX)
+    assert other["train"][0]["starts"]["4"] != drawn["train"][0]["starts"]["4"] or other["train"] != drawn["train"]
 
 
 def test_stage_plan_boxes_align_and_only_touched_chunks_are_planned():

@@ -7,7 +7,6 @@ import random
 from dataclasses import dataclass
 from pathlib import Path
 
-from .sample import OVERLAP_MAX, overlap_frac
 
 
 @dataclass(frozen=True)
@@ -94,38 +93,34 @@ def start_index(centre_nm: float, voxel_nm: float, factor: int, patch: int, exte
 
 def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],
                    voxel_size_nm: dict[str, float]) -> dict[str, list[dict]]:
-    """Sample descriptors per split; one Random per split, so a larger count extends a smaller count's list.
-    A split asks for at most its capacity: non-overlapping coarsest footprints times the planes it holds (spec §2.5).
-    Val and test reject a sample whose coarsest footprint overlaps an accepted one by more than OVERLAP_MAX;
-    every split drops exact duplicates. Each split spends at most 8 draws per wanted sample."""
+    """Sample descriptors per split, none overlapping: each split tiles every plane it holds with coarsest
+    footprints (one grid offset per split, so the tiles stay disjoint), shuffles the (plane, tile) cells with one
+    Random and takes the first `min(samples[split], capacity)` (spec §2.5). A larger count extends a smaller
+    count's list; finer levels sit inside their coarsest footprint, so no two samples of a split share a pixel."""
     planes = shape[axes.index("z")] if "z" in axes else 1
     extents = [shape[axes.index(axis)] for axis in ("y", "x")]
     coarsest = max(rule.levels)
-    half = rule.patch * coarsest // 2
+    footprint = rule.patch * coarsest
+    tiles = [extent // footprint for extent in extents]
     # the registry's volume id (record/<volume dir>), so both repos put every plane in the same split
     planes_by_split = split_planes(f"{record}/v{volume}.zarr", planes, rule.split)
     out: dict[str, list[dict]] = {}
     for split, planes_of_split in planes_by_split.items():
         count = min(rule.samples.get(split, 0), capacity(*extents, len(planes_of_split), rule.patch, rule.levels))
         rng = random.Random(f"{rule.seed}:{record}:v{volume}:{split}")
+        # the grid's offset: a multiple of the coarsest factor, so every level's start lands on its own grid
+        offsets = [rng.randrange(extent - n * footprint + 1) // coarsest * coarsest if n else 0
+                   for extent, n in zip(extents, tiles)]
+        cells = [(z, ty, tx) for z in planes_of_split for ty in range(tiles[0]) for tx in range(tiles[1])]
+        rng.shuffle(cells)
         accepted: list[dict] = []
-        footprints: list[dict] = []
-        for _ in range(8 * count):
-            if len(accepted) == count:
-                break
-            z = rng.choice(planes_of_split)
+        for z, ty, tx in cells[:count]:
             plane = {"z": z} if "z" in axes else {}
-            centre_nm = [rng.randint(half, extent - half) * voxel_size_nm[axis] for axis, extent in zip("yx", extents)]
+            centre_nm = [(offset + tile * footprint + footprint / 2) * voxel_size_nm[axis]
+                         for offset, tile, axis in zip(offsets, (ty, tx), "yx")]
             starts = {str(factor): [start_index(centre, voxel_size_nm[axis], factor, rule.patch, extent)
                                     for centre, axis, extent in zip(centre_nm, "yx", extents)]
                       for factor in rule.levels}
-            footprint = {"raw": 0, "plane": plane, "y": starts[str(coarsest)][0], "x": starts[str(coarsest)][1]}
-            if footprint in footprints:
-                continue
-            overlaps = (overlap_frac(footprint, other, rule.patch) > OVERLAP_MAX for other in footprints)
-            if split != "train" and any(overlaps):
-                continue
-            footprints.append(footprint)
             accepted.append({"plane": plane, "centre_nm": centre_nm, "levels": list(rule.levels), "patch": rule.patch,
                              "starts": starts})
         out[split] = accepted
