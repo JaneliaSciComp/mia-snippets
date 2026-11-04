@@ -1,6 +1,7 @@
-"""What a staged artifact says about itself (staging spec §5): one model under every group's `attributes.mia`,
-summarized on the volume root and in stage.json, so nothing exists only in stage.json; beside it, the same facts
-the `provenance:` Zarr convention (v0.1.0) defines, as its one staging step."""
+"""What a staged artifact says about itself (staging spec §5). How it was made is the `provenance:` Zarr convention
+(v0.2.0): a staging step and a check step on every group. `attributes.mia` (schema 2) keeps only what neither
+OME-Zarr nor the convention carries and the reader or checker needs: the raw extent, the planned samples, the
+intensity sample, the check results. stage.json is built from the same models."""
 import hashlib
 import json
 from pathlib import Path
@@ -27,7 +28,7 @@ VOXEL_AXIS = TypeAdapter(VoxelAxis)
 
 
 class Artifact(_Strict):
-    """The inputs the staged artifact id hashes, written once by the harness."""
+    """The inputs the staged artifact id hashes, as stage.json records them."""
     id: str
     levels_key: str
     binding_hash: str
@@ -48,44 +49,20 @@ class SourceFile(_Strict):
     access: str
 
 
-class LevelRecord(_Strict):
-    """One written level: its box in raw index space, its array shape and what was written."""
-    factor: int
-    path: str
-    origin: dict[str, int]
-    extent: dict[str, int]
-    shape: list[int]
-    planned_planes: list[int]
-    chunks_written: int
-    bytes_written: int      # uncompressed: chunks_written × the chunk's item count × the item size
-
-
 class Geometry(_Strict):
-    """The raw extent and axis orders, the stored dtype and every written level."""
+    """The raw extent and axis orders: what places a sparse level box in the raw volume."""
     raw_shape: list[int]    # stored (canonical) axis order
     source_axes: str        # the raw array's own axis order
     axes: str
-    dtype: str
-    levels: list[LevelRecord]
-
-
-class Downsampling(_Strict):
-    """How coarser levels were made: block means for raw, nearest samples for labels, remainders clipped."""
-    raw: str = "mean"
-    label: str = "nearest"
-    edge: str = "clip"
-    nearest_offset: str = "(L-1)//2"
 
 
 class Plan(_Strict):
-    """The plan rule verbatim, its digest and the samples derived from it per split."""
-    digest: str
-    rule: dict
+    """The samples derived from the plan rule, per split; the rule itself is a parameter of the staging step."""
     samples: dict[str, list[dict]]
 
 
 class Verification(_Strict):
-    """Check results: the stage's geometry check, then check-stage's schemas, coverage and digests."""
+    """stage.json's check results: the stage's geometry check, then check-stage's schemas, coverage and digests."""
     checks: dict[str, Any] = {}
     ok: bool | None = None
     harness_commit: str | None = None
@@ -94,20 +71,14 @@ class Verification(_Strict):
 
 
 class Provenance(_Strict):
-    """The full `mia` attribute of a raw or label multiscale group."""
+    """The `mia` attribute of a raw or label multiscale group."""
     model_config = ConfigDict(extra="forbid", validate_by_name=True, serialize_by_alias=True)
-    schema_version: Literal[1] = Field(1, alias="schema")   # `schema` would shadow BaseModel.schema
-    kind: Literal["raw", "label"]
-    label_key: str | None = None
+    schema_version: Literal[2] = Field(2, alias="schema")   # `schema` would shadow BaseModel.schema
     segmentation_type: str | None = None
-    artifact: Artifact
-    derived_from: list[SourceFile]
     geometry: Geometry
-    voxel_size: dict[str, VoxelAxis]
-    downsampling: Downsampling = Downsampling()
     plan: Plan
     statistics: dict | None = None
-    verification: Verification = Verification()
+    checks: dict[str, Any] = {}
 
 
 def merge_geometry(checks: list[dict]) -> dict:
@@ -117,70 +88,149 @@ def merge_geometry(checks: list[dict]) -> dict:
 
 
 def summary(volume_provenances: list[Provenance]) -> dict:
-    """The volume root's `mia`: the raw group's artifact, voxel size and plan digest, every group's source files,
-    and the groups' geometry checks merged."""
-    first = volume_provenances[0]
-    derived = {(s.url, s.member): s for p in volume_provenances for s in p.derived_from}
-    geometry = [p.verification.checks["geometry"] for p in volume_provenances if "geometry" in p.verification.checks]
-    verification = Verification(checks={"geometry": merge_geometry(geometry)} if geometry else {})
-    return {"schema": 1, "artifact": first.artifact.model_dump(mode="json"),
-            "derived_from": [s.model_dump(mode="json") for s in derived.values()],
-            "voxel_size": {a: VOXEL_AXIS.dump_python(v, mode="json") for a, v in first.voxel_size.items()},
-            "plan": {"digest": first.plan.digest}, "verification": verification.model_dump(mode="json")}
+    """The volume root's `mia`: the groups' geometry checks merged."""
+    geometry = [p.checks["geometry"] for p in volume_provenances if "geometry" in p.checks]
+    return {"schema": 2, "checks": {"geometry": merge_geometry(geometry)} if geometry else {}}
 
+
+# --- the `provenance:` Zarr convention -------------------------------------------------------------------------
 
 CONVENTION = {"uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenance:",
-              "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
-              "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
+              "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.2.0/schema.json",
+              "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.2.0/README.md",
               "description": "The processing steps that produced or modified this node"}
 HARNESS_URI = "https://github.com/JaneliaSciComp/mia-snippets"
+STAGE_STEP = "Sparse OME-Zarr staging"
+CHECK_STEP = "check-stage"
 
 
-def convention_attributes(mia: dict, *, started: str | None = None, ended: str | None = None) -> dict:
-    """The `provenance:` Zarr convention's attributes beside a group's `mia` (full or root summary): one step, the
-    stage, carrying what the convention defines (software, parameters, inputs, times); the rest stays under `mia`."""
-    artifact = mia["artifact"]
-    inputs = []
-    for source in mia["derived_from"]:
-        reference = {"uri": source["url"]}
-        if source.get("member"):
-            reference["name"] = source["member"]
-        if sha256 := (source.get("validators") or {}).get("sha256"):
+def _software(commit: str | None) -> dict:
+    return {"name": "mia-harness", "version": commit or "unknown", "uri": HARNESS_URI}
+
+
+def _times(started: str | None, ended: str | None) -> dict:
+    return {k: v for k, v in (("started", started), ("ended", ended)) if v}
+
+
+def stage_step(artifact: Artifact, sources: list[SourceFile], parameters: dict, *, started: str | None = None,
+               ended: str | None = None) -> dict:
+    """The staging step: the harness, its lockfile, the snippets it loaded, the parameters as received, every source
+    file (and the record) as inputs, the artifact id as the output."""
+    step: dict = {"name": STAGE_STEP, "software": _software(artifact.harness_commit)}
+    if artifact.env_digest:
+        step["environment"] = {"name": "pixi.lock", "checksum": f"sha256:{artifact.env_digest}"}
+        if artifact.harness_commit:
+            step["environment"]["uri"] = f"{HARNESS_URI}/blob/{artifact.harness_commit}/harness/pixi.lock"
+    snippets = sorted({(s.snippet["name"], s.snippet["commit"]) for s in sources})
+    step["modules"] = [{"name": name, "version": commit, "uri": HARNESS_URI} for name, commit in snippets]
+    step["parameters"] = parameters
+    inputs: list[dict] = [{"id": artifact.record, "name": "record"}]
+    for source in {(s.url, s.member): s for s in sources}.values():
+        reference = {"uri": source.url}
+        if source.member:
+            reference["name"] = source.member
+        if sha256 := source.validators.get("sha256"):
             reference["checksum"] = f"sha256:{sha256}"
         inputs.append(reference)
-    step = {"name": "Sparse OME-Zarr staging",
-            "software": {"name": "mia-harness", "version": artifact["harness_commit"] or "unknown", "uri": HARNESS_URI},
-            "parameters": {"levels_key": artifact["levels_key"], "plan_digest": artifact["plan_digest"],
-                           "voxel_size_nm": {axis: value["nm"] for axis, value in mia["voxel_size"].items()}},
-            "inputs": inputs}
-    step |= {k: v for k, v in (("started", started), ("ended", ended)) if v}
-    return {"zarr_conventions": [CONVENTION], "provenance:steps": [step]}
+    step["inputs"] = inputs
+    step["outputs"] = [{"id": artifact.id, "name": "artifact"}]
+    return step | _times(started, ended)
+
+
+def check_step(ok: bool, harness_commit: str | None, schemas_commit: str | None, started: str | None,
+               ended: str | None) -> dict:
+    """The check-stage step: what checked, against which schemas, and whether it passed."""
+    step: dict = {"name": CHECK_STEP, "software": _software(harness_commit)}
+    if schemas_commit:
+        step["parameters"] = {"schemas_commit": schemas_commit}
+    step["status"] = "ok" if ok else "failed"
+    return step | _times(started, ended)
+
+
+def convention_attributes(steps: list[dict]) -> dict:
+    return {"zarr_conventions": [CONVENTION], "provenance:steps": steps}
+
+
+def with_step(attributes: dict, step: dict) -> dict:
+    """`attributes` with `step` appended to the convention's steps, replacing an earlier step of the same name."""
+    steps = [s for s in attributes.get("provenance:steps") or [] if s.get("name") != step["name"]]
+    return {**attributes, **convention_attributes(steps + [step])}
+
+
+def _stage_step_of(attributes: dict) -> dict:
+    return next((s for s in attributes.get("provenance:steps") or [] if s.get("name") == STAGE_STEP), {})
+
+
+def artifact_id_of(attributes: dict) -> str | None:
+    """The artifact id a group's staging step names as its output."""
+    outputs = _stage_step_of(attributes).get("outputs") or [{}]
+    return outputs[0].get("id")
+
+
+def record_of(attributes: dict) -> str | None:
+    """The record a group's staging step names among its inputs."""
+    return next((i.get("id") for i in _stage_step_of(attributes).get("inputs") or [] if i.get("name") == "record"),
+                None)
+
+
+def upgrade_schema_1(attributes: dict, rule: dict | None) -> dict:
+    """A group's attributes with its schema-1 `mia` (artifact, derived_from, voxel_size, plan rule and digest,
+    downsampling, kind, label_key, geometry levels, verification) split into schema 2 and the convention steps it
+    implied. `rule` stands in for the plan rule where the group recorded only its digest (the volume root)."""
+    mia = attributes["mia"]
+    artifact = Artifact(**mia["artifact"])
+    sources = [SourceFile(**s) for s in mia["derived_from"]]
+    parameters = {k: v for k, v in (("plan", mia["plan"].get("rule", rule)), ("voxel_size", mia.get("voxel_size")))
+                  if v is not None}
+    steps = [stage_step(artifact, sources, parameters)]
+    verification = mia.get("verification") or {}
+    if verification.get("ok") is not None:
+        steps.append(check_step(verification["ok"], verification.get("harness_commit"),
+                                verification.get("schemas_commit"), verification.get("time"), verification.get("time")))
+    slim: dict = {"schema": 2}
+    if mia.get("segmentation_type"):
+        slim["segmentation_type"] = mia["segmentation_type"]
+    if "geometry" in mia:
+        slim["geometry"] = {k: mia["geometry"][k] for k in ("raw_shape", "source_axes", "axes")}
+    if "samples" in mia["plan"]:
+        slim["plan"] = {"samples": mia["plan"]["samples"]}
+    if mia.get("statistics") is not None:
+        slim["statistics"] = mia["statistics"]
+    slim["checks"] = verification.get("checks") or {}
+    kept = {k: v for k, v in attributes.items() if k not in ("mia", "zarr_conventions", "provenance:steps")}
+    return {**kept, "mia": slim, **convention_attributes(steps)}
 
 
 def add_convention(out_dir: Path) -> dict:
-    """Give every group of a staged artifact under `out_dir` the convention attributes derived from its `mia`, in
-    place, and refresh stage.json's zarr.json digests if it has any. Groups that already carry them, or whose `mia`
-    predates `artifact`, are left alone. Returns counts: written, present, skipped."""
+    """Bring every group of a staged artifact under `out_dir` to schema 2 with the convention steps, in place, and
+    refresh stage.json's zarr.json digests if it has any. Groups already at schema 2 are left alone; a `mia` that
+    predates `artifact` cannot be upgraded. Returns counts: written, present, skipped."""
+    out_dir = Path(out_dir)
     counts = {"written": 0, "present": 0, "skipped": 0}
-    for path in sorted(Path(out_dir).rglob("zarr.json")):
+    for path in sorted(out_dir.rglob("zarr.json")):
         document = json.loads(path.read_text())
         attributes = document.get("attributes") or {}
         mia = attributes.get("mia")
-        if not isinstance(mia, dict) or "artifact" not in mia:
-            counts["skipped"] += document.get("node_type") == "group" and "mia" in attributes
+        if not isinstance(mia, dict):
             continue
-        if "provenance:steps" in attributes:
+        if mia.get("schema") == 2:
             counts["present"] += 1
-            continue
-        document["attributes"] = {**attributes, **convention_attributes(mia)}
-        path.write_text(json.dumps(document, indent=2))
-        counts["written"] += 1
-    stage_path = Path(out_dir) / "stage.json"
+        elif "artifact" not in mia:
+            counts["skipped"] += 1
+        else:
+            rule = None
+            if "rule" not in mia["plan"]:     # the volume root: the raw group beside it recorded the rule
+                raw = json.loads((path.parent / "raw" / "zarr.json").read_text())["attributes"]
+                rule = (raw["mia"].get("plan") or {}).get("rule") or (_stage_step_of(raw).get("parameters") or {}).get("plan")
+            document["attributes"] = upgrade_schema_1(attributes, rule)
+            path.write_text(json.dumps(document, indent=2))
+            counts["written"] += 1
+    stage_path = out_dir / "stage.json"
     if counts["written"] and stage_path.exists():
         stage = json.loads(stage_path.read_text())
         if stage.get("zarr_json_sha256"):
             stage["zarr_json_sha256"] = {p.relative_to(out_dir).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-                                         for p in sorted(Path(out_dir).rglob("zarr.json"))}
+                                         for p in sorted(out_dir.rglob("zarr.json"))}
             stage_path.write_text(json.dumps(stage, separators=(",", ":")) + "\n")
     return counts
 

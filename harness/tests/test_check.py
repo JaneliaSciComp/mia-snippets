@@ -10,6 +10,7 @@ import pytest
 import zarr
 from rangeserver import server  # noqa: F401  (fixture)
 from test_smoke import SNAP, write
+from test_provenance import SCHEMA_1, convention_errors
 from test_stage import SHAPE, VOXEL, io, plan_input, served  # noqa: F401  (io is a fixture)
 
 import mia_harness.check
@@ -35,39 +36,50 @@ def test_check_stage_passes_a_good_artifact_and_records_verification(staged_out)
     assert rep["ok"] and rep["checks"]["schemas"]["errors"] == [] and rep["checks"]["coverage"]["missing"] == []
     assert rep["checks"]["strict"]["label"]  # instance label fails strict_label (no colors): advisory, recorded
     assert rep["checks"]["coverage"]["samples"] == 12 and rep["checks"]["coverage"]["levels"] == 6
-    mia = zarr.open_group(staged_out / "v0.zarr" / "raw", mode="r").attrs["mia"]
-    assert mia["verification"]["ok"] and mia["verification"]["schemas_commit"] == ngff.SCHEMAS_COMMIT
-    assert mia["verification"]["harness_commit"] == "h" * 40 and mia["verification"]["checks"]["geometry"]["samples"]
+    attrs = zarr.open_group(staged_out / "v0.zarr" / "raw", mode="r").attrs.asdict()
+    assert convention_errors(attrs) == []
+    stage_, check = attrs["provenance:steps"]          # the staging step stays; the check step follows it
+    assert stage_["name"] == "Sparse OME-Zarr staging" and check["name"] == "check-stage"
+    assert check["status"] == "ok" and check["parameters"] == {"schemas_commit": ngff.SCHEMAS_COMMIT}
+    assert check["software"]["version"] == "h" * 40 and check["started"] <= check["ended"]
+    mia = attrs["mia"]
+    assert mia["checks"] == rep["checks"] and mia["checks"]["geometry"]["samples"]
     for group in ("v0.zarr", "v0.zarr/labels/gt"):
-        assert zarr.open_group(staged_out / group, mode="r").attrs["mia"]["verification"] == mia["verification"]
-    assert "provenance:steps" in zarr.open_group(staged_out / "v0.zarr" / "raw", mode="r").attrs   # left in place
+        other = zarr.open_group(staged_out / group, mode="r").attrs.asdict()
+        assert other["provenance:steps"][-1] == check and other["mia"]["checks"] == mia["checks"]
     text = (staged_out / "stage.json").read_text()
     assert "\n  " not in text   # the rewrite stays compact
     sj = json.loads(text)
     raw_json = (staged_out / "v0.zarr/raw/zarr.json").read_bytes()
     assert sj["zarr_json_sha256"]["v0.zarr/raw/zarr.json"] == hashlib.sha256(raw_json).hexdigest()
     assert "v0.zarr/raw/s0/zarr.json" in sj["zarr_json_sha256"] and sj["ok"] and sj["verification"]["ok"]
-    assert sj["verification"] == mia["verification"]
+    assert sj["checks"] == mia["checks"] and sj["verification"]["harness_commit"] == "h" * 40
 
 
-def test_add_provenance_restores_the_convention_in_place_and_refreshes_the_digests(staged_out, capsys):
-    """An artifact staged before the convention: `mia` without the convention keys, digests already recorded."""
-    check_stage(staged_out)
-    for path in staged_out.rglob("zarr.json"):
-        document = json.loads(path.read_text())
-        document["attributes"] = {k: v for k, v in document["attributes"].items()
-                                  if k not in ("zarr_conventions", "provenance:steps")}
-        path.write_text(json.dumps(document))
-    assert cli.main(["add-provenance", str(staged_out.parent)]) == 0
-    assert capsys.readouterr().out.strip().endswith("written 3, present 0, skipped 0")
-    attrs = zarr.open_group(staged_out / "v0.zarr" / "raw", mode="r").attrs.asdict()
-    assert attrs["provenance:steps"][0]["software"]["name"] == "mia-harness" and "started" not in attrs["provenance:steps"][0]
-    assert attrs["mia"]["verification"]["ok"]          # `mia` untouched
-    sj = json.loads((staged_out / "stage.json").read_text())
+def test_add_provenance_upgrades_schema_1_in_place_and_leaves_schema_2_alone(staged_out, tmp_path, capsys):
+    """An artifact written under schema 1: `mia` carries everything, no convention; check-stage had recorded digests."""
+    old = tmp_path / "old" / "v0.zarr"
+    (old / "raw").mkdir(parents=True)
+    raw = {"schema": 1, **SCHEMA_1}
+    root = {k: v for k, v in SCHEMA_1.items() if k in ("schema", "artifact", "derived_from", "voxel_size", "verification")}
+    root["plan"] = {"digest": "d" * 64}
+    (old / "zarr.json").write_text(json.dumps({"zarr_format": 3, "node_type": "group", "attributes": {"ome": {}, "mia": root}}))
+    (old / "raw" / "zarr.json").write_text(json.dumps({"zarr_format": 3, "node_type": "group", "attributes": {"ome": {}, "mia": raw}}))
+    (old / "raw" / "s0").mkdir()
+    (old / "raw" / "s0" / "zarr.json").write_text(json.dumps({"zarr_format": 3, "node_type": "array"}))
+    (old.parent / "stage.json").write_text(json.dumps({"ok": True, "zarr_json_sha256": {"stale": "0"}}))
+    assert cli.main(["add-provenance", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert f"{old.parent}: written 2, present 0, skipped 0" in out and f"{staged_out}: written 0, present 3, skipped 0" in out
+    for group in (old, old / "raw"):
+        attrs = json.loads((group / "zarr.json").read_text())["attributes"]
+        assert convention_errors(attrs) == [] and attrs["mia"]["schema"] == 2 and "artifact" not in attrs["mia"]
+        assert attrs["provenance:steps"][0]["parameters"]["plan"] == {"seed": 0, "patch": 64}   # the root took raw's rule
+    sj = json.loads((old.parent / "stage.json").read_text())
+    assert set(sj["zarr_json_sha256"]) == {"v0.zarr/zarr.json", "v0.zarr/raw/zarr.json", "v0.zarr/raw/s0/zarr.json"}
     for rel, digest in sj["zarr_json_sha256"].items():
-        assert hashlib.sha256((staged_out / rel).read_bytes()).hexdigest() == digest
-    assert cli.main(["add-provenance", str(staged_out)]) == 0 and check_stage(staged_out)["ok"]
-    assert capsys.readouterr().out.strip().endswith("written 0, present 3, skipped 0")
+        assert hashlib.sha256((old.parent / rel).read_bytes()).hexdigest() == digest
+    assert cli.main(["add-provenance", str(old.parent)]) == 0 and "written 0, present 2" in capsys.readouterr().out
 
 
 def test_check_stage_is_idempotent_and_its_digests_describe_the_files_on_disk(staged_out):
@@ -127,7 +139,8 @@ def test_check_stage_reports_a_missing_stage_json_without_writing(staged_out):
     rep = check_stage(staged_out)
     assert not rep["ok"] and rep["errors"][0].startswith("stage.json: cannot read: FileNotFoundError")
     assert not (staged_out / "stage.json").exists()
-    assert zarr.open_group(staged_out / "v0.zarr/raw", mode="r").attrs["mia"]["verification"]["ok"] is None  # untouched
+    steps = zarr.open_group(staged_out / "v0.zarr/raw", mode="r").attrs["provenance:steps"]
+    assert [s["name"] for s in steps] == ["Sparse OME-Zarr staging"]        # untouched
 
 
 def test_check_stage_reports_a_partly_written_volume(staged_out):
@@ -137,7 +150,7 @@ def test_check_stage_reports_a_partly_written_volume(staged_out):
                                  for e in rep["errors"])
     sj = json.loads((staged_out / "stage.json").read_text())
     assert not sj["ok"] and "v0.zarr/raw/zarr.json" not in sj["zarr_json_sha256"]
-    assert zarr.open_group(staged_out / "v0.zarr/labels/gt", mode="r").attrs["mia"]["verification"]["ok"] is False
+    assert zarr.open_group(staged_out / "v0.zarr/labels/gt", mode="r").attrs["provenance:steps"][-1]["status"] == "failed"
 
 
 def test_check_stage_says_why_when_the_stage_failed_or_left_no_volumes(staged_out):

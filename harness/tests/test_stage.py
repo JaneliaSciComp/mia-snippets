@@ -15,7 +15,8 @@ from mia_harness.binding import binding_hash
 from mia_harness.cache import DatasetCache
 from mia_harness.io import IO
 from mia_harness.plan import LevelPlan, PlanInput, PlanRule, derive_samples, planned_bytes, stage_plan
-from mia_harness.provenance import VoxelAxis
+from mia_harness.provenance import HARNESS_URI, VoxelAxis
+from mia_harness.pyramid import open_pyramid
 from test_provenance import convention_errors
 from mia_harness.stage import stage
 
@@ -70,22 +71,29 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     rep = stage(b, SNAP, r, io, plan=plan, voxel=VOXEL, out=tmp_path / "out")
     assert rep["ok"], rep["errors"]
     assert rep["bytes_fetched"] == source_bytes   # each source fetched once, then read from the cache
-    mia = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["mia"]
-    assert mia["schema"] == 1 and mia["artifact"]["id"] == "a" * 16 and mia["artifact"]["plan_digest"] == plan.rule.digest()
-    assert mia["artifact"]["binding_hash"] == binding_hash(b) and mia["artifact"]["record_commit"] == "0" * 40
-    assert mia["derived_from"][0]["snippet"] == {"name": "npy-local", "commit": "1" * 40}
-    assert mia["derived_from"][0]["access"] == "chunk" and mia["derived_from"][0]["validators"]["size"] == raw_bytes
-    assert mia["voxel_size"]["y"] == {"nm": 8.0, "source": "assumed", "basis": "test", "range": None}
-    assert sum(len(v) for v in mia["plan"]["samples"].values()) == 6 and mia["geometry"]["raw_shape"] == list(SHAPE)
-    assert mia["verification"]["checks"]["geometry"]["mismatches"] == []
-    assert mia["verification"]["checks"]["geometry"]["samples"] == 6 and len(mia["statistics"]["intensity_sample"]) == 1
-    lab = zarr.open_group(tmp_path / "out" / "v0.zarr" / "labels" / "gt", mode="r").attrs["mia"]
-    assert lab["kind"] == "label" and lab["geometry"]["levels"] == mia["geometry"]["levels"]   # same boxes, same chunks
-    assert lab["label_key"] == "gt" and lab["statistics"] is None
+    attrs = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs.asdict()
+    mia = attrs["mia"]
+    assert convention_errors(attrs) == []
+    step, = attrs["provenance:steps"]           # how the group was made: the convention
+    assert step["software"] == {"name": "mia-harness", "version": "c" * 40, "uri": HARNESS_URI}
+    assert step["outputs"] == [{"id": "a" * 16, "name": "artifact"}] and step["started"] <= step["ended"]
+    assert step["parameters"]["plan"] == json.loads(json.dumps(dataclasses.asdict(plan.rule)))
+    assert step["parameters"]["binding"]["record_commit"] == "0" * 40
+    assert step["parameters"]["voxel_size"]["y"] == {"nm": 8.0, "source": "assumed", "basis": "test", "range": None}
+    assert step["modules"] == [{"name": "npy-local", "version": "1" * 40, "uri": HARNESS_URI}]
+    assert step["inputs"] == [{"id": "r", "name": "record"}, {"uri": server.url("/raw0.npy")}]
+    assert mia["schema"] == 2 and set(mia) == {"schema", "segmentation_type", "geometry", "plan", "statistics", "checks"}
+    assert mia["geometry"] == {"raw_shape": list(SHAPE), "source_axes": "zyx", "axes": "zyx"}
+    assert sum(len(v) for v in mia["plan"]["samples"].values()) == 6
+    assert mia["checks"]["geometry"]["mismatches"] == [] and mia["checks"]["geometry"]["samples"] == 6
+    assert len(mia["statistics"]["intensity_sample"]) == 1
+    lab_attrs = zarr.open_group(tmp_path / "out" / "v0.zarr" / "labels" / "gt", mode="r").attrs.asdict()
+    lab = lab_attrs["mia"]
+    assert lab["geometry"] == mia["geometry"] and lab["statistics"] is None and lab["segmentation_type"]
+    assert lab_attrs["provenance:steps"][0]["inputs"] == [{"id": "r", "name": "record"}, {"uri": server.url("/labels0.npy")}]
     ms = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["ome"]["multiscales"][0]
     assert ms["metadata"] == {"method": "mean", "factors": [1, 2, 4], "module": "mia_harness.pyramid",
                               "commit": "c" * 40, "edge": "clip", "nearest_offset": "(L-1)//2"}
-    assert mia["artifact"]["harness_commit"] == "c" * 40
     assert ms["coordinateSystems"][0]["name"] == "r.v0"
     text = (tmp_path / "out" / "stage.json").read_text()
     assert "\n  " not in text   # compact: the consumer reads stage.json within a size limit
@@ -95,16 +103,14 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     assert sj["volumes"][0]["labels"] == {"gt": "labels/gt"} and sj["zarr_json_sha256"] == {}
     assert sj["checks"]["geometry"]["mismatches"] == [] and sj["checks"]["geometry"]["samples"] == 12
     level = sj["volumes"][0]["levels"][2]
-    assert level["factor"] == 4 and level["origin"] == mia["geometry"]["levels"][2]["origin"] and "extent" in level
-    root = zarr.open_group(tmp_path / "out" / "v0.zarr", mode="r").attrs
-    assert root["mia"]["plan"] == {"digest": plan.rule.digest()} and root["ome"]["labels"] == ["gt"]
-    for group in ("v0.zarr", "v0.zarr/raw", "v0.zarr/labels/gt"):    # the convention beside `mia`, on every group
-        attrs = zarr.open_group(tmp_path / "out" / group, mode="r").attrs.asdict()
-        assert convention_errors(attrs) == [], group
-        step, = attrs["provenance:steps"]
-        assert step["software"]["version"] == "c" * 40 and step["started"] <= step["ended"]
-        assert step["inputs"][0]["uri"] == attrs["mia"]["derived_from"][0]["url"]
-    assert len(root["provenance:steps"][0]["inputs"]) == 2       # the root's inputs are every group's
+    assert level["factor"] == 4 and "extent" in level
+    assert level["origin"] == open_pyramid(tmp_path / "out" / "v0.zarr" / "raw").levels[2].origin   # from the OME transforms
+    assert sj["artifact"]["binding_hash"] == binding_hash(b) and sj["artifact"]["harness_commit"] == "c" * 40
+    root = zarr.open_group(tmp_path / "out" / "v0.zarr", mode="r").attrs.asdict()
+    assert convention_errors(root) == [] and root["ome"]["labels"] == ["gt"]
+    assert root["mia"] == {"schema": 2, "checks": {"geometry": {"samples": 12, "levels": 6, "mismatches": []}}}
+    assert [i.get("uri", i.get("id")) for i in root["provenance:steps"][0]["inputs"]] == [
+        "r", server.url("/raw0.npy"), server.url("/labels0.npy")]      # the root's inputs are every group's
 
 
 def test_stage_refuses_a_plan_over_the_byte_cap(tmp_path, io, server):
@@ -137,11 +143,14 @@ def test_stage_pairs_a_channel_raw_with_a_label_without_channels(tmp_path, io, s
     rep = stage(b, SNAP, r, io, plan=plan_input((1, 2), 64, {"train": 3, "val": 3, "test": 3}), voxel=VOXEL,
                 out=tmp_path / "out")
     assert rep["ok"], rep["errors"]
-    raw = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["mia"]["geometry"]
-    lab = zarr.open_group(tmp_path / "out" / "v0.zarr" / "labels" / "gt", mode="r").attrs["mia"]["geometry"]
-    assert raw["axes"] == "cyx" and lab["axes"] == "yx" and len(rep["volumes"][0]["intensity_sample"]) == 2
-    assert [lv["chunks_written"] for lv in raw["levels"]] == [2 * lv["chunks_written"] for lv in lab["levels"]]
-    assert [lv["origin"] for lv in raw["levels"]] == [lv["origin"] for lv in lab["levels"]]
+    raw = open_pyramid(tmp_path / "out" / "v0.zarr" / "raw")
+    lab = open_pyramid(tmp_path / "out" / "v0.zarr" / "labels" / "gt")
+    assert raw.axes == "cyx" and lab.axes == "yx" and len(rep["volumes"][0]["intensity_sample"]) == 2
+
+    def chunks(p):
+        return [sum(1 for f in (p.path / lv.path).rglob("*") if f.is_file() and f.name != "zarr.json") for lv in p.levels]
+    assert chunks(raw) == [2 * n for n in chunks(lab)]        # one chunk per channel over the same boxes
+    assert [lv.origin for lv in raw.levels] == [lv.origin for lv in lab.levels]
 
 
 def test_stage_refuses_a_binding_without_source_urls(tmp_path, io):
