@@ -40,6 +40,7 @@ def test_check_stage_passes_a_good_artifact_and_records_verification(staged_out)
     assert mia["verification"]["harness_commit"] == "h" * 40 and mia["verification"]["checks"]["geometry"]["samples"]
     for group in ("v0.zarr", "v0.zarr/labels/gt"):
         assert zarr.open_group(staged_out / group, mode="r").attrs["mia"]["verification"] == mia["verification"]
+    assert "provenance:steps" in zarr.open_group(staged_out / "v0.zarr" / "raw", mode="r").attrs   # left in place
     text = (staged_out / "stage.json").read_text()
     assert "\n  " not in text   # the rewrite stays compact
     sj = json.loads(text)
@@ -47,6 +48,26 @@ def test_check_stage_passes_a_good_artifact_and_records_verification(staged_out)
     assert sj["zarr_json_sha256"]["v0.zarr/raw/zarr.json"] == hashlib.sha256(raw_json).hexdigest()
     assert "v0.zarr/raw/s0/zarr.json" in sj["zarr_json_sha256"] and sj["ok"] and sj["verification"]["ok"]
     assert sj["verification"] == mia["verification"]
+
+
+def test_add_provenance_restores_the_convention_in_place_and_refreshes_the_digests(staged_out, capsys):
+    """An artifact staged before the convention: `mia` without the convention keys, digests already recorded."""
+    check_stage(staged_out)
+    for path in staged_out.rglob("zarr.json"):
+        document = json.loads(path.read_text())
+        document["attributes"] = {k: v for k, v in document["attributes"].items()
+                                  if k not in ("zarr_conventions", "provenance:steps")}
+        path.write_text(json.dumps(document))
+    assert cli.main(["add-provenance", str(staged_out.parent)]) == 0
+    assert capsys.readouterr().out.strip().endswith("written 3, present 0, skipped 0")
+    attrs = zarr.open_group(staged_out / "v0.zarr" / "raw", mode="r").attrs.asdict()
+    assert attrs["provenance:steps"][0]["software"]["name"] == "mia-harness" and "started" not in attrs["provenance:steps"][0]
+    assert attrs["mia"]["verification"]["ok"]          # `mia` untouched
+    sj = json.loads((staged_out / "stage.json").read_text())
+    for rel, digest in sj["zarr_json_sha256"].items():
+        assert hashlib.sha256((staged_out / rel).read_bytes()).hexdigest() == digest
+    assert cli.main(["add-provenance", str(staged_out)]) == 0 and check_stage(staged_out)["ok"]
+    assert capsys.readouterr().out.strip().endswith("written 0, present 3, skipped 0")
 
 
 def test_check_stage_is_idempotent_and_its_digests_describe_the_files_on_disk(staged_out):

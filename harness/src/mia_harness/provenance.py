@@ -1,5 +1,9 @@
 """What a staged artifact says about itself (staging spec §5): one model under every group's `attributes.mia`,
-summarized on the volume root and in stage.json, so nothing exists only in stage.json."""
+summarized on the volume root and in stage.json, so nothing exists only in stage.json; beside it, the same facts
+the `provenance:` Zarr convention (v0.1.0) defines, as its one staging step."""
+import hashlib
+import json
+from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
@@ -123,6 +127,62 @@ def summary(volume_provenances: list[Provenance]) -> dict:
             "derived_from": [s.model_dump(mode="json") for s in derived.values()],
             "voxel_size": {a: VOXEL_AXIS.dump_python(v, mode="json") for a, v in first.voxel_size.items()},
             "plan": {"digest": first.plan.digest}, "verification": verification.model_dump(mode="json")}
+
+
+CONVENTION = {"uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenance:",
+              "schema_url": "https://raw.githubusercontent.com/BioImageTools/zarr-convention-provenance/refs/tags/v0.1.0/schema.json",
+              "spec_url": "https://github.com/BioImageTools/zarr-convention-provenance/blob/v0.1.0/README.md",
+              "description": "The processing steps that produced or modified this node"}
+HARNESS_URI = "https://github.com/JaneliaSciComp/mia-snippets"
+
+
+def convention_attributes(mia: dict, *, started: str | None = None, ended: str | None = None) -> dict:
+    """The `provenance:` Zarr convention's attributes beside a group's `mia` (full or root summary): one step, the
+    stage, carrying what the convention defines (software, parameters, inputs, times); the rest stays under `mia`."""
+    artifact = mia["artifact"]
+    inputs = []
+    for source in mia["derived_from"]:
+        reference = {"uri": source["url"]}
+        if source.get("member"):
+            reference["name"] = source["member"]
+        if sha256 := (source.get("validators") or {}).get("sha256"):
+            reference["checksum"] = f"sha256:{sha256}"
+        inputs.append(reference)
+    step = {"name": "Sparse OME-Zarr staging",
+            "software": {"name": "mia-harness", "version": artifact["harness_commit"] or "unknown", "uri": HARNESS_URI},
+            "parameters": {"levels_key": artifact["levels_key"], "plan_digest": artifact["plan_digest"],
+                           "voxel_size_nm": {axis: value["nm"] for axis, value in mia["voxel_size"].items()}},
+            "inputs": inputs}
+    step |= {k: v for k, v in (("started", started), ("ended", ended)) if v}
+    return {"zarr_conventions": [CONVENTION], "provenance:steps": [step]}
+
+
+def add_convention(out_dir: Path) -> dict:
+    """Give every group of a staged artifact under `out_dir` the convention attributes derived from its `mia`, in
+    place, and refresh stage.json's zarr.json digests if it has any. Groups that already carry them, or whose `mia`
+    predates `artifact`, are left alone. Returns counts: written, present, skipped."""
+    counts = {"written": 0, "present": 0, "skipped": 0}
+    for path in sorted(Path(out_dir).rglob("zarr.json")):
+        document = json.loads(path.read_text())
+        attributes = document.get("attributes") or {}
+        mia = attributes.get("mia")
+        if not isinstance(mia, dict) or "artifact" not in mia:
+            counts["skipped"] += document.get("node_type") == "group" and "mia" in attributes
+            continue
+        if "provenance:steps" in attributes:
+            counts["present"] += 1
+            continue
+        document["attributes"] = {**attributes, **convention_attributes(mia)}
+        path.write_text(json.dumps(document, indent=2))
+        counts["written"] += 1
+    stage_path = Path(out_dir) / "stage.json"
+    if counts["written"] and stage_path.exists():
+        stage = json.loads(stage_path.read_text())
+        if stage.get("zarr_json_sha256"):
+            stage["zarr_json_sha256"] = {p.relative_to(out_dir).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+                                         for p in sorted(Path(out_dir).rglob("zarr.json"))}
+            stage_path.write_text(json.dumps(stage, separators=(",", ":")) + "\n")
+    return counts
 
 
 class VolumeSummary(_Strict):

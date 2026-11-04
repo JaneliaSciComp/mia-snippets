@@ -16,6 +16,7 @@ from mia_harness.cache import DatasetCache
 from mia_harness.io import IO
 from mia_harness.plan import LevelPlan, PlanInput, PlanRule, derive_samples, planned_bytes, stage_plan
 from mia_harness.provenance import VoxelAxis
+from test_provenance import convention_errors
 from mia_harness.stage import stage
 
 VOXEL = {"z": VoxelAxis(300.0, "record"), "y": VoxelAxis(8.0, "assumed", "test"), "x": VoxelAxis(8.0, "assumed", "test")}
@@ -97,6 +98,13 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     assert level["factor"] == 4 and level["origin"] == mia["geometry"]["levels"][2]["origin"] and "extent" in level
     root = zarr.open_group(tmp_path / "out" / "v0.zarr", mode="r").attrs
     assert root["mia"]["plan"] == {"digest": plan.rule.digest()} and root["ome"]["labels"] == ["gt"]
+    for group in ("v0.zarr", "v0.zarr/raw", "v0.zarr/labels/gt"):    # the convention beside `mia`, on every group
+        attrs = zarr.open_group(tmp_path / "out" / group, mode="r").attrs.asdict()
+        assert convention_errors(attrs) == [], group
+        step, = attrs["provenance:steps"]
+        assert step["software"]["version"] == "c" * 40 and step["started"] <= step["ended"]
+        assert step["inputs"][0]["uri"] == attrs["mia"]["derived_from"][0]["url"]
+    assert len(root["provenance:steps"][0]["inputs"]) == 2       # the root's inputs are every group's
 
 
 def test_stage_refuses_a_plan_over_the_byte_cap(tmp_path, io, server):

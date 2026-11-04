@@ -1,6 +1,7 @@
 """`harness stage`: a binding's arrays and a plan rule → one sparse OME-Zarr 0.6 image per raw volume, labels
 alongside, provenance under `attributes.mia` and stage.json from the same model (staging spec §4.1, §5, §6)."""
 import dataclasses
+from datetime import datetime, timezone
 import json
 import os
 from dataclasses import dataclass
@@ -16,6 +17,7 @@ from .fetch import expand
 from .io import IO, BudgetExceeded, HostNotAllowed, _split
 from .plan import LevelPlan, PlanInput, StagePlan, derive_samples, planned_bytes, stage_plan
 from .provenance import (VOXEL_AXIS, Artifact, Geometry, LevelRecord, Plan, Provenance, SourceFile, Verification,
+                         convention_attributes,
                          VolumeSummary, VoxelAxis, merge_geometry, stage_json, summary)
 from .pyramid import (Pyramid, PyramidInfo, _canonical, _read_yx, block_mean, open_pyramid, stride, write_pyramid,
                       write_volume_groups)
@@ -171,9 +173,14 @@ def _level_records(plan: StagePlan, info: PyramidInfo, channels: int, itemsize: 
             for lp, li in zip(plan.levels, info.levels)]
 
 
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
 def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifact, rule_input: PlanInput, io: IO,
-                  rng: np.random.Generator, errors: list[str]) -> tuple[VolumeSummary, list[dict]]:
-    """Write every group of the volume, check its geometry, then set its `mia` once; then the volume root."""
+                  rng: np.random.Generator, errors: list[str], started: str) -> tuple[VolumeSummary, list[dict]]:
+    """Write every group of the volume, check its geometry, then set its `mia` and the `provenance:` convention
+    once; then the volume root."""
     rule = rule_input.rule
     vdir = out / f"v{volume.index}.zarr"
     nm = {a: v.nm for a, v in volume.voxel.items()}
@@ -207,10 +214,13 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
             voxel_size=volume.voxel, plan=plan,
             statistics={"intensity_sample": sample} if group.kind == "raw" else None,
             verification=Verification(checks={"geometry": geometry}))
-        zarr.open_group(vdir / group.path, mode="r+").attrs["mia"] = provenance.model_dump(mode="json")
+        mia = provenance.model_dump(mode="json")
+        attrs = zarr.open_group(vdir / group.path, mode="r+").attrs
+        attrs.put({**attrs.asdict(), "mia": mia, **convention_attributes(mia, started=started, ended=_now())})
         provenances.append(provenance)
     labels = {g.binding.label_key: g.path for g in volume.groups if isinstance(g.binding, LabelBinding)}
-    write_volume_groups(vdir, list(labels), summary(provenances))
+    root_mia = summary(provenances)
+    write_volume_groups(vdir, list(labels), root_mia, convention_attributes(root_mia, started=started, ended=_now()))
     raw_info, raw_plan = infos[0], volume.groups[0].plan
     levels = [{"factor": li.factor, "path": li.path, "shape": list(li.shape), "scale_nm": li.scale_nm,
                "translation_nm": li.translation_nm, "origin": dict(lp.origin), "extent": dict(lp.extent)}
@@ -244,6 +254,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
     artifact = None
     blocked: dict = {}
     rng = np.random.default_rng(seed)
+    started = _now()
     try:
         binding = load_binding(binding_path)
         artifact = Artifact(id=plan.artifact_id, levels_key=plan.levels_key, binding_hash=binding_hash(binding_path),
@@ -261,7 +272,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
             errors.insert(0, f"plan exceeds stage cap: {budget} > {stage_bytes} bytes")
         else:
             for volume in planned:
-                summary_, volume_checks = _write_volume(volume, out, binding, artifact, plan, io, rng, errors)
+                summary_, volume_checks = _write_volume(volume, out, binding, artifact, plan, io, rng, errors, started)
                 volumes.append(summary_)
                 checks += volume_checks
     except HostNotAllowed as e:
