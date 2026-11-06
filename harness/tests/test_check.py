@@ -8,6 +8,7 @@ import sys
 
 import pytest
 import zarr
+from mia_harness.provenance import HARNESS_URI
 from rangeserver import server  # noqa: F401  (fixture)
 from test_smoke import SNAP, write
 from test_provenance import SCHEMA_1, convention_errors
@@ -83,13 +84,15 @@ def test_add_provenance_upgrades_schema_1_in_place_and_leaves_schema_2_alone(sta
     # a schema-2 group written before the convention renamed `modules`: the key is renamed, the digest refreshed
     doc = json.loads((old / "raw" / "zarr.json").read_text())
     step = doc["attributes"]["provenance:steps"][0]
-    step["runtime-dependencies"] = step.pop("runtime_dependencies")
+    step["inputs"] = [i for i in step["inputs"] if i.get("name") != "snippet"]
+    step["runtime-dependencies"] = [{"name": "npy-local", "version": "1" * 40, "uri": HARNESS_URI}]
     step["status"] = "ok"
     (old / "raw" / "zarr.json").write_text(json.dumps(doc))
     assert cli.main(["add-provenance", str(old.parent)]) == 0 and "written 1, present 1" in capsys.readouterr().out
     attrs = json.loads((old / "raw" / "zarr.json").read_text())["attributes"]
-    assert set(attrs["provenance:steps"][0]) & {"modules", "runtime-dependencies", "status"} == set()
-    assert attrs["provenance:steps"][0]["runtime_dependencies"]
+    assert set(attrs["provenance:steps"][0]) & {"modules", "runtime-dependencies", "runtime_dependencies", "status"} == set()
+    assert attrs["provenance:steps"][0]["inputs"][-1] == {"uri": f"{HARNESS_URI}/blob/{'1' * 40}/snippets/npy-local/snippet.py",
+                                                         "name": "snippet"}
     sj = json.loads((old.parent / "stage.json").read_text())
     assert hashlib.sha256((old / "raw" / "zarr.json").read_bytes()).hexdigest() == sj["zarr_json_sha256"]["v0.zarr/raw/zarr.json"]
 

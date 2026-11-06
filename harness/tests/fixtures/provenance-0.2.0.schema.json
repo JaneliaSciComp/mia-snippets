@@ -59,8 +59,7 @@
         "outputs": { "type": "array", "items": { "$ref": "#/$defs/data_reference" } },
         "started": { "$ref": "#/$defs/date_time" },
         "ended": { "$ref": "#/$defs/date_time" },
-        "environment": { "$ref": "#/$defs/data_reference" },
-        "runtime_dependencies": { "type": "array", "items": { "$ref": "#/$defs/software" } }
+        "environment": { "$ref": "#/$defs/data_reference" }
       }
     },
     "software": {

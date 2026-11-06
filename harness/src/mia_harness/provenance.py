@@ -102,7 +102,7 @@ CONVENTION = {"uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenanc
 HARNESS_URI = "https://github.com/JaneliaSciComp/mia-snippets"
 STAGE_STEP = "Sparse OME-Zarr staging"
 CHECK_STEP = "check-stage"
-OLD_DEPENDENCY_KEYS = {"modules", "runtime-dependencies"}   # pre-release spellings of `runtime_dependencies`
+OLD_DEPENDENCY_KEYS = {"modules", "runtime-dependencies", "runtime_dependencies"}   # pre-release: snippets are inputs now
 
 
 def _software(commit: str | None) -> dict:
@@ -115,15 +115,13 @@ def _times(started: str | None, ended: str | None) -> dict:
 
 def stage_step(artifact: Artifact, sources: list[SourceFile], parameters: dict, *, started: str | None = None,
                ended: str | None = None) -> dict:
-    """The staging step: the harness, its lockfile, the snippets it loaded, the parameters as received, every source
-    file (and the record) as inputs, the artifact id as the output."""
+    """The staging step: the harness, its lockfile, the parameters as received, the record, every source file and
+    the snippets that read them as inputs, the artifact id as the output."""
     step: dict = {"name": STAGE_STEP, "software": _software(artifact.harness_commit)}
     if artifact.env_digest:
         step["environment"] = {"name": "pixi.lock", "checksum": f"sha256:{artifact.env_digest}"}
         if artifact.harness_commit:
             step["environment"]["uri"] = f"{HARNESS_URI}/blob/{artifact.harness_commit}/harness/pixi.lock"
-    snippets = sorted({(s.snippet["name"], s.snippet["commit"]) for s in sources})
-    step["runtime_dependencies"] = [{"name": name, "version": commit, "uri": HARNESS_URI} for name, commit in snippets]
     step["parameters"] = parameters
     inputs: list[dict] = [{"id": artifact.record, "name": "record"}]
     for source in {(s.url, s.member): s for s in sources}.values():
@@ -133,9 +131,15 @@ def stage_step(artifact: Artifact, sources: list[SourceFile], parameters: dict, 
         if sha256 := source.validators.get("sha256"):
             reference["checksum"] = f"sha256:{sha256}"
         inputs.append(reference)
+    inputs += [snippet_input(name, commit) for name, commit in sorted({(s.snippet["name"], s.snippet["commit"]) for s in sources})]
     step["inputs"] = inputs
     step["outputs"] = [{"id": artifact.id, "name": "artifact"}]
     return step | _times(started, ended)
+
+
+def snippet_input(name: str, commit: str) -> dict:
+    """A snippet as a step input: the file it was loaded from, pinned to its commit (the environment does not pin it)."""
+    return {"uri": f"{HARNESS_URI}/blob/{commit}/snippets/{name}/snippet.py", "name": "snippet"}
 
 
 def check_step(harness_commit: str | None, schemas_commit: str | None, started: str | None, ended: str | None) -> dict:
@@ -211,8 +215,8 @@ def upgrade_schema_1(attributes: dict, rule: dict | None) -> dict:
 def add_convention(out_dir: Path) -> dict:
     """Bring every group of a staged artifact under `out_dir` to schema 2 with the convention steps, in place, and
     refresh stage.json's zarr.json digests if it has any. Groups already at schema 2 only lose pre-release keys
-    (a `modules` or `runtime-dependencies` spelling of `runtime_dependencies`, a step `status`); a `mia` that predates `artifact` cannot be upgraded. Returns counts: written,
-    present, skipped."""
+    (a step `status`; a `modules` / `runtime_dependencies` list, whose snippets become inputs); a `mia` that predates
+    `artifact` cannot be upgraded. Returns counts: written, present, skipped."""
     out_dir = Path(out_dir)
     counts = {"written": 0, "present": 0, "skipped": 0}
     for path in sorted(out_dir.rglob("zarr.json")):
@@ -225,7 +229,8 @@ def add_convention(out_dir: Path) -> dict:
             stale = False
             for step in attributes.get("provenance:steps") or []:
                 for old in list(step.keys() & OLD_DEPENDENCY_KEYS):
-                    step["runtime_dependencies"] = step.pop(old)
+                    snippets = [snippet_input(d["name"], d["version"]) for d in step.pop(old)]
+                    step["inputs"] = [i for i in step.get("inputs") or [] if i.get("name") != "snippet"] + snippets
                     stale = True
                 stale = step.pop("status", None) is not None or stale
             if stale:

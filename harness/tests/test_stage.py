@@ -80,8 +80,8 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     assert step["parameters"]["plan"] == json.loads(json.dumps(dataclasses.asdict(plan.rule)))
     assert step["parameters"]["binding"]["record_commit"] == "0" * 40
     assert step["parameters"]["voxel_size"]["y"] == {"nm": 8.0, "source": "assumed", "basis": "test", "range": None}
-    assert step["runtime_dependencies"] == [{"name": "npy-local", "version": "1" * 40, "uri": HARNESS_URI}]
-    assert step["inputs"] == [{"id": "r", "name": "record"}, {"uri": server.url("/raw0.npy")}]
+    snippet = {"uri": f"{HARNESS_URI}/blob/{'1' * 40}/snippets/npy-local/snippet.py", "name": "snippet"}
+    assert step["inputs"] == [{"id": "r", "name": "record"}, {"uri": server.url("/raw0.npy")}, snippet]
     assert mia["schema"] == 2 and set(mia) == {"schema", "segmentation_type", "geometry", "plan", "statistics", "checks"}
     assert mia["geometry"] == {"raw_shape": list(SHAPE), "source_axes": "zyx", "axes": "zyx"}
     assert sum(len(v) for v in mia["plan"]["samples"].values()) == 6
@@ -90,7 +90,7 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     lab_attrs = zarr.open_group(tmp_path / "out" / "v0.zarr" / "labels" / "gt", mode="r").attrs.asdict()
     lab = lab_attrs["mia"]
     assert lab["geometry"] == mia["geometry"] and lab["statistics"] is None and lab["segmentation_type"]
-    assert lab_attrs["provenance:steps"][0]["inputs"] == [{"id": "r", "name": "record"}, {"uri": server.url("/labels0.npy")}]
+    assert lab_attrs["provenance:steps"][0]["inputs"] == [{"id": "r", "name": "record"}, {"uri": server.url("/labels0.npy")}, snippet]
     ms = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["ome"]["multiscales"][0]
     assert ms["metadata"] == {"method": "mean", "factors": [1, 2, 4], "module": "mia_harness.pyramid",
                               "commit": "c" * 40, "edge": "clip", "nearest_offset": "(L-1)//2"}
@@ -110,7 +110,7 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     assert convention_errors(root) == [] and root["ome"]["labels"] == ["gt"]
     assert root["mia"] == {"schema": 2, "checks": {"geometry": {"samples": 12, "levels": 6, "mismatches": []}}}
     assert [i.get("uri", i.get("id")) for i in root["provenance:steps"][0]["inputs"]] == [
-        "r", server.url("/raw0.npy"), server.url("/labels0.npy")]      # the root's inputs are every group's
+        "r", server.url("/raw0.npy"), server.url("/labels0.npy"), snippet["uri"]]      # the root's inputs are every group's
 
 
 def test_stage_refuses_a_plan_over_the_byte_cap(tmp_path, io, server):
