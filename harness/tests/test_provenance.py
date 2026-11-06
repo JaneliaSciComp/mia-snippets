@@ -68,7 +68,7 @@ def test_provenance_dumps_schema_2_and_forbids_extra_fields():
         VoxelAxis(8.0, "guessed")
 
 
-def test_stage_step_validates_and_names_the_software_environment_modules_inputs_and_output():
+def test_stage_step_validates_and_names_the_software_environment_runtime_dependencies_inputs_and_output():
     hashed = SRC.model_copy(update={"validators": {"size": 1, "sha256": "f" * 64}})
     member = SRC.model_copy(update={"member": "train/*.tif"})
     step = stage_step(ART, [hashed, member, member], {"plan": {"seed": 0}}, started="2026-11-04T10:00:00+00:00",
@@ -78,7 +78,7 @@ def test_stage_step_validates_and_names_the_software_environment_modules_inputs_
     assert step["software"] == {"name": "mia-harness", "version": "h" * 40, "uri": HARNESS_URI}
     assert step["environment"] == {"name": "pixi.lock", "checksum": "sha256:" + "e" * 64,
                                    "uri": f"{HARNESS_URI}/blob/{'h' * 40}/harness/pixi.lock"}
-    assert step["modules"] == [{"name": "npy-local", "version": "1" * 40, "uri": HARNESS_URI}]
+    assert step["runtime-dependencies"] == [{"name": "npy-local", "version": "1" * 40, "uri": HARNESS_URI}]
     assert step["parameters"] == {"plan": {"seed": 0}}
     assert step["inputs"] == [{"id": "r", "name": "record"}, {"uri": "http://h/a.npy", "checksum": "sha256:" + "f" * 64},
                               {"uri": "http://h/a.npy", "name": "train/*.tif"}]     # each source once
@@ -110,7 +110,7 @@ def test_upgrade_schema_1_splits_mia_into_schema_2_and_the_steps():
     assert Provenance.model_validate(upgraded["mia"])
     step, = upgraded["provenance:steps"]       # never checked: no check step
     assert step["parameters"] == {"plan": {"seed": 0, "patch": 64}, "voxel_size": SCHEMA_1["voxel_size"]}
-    assert step["environment"]["checksum"] == "sha256:" + "e" * 64 and step["modules"][0]["name"] == "npy-local"
+    assert step["environment"]["checksum"] == "sha256:" + "e" * 64 and step["runtime-dependencies"][0]["name"] == "npy-local"
     assert "started" not in step and artifact_id_of(upgraded) == "a" * 16 and record_of(upgraded) == "r"
     # the volume root: plan digest only, so the rule comes from the raw group; a verification that ran becomes a step
     root = {**SCHEMA_1, "plan": {"digest": "d" * 64}, "kind": None, "geometry": None, "statistics": None,

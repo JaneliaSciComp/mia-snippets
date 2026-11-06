@@ -122,7 +122,7 @@ def stage_step(artifact: Artifact, sources: list[SourceFile], parameters: dict, 
         if artifact.harness_commit:
             step["environment"]["uri"] = f"{HARNESS_URI}/blob/{artifact.harness_commit}/harness/pixi.lock"
     snippets = sorted({(s.snippet["name"], s.snippet["commit"]) for s in sources})
-    step["modules"] = [{"name": name, "version": commit, "uri": HARNESS_URI} for name, commit in snippets]
+    step["runtime-dependencies"] = [{"name": name, "version": commit, "uri": HARNESS_URI} for name, commit in snippets]
     step["parameters"] = parameters
     inputs: list[dict] = [{"id": artifact.record, "name": "record"}]
     for source in {(s.url, s.member): s for s in sources}.values():
@@ -203,8 +203,9 @@ def upgrade_schema_1(attributes: dict, rule: dict | None) -> dict:
 
 def add_convention(out_dir: Path) -> dict:
     """Bring every group of a staged artifact under `out_dir` to schema 2 with the convention steps, in place, and
-    refresh stage.json's zarr.json digests if it has any. Groups already at schema 2 are left alone; a `mia` that
-    predates `artifact` cannot be upgraded. Returns counts: written, present, skipped."""
+    refresh stage.json's zarr.json digests if it has any. Groups already at schema 2 only have a pre-release
+    `modules` step key renamed; a `mia` that predates `artifact` cannot be upgraded. Returns counts: written,
+    present, skipped."""
     out_dir = Path(out_dir)
     counts = {"written": 0, "present": 0, "skipped": 0}
     for path in sorted(out_dir.rglob("zarr.json")):
@@ -214,7 +215,14 @@ def add_convention(out_dir: Path) -> dict:
         if not isinstance(mia, dict):
             continue
         if mia.get("schema") == 2:
-            counts["present"] += 1
+            stale = [s for s in attributes.get("provenance:steps") or [] if "modules" in s]
+            for step in stale:
+                step["runtime-dependencies"] = step.pop("modules")
+            if stale:
+                path.write_text(json.dumps(document, indent=2))
+                counts["written"] += 1
+            else:
+                counts["present"] += 1
         elif "artifact" not in mia:
             counts["skipped"] += 1
         else:

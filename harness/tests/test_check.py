@@ -80,6 +80,16 @@ def test_add_provenance_upgrades_schema_1_in_place_and_leaves_schema_2_alone(sta
     for rel, digest in sj["zarr_json_sha256"].items():
         assert hashlib.sha256((old.parent / rel).read_bytes()).hexdigest() == digest
     assert cli.main(["add-provenance", str(old.parent)]) == 0 and "written 0, present 2" in capsys.readouterr().out
+    # a schema-2 group written before the convention renamed `modules`: the key is renamed, the digest refreshed
+    doc = json.loads((old / "raw" / "zarr.json").read_text())
+    step = doc["attributes"]["provenance:steps"][0]
+    step["modules"] = step.pop("runtime-dependencies")
+    (old / "raw" / "zarr.json").write_text(json.dumps(doc))
+    assert cli.main(["add-provenance", str(old.parent)]) == 0 and "written 1, present 1" in capsys.readouterr().out
+    attrs = json.loads((old / "raw" / "zarr.json").read_text())["attributes"]
+    assert "modules" not in attrs["provenance:steps"][0] and attrs["provenance:steps"][0]["runtime-dependencies"]
+    sj = json.loads((old.parent / "stage.json").read_text())
+    assert hashlib.sha256((old / "raw" / "zarr.json").read_bytes()).hexdigest() == sj["zarr_json_sha256"]["v0.zarr/raw/zarr.json"]
 
 
 def test_check_stage_is_idempotent_and_its_digests_describe_the_files_on_disk(staged_out):
