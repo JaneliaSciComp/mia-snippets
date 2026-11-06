@@ -102,6 +102,7 @@ CONVENTION = {"uuid": "0d4ef942-0f74-4187-ae72-016ddf083fe1", "name": "provenanc
 HARNESS_URI = "https://github.com/JaneliaSciComp/mia-snippets"
 STAGE_STEP = "Sparse OME-Zarr staging"
 CHECK_STEP = "check-stage"
+OLD_DEPENDENCY_KEYS = {"modules", "runtime-dependencies"}   # pre-release spellings of `runtime_dependencies`
 
 
 def _software(commit: str | None) -> dict:
@@ -122,7 +123,7 @@ def stage_step(artifact: Artifact, sources: list[SourceFile], parameters: dict, 
         if artifact.harness_commit:
             step["environment"]["uri"] = f"{HARNESS_URI}/blob/{artifact.harness_commit}/harness/pixi.lock"
     snippets = sorted({(s.snippet["name"], s.snippet["commit"]) for s in sources})
-    step["runtime-dependencies"] = [{"name": name, "version": commit, "uri": HARNESS_URI} for name, commit in snippets]
+    step["runtime_dependencies"] = [{"name": name, "version": commit, "uri": HARNESS_URI} for name, commit in snippets]
     step["parameters"] = parameters
     inputs: list[dict] = [{"id": artifact.record, "name": "record"}]
     for source in {(s.url, s.member): s for s in sources}.values():
@@ -204,7 +205,7 @@ def upgrade_schema_1(attributes: dict, rule: dict | None) -> dict:
 def add_convention(out_dir: Path) -> dict:
     """Bring every group of a staged artifact under `out_dir` to schema 2 with the convention steps, in place, and
     refresh stage.json's zarr.json digests if it has any. Groups already at schema 2 only have a pre-release
-    `modules` step key renamed; a `mia` that predates `artifact` cannot be upgraded. Returns counts: written,
+    spelling of `runtime_dependencies` renamed; a `mia` that predates `artifact` cannot be upgraded. Returns counts: written,
     present, skipped."""
     out_dir = Path(out_dir)
     counts = {"written": 0, "present": 0, "skipped": 0}
@@ -215,9 +216,9 @@ def add_convention(out_dir: Path) -> dict:
         if not isinstance(mia, dict):
             continue
         if mia.get("schema") == 2:
-            stale = [s for s in attributes.get("provenance:steps") or [] if "modules" in s]
+            stale = [s for s in attributes.get("provenance:steps") or [] if s.keys() & OLD_DEPENDENCY_KEYS]
             for step in stale:
-                step["runtime-dependencies"] = step.pop("modules")
+                step["runtime_dependencies"] = step.pop(next(iter(step.keys() & OLD_DEPENDENCY_KEYS)))
             if stale:
                 path.write_text(json.dumps(document, indent=2))
                 counts["written"] += 1

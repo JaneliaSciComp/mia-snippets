@@ -80,7 +80,7 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     assert step["parameters"]["plan"] == json.loads(json.dumps(dataclasses.asdict(plan.rule)))
     assert step["parameters"]["binding"]["record_commit"] == "0" * 40
     assert step["parameters"]["voxel_size"]["y"] == {"nm": 8.0, "source": "assumed", "basis": "test", "range": None}
-    assert step["runtime-dependencies"] == [{"name": "npy-local", "version": "1" * 40, "uri": HARNESS_URI}]
+    assert step["runtime_dependencies"] == [{"name": "npy-local", "version": "1" * 40, "uri": HARNESS_URI}]
     assert step["inputs"] == [{"id": "r", "name": "record"}, {"uri": server.url("/raw0.npy")}]
     assert mia["schema"] == 2 and set(mia) == {"schema", "segmentation_type", "geometry", "plan", "statistics", "checks"}
     assert mia["geometry"] == {"raw_shape": list(SHAPE), "source_axes": "zyx", "axes": "zyx"}
