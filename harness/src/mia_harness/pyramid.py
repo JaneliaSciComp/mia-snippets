@@ -160,7 +160,7 @@ def write_pyramid(array: Array, out: Path, *, plan: StagePlan, voxel_size_nm: di
     return PyramidInfo(axes, tuple(size[a] for a in axes), dtype.name, infos)
 
 
-def write_volume_groups(vdir: Path, labels: list[str], mia_summary: dict) -> None:
+def write_volume_groups(vdir: Path, labels: list[str], mia_summary: dict, extra: dict | None = None) -> None:
     """Make `vdir` one OME-Zarr 0.6 image: the root group's `multiscales` is raw's with paths under raw/, and with
     labels the root lists them and `labels/` is the spec's labels group. The arrays and the raw/label groups are
     untouched."""
@@ -173,7 +173,7 @@ def write_volume_groups(vdir: Path, labels: list[str], mia_summary: dict) -> Non
     if labels:
         ome["labels"] = list(labels)
         _write_group(vdir / "labels", {"ome": {"version": "0.6", "labels": list(labels)}})
-    _write_group(vdir, {"ome": ome, "mia": mia_summary})
+    _write_group(vdir, {"ome": ome, "mia": mia_summary, **(extra or {})})
 
 
 def _write_group(path: Path, attributes: dict) -> None:

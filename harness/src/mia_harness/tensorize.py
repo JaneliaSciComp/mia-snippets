@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 
 from .loader import load_snippet, withdrawn_names
+from .provenance import record_of
 from .pyramid import Pyramid, open_pyramid
 from .tensor_api import LevelPatch, Sample, Stack, check_sample, recipe_channels
 
@@ -43,7 +44,8 @@ def read_stack(pyramid_dir: Path, descriptor: dict) -> Stack:
         levels.append(LevelPatch(factor, img, found, (lv.scale_nm["y"], lv.scale_nm["x"]),
                                  (lv.translation_nm["y"], lv.translation_nm["x"]), (box["y"].start, box["x"].start)))
     mia = raw.attrs.get("mia") or {}
-    record = mia.get("record") or (mia.get("artifact") or {}).get("record")   # 0.5 top level, 0.6 under artifact
+    # the staging step's record input; before it, 0.6 schema 1 under artifact, 0.5 at the top level
+    record = record_of(raw.attrs) or (mia.get("artifact") or {}).get("record") or mia.get("record")
     meta = {"pyramid": str(pyramid_dir), "record": record, "descriptor": descriptor}
     return Stack(levels, patch, dict(plane), (float(cy), float(cx)), meta)
 
