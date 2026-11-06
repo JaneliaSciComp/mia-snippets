@@ -60,8 +60,7 @@
         "started": { "$ref": "#/$defs/date_time" },
         "ended": { "$ref": "#/$defs/date_time" },
         "environment": { "$ref": "#/$defs/data_reference" },
-        "runtime_dependencies": { "type": "array", "items": { "$ref": "#/$defs/software" } },
-        "status": { "type": "string", "enum": ["ok", "failed"] }
+        "runtime_dependencies": { "type": "array", "items": { "$ref": "#/$defs/software" } }
       }
     },
     "software": {

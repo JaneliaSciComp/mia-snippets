@@ -40,7 +40,7 @@ def test_check_stage_passes_a_good_artifact_and_records_verification(staged_out)
     assert convention_errors(attrs) == []
     stage_, check = attrs["provenance:steps"]          # the staging step stays; the check step follows it
     assert stage_["name"] == "Sparse OME-Zarr staging" and check["name"] == "check-stage"
-    assert check["status"] == "ok" and check["parameters"] == {"schemas_commit": ngff.SCHEMAS_COMMIT}
+    assert "status" not in check and check["parameters"] == {"schemas_commit": ngff.SCHEMAS_COMMIT}
     assert check["software"]["version"] == "h" * 40 and check["started"] <= check["ended"]
     mia = attrs["mia"]
     assert mia["checks"] == rep["checks"] and mia["checks"]["geometry"]["samples"]
@@ -84,10 +84,12 @@ def test_add_provenance_upgrades_schema_1_in_place_and_leaves_schema_2_alone(sta
     doc = json.loads((old / "raw" / "zarr.json").read_text())
     step = doc["attributes"]["provenance:steps"][0]
     step["runtime-dependencies"] = step.pop("runtime_dependencies")
+    step["status"] = "ok"
     (old / "raw" / "zarr.json").write_text(json.dumps(doc))
     assert cli.main(["add-provenance", str(old.parent)]) == 0 and "written 1, present 1" in capsys.readouterr().out
     attrs = json.loads((old / "raw" / "zarr.json").read_text())["attributes"]
-    assert set(attrs["provenance:steps"][0]) & {"modules", "runtime-dependencies"} == set() and attrs["provenance:steps"][0]["runtime_dependencies"]
+    assert set(attrs["provenance:steps"][0]) & {"modules", "runtime-dependencies", "status"} == set()
+    assert attrs["provenance:steps"][0]["runtime_dependencies"]
     sj = json.loads((old.parent / "stage.json").read_text())
     assert hashlib.sha256((old / "raw" / "zarr.json").read_bytes()).hexdigest() == sj["zarr_json_sha256"]["v0.zarr/raw/zarr.json"]
 
@@ -160,7 +162,8 @@ def test_check_stage_reports_a_partly_written_volume(staged_out):
                                  for e in rep["errors"])
     sj = json.loads((staged_out / "stage.json").read_text())
     assert not sj["ok"] and "v0.zarr/raw/zarr.json" not in sj["zarr_json_sha256"]
-    assert zarr.open_group(staged_out / "v0.zarr/labels/gt", mode="r").attrs["provenance:steps"][-1]["status"] == "failed"
+    steps = zarr.open_group(staged_out / "v0.zarr/labels/gt", mode="r").attrs["provenance:steps"]
+    assert [s["name"] for s in steps] == ["Sparse OME-Zarr staging"]      # a failed check leaves no step
 
 
 def test_check_stage_says_why_when_the_stage_failed_or_left_no_volumes(staged_out):

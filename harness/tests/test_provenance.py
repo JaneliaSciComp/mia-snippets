@@ -6,8 +6,9 @@ from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
 from mia_harness.provenance import (CONVENTION, HARNESS_URI, Artifact, Geometry, Plan, Provenance, SourceFile,
-                                    VolumeSummary, VoxelAxis, artifact_id_of, check_step, record_of, stage_json,
-                                    stage_step, summary, upgrade_schema_1, with_step)
+                                    VolumeSummary, VoxelAxis, artifact_id_of, check_step, convention_attributes,
+                                    record_of, stage_json, stage_step, summary, upgrade_schema_1, with_step,
+                                    without_step)
 
 CONVENTION_SCHEMA = Draft202012Validator(json.loads((Path(__file__).parent / "fixtures" / "provenance-0.2.0.schema.json")
                                                     .read_text()))
@@ -89,16 +90,19 @@ def test_stage_step_validates_and_names_the_software_environment_runtime_depende
     assert convention_errors({"zarr_conventions": [CONVENTION], "provenance:steps": [bare]}) == []
 
 
-def test_check_step_is_appended_once_with_its_status():
-    first = check_step(False, None, "0.6", "2026-11-04T10:00:00Z", "2026-11-04T10:00:01Z")
+def test_check_step_is_appended_once_and_a_failed_check_removes_it():
+    first = check_step(None, "0.6", "2026-11-04T10:00:00Z", "2026-11-04T10:00:01Z")
     attributes = with_step({"provenance:steps": [stage_step(ART, [SRC], {})]}, first)
-    attributes = with_step(attributes, check_step(True, "h" * 40, "0.6", "2026-11-04T11:00:00Z", None))
+    attributes = with_step(attributes, check_step("h" * 40, "0.6", "2026-11-04T11:00:00Z", None))
     assert convention_errors(attributes) == []
     names = [s["name"] for s in attributes["provenance:steps"]]
     assert names == ["Sparse OME-Zarr staging", "check-stage"]       # a re-run replaces, never appends
     check = attributes["provenance:steps"][-1]
-    assert check["status"] == "ok" and check["parameters"] == {"schemas_commit": "0.6"} and "ended" not in check
+    assert "status" not in check and check["parameters"] == {"schemas_commit": "0.6"} and "ended" not in check
     assert artifact_id_of(attributes) == "a" * 16
+    failed = without_step(attributes, "check-stage")
+    assert [s["name"] for s in failed["provenance:steps"]] == ["Sparse OME-Zarr staging"] and convention_errors(failed) == []
+    assert without_step({"ome": {}, **convention_attributes([first])}, "check-stage") == {"ome": {}}
 
 
 def test_upgrade_schema_1_splits_mia_into_schema_2_and_the_steps():
@@ -121,7 +125,9 @@ def test_upgrade_schema_1_splits_mia_into_schema_2_and_the_steps():
     assert convention_errors(upgraded) == [] and set(upgraded["mia"]) == {"schema", "checks"}
     stage, check = upgraded["provenance:steps"]
     assert stage["parameters"]["plan"] == {"seed": 0, "patch": 64}
-    assert check["status"] == "ok" and check["software"]["version"] == "h" * 40 and check["ended"] == "2026-11-02T18:04:20+00:00"
+    assert "status" not in check and check["software"]["version"] == "h" * 40 and check["ended"] == "2026-11-02T18:04:20+00:00"
+    failed = {**root, "verification": {**root["verification"], "ok": False}}
+    assert len(upgrade_schema_1({"mia": failed}, rule={"seed": 0})["provenance:steps"]) == 1   # a failed check is no step
 
 
 def test_summary_merges_the_groups():

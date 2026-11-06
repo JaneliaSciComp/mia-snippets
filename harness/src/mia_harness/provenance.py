@@ -138,18 +138,24 @@ def stage_step(artifact: Artifact, sources: list[SourceFile], parameters: dict, 
     return step | _times(started, ended)
 
 
-def check_step(ok: bool, harness_commit: str | None, schemas_commit: str | None, started: str | None,
-               ended: str | None) -> dict:
-    """The check-stage step: what checked, against which schemas, and whether it passed."""
+def check_step(harness_commit: str | None, schemas_commit: str | None, started: str | None, ended: str | None) -> dict:
+    """The check-stage step: what checked and against which schemas. A recorded check passed; a failed check leaves
+    no step (the convention records what happened to the data, not how the computation went)."""
     step: dict = {"name": CHECK_STEP, "software": _software(harness_commit)}
     if schemas_commit:
         step["parameters"] = {"schemas_commit": schemas_commit}
-    step["status"] = "ok" if ok else "failed"
     return step | _times(started, ended)
 
 
 def convention_attributes(steps: list[dict]) -> dict:
     return {"zarr_conventions": [CONVENTION], "provenance:steps": steps}
+
+
+def without_step(attributes: dict, name: str) -> dict:
+    """`attributes` without the convention step named `name`; the convention keys go too when no step remains."""
+    steps = [s for s in attributes.get("provenance:steps") or [] if s.get("name") != name]
+    kept = {k: v for k, v in attributes.items() if k not in ("zarr_conventions", "provenance:steps")}
+    return {**kept, **convention_attributes(steps)} if steps else kept
 
 
 def with_step(attributes: dict, step: dict) -> dict:
@@ -185,9 +191,9 @@ def upgrade_schema_1(attributes: dict, rule: dict | None) -> dict:
                   if v is not None}
     steps = [stage_step(artifact, sources, parameters)]
     verification = mia.get("verification") or {}
-    if verification.get("ok") is not None:
-        steps.append(check_step(verification["ok"], verification.get("harness_commit"),
-                                verification.get("schemas_commit"), verification.get("time"), verification.get("time")))
+    if verification.get("ok"):      # a check that failed, or never ran, is no step
+        steps.append(check_step(verification.get("harness_commit"), verification.get("schemas_commit"),
+                                verification.get("time"), verification.get("time")))
     slim: dict = {"schema": 2}
     if mia.get("segmentation_type"):
         slim["segmentation_type"] = mia["segmentation_type"]
@@ -204,8 +210,8 @@ def upgrade_schema_1(attributes: dict, rule: dict | None) -> dict:
 
 def add_convention(out_dir: Path) -> dict:
     """Bring every group of a staged artifact under `out_dir` to schema 2 with the convention steps, in place, and
-    refresh stage.json's zarr.json digests if it has any. Groups already at schema 2 only have a pre-release
-    spelling of `runtime_dependencies` renamed; a `mia` that predates `artifact` cannot be upgraded. Returns counts: written,
+    refresh stage.json's zarr.json digests if it has any. Groups already at schema 2 only lose pre-release keys
+    (a `modules` or `runtime-dependencies` spelling of `runtime_dependencies`, a step `status`); a `mia` that predates `artifact` cannot be upgraded. Returns counts: written,
     present, skipped."""
     out_dir = Path(out_dir)
     counts = {"written": 0, "present": 0, "skipped": 0}
@@ -216,9 +222,12 @@ def add_convention(out_dir: Path) -> dict:
         if not isinstance(mia, dict):
             continue
         if mia.get("schema") == 2:
-            stale = [s for s in attributes.get("provenance:steps") or [] if s.keys() & OLD_DEPENDENCY_KEYS]
-            for step in stale:
-                step["runtime_dependencies"] = step.pop(next(iter(step.keys() & OLD_DEPENDENCY_KEYS)))
+            stale = False
+            for step in attributes.get("provenance:steps") or []:
+                for old in list(step.keys() & OLD_DEPENDENCY_KEYS):
+                    step["runtime_dependencies"] = step.pop(old)
+                    stale = True
+                stale = step.pop("status", None) is not None or stale
             if stale:
                 path.write_text(json.dumps(document, indent=2))
                 counts["written"] += 1

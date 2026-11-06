@@ -1,5 +1,5 @@
 """`harness check-stage`: a staged artifact's OME-Zarr 0.6 schemas, sample coverage, artifact ids and zarr.json
-digests, recorded on every group as a `provenance:` check step (status) with the results under `mia.checks`, and in
+digests, recorded on every group as a `provenance:` check step when it passes, with the results under `mia.checks`, and in
 stage.json (staging spec §6). Loads no snippet code."""
 import hashlib
 import json
@@ -7,7 +7,7 @@ import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .provenance import Verification, artifact_id_of, check_step, with_step
+from .provenance import CHECK_STEP, Verification, artifact_id_of, check_step, with_step, without_step
 from .pyramid import NotStaged, open_pyramid
 from .schemas import ngff
 
@@ -132,12 +132,12 @@ def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
     checks = {"schemas": schemas, "strict": strict, "coverage": coverage, "geometry": geometry}
     verification = Verification(checks=checks, ok=ok, harness_commit=harness_commit, time=time,
                                 schemas_commit=ngff.SCHEMAS_COMMIT).model_dump(mode="json")
-    step = check_step(ok, harness_commit, ngff.SCHEMAS_COMMIT, time, datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    step = check_step(harness_commit, ngff.SCHEMAS_COMMIT, time, datetime.now(timezone.utc).isoformat(timespec="seconds"))
     for path in documents:
         document = json.loads(path.read_text())
         mia = document["attributes"].get("mia")
         attributes = {**document["attributes"], "mia": {**(mia if isinstance(mia, dict) else {}), "checks": checks}}
-        document["attributes"] = with_step(attributes, step)
+        document["attributes"] = with_step(attributes, step) if ok else without_step(attributes, CHECK_STEP)
         path.write_text(json.dumps(document, indent=2))
     digests = {p.relative_to(out_dir).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                for p in sorted(out_dir.rglob("zarr.json"))}
