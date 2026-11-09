@@ -1,12 +1,13 @@
 """`harness check-stage`: a staged artifact's OME-Zarr 0.6 schemas, sample coverage, artifact ids and zarr.json
-digests, recorded as `mia.verification` on every group and in stage.json (staging spec §6). Loads no snippet code."""
+digests, recorded on every group as a `provenance:` check step when it passes, with the results under `mia.checks`, and in
+stage.json (staging spec §6). Loads no snippet code."""
 import hashlib
 import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .provenance import Verification
+from .provenance import CHECK_STEP, Verification, artifact_id_of, check_step, with_step, without_step
 from .pyramid import NotStaged, open_pyramid
 from .schemas import ngff
 
@@ -52,7 +53,7 @@ def _coverage(rel: str, group: Path, mia: dict) -> tuple[int, int, list[dict]]:
 
 
 def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
-    """Check a `harness stage` output directory and record the result in every group's `mia.verification` and in
+    """Check a `harness stage` output directory and record the result on every group (a check step, `mia.checks`) and in
     stage.json (with the sha256 of every zarr.json as left on disk). Returns the report; `ok` iff schemas,
     coverage, geometry and artifact ids all pass and the stage itself succeeded. Broken input is an error line,
     never an exception; an unreadable stage.json is reported and nothing is written."""
@@ -104,7 +105,7 @@ def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
                 strict["label"] += _group_errors(rel, attributes, ("strict_label",))
             documents.append(group / "zarr.json")
             mia = attributes.get("mia") if isinstance(attributes.get("mia"), dict) else {}
-            group_id = (mia.get("artifact") or {}).get("id")
+            group_id = artifact_id_of(attributes)
             if group_id != artifact_id:
                 errors.append(f"{rel}: artifact id {group_id} != stage.json {artifact_id}")
             if "samples" not in (mia.get("plan") or {}):
@@ -131,10 +132,12 @@ def check_stage(out_dir: Path, *, harness_commit: str | None = None) -> dict:
     checks = {"schemas": schemas, "strict": strict, "coverage": coverage, "geometry": geometry}
     verification = Verification(checks=checks, ok=ok, harness_commit=harness_commit, time=time,
                                 schemas_commit=ngff.SCHEMAS_COMMIT).model_dump(mode="json")
+    step = check_step(harness_commit, ngff.SCHEMAS_COMMIT, time, datetime.now(timezone.utc).isoformat(timespec="seconds"))
     for path in documents:
         document = json.loads(path.read_text())
         mia = document["attributes"].get("mia")
-        document["attributes"]["mia"] = {**(mia if isinstance(mia, dict) else {}), "verification": verification}
+        attributes = {**document["attributes"], "mia": {**(mia if isinstance(mia, dict) else {}), "checks": checks}}
+        document["attributes"] = with_step(attributes, step) if ok else without_step(attributes, CHECK_STEP)
         path.write_text(json.dumps(document, indent=2))
     digests = {p.relative_to(out_dir).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                for p in sorted(out_dir.rglob("zarr.json"))}

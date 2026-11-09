@@ -11,7 +11,7 @@ from .fetch import fetch
 from .io import from_env
 from .plan import load_plan
 from .preview import preview
-from .provenance import VoxelAxis
+from .provenance import VoxelAxis, add_convention
 from .run import crop, smoke
 from .stage import stage
 from .tensorize import tensorize
@@ -77,6 +77,9 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("check-stage", help="0.6 schemas, sample coverage and zarr.json digests of a stage output, "
                                            "recorded in it; loads no snippet code")
     s.add_argument("dir", type=Path, help="the directory `stage --out` wrote")
+    s = sub.add_parser("add-provenance", help="give every staged artifact under a directory the `provenance:` Zarr "
+                                              "convention attributes its `mia` already implies, in place")
+    s.add_argument("root", type=Path, help="a stage output directory, or any directory above several")
     s = sub.add_parser("preview", help="label overlay PNG per crop (SPEC §6.7)")
     s.add_argument("dir", type=Path)
     s.add_argument("--out", type=Path, required=True, help="directory for <crop_id>/overlay.png")
@@ -100,6 +103,11 @@ def main(argv: list[str] | None = None) -> int:
         import numpy as np
         np.savez(args.out, **{k: v for k, v in sample.items() if k != "meta"})
         args.out.with_suffix(".json").write_text(json.dumps(sample.get("meta", {}), indent=2, default=str) + "\n")
+        return 0
+    if args.cmd == "add-provenance":
+        for stage_json in sorted(args.root.rglob("stage.json")):
+            counts = add_convention(stage_json.parent)
+            print(f"{stage_json.parent}: " + ", ".join(f"{k} {v}" for k, v in counts.items()))
         return 0
     if args.cmd == "preview":
         errors = preview(args.dir, args.out)

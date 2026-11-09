@@ -1,6 +1,7 @@
 """`harness stage`: a binding's arrays and a plan rule → one sparse OME-Zarr 0.6 image per raw volume, labels
 alongside, provenance under `attributes.mia` and stage.json from the same model (staging spec §4.1, §5, §6)."""
 import dataclasses
+from datetime import datetime, timezone
 import json
 import os
 from dataclasses import dataclass
@@ -15,7 +16,8 @@ from .binding import ArrayBinding, Binding, LabelBinding, binding_hash, load_bin
 from .fetch import expand
 from .io import IO, BudgetExceeded, HostNotAllowed, _split
 from .plan import LevelPlan, PlanInput, StagePlan, derive_samples, planned_bytes, stage_plan
-from .provenance import (VOXEL_AXIS, Artifact, Geometry, LevelRecord, Plan, Provenance, SourceFile, Verification,
+from .provenance import (VOXEL_AXIS, Artifact, Geometry, Plan, Provenance, SourceFile, Verification,
+                         convention_attributes, stage_step,
                          VolumeSummary, VoxelAxis, merge_geometry, stage_json, summary)
 from .pyramid import (Pyramid, PyramidInfo, _canonical, _read_yx, block_mean, open_pyramid, stride, write_pyramid,
                       write_volume_groups)
@@ -162,29 +164,27 @@ def _derived_from(b: ArrayBinding, access: str, snippets_commit: str, io: IO) ->
     return out
 
 
-def _level_records(plan: StagePlan, info: PyramidInfo, channels: int, itemsize: int) -> list[LevelRecord]:
-    """Per written level: the plan's box and chunk count, the array's shape, the uncompressed bytes written."""
-    return [LevelRecord(factor=lp.factor, path=li.path, origin=dict(lp.origin), extent=dict(lp.extent),
-                        shape=list(li.shape), planned_planes=list(lp.planned_planes),
-                        chunks_written=len(lp.chunks) * channels,
-                        bytes_written=len(lp.chunks) * channels * plan.patch * plan.patch * itemsize)
-            for lp, li in zip(plan.levels, info.levels)]
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
 def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifact, rule_input: PlanInput, io: IO,
-                  rng: np.random.Generator, errors: list[str]) -> tuple[VolumeSummary, list[dict]]:
-    """Write every group of the volume, check its geometry, then set its `mia` once; then the volume root."""
+                  rng: np.random.Generator, errors: list[str], started: str) -> tuple[VolumeSummary, list[dict]]:
+    """Write every group of the volume, check its geometry, then set its `mia` and its `provenance:` staging step
+    once; then the volume root, whose step lists every group's inputs."""
     rule = rule_input.rule
     vdir = out / f"v{volume.index}.zarr"
     nm = {a: v.nm for a, v in volume.voxel.items()}
-    plan = Plan(digest=rule.digest(), rule=dataclasses.asdict(rule), samples=volume.samples)
-    voxel_json = {a: VOXEL_AXIS.dump_python(v, mode="json") for a, v in volume.voxel.items()}
-    provenances, checks, infos, sample = [], [], [], []
+    plan = Plan(samples=volume.samples)
+    # the staging step's parameters: what the command received
+    parameters = {"binding": binding.model_dump(mode="json"), "plan": dataclasses.asdict(rule),
+                  "voxel_size": {a: VOXEL_AXIS.dump_python(v, mode="json") for a, v in volume.voxel.items()}}
+    provenances, sources, checks, infos, sample = [], [], [], [], []
     for group in volume.groups:
         label = group.binding if isinstance(group.binding, LabelBinding) else None
         names = {"label_key": label.label_key, "segmentation_type": label.segmentation_type} if label else {}
-        # what the writer (name, colors) and the reader (sparse, raw extent, voxel size) need until `mia` is set
-        provisional = {"kind": group.kind, **names, "plan": plan.model_dump(mode="json"), "voxel_size": voxel_json,
+        # what the writer (name, colors) and the reader (sparse, raw extent) need until `mia` is set
+        provisional = {"kind": group.kind, **names, "plan": plan.model_dump(mode="json"),
                        "geometry": {"axes": group.axes, "raw_shape": list(_shape(group.array))}}
         info = write_pyramid(group.array, vdir / group.path, plan=group.plan, voxel_size_nm=nm, kind=group.kind,
                              coordinate_system=f"{binding.record}.v{volume.index}", mia=provisional,
@@ -198,19 +198,19 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
         checks.append({**geometry, "mismatches": [{"group": group.name, **m} for m in geometry["mismatches"]]})
         if group.kind == "raw":
             sample = intensity_sample(p, group.plan.levels[0], rule.patch, rng)
+        group_sources = _derived_from(group.binding, group.array.access, binding.snippets_commit, io)
         provenance = Provenance(
-            kind=group.kind, **names, artifact=artifact,
-            derived_from=_derived_from(group.binding, group.array.access, binding.snippets_commit, io),
-            geometry=Geometry(raw_shape=list(info.shape), source_axes=group.array.axes, axes=info.axes,
-                              dtype=info.dtype, levels=_level_records(group.plan, info, _channels(group.array),
-                                                                      np.dtype(info.dtype).itemsize)),
-            voxel_size=volume.voxel, plan=plan,
-            statistics={"intensity_sample": sample} if group.kind == "raw" else None,
-            verification=Verification(checks={"geometry": geometry}))
-        zarr.open_group(vdir / group.path, mode="r+").attrs["mia"] = provenance.model_dump(mode="json")
+            segmentation_type=label.segmentation_type if label else None,
+            geometry=Geometry(raw_shape=list(info.shape), source_axes=group.array.axes, axes=info.axes), plan=plan,
+            statistics={"intensity_sample": sample} if group.kind == "raw" else None, checks={"geometry": geometry})
+        step = stage_step(artifact, group_sources, parameters, started=started, ended=_now())
+        attrs = zarr.open_group(vdir / group.path, mode="r+").attrs
+        attrs.put({**attrs.asdict(), "mia": provenance.model_dump(mode="json"), **convention_attributes([step])})
         provenances.append(provenance)
+        sources += group_sources
     labels = {g.binding.label_key: g.path for g in volume.groups if isinstance(g.binding, LabelBinding)}
-    write_volume_groups(vdir, list(labels), summary(provenances))
+    write_volume_groups(vdir, list(labels), summary(provenances),
+                        convention_attributes([stage_step(artifact, sources, parameters, started=started, ended=_now())]))
     raw_info, raw_plan = infos[0], volume.groups[0].plan
     levels = [{"factor": li.factor, "path": li.path, "shape": list(li.shape), "scale_nm": li.scale_nm,
                "translation_nm": li.translation_nm, "origin": dict(lp.origin), "extent": dict(lp.extent)}
@@ -244,6 +244,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
     artifact = None
     blocked: dict = {}
     rng = np.random.default_rng(seed)
+    started = _now()
     try:
         binding = load_binding(binding_path)
         artifact = Artifact(id=plan.artifact_id, levels_key=plan.levels_key, binding_hash=binding_hash(binding_path),
@@ -261,7 +262,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
             errors.insert(0, f"plan exceeds stage cap: {budget} > {stage_bytes} bytes")
         else:
             for volume in planned:
-                summary_, volume_checks = _write_volume(volume, out, binding, artifact, plan, io, rng, errors)
+                summary_, volume_checks = _write_volume(volume, out, binding, artifact, plan, io, rng, errors, started)
                 volumes.append(summary_)
                 checks += volume_checks
     except HostNotAllowed as e:
