@@ -1,0 +1,10 @@
+name: tiff-series-http
+spec_version: 1
+summary: A numbered series of single-page grey TIFF files at plain URLs, one file per z plane, stacked as zyx; the binding names the first file and the last file's number instead of every URL.
+formats: [tiff]
+containers: [http]
+params:
+  last: {type: int, required: false, doc: "the number in the last file's name. With it the binding gives exactly one url, the first file; the counter is the last run of digits in that url's file name and is counted up by 1 to `last` with the same zero padding (amst_crop_0101.tif, last 2037 -> amst_crop_0101.tif ... amst_crop_2037.tif, z = number - first). Every number in between must exist as a file. Without it the urls are the planes, in binding order; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [empiar-11399-dinoflagellate-fib-sem]
+supersedes: null

@@ -1,0 +1,12 @@
+record: empiar-11399-dinoflagellate-fib-sem
+record_commit: bd965a656de8f35269c064a77912455b3d4058e7
+snippets_commit: 5ca9cacbe772e9af2c63ce829ccfb49088c3d66f
+raw:
+  - snippet: tiff-series-http
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11399/data/FIBSEM/amst_crop_0101.tif"]
+    params: {last: 2037}
+labels: []
+reasons:
+  - "tiff-series-http with one url and last 2037: the raw is 1,937 single-page TIFFs FIBSEM/amst_crop_0101.tif ... amst_crop_2037.tif, one z slice each (record path_pattern FIBSEM/amst_crop_[0-9][0-9][0-9][0-9].tif, alignment_notes 'z = file index', listing_complete: true); 2037 - 101 + 1 = 1,937 files, so the numbering has no gaps and the url counts up to the whole stack as zyx 1937x2718x2718 uint8 (the shape of the MoBIE raw N5 in the record notes) without listing 1,937 urls, which made the match agent's draft too large"
+  - "no voxel size from the files: the TIFFs carry no calibration (record notes); 8 nm isotropic is the record's imaging.voxel_size_nm"
+  - "no labels: the EMPIAR labels are surface meshes (EMDB-SFF mesh_list in the .hff, STL files in individual_segments.tar.gz), not voxel arrays; the 14 binary organelle masks are N5 stores at 16 nm on s3.embl.de, a format this snippet does not read, on a host the record says is not allowlisted, and at half the raw's sampling (969x1359x1359), so they cannot pair shape-for-shape with this raw"
