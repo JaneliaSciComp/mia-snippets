@@ -1,0 +1,50 @@
+record: empiar-10553-gemmata-fib-sem-membranes
+record_commit: bd965a656de8f35269c064a77912455b3d4058e7
+snippets_commit: 5ca9cacbe772e9af2c63ce829ccfb49088c3d66f
+raw:
+  - snippet: tiff-zip-member
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/Seeger_5_reg.tif"]
+    params: {}
+labels:
+  - snippet: imod-model-mask
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190819_Gobs_model_C1.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190830_Gobs_model_C2.mod"
+    params: {objects: "1,1", draw: outline}
+    pairs_with: 0
+    label_key: manual_gt-cell_envelope-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190819_Gobs_model_C1.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190830_Gobs_model_C2.mod"
+    params: {objects: "2,4", draw: outline}
+    pairs_with: 0
+    label_key: manual_gt-cytoplasmic_membrane-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190819_Gobs_model_C1.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190830_Gobs_model_C2.mod"
+    params: {objects: "3,3"}
+    pairs_with: 0
+    label_key: manual_gt-nucleoid-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190819_Gobs_model_C1.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10553/data/20190830_Gobs_model_C2.mod"
+    params: {objects: "4,2"}
+    pairs_with: 0
+    label_key: manual_gt-polyphosphate_granule-semantic
+    segmentation_type: binary
+reasons:
+  - "raw: record technical.arrays[0] is one ImageJ TIFF stack (data/Seeger_5_reg.tif, zyx, 470x1602x2268, uint8, uncompressed) at a plain https URL from technical.sample.urls, so tiff-zip-member with default params (no axes override)"
+  - "labels with imod-model-mask: the record's label arrays are IMOD binary contour models (format other, encoding polygons, 'Contours need rasterizing to masks'); both model headers have dims 2268x1602x470, the raw's grid, so each object rasterizes to a zyx 470x1602x2268 mask that pairs with raw 0"
+  - "both models in every label: C1 and C2 each outline one cell of the same stack with the same four classes, and two labels of one raw cannot share a label_key, so each class is one mask that is 1 where either model has it. The C2 URL is not in technical.sample.urls; it is data.download_url plus the layout tree's data/20190830_Gobs_model_C2.mod, which path_pattern data/2019*_Gobs_model_C?.mod covers"
+  - "objects per class, one number per url (C1, C2), from the OBJT names in the files: cell envelope 1,1 ('Cell Envelope', 'CE (cell1)'); cytoplasmic membrane 2,4 ('Cytoplasmic Membrane', 'Cytoplasmic membrane (2)'); nucleoid / DNA 3,3 ('Nucleoid', 'DNA'); large poly-phosphate granule 4,2 ('Large Poly-P granule', 'Large poly-P granule'). The two models order their objects differently, hence objects and not object"
+  - "draw: outline for cell envelope and cytoplasmic membrane: the contours trace the membranes, so the outline is the class the record names; filled they would be the whole cell and the cytoplasm (with invaginations as holes). All contours of both models are closed, so draw: fill also works: a human should confirm which is wanted (the record does not say)"
+  - "draw: fill (default) for nucleoid / DNA and the poly-phosphate granule: the contours are drawn around bodies, so the class is the enclosed region"
+  - "label_keys manual_gt-<class>-semantic with segmentation_type binary: annotations are manual (provenance manual_gt), each mask is {0,1} for one class, and binary folds to semantic in the key. Encoding 'polygons' has no kind in the label_key rule; the rasterizer emits one binary mask per class and does not number the two cells as instances"
+  - "coverage is partial: only two cells of the stack are modelled, and only on the sections that carry contours (C1 z 65..158, C2 z 151..256); everywhere else the masks are 0, which is 'not annotated', not 'background'"
+  - "voxel size: none from either array (TIFF uncalibrated; the snippet does not report the models' pixsize 5 nm and z scales 4.49 / 4.05, which disagree and which the record calls unreliable)"
