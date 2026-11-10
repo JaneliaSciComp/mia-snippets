@@ -1,0 +1,10 @@
+name: mrc-http-2
+spec_version: 1
+summary: One MRC/REC volume over range requests, header parsed by the snippet; mode 0 is uint8 when the IMOD header flag or the `mode0` param says the bytes are unsigned, else int8.
+formats: [mrc]
+containers: [http, s3]
+params:
+  mode0: {type: str, required: false, doc: "'uint8' or 'int8': how to read MRC mode 0 bytes, overriding the header (IMOD stamp and flags, else signed per MRC2014). Set it only when the record's dtype or value_range contradicts what the header gives; refused for files of any other mode; reason required in binding"}
+requires: [numpy]   # no mrcfile: the header is parsed in snippet.py, so a read is one range request
+tested_on: [empiar-10070-muscle-mitochondria-fib-sem]
+supersedes: mrc-http

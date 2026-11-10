@@ -1,0 +1,12 @@
+record: empiar-10070-muscle-mitochondria-fib-sem
+record_commit: bd965a656de8f35269c064a77912455b3d4058e7
+snippets_commit: 5ca9cacbe772e9af2c63ce829ccfb49088c3d66f
+raw:
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10070/data/b3talongmusc20130301.mrc"]
+    params: {mode0: uint8}
+labels: []
+reasons:
+  - "raw: the record's one MRC volume (technical.inspected_urls), format mrc -> mrc-http-2, which supersedes mrc-http"
+  - "mode0: uint8 because the file is MRC mode 0 holding unsigned bytes: the record gives dtype uint8, value_range 39-160 and 'read as int8 it wraps', and the paper says 8-bit images. The header cannot say so itself: its imodStamp/imodFlags words are 0 (written by IMOD tif2mrc/newstack in March 2013, per its labels), so without the param the snippet follows MRC2014 and reads int8"
+  - "labels left empty: the record's label array is binary STL surface meshes (format other, encoding other, axes/shape null, alignment unknown); no catalog snippet reads STL, and mesh units/origin relative to the MRC grid are not stated, so rasterizing them needs a human decision"
