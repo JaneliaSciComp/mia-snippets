@@ -39,8 +39,10 @@ None.
 
 ## Example
 
-`examples/empiar-10791-mouse-liver-fib-sem-organelles.yaml` binds the whole lean-liver volume 6461: 5638 raw
-slices as plain URLs (names taken from the server's directory listing) and the mitochondria masks as one zip
-member glob. Smoke on it fetched 6.2 MB. The binding's `snippets_commit` is the commit before this snippet's
+`examples/empiar-10791-mouse-liver-fib-sem-organelles.yaml` binds the first 1000 slices of the lean-liver
+volume 6461: raw slices 0000..0999 as plain URLs (names taken from the server's directory listing) and the
+matching mitochondria masks as one zip member glob. Listing all 5638 plain URLs made the binding 1.7 MB, which
+the mia-data worker could not read from the PR; 1000 URLs keep it near 0.3 MB.
+Smoke on it fetched 6.2 MB. The binding's `snippets_commit` is the commit before this snippet's
 own (a binding can't name the commit that adds it); a binding written by the worker names a commit that
 contains the snippet.
