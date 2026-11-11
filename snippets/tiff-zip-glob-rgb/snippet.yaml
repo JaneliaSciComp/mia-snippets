@@ -1,6 +1,6 @@
 name: tiff-zip-glob-rgb
 spec_version: 1
-summary: Single-page TIFF tiles from zip members chosen by glob (or plain URLs), stacked along z, with the RGB sample axis collapsed to one plane (grey copy, one-hot class ids, or one sample).
+summary: Single-page TIFF tiles from zip members or an HTTP directory chosen by glob (or plain URLs), stacked along z, with the RGB sample axis collapsed to one plane (grey copy, one-hot class ids, or one sample).
 formats: [tiff]
 containers: [zip, http]
 params:

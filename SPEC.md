@@ -48,7 +48,9 @@ class Array(Protocol):                     # defined in harness/src/mia_harness/
   hints throughout the snippet; `Source`, `IO`, `Array` and the exceptions below all come from `mia_harness.api`.
 - **`Source`** holds:
   - `urls: list[str]`: one per file, sorted. There are several when the dataset is one file per Z slice.
-    Zip members are written `<zip url>::<member>`.
+    Zip members are written `<zip url>::<member>`. A glob url, `<zip url>::<glob>` over a zip's members or
+    `<dir url>/::<glob>` over an HTTP directory index (`fnmatch` syntax), stands for every matching file, sorted
+    by name; `io.expand` resolves it, and a snippet that takes globs says so in its README.
   - `params: dict`: snippet-specific parameters declared in `snippet.yaml`, e.g. an HDF5 key or an axis
     override.
 - **`access` is reported at runtime** by the opened `Array`, because the same snippet can meet a stored zip
@@ -56,7 +58,9 @@ class Array(Protocol):                     # defined in harness/src/mia_harness/
 - **All I/O goes through `io`**, which counts network bytes and enforces the job's byte cap:
   - `io.open(url)`: a seekable binary file backed by HTTP or S3 range requests and an on-disk cache
   - `io.fetch(url)`: a local `Path` holding the whole file, staged once
-  - `io.list(url)`: lists zip members
+  - `io.list(url)`: the entries of a zip (its members) or of an HTTP directory index (a url ending in `/`;
+    subdirectories keep their trailing `/`)
+  - `io.expand(url)`: a glob url as the plain or member urls it matches, sorted; any other url as itself
 
   `io` records each file's validators (ETag, Last-Modified, size) for provenance, and refuses a server that
   answers a range request with the whole body. In a writable dataset cache it also records them in

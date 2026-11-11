@@ -1,14 +1,14 @@
 """`harness fetch`: every URL of a binding into the raw cache, with a per-file outcome report (fetch.json).
 
-A `<zip>::<glob>` url is expanded against the zip's directory and every matching member fetched; the url is one
-report entry, and once all its members are in, files.json records it (`note_fetched`), which is what tells a
-worker the members are cached rather than merely the zip's validators known."""
-from fnmatch import fnmatchcase
+A glob url (`<zip>::<glob>`, `<dir>/::<glob>`) is expanded against the zip's directory or the directory's index
+and every matching file fetched; the url is one report entry, and once all its files are in, files.json records
+it (`note_fetched`), which is what tells a worker the files are cached rather than merely the container's
+validators known."""
 from pathlib import Path
 
 from .api import BudgetExceeded, HostNotAllowed, NeedsFetch
 from .binding import load_binding
-from .io import IO, _split
+from .io import IO
 
 
 def fetch(binding_path: Path, record_path: Path, io: IO) -> dict:
@@ -21,7 +21,7 @@ def fetch(binding_path: Path, record_path: Path, io: IO) -> dict:
             before = io.bytes_fetched
             try:
                 size = 0
-                for piece in expand(url, io):
+                for piece in io.expand(url):
                     size += io.fetch(piece).stat().st_size
                 io.note_fetched(url)
             except NeedsFetch as e:
@@ -47,17 +47,3 @@ def fetch(binding_path: Path, record_path: Path, io: IO) -> dict:
     rep["bytes_fetched"] = io.bytes_fetched
     return rep
 
-
-GLOB_CHARS = "*?["
-
-
-def expand(url: str, io: IO) -> list[str]:
-    """A `<zip>::<glob>` url as its matching member urls, sorted by name (the snippets expand the same way);
-    any other url as itself."""
-    zip_url, member = _split(url)
-    if member is None or not any(ch in member for ch in GLOB_CHARS):
-        return [url]
-    names = sorted(n for n in io.list(zip_url) if fnmatchcase(n, member))
-    if not names:
-        raise ValueError(f"no member of {zip_url} matches {member!r}")
-    return [f"{zip_url}::{n}" for n in names]

@@ -308,3 +308,23 @@ def test_read_only_cache_does_not_write_the_manifest(server, make_io, tmp_path):
     server.files["/d.bin"] = DATA
     make_io(writable=False).fetch(server.url("/d.bin"))
     assert not (tmp_path / "shared" / "files.json").exists()
+
+
+INDEX = ('<html><body><h1>Index of /d</h1><a href="?C=N;O=D">Name</a><a href="/">Parent Directory</a>'
+         '<a href="sub/">sub/</a><a href="a%20b.tif">a b.tif</a><a href="z_0001.tif">z_0001.tif</a>'
+         '<a href="z_0000.tif">z_0000.tif</a><a href="z_0000.tif">again</a></body></html>')
+
+
+def test_list_reads_an_http_directory_index_once_and_expand_joins_the_names(server, make_io):
+    server.files["/d/"] = INDEX.encode()
+    io = make_io()
+    d = server.url("/d/")
+    assert io.list(d) == ["sub/", "a%20b.tif", "z_0001.tif", "z_0000.tif"]
+    assert io.expand(d + "::z_*.tif") == [d + "z_0000.tif", d + "z_0001.tif"]
+    assert io.expand(d + "::*") == [d + "a%20b.tif", d + "z_0000.tif", d + "z_0001.tif"]   # no subdirectories
+    assert io.expand(d + "z_0000.tif") == [d + "z_0000.tif"]
+    assert io.bytes_fetched == len(INDEX) and server.gets() == ["/d/"]
+    with pytest.raises(ValueError):
+        io.expand(d + "::*.png")
+    with pytest.raises(ValueError):
+        io.list(d + "::z_0000.tif")

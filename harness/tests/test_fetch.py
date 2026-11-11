@@ -64,6 +64,39 @@ def test_fetch_expands_member_globs_and_an_offline_job_reads_them(server, make_i
     assert fetch(nothing, record, make_io())["files"][0]["outcome"] == "failed"
 
 
+def test_fetch_expands_directory_globs_and_an_offline_job_reads_them(server, make_io, tmp_path):
+    """A `<dir>/::<glob>` url fetches every matching file of an HTTP directory index; afterwards a job with no
+    hosts expands the glob from the cached listing and opens the files without a request."""
+    from mia_harness.cache import MANIFEST
+
+    server.files["/d/"] = b'<a href="sub/">sub/</a><a href="1.tif">1.tif</a><a href="2.tif">2.tif</a><a href="n.txt">n</a>'
+    server.files["/d/1.tif"], server.files["/d/2.tif"] = b"1" * 10, b"2" * 20
+    glob_url = server.url("/d/") + "::*.tif"
+    binding, record = write_binding(tmp_path, [glob_url], [])
+    rep = fetch(binding, record, make_io())
+    assert rep["ok"] and [(f["url"], f["outcome"], f["bytes"]) for f in rep["files"]] == [(glob_url, "fetched", 30)]
+    assert json.loads((tmp_path / "shared" / MANIFEST).read_text())[glob_url]["source"] == "members"
+    gets = len(server.gets())
+    offline = make_io(hosts=())
+    assert offline.expand(glob_url) == [server.url("/d/1.tif"), server.url("/d/2.tif")]
+    with offline.open(server.url("/d/1.tif")) as f:
+        assert f.read() == b"1" * 10
+    assert offline.bytes_fetched == 0 and len(server.gets()) == gets
+
+
+def test_list_cli_prints_entries_or_the_urls_a_glob_stands_for(server, tmp_path, monkeypatch, capsys):
+    server.files["/d/"] = b'<a href="1.tif">1.tif</a><a href="n.txt">n</a>'
+    monkeypatch.setenv("MIA_HARNESS_ALLOWED_HOSTS", "127.0.0.1")
+    monkeypatch.setenv("MIA_HARNESS_JOB_BYTES", "100000")
+    work = str(tmp_path / "work")
+    assert cli.main(["list", server.url("/d/"), "--work", work]) == 0
+    assert capsys.readouterr().out.split() == ["1.tif", "n.txt"]
+    assert cli.main(["list", server.url("/d/") + "::*.tif", "--work", work]) == 0
+    assert capsys.readouterr().out.split() == [server.url("/d/1.tif")]
+    assert cli.main(["list", "https://example.org/x/", "--work", work]) == 1
+    assert "HostNotAllowed" in capsys.readouterr().err
+
+
 def test_fetch_partial_on_byte_cap_and_failed_on_404(server, make_io, tmp_path):
     server.files["/a.bin"] = b"a" * 1000
     binding, record = write_binding(tmp_path, [server.url("/a.bin"), server.url("/missing.bin")], [])

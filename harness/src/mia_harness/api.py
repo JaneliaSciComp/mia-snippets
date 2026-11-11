@@ -1,4 +1,6 @@
 """The snippet contract (SPEC.md section 2)."""
+from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO, Literal, Protocol
@@ -38,7 +40,8 @@ class IO(Protocol):
 
     def open(self, url: str) -> BinaryIO: ...     # seekable, range-backed; raises NeedsFetch when ranges won't do
     def fetch(self, url: str) -> Path: ...        # the whole file, staged once
-    def list(self, url: str) -> list[str]: ...    # zip members of a zip url
+    def list(self, url: str) -> list[str]: ...    # a zip's members, or an HTTP directory index's names
+    def expand(self, url: str) -> list[str]: ...  # a `<zip>::<glob>` or `<dir>/::<glob>` url as its files, sorted
 
 
 class Array(Protocol):

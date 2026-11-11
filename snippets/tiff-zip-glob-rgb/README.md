@@ -6,9 +6,11 @@ plane, which is what this snippet adds over `tiff-zip-member`: that snippet expo
 image saved as RGB yields three duplicate planes and a one-hot RGB mask yields three binary planes that the
 harness pairs with the raw's samples.
 
-- **URLs.** Each URL is a plain file, a zip member `<zip url>::<member>`, or a zip member glob
-  `<zip url>::<pattern>` (`fnmatch` syntax: `*`, `?`, `[...]`; `*` also crosses `/`). A glob is expanded with
-  `io.list` and sorted by member name; several URLs are concatenated in binding order. Two arrays bound with
+- **URLs.** Each URL is a plain file, a zip member `<zip url>::<member>`, a zip member glob
+  `<zip url>::<pattern>` or a glob over an HTTP directory index `<dir url>/::<pattern>` (`fnmatch` syntax: `*`,
+  `?`, `[...]`; `*` also crosses `/`). A glob is expanded with `io.expand` and sorted by name; several URLs are
+  concatenated in binding order. A directory of one TIFF per z slice (EMPIAR's FIB-SEM and SBF-SEM entries,
+  say) is bound as `<dir url>/::*.tif`. Two arrays bound with
   globs over sibling directories (e.g. `images/*.tif` and `labels/*.tif`) pair plane for plane when the two
   directories hold the same file names. The snippet cannot check that across arrays, so the binding's
   `reasons` must say why the names pair.

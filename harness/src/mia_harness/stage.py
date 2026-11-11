@@ -13,7 +13,6 @@ import zarr
 
 from .api import Array
 from .binding import ArrayBinding, Binding, LabelBinding, binding_hash, load_binding
-from .fetch import expand
 from .io import IO, BudgetExceeded, HostNotAllowed, _split
 from .plan import LevelPlan, PlanInput, StagePlan, derive_samples, planned_bytes, stage_plan
 from .provenance import (VOXEL_AXIS, Artifact, Geometry, Plan, Provenance, SourceFile, Verification,
@@ -225,7 +224,7 @@ def prefetch(binding, io: IO) -> None:
     the snippets then read locally; offline (a stage from the cache) each is a hit, or the error names it."""
     for b in [*binding.raw, *binding.labels]:
         for url in b.urls:
-            for piece in expand(url, io):
+            for piece in io.expand(url):
                 io.fetch(piece)
 
 

@@ -1,4 +1,6 @@
 """All snippet network I/O (SPEC §5.2): range files, whole-file fetches, byte cap, validators, host checks."""
+from __future__ import annotations
+
 import hashlib
 import io
 import itertools
@@ -6,6 +8,7 @@ import json
 import os
 import re
 from contextlib import closing
+from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import BinaryIO, Iterator
 from urllib.parse import urlsplit
@@ -18,6 +21,7 @@ from .cache import DatasetCache
 
 BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB blocks
 MAX_REDIRECTS = 10
+GLOB_CHARS = "*?["
 
 
 class IO:
@@ -30,6 +34,7 @@ class IO:
         self.bytes_fetched = 0
         self.validators: dict[str, dict] = {}   # url -> {"etag", "last_modified", "size"}
         self._zips: dict[str, dict] = {}         # zip url -> members by name
+        self._dirs: dict[str, list[str]] = {}    # directory url -> the names its index links to
 
     def close(self) -> None:
         if self._own_client:
@@ -67,11 +72,36 @@ class IO:
         return self.cache.get(key, check=lambda p: remotezip.crc_ok(p, info)) or self.cache.put(key, write)
 
     def list(self, url: str) -> list[str]:
-        """Member names of a zip."""
+        """The entries of a container: a zip's member names, or the names an HTTP directory index (a url ending
+        in `/`) links to, subdirectories with their trailing `/`."""
         url, member = _split(url)
         if member is not None:
-            raise ValueError(f"io.list takes a zip url, not a member: {member!r}")
-        return list(self._directory(url))
+            raise ValueError(f"io.list takes a zip or directory url, not a member: {member!r}")
+        return list(self._index(url)) if url.endswith("/") else list(self._directory(url))
+
+    def expand(self, url: str) -> list[str]:
+        """A `<zip>::<glob>` url as its matching member urls, a `<dir>/::<glob>` url as the matching files' plain
+        urls, sorted by name (fnmatch syntax; `*` crosses `/`); any other url as itself."""
+        container, member = _split(url)
+        if member is None or not any(ch in member for ch in GLOB_CHARS):
+            return [url]
+        names = sorted(n for n in self.list(container) if not n.endswith("/") and fnmatchcase(n, member))
+        if not names:
+            raise ValueError(f"no member of {container} matches {member!r}")
+        return [container + n if container.endswith("/") else f"{container}::{n}" for n in names]
+
+    # -- directory indexes
+
+    def _index(self, url: str) -> list[str]:
+        """The names an HTTP directory index links to, from the dataset cache when a fetch stored them (an offline
+        stage job expands a glob from it), else one GET of the page, stored for the next job."""
+        if url not in self._dirs:
+            key = _key(f"{url}::", self._head(url))   # the listing's entry, under the directory's validators
+            if (local := self.cache.get(key)) is None:
+                names = _index_names(b"".join(self._get(url)).decode("utf-8", "replace"))
+                local = self.cache.put(key, lambda p: p.write_text(json.dumps(names)))
+            self._dirs[url] = json.loads(local.read_text())
+        return self._dirs[url]
 
     # -- zip members
 
@@ -275,6 +305,14 @@ def _split(url: str) -> tuple[str, str | None]:
     path = url.find("/", url.find("://") + 3)               # "::" in the path, not in an IPv6 host
     i = url.find("::", path) if path >= 0 else -1
     return (url, None) if i < 0 else (url[:i], url[i + 2:])
+
+
+def _index_names(html: str) -> list[str]:
+    """The relative hrefs of an index page, in page order, once each: not the parent link, the sort links or
+    anything absolute. Names stay percent-encoded, so `<dir url> + name` is the file's url."""
+    # ponytail: Apache and nginx autoindex pages; a JSON listing or an S3 bucket index needs its own parser
+    hrefs = re.findall(r'<a\s[^>]*?href="([^"]*)"', html, re.I)
+    return list(dict.fromkeys(h for h in hrefs if h and not h.startswith(("?", "/", "#", ".")) and "://" not in h))
 
 
 def _write(path: Path, chunks: Iterator[bytes]) -> None:

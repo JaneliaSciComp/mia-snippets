@@ -8,7 +8,7 @@ from pathlib import Path
 from .api import CROP
 from .check import check_stage
 from .fetch import fetch
-from .io import from_env
+from .io import _split, from_env
 from .plan import load_plan
 from .preview import preview
 from .provenance import VoxelAxis, add_convention
@@ -61,6 +61,10 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--record", type=Path, required=True)
     s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
     s.add_argument("--out", type=Path, required=True, help="result JSON")
+    s = sub.add_parser("list", help="the entries of a zip or of an HTTP directory index (a url ending in /), one "
+                                    "per line; with ::<glob>, the file urls the glob stands for in a binding")
+    s.add_argument("url")
+    s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
     s = sub.add_parser("tensorize", help="one crop descriptor through a tensorizer: sample.npz + .json (buffers spec §4)")
     s.add_argument("pyramid", type=Path, help="a staged v<i>.zarr directory (raw/ and labels/ inside)")
     s.add_argument("--tensorizers", type=Path, required=True, help="tensorizer snapshot directory")
@@ -115,6 +119,13 @@ def main(argv: list[str] | None = None) -> int:
         return 1 if errors else 0
     io = from_env(args.work)
     try:
+        if args.cmd == "list":
+            try:
+                print(*(io.expand(args.url) if _split(args.url)[1] else io.list(args.url)), sep="\n")
+            except Exception as e:      # a host the job may not reach, a 404, a glob with no match
+                print(f"list failed: {type(e).__name__}: {e}", file=sys.stderr)
+                return 1
+            return 0
         if args.cmd == "stage":
             try:
                 path = args.plan

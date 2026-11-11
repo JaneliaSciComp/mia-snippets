@@ -1,12 +1,11 @@
-"""Single-page TIFF tiles from zip members chosen by glob (or listed one by one), stacked along z, with the
-TIFF's sample (RGB) axis collapsed to one plane.
+"""Single-page TIFF tiles from zip members or directory files chosen by glob (or listed one by one), stacked
+along z, with the TIFF's sample (RGB) axis collapsed to one plane.
 
 Three collapses, chosen by params: `samples: grey` for a grey image stored as identical RGB samples (sample 0
 is returned, after checking the samples agree), `samples: onehot` for a mask whose pixels are set in exactly
 one sample (class ids 1..S in sample order, 0 where none is set), or `sample: <k>` for one sample plane.
 Files are opened lazily: `open_array` reads the first file's header only; `read` fetches the planes it needs.
 """
-from fnmatch import fnmatchcase
 from typing import BinaryIO
 
 import numpy as np
@@ -16,7 +15,6 @@ from mia_harness.api import IO, Array, NeedsFetch, Source
 
 SPEC_VERSION = 1
 
-GLOB_CHARS = "*?["
 MODES = ("grey", "onehot")
 
 
@@ -90,25 +88,10 @@ class _Tiles:
                          f"({' or '.join(MODES)}) or params.sample (an index) to collapse them to one plane")
 
 
-def _split(url: str) -> tuple[str, str | None]:
-    """(file url, zip member or None): `::` after the path starts, as the harness writes zip members."""
-    path = url.find("/", url.find("://") + 3)
-    i = url.find("::", path) if path >= 0 else -1
-    return (url, None) if i < 0 else (url[:i], url[i + 2:])
-
-
 def _expand(urls: tuple[str, ...], io: IO) -> list[str]:
-    """Each `<zip>::<glob>` becomes its matching members, sorted by name; other urls pass through."""
-    out: list[str] = []
-    for u in urls:
-        zip_url, member = _split(u)
-        if member is not None and any(ch in member for ch in GLOB_CHARS):
-            names = sorted(n for n in io.list(zip_url) if fnmatchcase(n, member))
-            if not names:
-                raise ValueError(f"no member of {zip_url} matches {member!r}")
-            out += [f"{zip_url}::{n}" for n in names]
-        else:
-            out.append(u)
+    """Each glob url (`<zip>::<glob>`, `<dir>/::<glob>`) becomes its matching files, sorted by name; other urls
+    pass through."""
+    out = [u for url in urls for u in io.expand(url)]
     if len(set(out)) != len(out):
         raise ValueError("the urls (after glob expansion) name the same file twice")
     return out
