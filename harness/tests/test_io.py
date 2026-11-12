@@ -4,6 +4,7 @@ import json
 import os
 import zipfile
 
+import httpx
 import pytest
 from rangeserver import server  # noqa: F401  (fixture)
 
@@ -328,3 +329,27 @@ def test_list_reads_an_http_directory_index_once_and_expand_joins_the_names(serv
         io.expand(d + "::*.png")
     with pytest.raises(ValueError):
         io.list(d + "::z_0000.tif")
+
+
+def test_a_dropped_truncated_or_5xx_response_is_retried_and_charged_once(server, make_io, monkeypatch):
+    import mia_harness.io as io_module
+    monkeypatch.setattr(io_module, "RETRY_WAIT", (0, 0))
+    server.files["/d.bin"], server.files["/e.bin"] = DATA, DATA
+    io = make_io()
+    server.fail = 1                                 # the first range GET is cut short
+    assert io.open(server.url("/d.bin")).read(BLOCK) == DATA[:BLOCK]
+    assert io.bytes_fetched == BLOCK and server.gets() == ["/d.bin"] * 2
+    server.fail = 1
+    io.open(server.url("/d.bin")).read(2 * BLOCK)   # block 1 is new: its GET is truncated once
+    assert io.bytes_fetched == 2 * BLOCK and len(server.gets()) == 4
+    server.fail, server.fail_mode = 2, "503"
+    assert io.fetch(server.url("/e.bin")).read_bytes() == DATA
+    assert io.bytes_fetched == 2 * BLOCK + len(DATA)
+    assert server.requests[-4:] == [("HEAD", "/e.bin")] * 3 + [("GET", "/e.bin")]   # the HEAD is retried too
+    server.files["/f.bin"], server.fail, server.fail_mode = DATA, 3, "truncate"
+    with pytest.raises(httpx.RemoteProtocolError):       # three bad answers: the error is final
+        io.open(server.url("/f.bin")).read(10)
+    assert io.bytes_fetched == 2 * BLOCK + len(DATA)       # the failed attempts charged nothing
+    with pytest.raises(httpx.HTTPStatusError):           # a 404 is not retried
+        io.open(server.url("/missing")).read(10)
+    assert server.heads().count("/missing") == 1

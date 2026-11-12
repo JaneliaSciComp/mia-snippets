@@ -7,10 +7,11 @@ import itertools
 import json
 import os
 import re
+import time
 from contextlib import closing
 from fnmatch import fnmatchcase
 from pathlib import Path
-from typing import BinaryIO, Iterator
+from typing import BinaryIO, Callable, Iterator, TypeVar
 from urllib.parse import urlsplit
 
 import httpx
@@ -22,6 +23,8 @@ from .cache import DatasetCache
 BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB blocks
 MAX_REDIRECTS = 10
 GLOB_CHARS = "*?["
+RETRY_WAIT = (1.0, 4.0)     # seconds before the second and third attempt of a request a server dropped
+T = TypeVar("T")
 
 
 class IO:
@@ -59,7 +62,8 @@ class IO:
         url, member = _split(url)
         if member is None:
             key = _key(url, self._head(url))
-            return self.cache.get(key) or self.cache.put(key, lambda p: _write(p, self._get(url)))
+            write = lambda p: self._retry(lambda: _write(p, self._get(url)))  # noqa: E731
+            return self.cache.get(key) or self.cache.put(key, write)
         key = _member_key(url, member, self._head(url))
         if self._offline(url) and (local := self.cache.get(key)) is not None:
             return local   # written whole and CRC-checked by the fetch; the zip's directory is out of reach anyway
@@ -67,7 +71,7 @@ class IO:
 
         def write(p: Path) -> None:
             offset = self._data_offset(url, info)
-            remotezip.extract(self._bytes(url, offset, offset + info.compress_size), info, p)
+            self._retry(lambda: remotezip.extract(self._bytes(url, offset, offset + info.compress_size), info, p))
 
         return self.cache.get(key, check=lambda p: remotezip.crc_ok(p, info)) or self.cache.put(key, write)
 
@@ -98,7 +102,7 @@ class IO:
         if url not in self._dirs:
             key = _key(f"{url}::", self._head(url))   # the listing's entry, under the directory's validators
             if (local := self.cache.get(key)) is None:
-                names = _index_names(b"".join(self._get(url)).decode("utf-8", "replace"))
+                names = _index_names(self._retry(lambda: b"".join(self._get(url))).decode("utf-8", "replace"))
                 local = self.cache.put(key, lambda p: p.write_text(json.dumps(names)))
             self._dirs[url] = json.loads(local.read_text())
         return self._dirs[url]
@@ -136,7 +140,8 @@ class IO:
 
     def _data_offset(self, url: str, info) -> int:
         """One 30-byte range request for the local header, not a 1 MiB block."""
-        return remotezip.data_offset(b"".join(self._bytes(url, info.header_offset, info.header_offset + 30)), info)
+        head = self._retry(lambda: b"".join(self._bytes(url, info.header_offset, info.header_offset + 30)))
+        return remotezip.data_offset(head, info)
 
     def _local(self, url: str) -> Path | None:
         """The whole file in the dataset cache (fetched before, or dropped by hand), or None."""
@@ -158,6 +163,22 @@ class IO:
 
     # -- HTTP
 
+    def _retry(self, attempt: Callable[[], T]) -> T:
+        """`attempt` up to three times when the server drops the connection, times out, truncates the body or
+        answers 5xx (EBI does all of these under load); a failed attempt's bytes are not charged, nothing was kept.
+        Anything else (a 404, the cap, a host, Range ignored) is final."""
+        # ponytail: the whole request again, not a resume; a resume needs Range on the partial body
+        for wait in (*RETRY_WAIT, None):
+            before = self.bytes_fetched
+            try:
+                return attempt()
+            except (httpx.TransportError, httpx.HTTPStatusError, OSError) as e:
+                self.bytes_fetched = before
+                if wait is None or (isinstance(e, httpx.HTTPStatusError) and e.response.status_code < 500):
+                    raise
+                time.sleep(wait)
+        raise AssertionError("unreachable")
+
     def _head(self, url: str) -> dict:
         """The URL's validators: a HEAD request when the host is allowed (so a changed upstream file is noticed),
         recorded in files.json for later; otherwise files.json, which is how an offline job (no hosts: a dataset a
@@ -170,15 +191,17 @@ class IO:
                 raise FileNotFoundError(f"{url}: not in the raw cache's files.json; a human has to drop this file "
                                         "(buffers spec §3)")
             else:   # a HEAD; for a host that is not allowed, _send raises HostNotAllowed
-                with closing(self._send("HEAD", url)) as r:
-                    r.raise_for_status()
-                    size = r.headers.get("content-length")
-                    self.validators[url] = {"etag": r.headers.get("etag"),
-                                            "last_modified": r.headers.get("last-modified"),
-                                            "size": int(size) if size is not None else None}
+                self.validators[url] = self._retry(lambda: self._head_once(url))
                 if self.cache.writable:
                     self.cache.manifest_put(url, self.validators[url], "download")
         return self.validators[url]
+
+    def _head_once(self, url: str) -> dict:
+        with closing(self._send("HEAD", url)) as r:
+            r.raise_for_status()
+            size = r.headers.get("content-length")
+            return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
+                    "size": int(size) if size is not None else None}
 
     def _size(self, url: str) -> int:
         size = self._head(url)["size"]
@@ -247,7 +270,7 @@ class IO:
         missing = [i for i in range(first, last + 1) if not (d / str(i)).is_file()]
         for _, run in itertools.groupby(enumerate(missing), lambda t: t[1] - t[0]):
             run = [i for _, i in run]
-            data = b"".join(self._get(url, run[0] * BLOCK, min(size, (run[-1] + 1) * BLOCK)))
+            data = self._retry(lambda: b"".join(self._get(url, run[0] * BLOCK, min(size, (run[-1] + 1) * BLOCK))))
             d.mkdir(parents=True, exist_ok=True)
             for i in run:
                 tmp = d / f".{i}.tmp"
