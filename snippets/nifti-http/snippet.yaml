@@ -1,0 +1,11 @@
+name: nifti-http
+spec_version: 1
+summary: One single-file NIfTI-1 volume (.nii.gz or .nii) at a plain URL, zyx in the file's voxel order; header parsed by the snippet, a gzip file is fetched whole, scl_slope/scl_inter applied.
+formats: [nifti]
+containers: [http, s3]
+params:
+  pixdim_unit: {type: str, required: false, doc: "m, mm or um: the unit of pixdim when the header's xyzt_units leaves the spatial unit unset (code 0), so voxel_size_nm can be reported instead of None; refused when the header states a different unit; reason required in binding"}
+  stored_values: {type: bool, required: false, doc: "true to return the stored numbers in the stored dtype, without the header's scl_slope and scl_inter (e.g. an integer label whose header scaling is known to be wrong); reason required in binding"}
+requires: [numpy]   # no nibabel (not on the allowlist): the header is parsed in snippet.py, gzip is stdlib
+tested_on: [aws-brainminds-marmoset-connectivity-stpt-tracer]
+supersedes: null
