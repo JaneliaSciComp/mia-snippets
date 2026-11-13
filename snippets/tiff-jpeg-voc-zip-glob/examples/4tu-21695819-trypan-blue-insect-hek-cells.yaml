@@ -1,0 +1,44 @@
+record: 4tu-21695819-trypan-blue-insect-hek-cells
+record_commit: 3f75709f1d2778fe86fd9c436b2b5ff948a72c7b
+snippets_commit: c6f6a6d90f446630e6157532eb084e5c9c9650d6
+raw:
+  - snippet: tiff-jpeg-voc-zip-glob
+    urls: ["https://data.4tu.nl/file/43c5cb30-69be-4355-a843-60b4a86e05cd/b9bac702-38ec-47d3-b87d-70690d3584e3::4TU repository/Train set/*.[tj]*"]
+    params: {}
+  - snippet: tiff-jpeg-voc-zip-glob
+    urls: ["https://data.4tu.nl/file/43c5cb30-69be-4355-a843-60b4a86e05cd/b9bac702-38ec-47d3-b87d-70690d3584e3::4TU repository/Validation set/*.[tj]*"]
+    params: {}
+labels:
+  - snippet: tiff-jpeg-voc-zip-glob
+    urls: ["https://data.4tu.nl/file/43c5cb30-69be-4355-a843-60b4a86e05cd/b9bac702-38ec-47d3-b87d-70690d3584e3::4TU repository/Train set/*.xml"]
+    params: {boxes: instance, classes: [Alive, Dead, Aggregate]}
+    pairs_with: 0
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: tiff-jpeg-voc-zip-glob
+    urls: ["https://data.4tu.nl/file/43c5cb30-69be-4355-a843-60b4a86e05cd/b9bac702-38ec-47d3-b87d-70690d3584e3::4TU repository/Train set/*.xml"]
+    params: {boxes: semantic, classes: [Alive, Dead, Aggregate]}
+    pairs_with: 0
+    label_key: manual_gt-cell-semantic
+    segmentation_type: semantic
+  - snippet: tiff-jpeg-voc-zip-glob
+    urls: ["https://data.4tu.nl/file/43c5cb30-69be-4355-a843-60b4a86e05cd/b9bac702-38ec-47d3-b87d-70690d3584e3::4TU repository/Validation set/*.xml"]
+    params: {boxes: instance, classes: [Alive, Dead, Aggregate]}
+    pairs_with: 1
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: tiff-jpeg-voc-zip-glob
+    urls: ["https://data.4tu.nl/file/43c5cb30-69be-4355-a843-60b4a86e05cd/b9bac702-38ec-47d3-b87d-70690d3584e3::4TU repository/Validation set/*.xml"]
+    params: {boxes: semantic, classes: [Alive, Dead, Aggregate]}
+    pairs_with: 1
+    label_key: manual_gt-cell-semantic
+    segmentation_type: semantic
+reasons:
+  - "tiff-jpeg-voc-zip-glob instead of the draft's tiff-zip-member: the labels are labelImg Pascal VOC XML and 18 of the 60 annotated images are JPEG, neither of which a catalog snippet reads; this snippet reads RGB TIFF and JPEG members as one set and paints the XML boxes on the image grid"
+  - "raw urls are member globs, not the record's one sample image: 'Train set/*.[tj]*' matches the 31 .tif + 15 .jpeg of the train set (not the .xml), 'Validation set/*.[tj]*' the 11 .tif + 3 .jpeg; every one of the 60 is 768x1024x3 uint8 (all headers read while testing), so each folder is one zcyx array, one image per z, the RGB samples kept as c 0..2 (R, G, B: the trypan-blue stain is a colour signal)"
+  - "one raw per folder, not one for both: the publication's train/validation split stays visible as raw 0 / raw 1"
+  - "the unannotated 'Test set' (123 tif) and 'HEK test set' (52 tif) folders are not bound: they have no pixel-level annotation (image-level counts in S1 Table.xlsx only) and the labels are what this dataset is bound for; they can be bound as further raws of this snippet, one per shape"
+  - "label urls 'Train set/*.xml' and 'Validation set/*.xml': one labelImg XML per image, <stem>.xml beside <stem>.tif/.jpeg (record alignment_notes). The snippet sorts a glob's files by stem, and the sorted stems of each image glob and its XML glob were compared while testing and are identical (46 and 14), so z index k of a label is the annotation of z index k of its raw; every XML's <size> is 1024x768, the image shape"
+  - "classes [Alive, Dead, Aggregate]: the record lists Alive and Dead only, but the XMLs also hold 224 <object>s named Aggregate (171 train, 53 validation; Alive 7369, Dead 1448) and the snippet refuses a name that is not listed. Order as in the record (Alive, Dead) with Aggregate appended, so semantic ids are 1 Alive, 2 Dead, 3 Aggregate (the record's 0-based class ids + 1, because 0 is background). The record should gain the third class"
+  - "NEEDS A HUMAN DECISION, boxes as two labels per raw: the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. Chosen here so that nothing in the table is lost: boxes instance (each box filled with its object number, segmentation_type instance, label_key manual_gt-cell-instance as in the draft) tells the boxes apart, and boxes semantic (each box filled with its class id, segmentation_type semantic, label_key manual_gt-cell-semantic) carries Alive/Dead/Aggregate. Both are filled rectangles, not cell outlines: a consumer must not take them for pixel-accurate masks. Where boxes overlap (they do, cells touch) the smaller box is on top; no box is hidden completely in any of the 60 files"
+  - "label_key source manual_gt: the boxes were drawn by hand in labelImg (the draft's choice; the paper's training annotations)"
