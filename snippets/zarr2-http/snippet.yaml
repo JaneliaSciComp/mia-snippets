@@ -1,0 +1,11 @@
+name: zarr2-http
+spec_version: 1
+summary: One Zarr v2 array at a plain HTTP(S) URL (the array directory or its .zarray), read chunk by chunk with chunk keys derived from .zarray, so no directory listing is needed (S3 over https); voxel size from .zattrs resolution; optionally placed on another array's grid by .zattrs offset.
+formats: [zarr]
+containers: [http, s3]
+params:
+  grid: {type: str, required: false, doc: "url of another Zarr v2 array (directory or .zarray), normally the raw this label pairs with. The array is then presented on that array's voxel grid: its shape is the grid array's shape, its voxel 0 sits at index (offset - grid offset) / resolution taken from both arrays' .zattrs (same resolution and a whole-voxel shift required), and every voxel outside its own extent reads as fill_value. For a label that is an offset crop of its raw, or to have a same-shape label's offset checked; reason required in binding"}
+  axes: {type: str, required: false, doc: "one czyx letter per array dimension, in storage order; defaults to yx / zyx / czyx by rank; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [aws-asem-fib-sem-organelle-ground-truth]
+supersedes: null

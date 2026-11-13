@@ -1,0 +1,21 @@
+record: aws-asem-fib-sem-organelle-ground-truth
+record_commit: 3f75709f1d2778fe86fd9c436b2b5ff948a72c7b
+snippets_commit: c6f6a6d90f446630e6157532eb084e5c9c9650d6
+raw:
+  - snippet: zarr2-http
+    urls: ["https://asem-project.s3.amazonaws.com/datasets/1E/1E.zarr/volumes/raw/.zarray"]
+    params: {}
+labels:
+  - snippet: zarr2-http
+    urls: ["https://asem-project.s3.amazonaws.com/datasets/1E/1E.zarr/volumes/labels/ccp/.zarray"]
+    params: {grid: "https://asem-project.s3.amazonaws.com/datasets/1E/1E.zarr/volumes/raw/.zarray"}
+    pairs_with: 0
+    label_key: unknown-clathrin_coated_pit-semantic
+    segmentation_type: binary
+reasons:
+  - "zarr2-http: the record's arrays are Zarr v2 arrays (zlib chunks 128^3, dimension_separator '.') in an S3 bucket read over https, which has no directory index (the array url and any '<dir>/' url answer 404), so chunk keys are derived from .zarray and each chunk object is read through io"
+  - "urls are the record's technical.sample.urls (cell 1E raw 751x1088x2817 uint8 and labels/ccp on the same grid) with '/.zarray' appended: the snippet takes the array directory or its .zarray, and the .zarray is an object that exists, so `harness fetch` and the prefetch of `harness stage`, which fetch every binding url whole, get a file with validators instead of the directory's 404"
+  - "grid on the ccp label = the raw it pairs with: the label is presented on the raw's voxel grid from both arrays' .zattrs (offset [0,0,0], resolution [4,4,4] on each, so the shift is 0 and the shape is the raw's 751x1088x2817); set although this label already has the raw's shape so that the offsets are checked rather than assumed, and because the record's other labels are offset crops (alignment: offset) that only pair with their raw this way"
+  - "axes zyx: default for rank 3, matches the record (axes zyx, .zattrs offset and resolution in z, y, x)"
+  - "voxel size 4 nm isotropic comes from the arrays' .zattrs resolution; the record's imaging.voxel_size_nm is null because it differs per cell (4 nm for 1E/2E/3A, 5 nm for 46/58/61/64)"
+  - "label_key: annotations.source is 'mixed' -> unknown; class 'ccp' = clathrin-coated pits per record title -> clathrin_coated_pit; encoding binary -> semantic; segmentation_type binary (uint8 0/255)"
