@@ -1,0 +1,10 @@
+name: image-tiles-glob
+spec_version: 1
+summary: One image per file (PNG, JPEG or single-page TIFF, told apart by magic bytes) from zip members or an HTTP directory chosen by glob (or plain URLs), stacked along z; a colour file's samples are a c axis (zcyx), or one plane with samples grey when they are identical copies.
+formats: [png, jpeg, tiff]
+containers: [zip, http]
+params:
+  samples: {type: str, required: false, doc: "'grey': every file's samples are identical copies (a class map or grey image saved as RGB), so sample 0 is returned and the array has no c axis; differing samples raise, and a file without a sample axis passes through. Without it a file with samples is read as c (zcyx) and a file without as zyx; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [4tu-bf11171a-carbon-fibre-composite-masks]
+supersedes: null

@@ -1,0 +1,45 @@
+record: 4tu-bf11171a-carbon-fibre-composite-masks
+record_commit: 3f75709f1d2778fe86fd9c436b2b5ff948a72c7b
+snippets_commit: c6f6a6d90f446630e6157532eb084e5c9c9650d6
+raw:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set I/Original data set/Images/*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set II/Original data set/Images/0_ISC_400_R2_500x_to_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set II/Original data set/Images/0_press_375_R2_500x_xs_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set II/Original data set/Images/90_Press_375_R4_500x_surfxs_R_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Images/0_press_375_R2_300x_xsf_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Images/G02_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Images/Middle_R_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Images/Start_M_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Images/Stop_R_*.tif"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Images/specimen_*.jpg"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Test data set/Images/*.jpg"
+    params: {}
+labels:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set I/Original data set/Masks/*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set II/Original data set/Masks/0_ISC_400_R2_500x_to_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set II/Original data set/Masks/0_press_375_R2_500x_xs_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set II/Original data set/Masks/90_Press_375_R4_500x_surfxs_R_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Masks/0_press_375_R2_300x_xsf_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Masks/G02_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Masks/Middle_R_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Masks/Start_M_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Masks/Stop_R_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Data set III/Original data set/Masks/specimen_*.png"
+      - "https://data.4tu.nl/file/bf11171a-1f57-4a8a-9768-757850d13665/9b908a12-8b99-479f-a78d-a7d15e5466ba::Test data set/Masks/*.png"
+    params: {}
+    pairs_with: 0
+    label_key: auto_pred-fibre_void-semantic
+    segmentation_type: semantic
+reasons:
+  - "image-tiles-glob instead of tiff-zip-glob-rgb: the masks are PNG and 132 of the bound images are JPEG, which tifffile does not open (TiffFileError: not a TIFF file), and the TIFF/JPEG images are real colour (3 samples that differ, 256x256x3 uint8), which tiff-zip-glob-rgb can only reduce to one sample; this snippet decodes PNG, JPEG and TIFF by magic bytes and returns the samples as c, so raw is zcyx (1582, 3, 256, 256)"
+  - "urls are member globs of Data sets.zip (record data.download_url): one 256x256 tile per file under '<set>/Original data set/Images/' with a same-named mask (.png) under '.../Masks/'; each glob expands sorted by name and the globs are concatenated in binding order as z, a stack of independent 2D tiles (record dimensionality 2D), not a volume"
+  - "raw and label list the same 11 globs in the same order, differing only in Images/ vs Masks/ and the extension; names sort the same with either extension, so z index k of the label is the mask of z index k of the raw (checked on the zip directory: the two expansions have the same 1,582 base names in the same order)"
+  - "only the Original data sets and the Test data set are bound: the Augmented data sets are flips, crops, brightness/contrast, CLAHE and blur of the same tiles (the dataset's READ ME.txt), so they add no new images"
+  - "Data set II and III are bound by file-name prefix rather than '*': READ ME.txt says 250 images of Data set II come from Data set I, and the zip directory shows 250 II files and 200 III files with the same name and CRC-32 as a file of an earlier set (prefixes 2_*_cut_128 from I, 0_ISC_400_R2_500x_to from II); the prefix globs bind only the files that are new in each set (250 of II, 800 of III), so 500 + 250 + 800 + 32 = 1,582 distinct tiles and none twice"
+  - "no params on raw: the samples differ (real colour micrographs; all 1,582 bound images decode to 256x256x3 uint8 and none has identical samples), so they stay a c axis; no params on label: the Original and Test masks are single-sample 8-bit PNGs, read as zyx with the stored values"
+  - "label_key auto_pred-fibre_void-semantic (from the draft): READ ME.txt says the masks are made with ImageJ, fibres as circles of the average radius around local maxima and voids by minimum-method thresholding, so the source is automatic and 'not perfect'; values 0 matrix, 1 fibre, 2 void (READ ME.txt; all 1,582 bound masks hold only 0, 1, 2). The class slug fibre_void is the match agent's reading of a two-foreground-class map"
+  - "segmentation_type semantic: the ids are classes (matrix/fibre/void), not instances; fibres are not separated from one another"
