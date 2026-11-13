@@ -1,0 +1,26 @@
+record: aws-chammi-75-multichannel-pretraining
+record_commit: 3f75709f1d2778fe86fd9c436b2b5ff948a72c7b
+snippets_commit: c6f6a6d90f446630e6157532eb084e5c9c9650d6
+raw:
+  - snippet: png-channels
+    urls:
+      - "https://chammi-data.s3.amazonaws.com/CHAMMI-75/CHAMMI-75_train/idr0001/idr0001-plate_100A-converted/Meas_01%282013-01-14_11-13-43%29_001001001_series-0_z-9_t-0_channel-0.png"
+      - "https://chammi-data.s3.amazonaws.com/CHAMMI-75/CHAMMI-75_train/idr0001/idr0001-plate_100A-converted/Meas_01%282013-01-14_11-13-43%29_001001001_series-0_z-9_t-0_channel-1.png"
+    params: {}
+  - snippet: png-channels
+    urls:
+      - "https://chammi-data.s3.amazonaws.com/CHAMMI-75/CHAMMI-75_train/hpa0018/00070df0-bbc3-11e8-b2bc-ac1f6b6435d0-ch0.png"
+      - "https://chammi-data.s3.amazonaws.com/CHAMMI-75/CHAMMI-75_train/hpa0018/00070df0-bbc3-11e8-b2bc-ac1f6b6435d0-ch1.png"
+      - "https://chammi-data.s3.amazonaws.com/CHAMMI-75/CHAMMI-75_train/hpa0018/00070df0-bbc3-11e8-b2bc-ac1f6b6435d0-ch2.png"
+      - "https://chammi-data.s3.amazonaws.com/CHAMMI-75/CHAMMI-75_train/hpa0018/00070df0-bbc3-11e8-b2bc-ac1f6b6435d0-ch3.png"
+    params: {}
+labels: []
+reasons:
+  - "png-channels instead of the draft's tiff-zip-member: every raw is a single-channel 8-bit grey PNG (record technical.arrays: format png, axes yx, uint8, deflate), which tifffile refuses ('not a TIFF file: header=b'\\x89PNG''); png-channels decodes PNG and has no params"
+  - "raw 0 is the record's sampled idr0001 field with both of its channel files as cyx 2x1040x1376 instead of the draft's channel-0 alone: the dataset stores one PNG per channel of a field (record path_pattern <field>_channel-<c>.png), and a listing of the field's key prefix on chammi-data.s3.amazonaws.com (?list-type=2&prefix=...001001001_) returns exactly channel-0 and channel-1"
+  - "raw 1 is the record's probed hpa0018 field (00070df0-..., <uuid>-ch<c>.png) with its four channel files ch0..ch3 as cyx 4x512x512, so the binding covers both file layouts and both shapes the record saw (shape_varies: true); the same prefix listing returns exactly ch0..ch3"
+  - "all urls on chammi-data.s3.amazonaws.com, not the s3.us-west-2 host of the record's hpa0018 url: the record notes say the regional host is not on the allowlist and that the global host serves the same keys"
+  - "explicit urls, no glob: the bucket has no HTTP directory index (harness list on the prefix returns 404), so the channels of a field are listed one url each, in channel-number order"
+  - "two fields only: the other ~2.8M PNGs are not named in the record (listing_complete: false) and each field is its own array, since shapes and channel counts differ by study"
+  - "no voxel size and no channel names: neither is in a PNG, and the record sets neither (they differ by source study)"
+  - "no labels bound: record annotations.present is false (self-supervised pre-training set)"
