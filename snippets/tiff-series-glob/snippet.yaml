@@ -1,10 +1,10 @@
 name: tiff-series-glob
 spec_version: 1
-summary: A numbered series of single-page grey TIFF files, one file per z plane, spread over several HTTP folders; each url is a file or a `<dir>/::<glob>` over one folder's index, and the urls are concatenated in order as zyx.
+summary: A z-stack of grey TIFF pages over HTTP, as zyx. Either a numbered series of single-page files, one per z plane, spread over several folders (each url a file or a `<dir>/::<glob>` over one folder's index, concatenated in order), or one multi-page file with one page per z plane. Requests that fail in transit (timeouts, dropped connections) are retried, for slow servers.
 formats: [tiff]
 containers: [http]
 params:
-  count: {type: int, required: false, doc: "the number of files (z planes) the urls must stand for, from a complete listing; open fails when the directory indexes give another number, so a folder left out or a changed listing is noticed. Without it the count is whatever the globs match; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of z planes the urls must stand for, from a complete listing: the number of files of a series, or the number of pages of a lone multi-page file. Open fails on another number, so a folder left out or a changed listing is noticed. Without it the count is whatever the globs match; reason required in binding"}
 requires: [numpy, tifffile, imagecodecs]
 tested_on: [empiar-13156-hela-stard3-fib-sem-organelles]
 supersedes: null
