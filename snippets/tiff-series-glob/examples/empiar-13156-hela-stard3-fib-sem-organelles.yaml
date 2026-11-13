@@ -1,0 +1,33 @@
+record: empiar-13156-hela-stard3-fib-sem-organelles
+record_commit: 3f75709f1d2778fe86fd9c436b2b5ff948a72c7b
+snippets_commit: c6f6a6d90f446630e6157532eb084e5c9c9650d6
+raw:
+  - snippet: tiff-series-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/1-100/::image*.tif"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/101-200/::image*.tif"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/201-300/::image*.tif"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/301-400/::image*.tif"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/401-500/::image*.tif"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/501-600/::image*.tif"
+    params: {count: 600}
+labels:
+  - snippet: tiff-zip-member
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/Endosomes_ROI.tif"]
+    params: {}
+    pairs_with: 0
+    label_key: unknown-endosome_lysosome-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/13156/data/HeLaSTARD3_FA_YA_Raw/Mitochondria_ROI.tif"]
+    params: {}
+    pairs_with: 0
+    label_key: unknown-mitochondria-semantic
+    segmentation_type: binary
+reasons:
+  - "tiff-series-glob with six glob urls, one per sub-folder in series order: the HeLaSTARD3_FA_YA raw is 600 single-page uint8 TIFFs image001.tif ... image600.tif, one z slice each (record alignment_notes 'z = slice number in the file name'), kept 100 to a folder in 1-100/ ... 501-600/ (harness list: all 600 listed by name, no gaps); a directory glob does not descend into sub-folders and tiff-series-http's counter cannot change folder, so each folder is one `<dir>/::image*.tif` url and the snippet concatenates them as zyx 600x1092x2516"
+  - "count 600: the record's slice count for this volume (600 pages in each label stack, 600 files in the listing); the snippet refuses to open if the six indexes give another number, so the raw cannot silently pair with the 600-page label stacks at a wrong z"
+  - "only the HeLaSTARD3_FA_YA volume is bound: it is the one the record sampled; HeLaSTARD3_WT (810 slices, image_NNN.tif in 4 folders) and HeLaWT (993 slices, ROI_CICGFA_NNN.tif in 5 folders, number 154 absent) read the same way, but HeLaWT's label page count (993 or 994) is not established, an open point of the match report"
+  - "tiff-zip-member for the labels: each is one multi-page uint8 LZW TIFF at a plain URL (record technical.arrays); axes left to the file, no override"
+  - "label keys: provenance unknown because annotations.source is mixed; class from the record's classes (endosome/lysosome, mitochondria); kind semantic and segmentation_type binary because the record gives encoding binary, values {0,1}, for Endosomes_ROI.tif and Mitochondria_ROI.tif. Only the curated-ROI masks are bound: the whole-volume masks (X.tif) would take the same label_key for the same raw, and ER_ROI.tif, Endosomes.tif and Mitochondria.tif have encoding unknown in the record"
+  - "no voxel size bound: record imaging.voxel_size_nm is null (differs per volume) and the TIFFs carry no calibration (record notes: ImageJ default of 1 px = 1 micron, ignored)"
