@@ -1,0 +1,11 @@
+name: jpeg-zip-glob
+spec_version: 1
+summary: JPEG images chosen by glob from the members of a zip that is a plain URL or itself a member of another zip (a nested zip), stacked along z; a colour JPEG's samples (RGB) are the c axis, all of them or the ones `samples` names.
+formats: [jpeg]
+containers: [zip, http]
+params:
+  glob: {type: str, required: true, doc: "fnmatch pattern over the member names of each zip the urls name (`*` also crosses `/`), e.g. 'val/*.jpg'; every match is one z plane, sorted by name. Anchor it at the folder: a bare '*.jpg' also matches macOS sidecars such as '__MACOSX/val/._a.jpg', which are not JPEGs and raise at read"}
+  samples: {type: str, required: false, doc: "which samples of a colour JPEG to expose, as distinct letters of 'rgb' in the order they become the c axis, e.g. 'rg' when two channels were saved as red and green and blue is empty; one letter gives a single plane with no c axis. Default: all three as c. Not allowed for a grey JPEG; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [4tu-60cdce27-liposome-yolo-boxes-confocal]
+supersedes: null

@@ -1,0 +1,25 @@
+record: 4tu-60cdce27-liposome-yolo-boxes-confocal
+record_commit: 3f75709f1d2778fe86fd9c436b2b5ff948a72c7b
+snippets_commit: c6f6a6d90f446630e6157532eb084e5c9c9650d6
+raw:
+  - snippet: jpeg-zip-glob
+    urls: ["https://data.4tu.nl/file/60cdce27-5bd5-44ec-9d8f-53f2ef6b9d58/884eb9fc-0111-48b3-93b7-68368a764753::data - YOLO training and testing/Fig3 - FigS4/MinD 1 class/20240108_MinD_1class_training data and results/obj.zip"]
+    params: {glob: "obj/*.jpg", samples: rg}
+  - snippet: jpeg-zip-glob
+    urls: ["https://data.4tu.nl/file/60cdce27-5bd5-44ec-9d8f-53f2ef6b9d58/884eb9fc-0111-48b3-93b7-68368a764753::data - YOLO training and testing/Fig3 - FigS4/MinD 1 class/20240108_MinD_1class_training data and results/val.zip"]
+    params: {glob: "val/*.jpg", samples: rg}
+  - snippet: jpeg-zip-glob
+    urls: ["https://data.4tu.nl/file/60cdce27-5bd5-44ec-9d8f-53f2ef6b9d58/884eb9fc-0111-48b3-93b7-68368a764753::data - YOLO training and testing/Fig3 - FigS4/MinCDE 2 classes/20241107_MinCDE_2classes_training data and results/obj.zip"]
+    params: {glob: "obj/*.jpg", samples: rg}
+  - snippet: jpeg-zip-glob
+    urls: ["https://data.4tu.nl/file/60cdce27-5bd5-44ec-9d8f-53f2ef6b9d58/884eb9fc-0111-48b3-93b7-68368a764753::data - YOLO training and testing/Fig3 - FigS4/MinCDE 2 classes/20241107_MinCDE_2classes_training data and results/val.zip"]
+    params: {glob: "val/*.jpg", samples: rg}
+labels: []
+reasons:
+  - "jpeg-zip-glob: the images are JPEGs inside obj.zip / val.zip, which are themselves deflated members of the record's one zip; no other snippet decodes JPEG or looks inside a nested zip"
+  - "each url is the inner zip as a member of the 4TU zip (`<zip>::<...>/obj.zip`), not the draft's `<zip>::<inner zip>::<glob>`: the harness's own fetch and stage call io.expand and io.fetch on every binding url, which resolve one `::` level, so the url names a file the harness can fetch and cache (the inner zip) and the pattern for the images inside it is params.glob"
+  - "four raws, one per inner zip, so the whole set is bound (560 + 140 + 32 + 8 = 740 images, the record's n_items) rather than the 8-image sample, and the 1-class / 2-class sets and their obj (training) / val splits stay separate volumes; each is a z stack of independent 512x512 fields in member-name order, not a 3D volume (record dimensionality 2D)"
+  - "glob obj/*.jpg and val/*.jpg, anchored at the folder: each inner zip also holds macOS sidecars __MACOSX/<folder>/._<name>.jpg (AppleDouble, not JPEG) that a bare *.jpg would match, and the .txt box files"
+  - "samples rg: the record says the two confocal channels look stored as R and G with B near 0; decoding all 740 images confirmed it (per-set B mean 0.3-1.5 of 255, B max 4 in the 2-class set and 56-64 in the 1-class set, against R and G reaching 255), so B is JPEG chroma residue and is dropped; c 0 = red sample, c 1 = green sample. Which of them is eGFP-MinC and which DOPE-Cy5 (or the 1-class set's stains) is not stated in the record or the files"
+  - "no labels bound: the annotations are YOLO box tables (record encoding boxes-table, one .txt per jpg), which have no segmentation_type or label_key kind in the binding format; a human has to decide how boxes are represented before a snippet can read them"
+  - "voxel size: the snippet reports None (a JPEG carries no pixel size); the record's 250 nm x/y comes from the paper"
