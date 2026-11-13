@@ -1,0 +1,11 @@
+name: tiff-jpeg-voc-zip-glob
+spec_version: 1
+summary: A set of 2D images (single-page TIFF or JPEG, RGB samples kept as c) or of Pascal VOC XML box annotations (labelImg) rasterised on the image grid, from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane.
+formats: [tiff, jpeg, other]
+containers: [zip, http]
+params:
+  boxes: {type: str, required: false, doc: "VOC XML files only, and required for them: how the <object> boxes are painted on the yx grid. 'instance' fills each box with its 1-based object number in the file; 'semantic' fills it with the 1-based index of its <name> in `classes`. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "VOC XML files only, and required for them: every object <name> the files use, in class id order (semantic id = position, from 1). An object whose name is not listed raises, in both modes. From the record's classes; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [4tu-21695819-trypan-blue-insect-hek-cells]
+supersedes: null
