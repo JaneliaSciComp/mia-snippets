@@ -1,0 +1,9 @@
+name: tiff-rows-stack
+spec_version: 1
+summary: Single-page greyscale TIFFs, one per z (plain URLs, zip members or a member glob), stacked as zyx; an uncompressed page is read by rows over one byte range, anything else as a whole plane.
+formats: [tiff]
+containers: [http, s3, zip]
+params: {}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [empiar-10791-mouse-liver-fib-sem-organelles]
+supersedes: null
