@@ -1,0 +1,23 @@
+record: empiar-12581-mouse-brain-mitochondria-fib-sem
+record_commit: bd965a656de8f35269c064a77912455b3d4058e7
+snippets_commit: 5ca9cacbe772e9af2c63ce829ccfb49088c3d66f
+raw:
+  - snippet: tiff-http-numbered
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12581/data/brain_downsampled/frames/0000.tif"]
+    params: {last: 720}
+labels:
+  - snippet: tiff-http-numbered
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12581/data/brain_downsampled/frames/Mask/0000_mask.tif"]
+    params: {last: 720}
+    pairs_with: 0
+    label_key: unknown-mitochondria-semantic
+    segmentation_type: binary
+reasons:
+  - "tiff-http-numbered instead of tiff-zip-glob-rgb: the volume is 721 plain HTTP files per array with no archive to glob (record notes: no single archive), so a binding listing them needs 1,442 URLs, which was too large for the match agent's draft; this snippet takes the first file and the last number"
+  - "raw url frames/0000.tif with last 720: the record's layout lists frames/NNNN.tif, 0000-0720, 721 files (listing_complete: true); the counter is the 4-digit file name, so the stack is z 0..720 in file-number order, shape 721x1768x2048 uint8 (record: yx 1768x2048 per slice, dimensionality 3D)"
+  - "label url frames/Mask/0000_mask.tif with last 720: the layout lists frames/Mask/NNNN_mask.tif, 721 files; the counter is the digit run before _mask.tif, so label z index k is Mask/k_mask.tif, the mask of frames/k.tif (alignment_notes: one mask per raw slice, same 1768x2048 grid)"
+  - "label_key unknown-mitochondria-semantic: the record has no annotations.source (EMPIAR only says 'Segmentation of mitochondria'; whether manual or predicted is not documented); one class, mitochondria; encoding binary folds to semantic in the key"
+  - "segmentation_type binary: the mask is uint8 {0, 255} with the single class id 255 (record classes), foreground is non-zero"
+  - "labels/brain_*/NNNN.png not bound: 1-bit PNGs on every 100th slice only, of undocumented role (record: not copies of the masks, 'training seeds?'); this snippet reads TIFF, and a sparse label would not match the raw's z extent"
+  - "frames/Visualization/ not bound: half-resolution RGB overlay renderings for viewing, not listed as an array in the record"
+  - "voxel size not from the files: the snippet returns None; the record gives x/y 80 nm from the EMPIAR API and no z spacing"
