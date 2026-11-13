@@ -63,7 +63,9 @@ An array that mixes images and annotations raises.
 stained insect and HEK cell cultures. The 46 train and 14 validation images (42 RGB TIFF + 18 JPEG, all
 768x1024x3 `uint8`) are bound as two `zcyx` raws, and their labelImg XMLs (9,041 boxes named Alive, Dead or
 Aggregate) twice each: `boxes: instance` and `boxes: semantic`. The record lists only Alive and Dead;
-Aggregate was found by this snippet's `classes` check. The unannotated test folders are not bound; their TIFFs (larger, 1544x2080 per the record)
-would be further raws, one per shape. The example binding's `snippets_commit` is the commit before this
+Aggregate was found by this snippet's `classes` check. The unannotated test folders are not bound; their TIFFs
+are 1544x2080x3 (150 headers read; 23 of the Test set not reached, the server answered 502) and would be
+further raws, except two odd files in `HEK test set/` that a `*.tif` glob there would meet at `read`: a
+697x851 crop (another shape) and a two-series TIFF (898x1696), which this snippet refuses. The example binding's `snippets_commit` is the commit before this
 snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit
 that contains the snippet.
