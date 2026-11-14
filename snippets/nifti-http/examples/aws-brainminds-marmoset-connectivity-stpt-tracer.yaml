@@ -1,0 +1,14 @@
+record: aws-brainminds-marmoset-connectivity-stpt-tracer
+record_commit: 3f75709f1d2778fe86fd9c436b2b5ff948a72c7b
+snippets_commit: c6f6a6d90f446630e6157532eb084e5c9c9650d6
+raw:
+  - snippet: nifti-http
+    urls: ["https://brainminds-marmoset-connectivity.s3.ap-northeast-1.amazonaws.com/BMCR_v02/BMCR_core_data/Tissuecyte/A10-R01_0028-TT21/3D_stacks/anterograde_tracer_C1.nii.gz"]
+    params: {pixdim_unit: mm}
+labels: []
+reasons:
+  - "raw is the record's technical.sample url: animal A10-R01_0028-TT21, STPT channel C1, the 50 um 3D_stacks copy (path_pattern BMCR_core_data/Tissuecyte/*/3D_stacks/anterograde_tracer_C[123].nii.gz). The header's dim is 580 x 800 x 490 (x, y, z), read as zyx 490 x 800 x 580, the record's shape; C2 and C3 are separate files of the same grid and bind the same way"
+  - "pixdim_unit mm: the file's pixdim is 0.05 on all three axes but its xyzt_units is 0 (unit not stated), so without the param the snippet reports no voxel size. 0.05 mm = 50000 nm is the record's imaging.voxel_size_nm, and Backlit_and_Nissl/A10-R01_0028-TT21/Nissl.nii.gz of the same animal has the same dim, pixdim and sform with xyzt_units 2 (mm)"
+  - "values are float32, not the record's uint16 (smoke warns): the file stores uint16 with scl_slope 0.59245 and scl_inter 0, and the snippet returns stored * slope + inter as the NIfTI header defines and nibabel does (the record's value_range 0-65534 was sampled through nibabel from the 100 um copy, whose slope is 0.99998). stored_values is left at its default because the slope differs per file, so only the scaled values are comparable between channels and animals"
+  - "the snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it)"
+  - "labels left empty, as in the draft: anterograde_tracer_positive_voxels.nii.gz reads with this snippet on the same grid, but it is not an instance, semantic or binary label (stored uint16 with scl_slope 0.00154, header cal_max 100 and descrip 'hlim:[0,100]', i.e. a continuous 0-100 map; record encoding 'other', classes null), so label_key and segmentation_type need a human decision; the cell-location CSVs are point tables on an unverified grid that no snippet reads"
