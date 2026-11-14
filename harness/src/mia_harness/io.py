@@ -7,7 +7,9 @@ import itertools
 import json
 import os
 import re
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import closing
 from fnmatch import fnmatchcase
 from pathlib import Path
@@ -21,9 +23,11 @@ from .api import BudgetExceeded, HostNotAllowed, NeedsFetch
 from .cache import DatasetCache
 
 BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB blocks
+PIECE = 8 * BLOCK        # a longer run of missing blocks is asked for in pieces of this size,
+PARALLEL = 4             # this many at once: a slow host limits each connection, not the client
 MAX_REDIRECTS = 10
 GLOB_CHARS = "*?["
-RETRY_WAIT = (1.0, 4.0)     # seconds before the second and third attempt of a request a server dropped
+RETRY_WAIT = (1.0, 4.0, 16.0)   # seconds before each further attempt of a request a server dropped
 T = TypeVar("T")
 
 
@@ -35,6 +39,7 @@ class IO:
         self._own_client = client is None
         self._client = client or httpx.Client(follow_redirects=False, timeout=60)
         self.bytes_fetched = 0
+        self._counting = threading.Lock()        # pieces of one read are fetched on threads
         self.validators: dict[str, dict] = {}   # url -> {"etag", "last_modified", "size"}
         self._zips: dict[str, dict] = {}         # zip url -> members by name
         self._dirs: dict[str, list[str]] = {}    # directory url -> the names its index links to
@@ -44,7 +49,8 @@ class IO:
             self._client.close()
 
     def open(self, url: str) -> BinaryIO:
-        """Seekable file whose reads are range GETs, cached on disk in 1 MiB blocks."""
+        """Seekable file whose reads are range GETs, cached on disk in 1 MiB blocks; a long read is several
+        requests at once."""
         url, member = _split(url)
         if member is None:
             if (local := self._local(url)) is not None:   # fetched before, or dropped by hand: no network
@@ -164,16 +170,14 @@ class IO:
     # -- HTTP
 
     def _retry(self, attempt: Callable[[], T]) -> T:
-        """`attempt` up to three times when the server drops the connection, times out, truncates the body or
-        answers 5xx (EBI does all of these under load); a failed attempt's bytes are not charged, nothing was kept.
+        """`attempt` again after each RETRY_WAIT when the server drops the connection, times out, truncates the
+        body or answers 5xx (EBI does all of these, to about one request in seven, often several in a row).
         Anything else (a 404, the cap, a host, Range ignored) is final."""
-        # ponytail: the whole request again, not a resume; a resume needs Range on the partial body
+        # ponytail: the whole request again, not a resume; a range read loses one piece, a fetch the whole file
         for wait in (*RETRY_WAIT, None):
-            before = self.bytes_fetched
             try:
                 return attempt()
             except (httpx.TransportError, httpx.HTTPStatusError, OSError) as e:
-                self.bytes_fetched = before
                 if wait is None or (isinstance(e, httpx.HTTPStatusError) and e.response.status_code < 500):
                     raise
                 time.sleep(wait)
@@ -210,7 +214,8 @@ class IO:
         return size
 
     def _get(self, url: str, start: int | None = None, end: int | None = None) -> Iterator[bytes]:
-        """Body chunks of the whole file, or of bytes [start, end); counted against the cap."""
+        """Body chunks of the whole file, or of bytes [start, end); counted against the cap. A body the server
+        drops or cuts short is not charged: nothing of it is kept."""
         size = self._head(url)["size"] if start is None else end - start
         if size is not None and self.bytes_fetched + size > self.byte_cap:
             raise BudgetExceeded(f"{url}: {size} more bytes would pass the cap "
@@ -229,14 +234,22 @@ class IO:
                 if not m or int(m[1]) != start:
                     raise OSError(f"{url}: Content-Range {cr!r} does not start at {start}")
             got = 0
-            for chunk in r.iter_bytes():
-                got += len(chunk)
-                self.bytes_fetched += len(chunk)
-                if self.bytes_fetched > self.byte_cap:
-                    raise BudgetExceeded(f"{url}: passed the cap of {self.byte_cap} bytes")
-                yield chunk
-            if size is not None and got != size:
-                raise OSError(f"{url}: expected {size} bytes, got {got}")
+            try:
+                for chunk in r.iter_bytes():
+                    got += len(chunk)
+                    self._charge(len(chunk))
+                    if self.bytes_fetched > self.byte_cap:
+                        raise BudgetExceeded(f"{url}: passed the cap of {self.byte_cap} bytes")
+                    yield chunk
+                if size is not None and got != size:
+                    raise OSError(f"{url}: expected {size} bytes, got {got}")
+            except (httpx.TransportError, OSError):
+                self._charge(-got)
+                raise
+
+    def _charge(self, count: int) -> None:
+        with self._counting:
+            self.bytes_fetched += count
 
     def _send(self, method: str, url: str, headers: dict | None = None) -> httpx.Response:
         """A streamed response; redirects are followed here so every hop's host is checked first."""
@@ -260,22 +273,36 @@ class IO:
     # -- block cache (per job, under staging; distinct from the dataset cache)
 
     def _read(self, url: str, start: int, end: int) -> bytes:
-        """Bytes [start, end) of url via 1 MiB blocks; adjacent missing blocks share one request. A whole file
-        already in the dataset cache (fetched before, or dropped by hand) is read in place."""
+        """Bytes [start, end) of url via 1 MiB blocks. Adjacent missing blocks share one request up to PIECE;
+        a longer run is PARALLEL requests at a time, each piece retried and kept on its own. A whole file already
+        in the dataset cache (fetched before, or dropped by hand) is read in place."""
         size = self._size(url)
         if self._local(url) is not None:
             return b"".join(self._bytes(url, start, end))
         d = self.staging_dir / "blocks" / _key(url, self._head(url))
         first, last = start // BLOCK, (end - 1) // BLOCK
         missing = [i for i in range(first, last + 1) if not (d / str(i)).is_file()]
-        for _, run in itertools.groupby(enumerate(missing), lambda t: t[1] - t[0]):
-            run = [i for _, i in run]
-            data = self._retry(lambda: b"".join(self._get(url, run[0] * BLOCK, min(size, (run[-1] + 1) * BLOCK))))
-            d.mkdir(parents=True, exist_ok=True)
-            for i in run:
+        need = sum(min(size, (i + 1) * BLOCK) - i * BLOCK for i in missing)
+        if self.bytes_fetched + need > self.byte_cap:   # refused whole, before any piece is asked for
+            raise BudgetExceeded(f"{url}: {need} more bytes would pass the cap "
+                                 f"({self.bytes_fetched} of {self.byte_cap} used)")
+        runs = ([i for _, i in run] for _, run in itertools.groupby(enumerate(missing), lambda t: t[1] - t[0]))
+        pieces = [run[k:k + PIECE // BLOCK] for run in runs for k in range(0, len(run), PIECE // BLOCK)]
+
+        def keep(piece: list[int]) -> None:
+            data = self._retry(lambda: b"".join(self._get(url, piece[0] * BLOCK, min(size, (piece[-1] + 1) * BLOCK))))
+            for i in piece:
                 tmp = d / f".{i}.tmp"
-                tmp.write_bytes(data[(i - run[0]) * BLOCK:(i - run[0] + 1) * BLOCK])
+                tmp.write_bytes(data[(i - piece[0]) * BLOCK:(i - piece[0] + 1) * BLOCK])
                 os.replace(tmp, d / str(i))
+
+        if pieces:
+            d.mkdir(parents=True, exist_ok=True)
+        if len(pieces) == 1:
+            keep(pieces[0])
+        elif pieces:
+            with ThreadPoolExecutor(PARALLEL) as pool:
+                list(pool.map(keep, pieces))   # a piece that fails for good fails the read; the others' blocks stay
         data = b"".join((d / str(i)).read_bytes() for i in range(first, last + 1))
         return data[start - first * BLOCK:end - first * BLOCK]
 

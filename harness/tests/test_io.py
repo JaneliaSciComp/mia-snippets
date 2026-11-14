@@ -353,3 +353,21 @@ def test_a_dropped_truncated_or_5xx_response_is_retried_and_charged_once(server,
     with pytest.raises(httpx.HTTPStatusError):           # a 404 is not retried
         io.open(server.url("/missing")).read(10)
     assert server.heads().count("/missing") == 1
+
+
+def test_a_long_read_is_fetched_in_pieces_and_only_a_lost_piece_is_asked_for_again(server, make_io, monkeypatch):
+    import mia_harness.io as io_module
+    monkeypatch.setattr(io_module, "RETRY_WAIT", (0, 0))
+    monkeypatch.setattr(io_module, "PIECE", 2 * BLOCK)
+    data = os.urandom(5 * BLOCK + 17)
+    server.files["/long.bin"] = data
+    io = make_io()
+    server.fail = 1                                 # one piece's answer is cut short
+    assert io.open(server.url("/long.bin")).read() == data
+    assert len(server.gets()) == 4                  # three pieces (2 + 2 + the rest) and the lost one again
+    assert io.bytes_fetched == len(data)            # the cut answer charged nothing
+    small = make_io(cap=io.bytes_fetched - 1)
+    small.staging_dir = small.staging_dir / "other"   # its own block cache
+    with pytest.raises(BudgetExceeded):             # a read past the cap is refused whole, before any piece
+        small.open(server.url("/long.bin")).read()
+    assert len(server.gets()) == 4
