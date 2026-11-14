@@ -1,0 +1,12 @@
+name: tiff-series-glob-range
+spec_version: 1
+summary: A run of a numbered series of single-page grey TIFF files over HTTP, one file per z plane, as zyx. The urls are files or `<dir>/::<glob>` globs over directory indexes, as in tiff-series-glob; `first` and `last` keep the files between two file numbers. For a series whose yx shape changes along the way, bound as one array per stretch of one shape. Open checks that the run's first and last file agree, read checks every file.
+formats: [tiff]
+containers: [http]
+params:
+  first: {type: int, required: false, doc: "the number (last run of digits in the file name) of the run's first file; files with a smaller number are left out. It must be the number of a file the urls stand for. Without it the run starts at the first file; reason required in binding"}
+  last: {type: int, required: false, doc: "the number of the run's last file; files with a larger number are left out. It must be the number of a file the urls stand for. Without it the run ends at the last file; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of files the run must have, from a complete listing. Open fails on another number, so a file missing between first and last, or a changed listing, is noticed instead of shifting z. Without it the count is whatever the urls match; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [empiar-12659-nicotiana-epidermal-fib-sem]
+supersedes: null

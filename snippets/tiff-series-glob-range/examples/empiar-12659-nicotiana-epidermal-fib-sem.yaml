@@ -1,0 +1,40 @@
+record: empiar-12659-nicotiana-epidermal-fib-sem
+record_commit: b4c57a61ef1f5cde7a19c4bcd5320f909c43f406
+snippets_commit: e9b372d45275ff1d191ba49f2d13a479f9e76564
+raw:
+  - snippet: tiff-series-glob-range
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12659/data/HighQuality/::*_highQ.tif"]
+    params: {first: 1, last: 401, count: 401}
+  - snippet: tiff-series-glob-range
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12659/data/HighQuality/::*_highQ.tif"]
+    params: {first: 402, last: 1197, count: 796}
+  - snippet: tiff-series-glob-range
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12659/data/HighQuality/::*_highQ.tif"]
+    params: {first: 1198, last: 6114, count: 4917}
+labels:
+  - snippet: tiff-series-glob-range
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12659/data/Mask/::*_mask.tif"]
+    params: {first: 1, last: 401, count: 401}
+    pairs_with: 0
+    label_key: unknown-region_of_interest-semantic
+    segmentation_type: binary
+  - snippet: tiff-series-glob-range
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12659/data/Mask/::*_mask.tif"]
+    params: {first: 402, last: 1197, count: 796}
+    pairs_with: 1
+    label_key: unknown-region_of_interest-semantic
+    segmentation_type: binary
+  - snippet: tiff-series-glob-range
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/12659/data/Mask/::*_mask.tif"]
+    params: {first: 1198, last: 6114, count: 4917}
+    pairs_with: 2
+    label_key: unknown-region_of_interest-semantic
+    segmentation_type: binary
+reasons:
+  - "tiff-series-glob-range, three arrays per folder: HighQuality/ and Mask/ each hold 6114 single-page uint8 TIFFs, one per z slice, s0001-s6114 (record technical.arrays), but not in one yx shape (record shape_varies: true), so the folder is not one array and tiff-series-glob / tiff-series-http, which take the first file's shape for all, fail at read. The files are in three stretches of one shape each: s0001-s0401 3928x10211, s0402-s1197 3925x10209, s1198-s6114 3925x10208. Each stretch is one array: the folder's glob with params first and last"
+  - "first/last 1-401, 402-1197, 1198-6114: from a HEAD of all 6114 files of each folder. The files are uncompressed (pixels at offset 8, IFD and tags after them), so size follows shape: 40,150,207-40,150,251 B for s0001-s0401, 40,111,729-40,111,755 B for s0402-s1197, 40,107,703-40,107,833 B for s1198-s6114, with no other size and no change inside a stretch; HighQuality and Mask have the same size file for file. The snippet reads the header at both ends of each stretch at open (s0001, s0401, s0402, s1197, s1198, s6114 in both folders), which gives the three shapes harness smoke reports. The record has the first and last shape (s0001, s3000); 3925x10209 is not in it"
+  - "count 401, 796, 4917 (sum 6114, the folder's listing): the number of files in each stretch, set on raw and mask alike, so a file missing from one folder fails at open instead of pairing raw and mask at a shifted z"
+  - "each Mask stretch pairs with the HighQuality stretch of the same numbers (pairs_with 0, 1, 2): record alignment same-grid, <stem>_mask.tif <-> <stem>_highQ.tif by slice index, same shape per slice. In 8 test crops from all three stretches the raw is zero exactly where the mask is background"
+  - "label_key unknown-region_of_interest-semantic on all three: annotations.source is mixed -> unknown; class from the record's classes (id 255: region of interest); encoding binary -> semantic, segmentation_type binary. The key repeats because each label belongs to another raw"
+  - "Annotation/ (5 manual masks, 471x1225) is not bound: it is on the 50 nm Lowres grid, which the record does not list as a raw array, and no bound raw has its shape. AlignedAmira/ and Lowres/ are not listed as arrays in the record either"
+  - "no voxel size bound: the TIFFs carry no calibration (record notes); the record's 6x6x6 nm applies"
