@@ -1,0 +1,116 @@
+record: empiar-11380-organoid-fib-sem
+record_commit: 391f7bdcd945f79b066c968e6898de226f214eeb
+snippets_commit: 0fb4ca77927dc5932da0674518d9436af3f1712d
+raw:
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F059_bin2.mrc"]
+    params: {}
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A1_bin2.mrc"]
+    params: {}
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A2_bin2.mrc"]
+    params: {}
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A3_bin2.mrc"]
+    params: {}
+labels:
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F059_bin2_mitos.mrc"]
+    params: {}
+    pairs_with: 0
+    label_key: auto_pred-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F059_bin2_nuclei.mrc"]
+    params: {}
+    pairs_with: 0
+    label_key: auto_pred-nucleus-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A1_bin2_actin.mrc"]
+    params: {}
+    pairs_with: 1
+    label_key: auto_pred-microvillar_actin_bundle-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A1_bin2_entotic_cell.mrc"]
+    params: {}
+    pairs_with: 1
+    label_key: auto_pred-entotic_cell-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A1_bin2_junctions.mrc"]
+    params: {}
+    pairs_with: 1
+    label_key: auto_pred-cell_junction-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A1_bin2_mitos.mrc"]
+    params: {}
+    pairs_with: 1
+    label_key: auto_pred-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A1_bin2_nuclei.mrc"]
+    params: {}
+    pairs_with: 1
+    label_key: auto_pred-nucleus-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A2_bin2_actin.mrc"]
+    params: {}
+    pairs_with: 2
+    label_key: auto_pred-microvillar_actin_bundle-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A2_bin2_junctions.mrc"]
+    params: {}
+    pairs_with: 2
+    label_key: auto_pred-cell_junction-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A2_bin2_mitos.mrc"]
+    params: {}
+    pairs_with: 2
+    label_key: auto_pred-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A2_bin2_nuclei.mrc"]
+    params: {}
+    pairs_with: 2
+    label_key: auto_pred-nucleus-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A3_bin2_actin.mrc"]
+    params: {}
+    pairs_with: 3
+    label_key: auto_pred-microvillar_actin_bundle-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A3_bin2_junctions.mrc"]
+    params: {}
+    pairs_with: 3
+    label_key: auto_pred-cell_junction-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A3_bin2_mitos.mrc"]
+    params: {}
+    pairs_with: 3
+    label_key: auto_pred-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: mrc-http-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11380/data/F107_A3_bin2_nuclei.mrc"]
+    params: {}
+    pairs_with: 3
+    label_key: auto_pred-nucleus-semantic
+    segmentation_type: binary
+reasons:
+  - "mrc-http-2: record data.formats is mrc and every data file in the directory listing is a single uncompressed MRC volume (mode 0) served over https; one URL per array, no params"
+  - "mrc-http-2 instead of mrc-http, whose crops were rejected: every file here is IMOD tif2mrc output (header label 'tif2mrc: Converted to MRC format.', imodStamp 1146047817, imodFlags 13, bit 0 = bytes stored signed), i.e. 8-bit data 0..255 written as value - 128. mrc-http returned the stored int8, so the masks were -128 (background) / 127 (foreground), no voxel was 0 and the harness's binary encoding (value != 0) made every label crop all foreground. mrc-http-2 follows the stamp and returns uint8 = stored + 128: masks are 0 / 255, raw is the original 8-bit grey values"
+  - "dtype is therefore uint8 where the record says int8 (the record describes the bytes as stored; smoke warns about it): the record's raw range -128..84 is 0..212 and its mask values -128 / 127 are 0 / 255"
+  - "four raw volumes (F059, F107_A1, F107_A2, F107_A3), one per acquisition, URLs from harness list of the record's download_url, matching path_pattern F*_bin2.mrc"
+  - "each mask <acq>_bin2_<organelle>.mrc pairs with <acq>_bin2.mrc: record says alignment same-grid with identical header shape per pair"
+  - "label_key provenance auto_pred: annotations.source is automatic (Dragonfly CNN segmentations)"
+  - "label classes from file names and the record description: mitos -> mitochondria, nuclei -> nucleus, actin -> microvillar_actin_bundle (microvillar actin bundles), junctions -> cell_junction (cell junctions), entotic_cell -> entotic_cell"
+  - "segmentation_type binary, key kind semantic: record encoding is binary; as read by mrc-http-2 the masks are 0 = background, 255 = foreground, which the binary encoding (value != 0) maps to 0 / 1"

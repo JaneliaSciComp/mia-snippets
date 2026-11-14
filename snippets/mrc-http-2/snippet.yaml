@@ -1,0 +1,9 @@
+name: mrc-http-2
+spec_version: 1
+summary: One MRC/REC volume over range requests; header parsed by the snippet, rows of a plane per read. Mode 0 follows the IMOD header stamp - bytes IMOD stored as value - 128 (or unsigned, older IMOD) read as uint8 0..255, so a 0/255 mask has 0 as background; mode 0 without the stamp is int8.
+formats: [mrc]
+containers: [http, s3]
+params: {}
+requires: [numpy]   # no mrcfile: the header is parsed in snippet.py, so a read is one range request
+tested_on: [empiar-11380-organoid-fib-sem]
+supersedes: mrc-http
