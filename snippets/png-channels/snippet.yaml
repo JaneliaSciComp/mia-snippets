@@ -1,0 +1,9 @@
+name: png-channels
+spec_version: 1
+summary: Grey 8- or 16-bit PNG files at plain URLs or as zip members, one file per channel of one field of view; one url is yx, several urls (or a glob) are the channels in binding order as cyx. Each file is read and decoded whole.
+formats: [png]
+containers: [http, zip]
+params: {}
+requires: [numpy, imagecodecs]
+tested_on: [aws-chammi-75-multichannel-pretraining]
+supersedes: null
