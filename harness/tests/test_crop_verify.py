@@ -278,6 +278,37 @@ def test_a_label_off_its_raws_grid_is_the_reports_error_and_no_crop_is_made(tmp_
     assert not [d for d in (tmp_path / "out").iterdir() if d.is_dir()]
 
 
+@pytest.mark.parametrize("access", ["plane", "chunk"])
+def test_crops_of_a_labelled_raw_are_taken_where_the_annotations_are(tmp_path, monkeypatch, access):
+    """One 4 px annotation in a corner of plane 1. A label read by plane is searched, so the first crop holds the
+    annotation and the second is where the sampler drew it; a chunked label is only tested at each drawn box,
+    which never finds the annotation, and the crops are random."""
+    env(monkeypatch)
+    gt = np.zeros((2, 600, 600), np.uint16)
+    gt[1, 10:14, 10:14] = 7
+    np.save(tmp_path / "raw.npy", np.random.default_rng(0).integers(0, 4000, (2, 600, 600), np.uint16))
+    np.save(tmp_path / "gt.npy", gt)
+    array = {"snippet": "npy-local", "urls": []}
+    b = tmp_path / "binding.yaml"
+    b.write_text(yaml.safe_dump({
+        "record": "r", "record_commit": "0", "snippets_commit": "1", "reasons": [],
+        "raw": [{**array, "params": {"path": str(tmp_path / "raw.npy")}}],
+        "labels": [{**array, "params": {"path": str(tmp_path / "gt.npy"), "access": access}, "pairs_with": 0,
+                    "label_key": "gt", "segmentation_type": "semantic"}]}))
+    (tmp_path / "record.yaml").write_text("license: {spdx: CC0-1.0}\n")
+    out = tmp_path / "out"
+    code = cli.main(["crop", str(b), "--snippets", str(SNAP), "--record", str(tmp_path / "record.yaml"), "--n", "16",
+                     "--seed", "s1", "--round", "i1-e1", "--batch", "1", "--out", str(out), "--work", str(tmp_path)])
+    rep = json.loads((out / "report.json").read_text())
+    assert code == 0 and not rep["errors"], rep
+    first = read_png(out / "i1-e1-b1-000" / "labels" / "gt.png")[0]
+    if access == "plane":
+        assert first.any() and meta(out, "i1-e1-b1-000")["plane"]["z"] == 1
+        assert rep["made"] >= 2 and not read_png(out / "i1-e1-b1-001" / "labels" / "gt.png")[0].any()
+    else:   # 10 * n boxes without an annotation, then the crops a raw without labels would get
+        assert rep["rejected_unlabeled"] == 40 and rep["made"] == 4
+
+
 def test_verify_and_preview_cannot_load_snippet_code():
     code = ("import sys, mia_harness.verify, mia_harness.preview; "
             "sys.exit(any(m in sys.modules for m in ('mia_harness.loader', 'mia_harness.run')))")

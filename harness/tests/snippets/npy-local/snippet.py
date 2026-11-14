@@ -8,10 +8,9 @@ SPEC_VERSION = 1
 
 class _Npy:
     voxel_size_nm = None
-    access = "chunk"
 
-    def __init__(self, data: np.ndarray, axes: str):
-        self.data, self.axes, self.shape, self.dtype = data, axes, data.shape, data.dtype
+    def __init__(self, data: np.ndarray, axes: str, access: str):
+        self.data, self.axes, self.shape, self.dtype, self.access = data, axes, data.shape, data.dtype, access
 
     def read(self, region):
         return np.asarray(self.data[tuple(region.get(a, slice(None)) for a in self.axes)])
@@ -23,4 +22,4 @@ def open_array(src: Source, io: IO) -> Array:
     else:
         with io.open(src.urls[0]) as fh:   # ponytail: reads the whole file at open; fine for a test snippet
             data = np.load(fh)
-    return _Npy(data, src.params.get("axes") or {2: "yx", 3: "zyx"}[data.ndim])
+    return _Npy(data, src.params.get("axes") or {2: "yx", 3: "zyx"}[data.ndim], src.params.get("access", "chunk"))

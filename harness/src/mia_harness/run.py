@@ -1,7 +1,9 @@
 """Opening a binding's arrays, `harness smoke` and `harness crop` (SPEC §6.1-6.3)."""
 import json
 import os
+import random
 from collections import Counter
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -12,7 +14,7 @@ from .binding import ArrayBinding, Binding, load_binding
 from .io import IO, BudgetExceeded, HostNotAllowed, _split
 from .loader import load_snippet, withdrawn_names
 from .png import content_ok, encode_label, stats, stretch_raw, write_png
-from .sample import OVERLAP_MAX, Volume, candidates, capacity, collect, effective_n, overlap_frac
+from .sample import OVERLAP_MAX, CropSpec, Volume, candidates, capacity, collect, effective_n, overlap_frac
 from .verify import box_of, load_existing
 
 
@@ -106,12 +108,14 @@ def _region(a: Array, plane: dict, y, x) -> dict:
 def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: int, seed: str, round_id: str,
          batch: int, out: Path, existing: Path | None = None, size: int = CROP) -> dict:
     """Sample and write crops to out/<crop_id>/ and out/report.json; returns the report. The arrays get smoke's
-    checks first (check_binding): a label off its raw's grid is the report's error and no crop is made. Crops made
-    before a BudgetExceeded, HostNotAllowed or snippet error are kept."""
+    checks first (check_binding): a label off its raw's grid is the report's error and no crop is made. Every
+    other crop, from the first, is placed on an annotation when its raw has labels and the search finds one
+    (`aimed`); the rest are where the sampler drew them. Crops made before a BudgetExceeded, HostNotAllowed or
+    snippet error are kept."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     rep = {"requested_n": n, "n": 0, "capacity": 0, "made": 0, "rejected_content": 0, "rejected_overlap": 0,
-           "bytes_fetched": 0, "source_shapes": {}, "warnings": [], "errors": []}
+           "rejected_unlabeled": 0, "bytes_fetched": 0, "source_shapes": {}, "warnings": [], "errors": []}
     rej = Counter()
     try:
         binding = load_binding(binding_path)
@@ -200,13 +204,66 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
             rej.update([kind] if kind else [])
             return kind
 
+        searched = {}   # the last label plane searched: {"key": (raw, plane), "mask": annotated pixels, "rows": per row}
+        aim = random.Random(f"{seed}:labels")
+
+        def annotated(c: CropSpec) -> CropSpec | None:
+            """`c` when its box holds an annotation, a nonzero pixel of a label paired with its raw. Otherwise `c`
+            moved on its plane to hold a random annotated pixel, or None when there is none to move to."""
+            paired = [la for la, lb in zip(labels, binding.labels) if lb.pairs_with == c.raw]
+            box = slice(c.y, c.y + c.size), slice(c.x, c.x + c.size)
+            if any(la.access == "chunk" for la in paired):
+                # ponytail: a chunked label's plane may not fit in memory, so only the drawn box is tested and
+                # sparse annotations can use up the skips; search the label's coarsest level if that happens
+                return c if any(np.any(la.read(_region(la, c.plane, *box))) for la in paired) else None
+            key = (c.raw, sorted(c.plane.items()))
+            if searched.get("key") != key:
+                whole = slice(None), slice(None)
+                mask = np.any([np.asarray(la.read(_region(la, c.plane, *whole))) != 0 for la in paired], axis=0)
+                searched.update(key=key, mask=mask, rows=mask.sum(axis=1).tolist())
+            mask, rows = searched["mask"], searched["rows"]
+            if mask[box].any():
+                return c
+            if not any(rows):
+                return None
+            y = aim.choices(range(len(rows)), rows)[0]
+            x = aim.choice(np.flatnonzero(mask[y]).tolist())
+
+            def corner(at: int, extent: int) -> int:
+                return min(max(at - aim.randrange(c.size), 0), extent - c.size)
+
+            return replace(c, y=corner(y, mask.shape[0]), x=corner(x, mask.shape[1]))
+
+        def aimed(cands):
+            """The candidates, with every other crop (the even ones) aimed: a candidate for it passes only on an
+            annotation of its raw's labels, and one whose plane (or box, for a chunked label) has none is
+            skipped. Candidates for the odd crops and of a raw without labels pass as drawn, and so does every
+            candidate after 10 * n skips, so a raw whose labels are empty or too sparse to find still gets its
+            crops."""
+            for c in cands:
+                if (rep["made"] % 2 or rej["unlabeled"] >= 10 * rep["n"]
+                        or not any(lb.pairs_with == c.raw for lb in binding.labels)):
+                    yield c
+                    continue
+                try:
+                    found = annotated(c)
+                except (BudgetExceeded, HostNotAllowed):
+                    raise
+                except Exception:   # judge reads the same label and reports the error against this crop
+                    found = c
+                if found:
+                    yield found
+                else:
+                    rej["unlabeled"] += 1
+
         if not mismatched:
-            collect(candidates(vols, seed, size=edges), rep["n"], reject)
+            collect(aimed(candidates(vols, seed, size=edges)), rep["n"], reject)
     except HostNotAllowed as e:
         rep["errors"].append(str(e))
         rep["host_not_allowed"] = {"host": e.host, "chain": e.chain}
     except Exception as e:   # BudgetExceeded, and whatever snippet code raises
         rep["errors"].append(f"{type(e).__name__}: {e}")
-    rep.update(rejected_content=rej["content"], rejected_overlap=rej["overlap"], bytes_fetched=io.bytes_fetched)
+    rep.update(rejected_content=rej["content"], rejected_overlap=rej["overlap"], rejected_unlabeled=rej["unlabeled"],
+               bytes_fetched=io.bytes_fetched)
     (out / "report.json").write_text(json.dumps(rep, indent=2) + "\n")
     return rep
