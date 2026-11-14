@@ -1,0 +1,10 @@
+name: tiff-http-numbered
+spec_version: 1
+summary: A z stack of single-page grey TIFFs, one per slice, under consecutively numbered plain URLs; the binding gives the first file and the number of the last instead of every URL.
+formats: [tiff]
+containers: [http]
+params:
+  last: {type: int, required: false, doc: "number of the last slice file. With it the binding has exactly one url, the first file; the snippet counts the last run of digits in its file name up to `last` (inclusive, step 1, same zero padding) and stacks those files along z. From the record's listing (path_pattern and its number range); reason required in binding. Without it the urls are stacked as given"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [empiar-12581-mouse-brain-mitochondria-fib-sem]
+supersedes: null
