@@ -6,6 +6,7 @@ import gzip
 import hashlib
 import re
 import threading
+import time
 from email.utils import formatdate
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
@@ -22,6 +23,9 @@ class RangeServer:
         self.fail = 0                            # answer this many more requests badly, as `fail_mode` says
         self.fail_mode = "truncate"              # "truncate": half the body, then close; "503": a 503
         self.requests: list[tuple[str, str]] = []  # (method, path), every request in order
+        self.delay = 0.0                         # seconds each request takes before it is answered
+        self.peak = 0                            # the most requests ever in flight at once
+        self._active, self._lock = 0, threading.Lock()
         self._httpd = ThreadingHTTPServer(("127.0.0.1", 0), _Handler)
         self._httpd.daemon_threads = True
         self._httpd.state = self
@@ -61,6 +65,18 @@ class _Handler(BaseHTTPRequestHandler):
         self._serve(body=True)
 
     def _serve(self, body: bool):
+        s = self.server.state
+        with s._lock:
+            s._active += 1
+            s.peak = max(s.peak, s._active)
+        try:
+            time.sleep(s.delay)
+            self._answer(body)
+        finally:
+            with s._lock:
+                s._active -= 1
+
+    def _answer(self, body: bool):
         s = self.server.state
         s.requests.append((self.command, self.path))
         if self.path in s.redirects:

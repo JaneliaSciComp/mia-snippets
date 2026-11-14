@@ -139,3 +139,14 @@ def test_fetch_cli_exit_codes(server, tmp_path, monkeypatch):
     assert cli.main(args) == 2 and json.loads((tmp_path / "fetch.json").read_text())["partial"]
     monkeypatch.setenv("MIA_HARNESS_JOB_BYTES", "100000")
     assert cli.main(args) == 0 and json.loads((tmp_path / "fetch.json").read_text())["files"][0]["outcome"] == "fetched"
+
+
+def test_the_files_of_a_glob_are_fetched_side_by_side(server, make_io, tmp_path):
+    import zipfile
+    from test_io import zip_bytes
+
+    server.files["/d.zip"] = zip_bytes({f"{i}.tif": (bytes([i]) * 10, zipfile.ZIP_STORED) for i in range(8)})
+    binding, record = write_binding(tmp_path, [server.url("/d.zip") + "::*.tif"], [])
+    server.delay = 0.05
+    rep = fetch(binding, record, make_io())
+    assert rep["ok"] and rep["files"][0]["bytes"] == 80 and 1 < server.peak <= 4

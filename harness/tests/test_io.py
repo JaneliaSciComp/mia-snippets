@@ -371,3 +371,54 @@ def test_a_long_read_is_fetched_in_pieces_and_only_a_lost_piece_is_asked_for_aga
     with pytest.raises(BudgetExceeded):             # a read past the cap is refused whole, before any piece
         small.open(server.url("/long.bin")).read()
     assert len(server.gets()) == 4
+
+
+@pytest.fixture
+def small_pieces(monkeypatch):
+    """Pieces of one block and no wait between attempts, so a 3 MiB file is a large one."""
+    import mia_harness.io as io_module
+    monkeypatch.setattr(io_module, "RETRY_WAIT", (0, 0))
+    monkeypatch.setattr(io_module, "PIECE", BLOCK)
+
+
+def test_a_large_file_is_fetched_in_pieces_and_only_a_lost_piece_is_asked_for_again(server, make_io, small_pieces):
+    server.files["/big.bin"], server.files["/other.bin"] = DATA, DATA
+    io = make_io()
+    server.fail = 1                                 # one piece's answer is cut short
+    assert io.fetch(server.url("/big.bin")).read_bytes() == DATA
+    assert len(server.gets()) == 5                  # four pieces (3 MiB and the 17-byte rest) and the lost one again
+    assert io.bytes_fetched == len(DATA)
+    with pytest.raises(BudgetExceeded):             # a file past the cap is refused whole, before any piece
+        make_io(cap=2 * BLOCK).fetch(server.url("/other.bin"))
+    assert len(server.gets()) == 5
+
+
+def test_a_large_file_on_a_server_without_range_is_one_request(server, make_io, small_pieces):
+    server.files["/big.bin"] = DATA
+    server.ignore_range = True
+    io = make_io()
+    assert io.fetch(server.url("/big.bin")).read_bytes() == DATA and io.bytes_fetched == len(DATA)
+
+
+def test_a_large_zip_member_is_fetched_in_pieces_stored_or_deflated(server, make_io, small_pieces, tmp_path):
+    stored, deflated = os.urandom(2 * BLOCK + 5), os.urandom(2 * BLOCK + 7)   # random bytes do not deflate smaller
+    server.files["/z.zip"] = zip_bytes({"s.bin": (stored, zipfile.ZIP_STORED), "d.bin": (deflated, zipfile.ZIP_DEFLATED)})
+    z = server.url("/z.zip")
+    io = make_io()
+    io.list(z)
+    for name, data in (("s.bin", stored), ("d.bin", deflated)):
+        gets = len(server.gets())
+        assert io.fetch(f"{z}::{name}").read_bytes() == data
+        assert len(server.gets()) - gets == 4       # the member's local header, then three pieces
+    assert [p.name for p in (tmp_path / "shared").iterdir() if p.name.startswith(".tmp-")] == []
+
+
+def test_files_are_fetched_four_requests_at_a_time_whatever_their_size(server, make_io, small_pieces):
+    bodies = [bytes([i]) * 1000 for i in range(10)] + [os.urandom(2 * BLOCK + 1) for _ in range(2)]
+    for i, body in enumerate(bodies):
+        server.files[f"/{i}.bin"] = body
+    server.delay = 0.05
+    io = make_io()
+    paths = io.fetch_all([server.url(f"/{i}.bin") for i in range(len(bodies))])
+    assert [p.read_bytes() for p in paths] == bodies and io.bytes_fetched == sum(map(len, bodies))
+    assert 1 < server.peak <= 4

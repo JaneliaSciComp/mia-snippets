@@ -20,9 +20,7 @@ def fetch(binding_path: Path, record_path: Path, io: IO) -> dict:
         for i, url in enumerate(urls):
             before = io.bytes_fetched
             try:
-                size = 0
-                for piece in io.expand(url):
-                    size += io.fetch(piece).stat().st_size
+                size = sum(path.stat().st_size for path in io.fetch_all(io.expand(url)))
                 io.note_fetched(url)
             except NeedsFetch as e:
                 rep["files"].append({"url": url, "outcome": "stream", "reason": str(e)})

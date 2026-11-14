@@ -6,6 +6,7 @@ size and sha256 of a file a human dropped), so a later job finds the entry witho
 import json
 import os
 import re
+import threading
 from pathlib import Path
 from typing import Callable
 
@@ -20,6 +21,7 @@ class DatasetCache:
 
     def __init__(self, shared: Path, private: Path, writable: bool):
         self.shared, self.private, self.writable = Path(shared), Path(private), writable
+        self._recording = threading.Lock()   # files.json is read, merged and rewritten: one thread at a time
 
     def get(self, key: str, check: Callable[[Path], bool] | None = None) -> Path | None:
         """Shared first, then private; `check` (e.g. a CRC32) skips entries that fail it."""
@@ -55,10 +57,11 @@ class DatasetCache:
         """Record `url`'s validators in the writable cache's files.json (atomic rewrite)."""
         d = self.shared if self.writable else self.private
         d.mkdir(parents=True, exist_ok=True)
-        merged = {**self._manifest(d), url: {"validators": validators, "source": source}}
-        tmp = d / f".{MANIFEST}.{os.getpid()}.tmp"
-        tmp.write_text(json.dumps(merged, indent=1, sort_keys=True) + "\n")
-        os.replace(tmp, d / MANIFEST)
+        with self._recording:
+            merged = {**self._manifest(d), url: {"validators": validators, "source": source}}
+            tmp = d / f".{MANIFEST}.{os.getpid()}.tmp"
+            tmp.write_text(json.dumps(merged, indent=1, sort_keys=True) + "\n")
+            os.replace(tmp, d / MANIFEST)
 
     @staticmethod
     def _manifest(d: Path) -> dict:

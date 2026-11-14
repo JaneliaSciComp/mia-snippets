@@ -23,11 +23,12 @@ from .api import BudgetExceeded, HostNotAllowed, NeedsFetch
 from .cache import DatasetCache
 
 BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB blocks
-PIECE = 8 * BLOCK        # a longer run of missing blocks is asked for in pieces of this size,
-PARALLEL = 4             # this many at once: a slow host limits each connection, not the client
+PIECE = 8 * BLOCK        # anything longer (a run of missing blocks, a file, a zip member) is asked for in pieces
+PARALLEL = 4             # requests a job has in flight at once: a slow host limits each connection, not the client
 MAX_REDIRECTS = 10
 GLOB_CHARS = "*?["
 RETRY_WAIT = (1.0, 4.0, 16.0)   # seconds before each further attempt of a request a server dropped
+S = TypeVar("S")
 T = TypeVar("T")
 
 
@@ -39,7 +40,9 @@ class IO:
         self._own_client = client is None
         self._client = client or httpx.Client(follow_redirects=False, timeout=60)
         self.bytes_fetched = 0
-        self._counting = threading.Lock()        # pieces of one read are fetched on threads
+        self._counting = threading.Lock()        # pieces and files are fetched on threads
+        self._listing = threading.Lock()         # one thread reads a zip's directory or an index page
+        self._slots = threading.BoundedSemaphore(PARALLEL)
         self.validators: dict[str, dict] = {}   # url -> {"etag", "last_modified", "size"}
         self._zips: dict[str, dict] = {}         # zip url -> members by name
         self._dirs: dict[str, list[str]] = {}    # directory url -> the names its index links to
@@ -64,12 +67,12 @@ class IO:
         return _RangeFile(self, url, self._data_offset(url, info), info.file_size)
 
     def fetch(self, url: str) -> Path:
-        """Local path of the whole file, through the dataset cache; a hit costs 0 bytes."""
+        """Local path of the whole file, through the dataset cache; a hit costs 0 bytes. A file or zip member
+        longer than PIECE comes by range requests, several at once."""
         url, member = _split(url)
         if member is None:
             key = _key(url, self._head(url))
-            write = lambda p: self._retry(lambda: _write(p, self._get(url)))  # noqa: E731
-            return self.cache.get(key) or self.cache.put(key, write)
+            return self.cache.get(key) or self.cache.put(key, lambda p: self._whole(url, p))
         key = _member_key(url, member, self._head(url))
         if self._offline(url) and (local := self.cache.get(key)) is not None:
             return local   # written whole and CRC-checked by the fetch; the zip's directory is out of reach anyway
@@ -77,9 +80,23 @@ class IO:
 
         def write(p: Path) -> None:
             offset = self._data_offset(url, info)
-            self._retry(lambda: remotezip.extract(self._bytes(url, offset, offset + info.compress_size), info, p))
+            end = offset + info.compress_size
+            if info.compress_size <= PIECE or self._local(url) is not None:
+                self._retry(lambda: remotezip.extract(self._bytes(url, offset, end), info, p))
+                return
+            stored = p.with_name(f"{p.name}.stored")   # the member as the zip holds it; inflated and checked from here
+            try:
+                self._download(url, offset, end, stored)
+                with open(stored, "rb") as fh:
+                    remotezip.extract(iter(lambda: fh.read(BLOCK), b""), info, p)
+            finally:
+                stored.unlink(missing_ok=True)
 
         return self.cache.get(key, check=lambda p: remotezip.crc_ok(p, info)) or self.cache.put(key, write)
+
+    def fetch_all(self, urls: list[str]) -> list[Path]:
+        """`fetch` of each url, side by side; the paths in the urls' order."""
+        return self._together(self.fetch, urls)
 
     def list(self, url: str) -> list[str]:
         """The entries of a container: a zip's member names, or the names an HTTP directory index (a url ending
@@ -105,13 +122,14 @@ class IO:
     def _index(self, url: str) -> list[str]:
         """The names an HTTP directory index links to, from the dataset cache when a fetch stored them (an offline
         stage job expands a glob from it), else one GET of the page, stored for the next job."""
-        if url not in self._dirs:
-            key = _key(f"{url}::", self._head(url))   # the listing's entry, under the directory's validators
-            if (local := self.cache.get(key)) is None:
-                names = _index_names(self._retry(lambda: b"".join(self._get(url))).decode("utf-8", "replace"))
-                local = self.cache.put(key, lambda p: p.write_text(json.dumps(names)))
-            self._dirs[url] = json.loads(local.read_text())
-        return self._dirs[url]
+        with self._listing:
+            if url not in self._dirs:
+                key = _key(f"{url}::", self._head(url))   # the listing's entry, under the directory's validators
+                if (local := self.cache.get(key)) is None:
+                    names = _index_names(self._retry(lambda: b"".join(self._get(url))).decode("utf-8", "replace"))
+                    local = self.cache.put(key, lambda p: p.write_text(json.dumps(names)))
+                self._dirs[url] = json.loads(local.read_text())
+            return self._dirs[url]
 
     # -- zip members
 
@@ -121,15 +139,16 @@ class IO:
     def _directory(self, url: str) -> dict:
         """Members by name, from the dataset cache when a fetch stored the directory there (an offline stage job
         can expand a member glob from it), else one tail read of the zip, stored for the next job."""
-        if url not in self._zips:
-            key = _key(f"{url}::", self._head(url))   # the directory's entry, under the zip's validators
-            if (local := self.cache.get(key)) is not None:
-                self._zips[url] = remotezip.directory_from_json(local.read_bytes())
-            else:
-                members = remotezip.read_directory(_RangeFile(self, url, 0, self._size(url)))
-                self.cache.put(key, lambda p: p.write_bytes(remotezip.directory_to_json(members)))
-                self._zips[url] = members
-        return self._zips[url]
+        with self._listing:
+            if url not in self._zips:
+                key = _key(f"{url}::", self._head(url))   # the directory's entry, under the zip's validators
+                if (local := self.cache.get(key)) is not None:
+                    self._zips[url] = remotezip.directory_from_json(local.read_bytes())
+                else:
+                    members = remotezip.read_directory(_RangeFile(self, url, 0, self._size(url)))
+                    self.cache.put(key, lambda p: p.write_bytes(remotezip.directory_to_json(members)))
+                    self._zips[url] = members
+            return self._zips[url]
 
     def note_fetched(self, url: str) -> None:
         """Record in files.json that every member `url` names (`<zip>::<member or glob>`) is in the cache, so a
@@ -173,7 +192,7 @@ class IO:
         """`attempt` again after each RETRY_WAIT when the server drops the connection, times out, truncates the
         body or answers 5xx (EBI does all of these, to about one request in seven, often several in a row).
         Anything else (a 404, the cap, a host, Range ignored) is final."""
-        # ponytail: the whole request again, not a resume; a range read loses one piece, a fetch the whole file
+        # ponytail: the whole request again, not a resume; what is lost is one piece at most (PIECE)
         for wait in (*RETRY_WAIT, None):
             try:
                 return attempt()
@@ -201,7 +220,7 @@ class IO:
         return self.validators[url]
 
     def _head_once(self, url: str) -> dict:
-        with closing(self._send("HEAD", url)) as r:
+        with self._slots, closing(self._send("HEAD", url)) as r:
             r.raise_for_status()
             size = r.headers.get("content-length")
             return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
@@ -217,13 +236,11 @@ class IO:
         """Body chunks of the whole file, or of bytes [start, end); counted against the cap. A body the server
         drops or cuts short is not charged: nothing of it is kept."""
         size = self._head(url)["size"] if start is None else end - start
-        if size is not None and self.bytes_fetched + size > self.byte_cap:
-            raise BudgetExceeded(f"{url}: {size} more bytes would pass the cap "
-                                 f"({self.bytes_fetched} of {self.byte_cap} used)")
+        self._afford(url, size or 0)
         headers = {}
         if start is not None:
             headers["Range"] = f"bytes={start}-{end - 1}"
-        with closing(self._send("GET", url, headers)) as r:
+        with self._slots, closing(self._send("GET", url, headers)) as r:
             r.raise_for_status()
             if start is not None and r.status_code != 206:
                 raise NeedsFetch(f"{url}: server ignored Range (status {r.status_code}); "
@@ -251,6 +268,48 @@ class IO:
         with self._counting:
             self.bytes_fetched += count
 
+    def _afford(self, url: str, count: int) -> None:
+        """Refuse, before anything is asked for, what would pass the byte cap."""
+        if self.bytes_fetched + count > self.byte_cap:
+            raise BudgetExceeded(f"{url}: {count} more bytes would pass the cap "
+                                 f"({self.bytes_fetched} of {self.byte_cap} used)")
+
+    def _together(self, work: Callable[[S], T], items: list[S]) -> list[T]:
+        """`work` on each item, on PARALLEL threads when there are several; `_slots` bounds the requests in flight,
+        however such calls nest. An item that fails for good fails the call; those not yet started are dropped."""
+        if len(items) < 2:
+            return [work(item) for item in items]
+        with ThreadPoolExecutor(PARALLEL) as pool:
+            return list(pool.map(work, items))
+
+    # -- whole files and long ranges
+
+    def _whole(self, url: str, path: Path) -> None:
+        """The file at url into `path`: by pieces when it is longer than one and the server answers Range, else
+        as one request."""
+        size = self._head(url)["size"]
+        if size is not None and size > PIECE:
+            try:
+                return self._download(url, 0, size, path)
+            except NeedsFetch:
+                pass
+        self._retry(lambda: _write(path, self._get(url)))
+
+    def _download(self, url: str, start: int, end: int, path: Path) -> None:
+        """Bytes [start, end) of url into `path`, in range requests of PIECE, each retried on its own."""
+        self._afford(url, end - start)
+        with open(path, "wb") as fh:
+            fh.truncate(end - start)
+
+        def keep(offset: int) -> None:
+            def attempt() -> None:
+                with open(path, "r+b") as fh:
+                    fh.seek(offset - start)
+                    fh.writelines(self._get(url, offset, min(end, offset + PIECE)))
+            self._retry(attempt)
+
+        self._together(keep, list(range(start, end, PIECE)))
+
     def _send(self, method: str, url: str, headers: dict | None = None) -> httpx.Response:
         """A streamed response; redirects are followed here so every hop's host is checked first."""
         # identity on every request, HEAD included, so validators and sizes describe the bytes we get
@@ -274,7 +333,7 @@ class IO:
 
     def _read(self, url: str, start: int, end: int) -> bytes:
         """Bytes [start, end) of url via 1 MiB blocks. Adjacent missing blocks share one request up to PIECE;
-        a longer run is PARALLEL requests at a time, each piece retried and kept on its own. A whole file already
+        a longer run is several requests at once, each piece retried and kept on its own. A whole file already
         in the dataset cache (fetched before, or dropped by hand) is read in place."""
         size = self._size(url)
         if self._local(url) is not None:
@@ -282,10 +341,7 @@ class IO:
         d = self.staging_dir / "blocks" / _key(url, self._head(url))
         first, last = start // BLOCK, (end - 1) // BLOCK
         missing = [i for i in range(first, last + 1) if not (d / str(i)).is_file()]
-        need = sum(min(size, (i + 1) * BLOCK) - i * BLOCK for i in missing)
-        if self.bytes_fetched + need > self.byte_cap:   # refused whole, before any piece is asked for
-            raise BudgetExceeded(f"{url}: {need} more bytes would pass the cap "
-                                 f"({self.bytes_fetched} of {self.byte_cap} used)")
+        self._afford(url, sum(min(size, (i + 1) * BLOCK) - i * BLOCK for i in missing))
         runs = ([i for _, i in run] for _, run in itertools.groupby(enumerate(missing), lambda t: t[1] - t[0]))
         pieces = [run[k:k + PIECE // BLOCK] for run in runs for k in range(0, len(run), PIECE // BLOCK)]
 
@@ -298,11 +354,7 @@ class IO:
 
         if pieces:
             d.mkdir(parents=True, exist_ok=True)
-        if len(pieces) == 1:
-            keep(pieces[0])
-        elif pieces:
-            with ThreadPoolExecutor(PARALLEL) as pool:
-                list(pool.map(keep, pieces))   # a piece that fails for good fails the read; the others' blocks stay
+            self._together(keep, pieces)   # a piece that fails for good fails the read; the others' blocks stay
         data = b"".join((d / str(i)).read_bytes() for i in range(first, last + 1))
         return data[start - first * BLOCK:end - first * BLOCK]
 

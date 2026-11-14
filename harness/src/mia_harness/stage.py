@@ -224,8 +224,7 @@ def prefetch(binding, io: IO) -> None:
     the snippets then read locally; offline (a stage from the cache) each is a hit, or the error names it."""
     for b in [*binding.raw, *binding.labels]:
         for url in b.urls:
-            for piece in io.expand(url):
-                io.fetch(piece)
+            io.fetch_all(io.expand(url))
 
 
 def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan: PlanInput,
