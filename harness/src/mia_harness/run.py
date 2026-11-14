@@ -44,6 +44,29 @@ def _patch(a: Array, edge: int) -> np.ndarray:
     return a.read({k: v for k, v in region.items() if k in a.axes})
 
 
+def check_binding(binding: Binding, record: dict, raws: list[Array], labels: list[Array]) -> tuple[list, list]:
+    """(warnings, errors) for opened arrays: a dtype that is not the record's only warns, since records are
+    inferred; a label that differs from its raw on any axis but c is an error."""
+    warnings, errors = [], []
+    expected: dict[str, set[str]] = {}
+    for r in (record.get("technical") or {}).get("arrays") or []:
+        expected.setdefault(r.get("role"), set()).add(str(r.get("dtype")))
+    for role, arrays in (("raw", raws), ("label", labels)):
+        for i, a in enumerate(arrays):
+            got = np.dtype(a.dtype).name
+            if role not in expected:
+                warnings.append(f"{role} {i}: record has no dtype for role {role!r}")
+            elif got not in expected[role]:
+                warnings.append(f"{role} {i}: dtype {got} is not the record's {sorted(expected[role])}")
+    for i, (lb, a) in enumerate(zip(binding.labels, labels)):
+        want = {k: v for k, v in _sizes(raws[lb.pairs_with]).items() if k != "c"}
+        got = {k: v for k, v in _sizes(a).items() if k != "c"}
+        if got != want:
+            errors.append(f"label {i} {a.axes} {list(a.shape)} does not match raw {lb.pairs_with} "
+                          f"{raws[lb.pairs_with].axes} {list(raws[lb.pairs_with].shape)} outside c")
+    return warnings, errors
+
+
 def smoke(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, size: int = CROP) -> dict:
     out = {"ok": False, "shapes": {"raw": [], "labels": []}, "warnings": [], "errors": [], "bytes_fetched": 0}
     err = out["errors"].append
@@ -53,24 +76,9 @@ def smoke(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, size
         # 1. open every array through its snippet (check_array runs in open_arrays)
         raws, labels = open_arrays(binding, Path(snapshot), io)
         out["shapes"] = {"raw": [list(a.shape) for a in raws], "labels": [list(a.shape) for a in labels]}
-        # 2. dtype vs the record: records are inferred, so a mismatch only warns
-        expected: dict[str, set[str]] = {}
-        for r in (record.get("technical") or {}).get("arrays") or []:
-            expected.setdefault(r.get("role"), set()).add(str(r.get("dtype")))
-        for role, arrays in (("raw", raws), ("label", labels)):
-            for i, a in enumerate(arrays):
-                got = np.dtype(a.dtype).name
-                if role not in expected:
-                    out["warnings"].append(f"{role} {i}: record has no dtype for role {role!r}")
-                elif got not in expected[role]:
-                    out["warnings"].append(f"{role} {i}: dtype {got} is not the record's {sorted(expected[role])}")
-        # 3. each label matches its raw on every axis but c
-        for i, (lb, a) in enumerate(zip(binding.labels, labels)):
-            want = {k: v for k, v in _sizes(raws[lb.pairs_with]).items() if k != "c"}
-            got = {k: v for k, v in _sizes(a).items() if k != "c"}
-            if got != want:
-                err(f"label {i} {a.axes} {list(a.shape)} does not match raw {lb.pairs_with} "
-                    f"{raws[lb.pairs_with].axes} {list(raws[lb.pairs_with].shape)} outside c")
+        # 2. dtype vs the record (warnings); each label on its raw's grid (errors)
+        out["warnings"], mismatched = check_binding(binding, record, raws, labels)
+        out["errors"] += mismatched
         # 4. one patch from plane 0 of the first raw and its labels; no size verdict: whether a dataset serves a
         #    buffer is the buffer plan's decision (prep-and-buffering spec §12)
         if raws:
@@ -97,17 +105,20 @@ def _region(a: Array, plane: dict, y, x) -> dict:
 
 def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: int, seed: str, round_id: str,
          batch: int, out: Path, existing: Path | None = None, size: int = CROP) -> dict:
-    """Sample and write crops to out/<crop_id>/ and out/report.json; returns the report. Crops made before a
-    BudgetExceeded, HostNotAllowed or snippet error are kept."""
+    """Sample and write crops to out/<crop_id>/ and out/report.json; returns the report. The arrays get smoke's
+    checks first (check_binding): a label off its raw's grid is the report's error and no crop is made. Crops made
+    before a BudgetExceeded, HostNotAllowed or snippet error are kept."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     rep = {"requested_n": n, "n": 0, "capacity": 0, "made": 0, "rejected_content": 0, "rejected_overlap": 0,
-           "bytes_fetched": 0, "source_shapes": {}, "errors": []}
+           "bytes_fetched": 0, "source_shapes": {}, "warnings": [], "errors": []}
     rej = Counter()
     try:
         binding = load_binding(binding_path)
         record = yaml.safe_load(Path(record_path).read_text()) or {}
         raws, labels = open_arrays(binding, Path(snapshot), io)
+        rep["warnings"], mismatched = check_binding(binding, record, raws, labels)
+        rep["errors"] += mismatched
         rep["source_shapes"] = {str(i): {"axes": a.axes, "shape": list(a.shape)} for i, a in enumerate(raws)}
         vols = [Volume(i, a.axes, tuple(a.shape), a.access) for i, a in enumerate(raws)]
         edges = {i: _edge(a, size) for i, a in enumerate(raws)}   # a raw smaller than size: whole-image crops
@@ -189,7 +200,8 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
             rej.update([kind] if kind else [])
             return kind
 
-        collect(candidates(vols, seed, size=edges), rep["n"], reject)
+        if not mismatched:
+            collect(candidates(vols, seed, size=edges), rep["n"], reject)
     except HostNotAllowed as e:
         rep["errors"].append(str(e))
         rep["host_not_allowed"] = {"host": e.host, "chain": e.chain}

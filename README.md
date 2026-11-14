@@ -83,8 +83,8 @@ directory, immutable once merged, no I/O, static import check. `muvit-2d` is the
 ## Harness
 
 `harness/` is a pip-installable package with a CLI (SPEC §7): `smoke` opens every array in a binding and
-reads one patch, `crop` samples and writes crops, `verify` checks a crop directory without loading snippets,
-`preview` draws label overlays. Humans own it; agents use it and never modify it. Jobs pin the harness
+reads one patch, `crop` makes the same checks and then samples and writes crops, `verify` checks a crop
+directory without loading snippets, `preview` draws label overlays. Humans own it; agents use it and never modify it. Jobs pin the harness
 checkout's commit and `pixi.lock` digest when a round is admitted, and refuse to run if either moved.
 
 ## Branch protection

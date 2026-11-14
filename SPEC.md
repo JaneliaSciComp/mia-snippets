@@ -175,9 +175,11 @@ Withdrawing is human-only (§5) and never deletes the snippet. Its effects:
 harness smoke   <binding.yaml> --snippets <dir> --record <record.yaml> [--size 256]   # open every array, check vs
                                                                        # record, read one patch (+ labels)
 harness crop    <binding.yaml> --snippets <dir> --record <record.yaml> --n N --seed S --round R --batch B
-                --out DIR [--existing MANIFEST] [--size 256]           # sample + write crops; a raw smaller than
-                                                                       # --size is cropped whole (no size verdict:
-                                                                       # a buffer plan decides what fits it)
+                --out DIR [--existing MANIFEST] [--size 256]           # open every array, smoke's checks vs the
+                                                                       # record and of labels vs raws, then sample
+                                                                       # + write crops; a raw smaller than --size
+                                                                       # is cropped whole (no size verdict: a
+                                                                       # buffer plan decides what fits it)
 harness verify  DIR --binding <binding.yaml> [--existing MANIFEST] [--size 256]   # output checks; no snippet code
 harness preview DIR --out PREVIEW                                      # label overlay PNG per crop
 harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan plan-rule.json

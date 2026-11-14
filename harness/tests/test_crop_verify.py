@@ -257,6 +257,27 @@ def test_a_raw_smaller_than_the_size_is_cropped_whole_and_verifies(tmp_path, mon
     assert result["errors"] == [] and result["crops"][0]["errors"] == ["crop.json has no source validators"], result
 
 
+def test_a_label_off_its_raws_grid_is_the_reports_error_and_no_crop_is_made(tmp_path, monkeypatch):
+    env(monkeypatch)
+    arrays = {}
+    for name, shape in (("raw", (2, 300, 300)), ("gt", (2, 300, 299))):
+        np.save(tmp_path / f"{name}.npy", np.zeros(shape, np.uint16))
+        arrays[name] = {"snippet": "npy-local", "urls": [], "params": {"path": str(tmp_path / f"{name}.npy")}}
+    b = tmp_path / "binding.yaml"
+    b.write_text(yaml.safe_dump({"record": "r", "record_commit": "0", "snippets_commit": "1", "reasons": [],
+                                 "raw": [arrays["raw"]],
+                                 "labels": [{**arrays["gt"], "pairs_with": 0, "label_key": "gt",
+                                             "segmentation_type": "instance"}]}))
+    (tmp_path / "record.yaml").write_text("technical: {arrays: [{role: raw, dtype: float32}]}\n")
+    code = cli.main(["crop", str(b), "--snippets", str(SNAP), "--record", str(tmp_path / "record.yaml"), "--n", "4",
+                     "--seed", "s", "--round", "i1-e1", "--batch", "1", "--out", str(tmp_path / "out"),
+                     "--work", str(tmp_path)])
+    rep = json.loads((tmp_path / "out" / "report.json").read_text())
+    assert code == 1 and rep["made"] == 0 and len(rep["errors"]) == 1 and "label 0" in rep["errors"][0]
+    assert "float32" in rep["warnings"][0]   # the record's dtype differing only warns
+    assert not [d for d in (tmp_path / "out").iterdir() if d.is_dir()]
+
+
 def test_verify_and_preview_cannot_load_snippet_code():
     code = ("import sys, mia_harness.verify, mia_harness.preview; "
             "sys.exit(any(m in sys.modules for m in ('mia_harness.loader', 'mia_harness.run')))")
