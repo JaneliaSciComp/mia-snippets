@@ -1,0 +1,52 @@
+record: empiar-11746-u2os-fib-sem-organelles
+record_commit: c2e2a055a2afab0306ff4e0d40093d29ef20fa37
+snippets_commit: 5ca9cacbe772e9af2c63ce829ccfb49088c3d66f
+raw:
+  - snippet: tiff-zip-member
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11746/data/Images/U2OS_cell_0600.tif"]
+    params: {}
+labels:
+  - snippet: tiff-zip-member-class
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11746/data/Labels/Labels_U2OS_cell_0600.tif"]
+    params: {class_id: 6}
+    pairs_with: 0
+    label_key: unknown-endoplasmic_reticulum-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member-class
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11746/data/Labels/Labels_U2OS_cell_0600.tif"]
+    params: {class_id: 5}
+    pairs_with: 0
+    label_key: unknown-golgi-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member-class
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11746/data/Labels/Labels_U2OS_cell_0600.tif"]
+    params: {class_id: 2}
+    pairs_with: 0
+    label_key: unknown-lipid_droplet-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member-class
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11746/data/Labels/Labels_U2OS_cell_0600.tif"]
+    params: {class_id: 4}
+    pairs_with: 0
+    label_key: unknown-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member-class
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11746/data/Labels/Labels_U2OS_cell_0600.tif"]
+    params: {class_id: 1}
+    pairs_with: 0
+    label_key: unknown-nuclear_envelope-semantic
+    segmentation_type: binary
+  - snippet: tiff-zip-member-class
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/11746/data/Labels/Labels_U2OS_cell_0600.tif"]
+    params: {class_id: 8}
+    pairs_with: 0
+    label_key: unknown-other-semantic
+    segmentation_type: binary
+reasons:
+  - "urls: only the record's technical.sample pair (section 0600), matching downloads.json scope sample-unit; the record gives the path_pattern and count (1168) but not the first file number, so the other slice URLs are not derivable without guessing, and both snippets take exactly one url per array"
+  - "raw with tiff-zip-member on a plain https URL: a single-page YX uint8 TIFF, axes yx 1385x3394 from the file, matches the record; no axis override"
+  - "labels with tiff-zip-member-class instead of tiff-zip-member: the label file is ONE semantic class-id map (uint8 ids 0-8, record technical.arrays) while downloads.json names one label per class; tiff-zip-member returns the whole map and segmentation_type binary encodes a != 0, so each per-class key would hold the union of all organelles. The same file is bound six times, once per class_id, each as a yx {0,1} mask"
+  - "class_id 6 / 5 / 2 / 4 / 1 / 8 = endoplasmic reticulum / Golgi / lipid droplets / mitochondria / nuclear envelope / other unclassified objects: the record's classes (from the EMPIAR entry); the file does not name its ids"
+  - "no entry for class ids 3 (lysosomes) and 7 (peroxisomes): downloads.json lists no label name for them, and neither occurs in the sampled slice (values {0,1,2,4,5,6,8})"
+  - "label_key values are the six names in downloads.json labels, used exactly; provenance unknown because annotations.source is mixed"
+  - "segmentation_type binary: each downloader label is one class's mask, and the snippet returns exactly that mask"

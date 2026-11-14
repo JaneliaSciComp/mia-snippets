@@ -1,0 +1,11 @@
+name: tiff-zip-member-class
+spec_version: 1
+summary: One integer class-id TIFF from a zip member or a plain URL, returned as the uint8 {0,1} mask of one class id (array == class_id); deflated members are fetched whole.
+formats: [tiff, ome-tiff]
+containers: [zip, http]
+params:
+  class_id: {type: int, required: true, doc: "the one class id to select from a semantic class-id map: returns uint8 1 where the file equals it, 0 elsewhere. The id's meaning comes from the record's classes, not the file; reason required in binding"}
+  axes: {type: str, required: false, doc: "override when the TIFF's own axes are wrong: one czyx letter per axis of tifffile's series[0] after size-1 axes (other than y/x) are dropped; no c; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [empiar-11746-u2os-fib-sem-organelles]
+supersedes: null
