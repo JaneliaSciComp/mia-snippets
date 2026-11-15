@@ -1,0 +1,10 @@
+name: ome-zarr2-http-timepoint
+spec_version: 1
+summary: One resolution level of an OME-Zarr image (Zarr v2, OME-NGFF 0.1-0.4) at a plain HTTP(S) URL (the level's array directory or its .zarray), at one index of its time axis (t), so a tczyx array is presented as czyx (zyx when it has one channel); axis order and voxel size from the image group's .zattrs multiscales; read chunk by chunk with chunk keys derived from .zarray, so no directory listing is needed (S3 over https).
+formats: [ome-zarr]
+containers: [http, s3]
+params:
+  t: {type: int, required: false, doc: "0-based index on the array's time axis of the one timepoint to present. Required when the time axis is longer than 1 (open raises, naming the range); may be left out when it has one entry (0 is then the only timepoint); an error when the array has no time axis. A label gets the same t as the raw it pairs with; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [allen-emt-timelapse-hips-colonies]
+supersedes: null
