@@ -1,0 +1,13 @@
+name: ome-zarr2-http
+spec_version: 1
+summary: One resolution level of an OME-Zarr v2 image (NGFF multiscales, axes from t c z y x) at a plain HTTP(S) URL, one timepoint at a time (t); optionally one channel (c), one z plane (z) or the maximum projection over z (z_project), so a 2D+t label pairs with a 3D+t raw; axes and voxel size from the group's multiscales; chunk keys derived from .zarray, so no directory listing is needed (S3 over https).
+formats: [ome-zarr]
+containers: [http, s3]
+params:
+  t: {type: int, required: false, doc: "0-based timepoint to read; the array then has no t axis. Required when the store has more than one timepoint (one binding entry per timepoint), not allowed when it has no t axis; a t axis of length 1 is dropped without it. Reason required in binding"}
+  c: {type: int, required: false, doc: "0-based channel to read; the array then has no c axis. For a label's single channel, or for the one channel of a raw that a label was made from (one raw entry per channel, each with the labels made from it). Without it the c axis stays; reason required in binding"}
+  z: {type: int, required: false, doc: "0-based z plane to read; the array then has no z axis. For a label's single plane, or for the one raw plane a 2D label is shown on (the plane the dataset names, or one chosen by a measure the binding states, e.g. the plane in focus). Exclusive with z_project; without either the z axis stays; reason required in binding"}
+  z_project: {type: str, required: false, doc: "'max': the array has no z axis and every pixel is the maximum over all z planes (maximum intensity projection), for a raw whose 2D label was made on that projection. Each read fetches every z plane's chunks under its box. Exclusive with z; the dataset must say the label belongs to the projection; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [allen-endothelial-shear-stress-ve-cadherin-timelapse]
+supersedes: null
