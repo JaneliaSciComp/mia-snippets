@@ -1,0 +1,16 @@
+record: allen-label-free-prediction-3d-hipsc
+record_commit: 33a53209f11e2173560c3230304c194297b342ed
+snippets_commit: 3621d82de687d68ad865eed4f26cdf6bfffc15d1
+raw:
+  - snippet: czi-targz-member
+    urls: ["https://s3-us-west-2.amazonaws.com/downloads.allencell.org/publication-data/label-free-prediction/dic_lamin_b1.tar.gz"]
+    params: {member: "dic_lamin_b1/DICLAMINB_100X_20170815_13_210_1-Scene-03-P3-B02.czi", channel: 6}
+labels: []
+reasons:
+  - "czi-targz-member: the record's data are tar.gz archives of Zeiss CZI z-stacks (data.formats czi, uncompressed Gray16 subblocks); a tar.gz has no index, so the member is read by inflating the archive's gzip stream from its start"
+  - "dic_lamin_b1.tar.gz: the record's technical.sample, the smallest paired archive (10,995,482,838 bytes); the archive is not fetched whole, which would pass the job's byte cap"
+  - "member dic_lamin_b1/DICLAMINB_100X_20170815_13_210_1-Scene-03-P3-B02.czi: the archive's first member (566,121,664 bytes, czyx 7x70x624x924 uint16 as in technical.arrays), so only the first 288 MiB of the archive are read (301,989,888 bytes in the smoke run); it is named rather than left to the default so the binding says which file it is. Each later member costs every compressed byte before it, so one member is bound, not the archive"
+  - "channel 6: the record's raw array is the transmitted-light channel, the last of the 7 in the DIC files (alignment_notes); the file names its channels CMDRP_2, CMDRP, EGFP_2, EGFP, H3342_2, H3342, 63X_DIC, and 63X_DIC (TL Brightfield) is index 6. The raw is zyx 70x624x924; without the param the sampler would draw crops from the six fluorescence channels, which are the record's targets, not its input"
+  - "No labels bound: annotations.types is restoration-pairs (fluorescence target channels of the same CZI), not segmentation masks"
+  - "The snippet reads the voxel size from the file (Metadata/Scaling): x/y 171.96 nm, z 290 nm, the record's note for dic_lamin_b1; the record's voxel_size_nm is null because it differs per subset"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"
