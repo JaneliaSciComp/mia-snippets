@@ -1,0 +1,15 @@
+name: jpeg-xml-boxes-numbers
+spec_version: 1
+summary: A set of numbered 8-bit JPEG images (RGB samples kept as c), or of the VOC-like XML box annotations beside them (no <size>, class in <label> or <name>) rasterised on the grid of the JPEG of the same name, from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane. `numbers` or `skip` choose the files of one array by file number, so a set whose images come in several shapes is bound as one array per shape. A file without <object> is an all-background plane.
+formats: [jpeg, other]
+containers: [zip, http]
+params:
+  numbers: {type: list, required: false, doc: "the file numbers (last run of digits in the file name) of the files this array holds, as numbers and inclusive 'a-b' runs; the other files the urls stand for are left out. Every number must be a file's. For the files of one image shape; reason required in binding"}
+  skip: {type: list, required: false, doc: "the file numbers left out, in the same form; the array holds every other file the urls stand for. Every number must be a file's. Not together with `numbers`; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of files the array must have, from a complete listing. Open fails on another number, so a changed listing is noticed instead of shifting z; reason required in binding"}
+  boxes: {type: str, required: false, doc: "XML files only, and required for them: how the <object> boxes are painted on the yx grid. 'instance' fills each box with its 1-based object number in the file; 'semantic' fills it with the 1-based index of its class in `classes`. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "XML files only, and required for them: every class string (<label>, else <name>) the files use, in class id order (semantic id = position, from 1). An object whose class is not listed raises, in both modes. Reason required in binding"}
+  image_ext: {type: str, required: false, doc: "XML files only: the extension, without the dot, of the JPEG that has an annotation file's name and gives its grid. Default jpg; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [air-ug-intestinal-parasites-phonecamera-boxes]
+supersedes: null
