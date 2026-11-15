@@ -1,0 +1,13 @@
+name: tiff-zip-member-2
+spec_version: 1
+summary: One TIFF from a zip member or a plain URL; deflated members are fetched whole. As tiff-zip-member, plus `z_first`/`z_last` to present only a run of the file's z planes (a z-stack whose outer planes are out of focus and unlabelled, bound with the same run for raw and label) and `channel` to present one channel of a channelled file (also the one channel a member of a multi-file OME-TIFF holds).
+formats: [tiff, ome-tiff]
+containers: [zip, http]
+params:
+  axes: {type: str, required: false, doc: "override when the TIFF's own axes are wrong: one czyx letter per axis of tifffile's series[0] after size-1 axes (other than y/x) are dropped, including a c that `channel` collapses; reason required in binding"}
+  channel: {type: int, required: false, doc: "0-based index on the file's channel axis (tifffile C or S) of the one channel to present; the array then has no c axis. Without it a channelled file keeps its c axis; reason required in binding"}
+  z_first: {type: int, required: false, doc: "0-based index of the file's z plane that becomes plane 0 of the array; planes before it are left out. Without it the array starts at the file's first plane. Give a raw and its label the same z_first and z_last; reason required in binding"}
+  z_last: {type: int, required: false, doc: "0-based index of the file's z plane that becomes the array's last plane (included); planes after it are left out. Without it the array ends at the file's last plane; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [allen-hipsc-cardiomyocyte-actn2-fish-structure-3d]
+supersedes: tiff-zip-member
