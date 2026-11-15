@@ -1,0 +1,11 @@
+name: czi-targz-member
+spec_version: 1
+summary: One Zeiss CZI z-stack (uncompressed grey subblocks, one scene, no mosaic) that is a member of a tar.gz archive, as czyx or one channel as zyx; the gzip stream is inflated by range reads up to the member's end, never fetched whole.
+formats: [czi]
+containers: [http, s3]
+params:
+  member: {type: str, required: false, doc: "the member's full name in the tar, e.g. dic_lamin_b1/DICLAMINB_100X_20170815_13_210_1-Scene-03-P3-B02.czi; default: the first member ending in .czi. Members further into the archive cost every compressed byte before them"}
+  channel: {type: int, required: false, doc: "0-based index of the one channel to return (the CZI's channel order, Metadata/Information/Image/Dimensions/Channels); the array is then zyx. Default: all channels, czyx; reason required in binding"}
+requires: [numpy]
+tested_on: [allen-label-free-prediction-3d-hipsc]
+supersedes: null
