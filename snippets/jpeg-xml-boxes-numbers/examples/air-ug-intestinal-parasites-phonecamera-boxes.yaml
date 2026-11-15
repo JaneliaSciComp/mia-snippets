@@ -1,0 +1,57 @@
+record: air-ug-intestinal-parasites-phonecamera-boxes
+record_commit: 33a53209f11e2173560c3230304c194297b342ed
+snippets_commit: 3621d82de687d68ad865eed4f26cdf6bfffc15d1
+raw:
+  - snippet: jpeg-xml-boxes-numbers
+    urls: ["https://air.ug/downloads/intestinalparasites-phonecamera.zip::intestinalparasites-phonecamera/intestinalparasites-phone-*.jpg"]
+    params:
+      count: 150
+      numbers: &shape_1224x1632 [
+        1, 13, 24, 36, 45, 54, 60-61, 67, 83, 91, 96, 117, 122, 167-168, 184, 189, 195, 198, 205-206, 210,
+        214-215, 222-223, 226, 231, 237, 239, 247, 249, 256, 258-259, 269, 271, 291, 294, 304, 310, 318,
+        340, 351, 354-355, 368, 375, 381, 383, 386, 393, 397-398, 423, 442, 444-446, 449, 455-456, 468,
+        492, 497, 504, 518, 523, 531, 534, 548, 551, 557-558, 565, 570, 580, 593-594, 602, 611, 626, 642,
+        650, 654, 658, 665, 667, 671, 685, 687, 689, 694, 727, 747, 752, 757, 772, 776, 798-799, 823-824,
+        830, 835, 848, 853, 856, 860-861, 870, 880, 887, 904, 908, 910-911, 914, 916, 941, 948, 954,
+        964-965, 979, 988, 1002, 1025, 1056, 1063, 1065, 1069, 1080, 1082, 1097, 1115-1116, 1118-1119,
+        1129, 1147, 1153, 1170, 1181, 1185, 1189, 1197, 1202, 1209]
+  - snippet: jpeg-xml-boxes-numbers
+    urls: ["https://air.ug/downloads/intestinalparasites-phonecamera.zip::intestinalparasites-phonecamera/intestinalparasites-phone-*.jpg"]
+    params: {count: 1067, skip: *shape_1224x1632}
+labels:
+  - snippet: jpeg-xml-boxes-numbers
+    urls: ["https://air.ug/downloads/intestinalparasites-phonecamera.zip::intestinalparasites-phonecamera/intestinalparasites-phone-*.xml"]
+    params: {count: 150, numbers: *shape_1224x1632, boxes: instance, classes: [Hookworm, Taenia, Hymenolepsis Nana]}
+    pairs_with: 0
+    label_key: manual_gt-parasite_egg-instance
+    segmentation_type: instance
+  - snippet: jpeg-xml-boxes-numbers
+    urls: ["https://air.ug/downloads/intestinalparasites-phonecamera.zip::intestinalparasites-phonecamera/intestinalparasites-phone-*.xml"]
+    params: {count: 150, numbers: *shape_1224x1632, boxes: semantic, classes: [Hookworm, Taenia, Hymenolepsis Nana]}
+    pairs_with: 0
+    label_key: manual_gt-parasite_egg-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-xml-boxes-numbers
+    urls: ["https://air.ug/downloads/intestinalparasites-phonecamera.zip::intestinalparasites-phonecamera/intestinalparasites-phone-*.xml"]
+    params: {count: 1067, skip: *shape_1224x1632, boxes: instance, classes: [Hookworm, Taenia, Hymenolepsis Nana]}
+    pairs_with: 1
+    label_key: manual_gt-parasite_egg-instance
+    segmentation_type: instance
+  - snippet: jpeg-xml-boxes-numbers
+    urls: ["https://air.ug/downloads/intestinalparasites-phonecamera.zip::intestinalparasites-phonecamera/intestinalparasites-phone-*.xml"]
+    params: {count: 1067, skip: *shape_1224x1632, boxes: semantic, classes: [Hookworm, Taenia, Hymenolepsis Nana]}
+    pairs_with: 1
+    label_key: manual_gt-parasite_egg-semantic
+    segmentation_type: semantic
+reasons:
+  - "jpeg-xml-boxes-numbers instead of the draft's tiff-jpeg-voc-zip-glob: the XMLs have no <size> and name the class in <label>, which that snippet refuses, and the JPEGs are not one shape. This snippet takes each label plane's grid from the header of the JPEG of the same name and lets a binding choose the files of one array by file number"
+  - "two raws, one per image shape, over the same glob intestinalparasites-phone-*.jpg: the headers of all 1217 JPEGs were read while testing (the whole zip was fetched once for it) and there are exactly two shapes, 1224x1632x3 (150 files) and 1161x2064x3 (1067 files), mixed through the numbering in 260 runs, so no glob or first/last range separates them (record: shape_varies true, 0001 and 0002). Raw 0 is params.numbers = the 150 file numbers of the 1224x1632 images; raw 1 is params.skip = the same list (written once, as the YAML anchor shape_1224x1632), so the two raws share no file and together hold all 1217. The snippet checks every file it reads against its array's shape and raises on another, so a wrong number cannot give a wrong plane"
+  - "count 150 and 1067 (sum 1217, the record's n_items and the zip's listing), on raws and labels alike: a changed listing fails at open instead of shifting z"
+  - "RGB samples kept as c 0..2 (R, G, B; zcyx, uint8, record axes yxs): brightfield colour of a stool wet preparation"
+  - "the 1161x2064 JPEGs (all 1067, and none of the others) carry Exif Orientation 6: a viewer shows them turned to 2064x1161 portrait. The snippet returns the stored 1161x2064 pixels and applies no rotation; none of these files has a box, so no box depends on it"
+  - "label urls intestinalparasites-phone-*.xml with the numbers / skip of the raw they pair with: one XML per JPEG, the same stem (record alignment_notes; the zip lists 1217 of each, numbers 0001-1217 without a gap), the snippet sorts both globs by stem and the same number list chooses the same stems, so z index k of a label is the annotation of z index k of its raw. The grid of each label plane is its JPEG's (the XMLs have no <size>); box corners are pixels of the stored JPEG (record alignment_notes), all 162 boxes lie inside their image, and outlines drawn on three images while testing surround the eggs"
+  - "classes [Hookworm, Taenia, Hymenolepsis Nana]: all 1217 XMLs were read while testing and the 162 <object>s carry exactly these <label> strings (Hookworm 129, Taenia 25, Hymenolepsis Nana 8, spelled so in the files). The record saw only Hookworm in the 9 files it read and should gain the other two. Order as the record's sample text names them, so semantic ids are 1 Hookworm, 2 Taenia, 3 Hymenolepsis Nana; 0 is background"
+  - "NEEDS A HUMAN DECISION, boxes as two labels per raw: the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. As in the catalog's other box binding (tiff-jpeg-voc-zip-glob): boxes instance (each box filled with its object number in its file, segmentation_type instance) tells the boxes apart, boxes semantic (each box filled with its class id, segmentation_type semantic) carries the species. Both are filled rectangles, not egg outlines: a consumer must not take them for pixel-accurate masks. 4 pairs of boxes overlap; the smaller box is on top"
+  - "label_key manual_gt-parasite_egg-instance / -semantic instead of the draft's manual_gt-hookworm_egg-instance: source manual as in the draft (boxes drawn by hand), but the boxes are eggs of three parasites, not of hookworm only, so the class word is parasite egg. A human should confirm the class word"
+  - "NEEDS A HUMAN DECISION, labels on raw 1: every one of the 1067 XMLs of the 1161x2064 images is the same 214-byte file without <object>, so labels 2 and 3 are all background. The snippet reads an XML without <object> as an all-background plane, as the issue asks, and the labels are bound so every crop has the same label files. Whether these images were looked at and found free of eggs or were never annotated the files do not say (the 3 empty XMLs among the 1224x1632 images are 216 bytes, another file). If they count as unannotated, drop labels 2 and 3 (or raw 1 with them); raw 0 and its labels do not change"
+  - "no voxel size bound: none in the JPEG headers or XML (record voxel_size_nm null)"
