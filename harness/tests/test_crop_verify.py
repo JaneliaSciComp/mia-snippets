@@ -305,8 +305,11 @@ def test_crops_of_a_labelled_raw_are_taken_where_the_annotations_are(tmp_path, m
     if access == "plane":
         assert first.any() and meta(out, "i1-e1-b1-000")["plane"]["z"] == 1
         assert rep["made"] >= 2 and not read_png(out / "i1-e1-b1-001" / "labels" / "gt.png")[0].any()
+        placed = [meta(out, f"i1-e1-b1-{i:03d}")["placement"] for i in range(2)]
+        assert placed == ["annotation", "random"]   # crop.json says how each crop was placed
     else:   # 10 * n boxes without an annotation, then the crops a raw without labels would get
         assert rep["rejected_unlabeled"] == 40 and rep["made"] == 4
+        assert {meta(out, f"i1-e1-b1-{i:03d}")["placement"] for i in range(4)} == {"random"}
 
 
 def test_verify_and_preview_cannot_load_snippet_code():

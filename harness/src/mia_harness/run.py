@@ -110,7 +110,7 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
     """Sample and write crops to out/<crop_id>/ and out/report.json; returns the report. The arrays get smoke's
     checks first (check_binding): a label off its raw's grid is the report's error and no crop is made. Every
     other crop, from the first, is placed on an annotation when its raw has labels and the search finds one
-    (`aimed`); the rest are where the sampler drew them. Crops made before a BudgetExceeded, HostNotAllowed or
+    (`aimed`); the rest are where the sampler drew them, and crop.json's `placement` says which. Crops made before a BudgetExceeded, HostNotAllowed or
     snippet error are kept."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -182,6 +182,7 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
                                           if _split(u)[0] in io.validators}},
                 "plane": {"z": c.plane.get("z"), "c": c.plane.get("c")},
                 "box": {"y": c.y, "x": c.x, "h": c.size, "w": c.size},
+                "placement": placing["how"],   # "annotation": it had to hold one; "random": where it was drawn
                 "voxel_size_nm": vs,
                 "extent_um": {"h": c.size * vs["y"] / 1000, "w": c.size * vs["x"] / 1000}
                 if vs and "y" in vs and "x" in vs else None,
@@ -206,6 +207,7 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
 
         searched = {}   # the last label plane searched: {"key": (raw, plane), "mask": annotated pixels, "rows": per row}
         aim = random.Random(f"{seed}:labels")
+        placing = {"how": "random"}   # how the candidate now being judged was placed: crop.json's `placement`
 
         def annotated(c: CropSpec) -> CropSpec | None:
             """`c` when its box holds an annotation, a nonzero pixel of a label paired with its raw. Otherwise `c`
@@ -243,6 +245,7 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
             for c in cands:
                 if (rep["made"] % 2 or rej["unlabeled"] >= 10 * rep["n"]
                         or not any(lb.pairs_with == c.raw for lb in binding.labels)):
+                    placing["how"] = "random"
                     yield c
                     continue
                 try:
@@ -252,6 +255,7 @@ def crop(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, n: in
                 except Exception:   # judge reads the same label and reports the error against this crop
                     found = c
                 if found:
+                    placing["how"] = "annotation"
                     yield found
                 else:
                     rej["unlabeled"] += 1
