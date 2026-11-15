@@ -1,0 +1,42 @@
+record: allen-hipsc-cardiomyocyte-actn2-fish-structure-3d
+record_commit: 83eb3a4e8b5d6cd209ecbc8985d12ae4765c10ad
+snippets_commit: bb4669ae660e7b3537804970ea50efaf8811238f
+raw:
+- snippet: tiff-zip-member-2
+  urls:
+  - https://allencell.s3.amazonaws.com/aics/integrated_transcriptomics_structural_organization_hipsc_cm/raw_images/FISH/5500000013/20190807_M01_001_Capture%201%20-%20Capture%201%20-%20B4%20%5B144%5D%20Montage%20-%201_C5.tif
+  params:
+    channel: 5
+    z_first: 13
+    z_last: 23
+labels:
+- snippet: tiff-zip-member-2
+  urls:
+  - https://allencell.s3.amazonaws.com/aics/integrated_transcriptomics_structural_organization_hipsc_cm/3d_actn2_segmentation/struc_seg_path/ae7744af_20190807_M01_001_Capture%201%20-%20Capture%201%20-%20B4%20%5B144%5D%20Montage%20-%201_C5_struct_segmentation.tiff
+  params:
+    z_first: 13
+    z_last: 23
+  pairs_with: 0
+  label_key: unknown-actn2-semantic
+  segmentation_type: binary
+reasons:
+- 'raw: the record''s sample FOV (plate 5500000013, B4 Montage 1), C5 file as named
+  by the record''s raw path_pattern (*_C5.tif)'
+- 'raw channel 5: the file is one member of a multi-file OME-TIFF whose OME-XML declares
+  czyx 6x50x1736x1776 but which holds only channel 5''s 50 pages (record alignment_notes);
+  the channels stored in sibling files cannot be read from it (''ValueError: page is
+  None''), so only the channel present in this file is presented. Channel 5 = 488 (ACTN2-mEGFP)
+  per the record''s alignment_notes (raw_images/README), the channel the label segments'
+- 'label: the same FOV''s 3D ACTN2 structure segmentation, paired per the record''s
+  alignment_notes (same-grid, <hash>_<fov>_C5_struct_segmentation.tiff)'
+- 'z_first 13, z_last 23 on raw and label alike (file planes, 0-based, both included):
+  the reviewer rejected the crops of the whole 50-plane stack for their labels. The
+  stack runs far above and below the cell layer: the segmentation is empty on 26 of
+  its 50 planes (z 0-10 and 35-49) and nearly empty on most of the rest, and the raw
+  there is out-of-focus blur or camera noise (plane mean 114-209 against 560-895 in
+  focus), so crops drawn uniformly over z had an empty label or a few specks. Planes
+  13-23 are the ones that each hold at least 1% of the segmentation''s foreground
+  (26,241 to 381,248 of 2,217,240 voxels; together 96.3% of it); measured on this
+  file, so another FOV needs its own run'
+- 'label_key unknown-actn2-semantic taken exactly from downloads.json labels; segmentation_type
+  binary from the record''s encoding: binary (values 0/255)'
