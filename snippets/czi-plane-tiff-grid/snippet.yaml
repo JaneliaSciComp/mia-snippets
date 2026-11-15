@@ -1,0 +1,10 @@
+name: czi-plane-tiff-grid
+spec_version: 1
+summary: One 2D greyscale Zeiss CZI (one uncompressed full-resolution subblock) at a plain URL as yx, read by byte range with its own ZISRAW parser; or, with label_factor k, one single-page integer TIFF placed on that CZI's grid (raw pixel (y, x) takes TIFF pixel (y // k, x // k)).
+formats: [czi, tiff]
+containers: [http, s3]
+params:
+  label_factor: {type: int, required: false, doc: "label form only, and required for it: urls are the label TIFF and the CZI it belongs to (two urls, any order), and the TIFF's shape must be the CZI's divided by this integer, rounded down, on y and x. The array has the CZI's shape; each TIFF pixel is repeated k x k, never interpolated. Absent: urls is one CZI, read as it is. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [allen-hipsc-12x-overview-colony-masks]
+supersedes: null
