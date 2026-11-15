@@ -1,0 +1,23 @@
+record: allen-hipsc-12x-overview-colony-masks
+record_commit: 33a53209f11e2173560c3230304c194297b342ed
+snippets_commit: 3621d82de687d68ad865eed4f26cdf6bfffc15d1
+raw:
+  - snippet: czi-plane-tiff-grid
+    urls: ["https://allencell.s3.amazonaws.com/aics/hipsc_12x_overview_image_dataset/stitchedwelloverviewimagepath/397f57ce_3500001914_10X_20180409_5_50-Scene-05-E8-E08.czi"]
+    params: {}
+labels:
+  - snippet: czi-plane-tiff-grid
+    urls:
+      - "https://allencell.s3.amazonaws.com/aics/hipsc_12x_overview_image_dataset/colonysegmentedimagepath/e25b5d05_3500001914_10X_20180409_5_50-Scene-05-E8-E08_seg.tiff"
+      - "https://allencell.s3.amazonaws.com/aics/hipsc_12x_overview_image_dataset/stitchedwelloverviewimagepath/397f57ce_3500001914_10X_20180409_5_50-Scene-05-E8-E08.czi"
+    params: {label_factor: 4}
+    pairs_with: 0
+    label_key: unknown-colony-semantic
+    segmentation_type: instance
+reasons:
+  - "urls: only the record's technical.sample pair (first metadata.csv row). The S3 prefix has no directory index (harness list returns 404), so the other 3,009 pairs cannot be globbed, and the snippet reads one CZI per array"
+  - "raw with czi-plane-tiff-grid, no params: the CZI holds one uncompressed Gray16 subblock, read as yx 5640x5845 uint16 with voxel size 1083.33 nm from the CZI Scaling metadata, matching the record's shape and 1083.3 nm. dtype uint16 comes from the subblock directory (pixel type Gray16, and the data segment is 5640*5845*2 bytes); the record leaves dtype unknown because the XML metadata says Gray8 in places"
+  - "label urls are the seg TIFF and the raw CZI again: the TIFF is 1410x1461, the CZI's shape divided by 4 and rounded down (record alignment: scaled), and the harness requires a label on its raw's grid. The snippet reads the CZI's header for the target shape; no CZI pixel is read for the label"
+  - "label_factor 4: 5640 // 4 = 1410 and 5845 // 4 = 1461 (the snippet refuses any other factor for this pair). Each int32 label pixel is repeated 4x4; the one raw column past 4*1461 = 5844 takes the last label column. An overlay of the label outlines on the 4x block-averaged raw follows the colony borders with no flip or offset"
+  - "segmentation_type instance: in the sampled TIFF the 38 nonzero ids (1..39, one unused) each form exactly one 8-connected region, and touching colonies carry different ids (22 connected foreground regions hold the 38 ids), so the values are one id per colony, not class ids. The README of the dataset only says colonies are segmented"
+  - "label_key unknown-colony-semantic is kept from the draft binding (annotations.source unknown, class colony, kind from annotations.types), so the name matches the one the record yields; only the PNG encoding (segmentation_type) follows the file's content. With ids 0..39 both encodings write the same values"
