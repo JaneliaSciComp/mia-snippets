@@ -36,9 +36,12 @@ All optional in the schema; give a reason in the binding for each one set.
   it wants, each with its labels at the same `t`.
 - `c`: 0-based channel; the array then has no `c` axis. Use it for a label's single channel (the harness
   reads a label at the raw's channel index when the label has a `c` axis, so a one-channel label under a
-  multi-channel raw must not keep it) and for a raw whose label belongs to one channel.
+  multi-channel raw must not keep it) and for a raw whose label belongs to one channel. **Pair a label with
+  the channel it was made from**: one raw entry per channel, each with its own labels, not every label on
+  one channel.
 - `z`: 0-based z plane; the array then has no `z` axis. For a label's single plane, or the one raw plane a
-  2D label belongs to **when the dataset says which**.
+  2D label is shown on: the plane the dataset names, or one chosen by a measure the binding states (the
+  plane in focus, for a label made from a whole transmitted-light stack).
 - `z_project: max`: the array has no `z` axis and each pixel is the maximum over all z planes, in the stored
   dtype. Exclusive with `z`. Only for a raw whose label was made on the maximum intensity projection,
   **with the dataset's own statement of that as the reason**; it is not a way to make shapes match.
@@ -66,17 +69,38 @@ harness samples over them.
 ## Example
 
 `examples/allen-endothelial-shear-stress-ve-cadherin-timelapse.yaml`: position `20250319_…_P0` of the Allen
-endothelial shear-stress time-lapse on `allencell.s3.amazonaws.com`. Raw `tczyx` 543×2×25×1712×1744 uint16
-(blosc-lz4, one yx plane per chunk) is bound at `t: 0, c: 0, z_project: max`; the VE-cadherin cell
-segmentation and the label-free nuclear segmentation (543×1×1×1712×1744 uint16, blosc-zstd bitshuffle, two
-timepoints per chunk) at `t: 0, c: 0, z: 0`. All three open as `yx` 1712×1744 at 382.016 nm.
+endothelial shear-stress time-lapse on `allencell.s3.amazonaws.com`, timepoint 0. The raw store (`tczyx`
+543×2×25×1712×1744 uint16, blosc-lz4, one yx plane per chunk) is bound twice, once per channel, and each
+label (543×1×1×1712×1744 uint16, blosc-zstd bitshuffle, two timepoints per chunk, `t: 0, c: 0, z: 0`) pairs
+with the channel it was made from. All four arrays open as `yx` 1712×1744 at 382.016 nm.
 
-Why the projection: the dataset's `cdh5_seg_validations_zarr/<same name>` store names its channels
-`VE-cadherin_mEGFP_maximum_intensity_projection`, …, `VE-cadherin_mEGFP_segmentation_split_by_nuclei`, ….
-Read through this snippet, its t 0 channel 0 equals the maximum over the 25 z planes of raw t 0 channel 0 in
-every pixel, and its channel 6 equals the cell segmentation at t 0 in every pixel. The cell borders of the
-label lie on bright VE-cadherin in the projection (border / interior mean intensity 1.21, against 1.00 with
-the borders shifted by 40 px); the best single plane (z 14) reaches 1.21 too but no plane is the label's.
+- **VE-cadherin projection ↔ cell segmentation** (`t: 0, c: 0, z_project: max`). The dataset's
+  `cdh5_seg_validations_zarr/<same name>` store names its channels
+  `VE-cadherin_mEGFP_maximum_intensity_projection`, …, `VE-cadherin_mEGFP_segmentation_split_by_nuclei`, ….
+  Read through this snippet, its t 0 channel 0 equals the maximum over the 25 z planes of raw t 0 channel 0
+  in every pixel, and its channel 6 equals the cell segmentation at t 0 in every pixel. The label's cell
+  borders lie on the bright VE-cadherin junctions of the projection.
+- **Bright-field plane ↔ nuclear segmentation** (`t: 0, c: 1, z: 10`). The nuclear segmentation is
+  "label-free": predicted from the bright-field channel. Its outlines lie on the nuclei that bright-field
+  shows (oval, with nucleoli, ringed by granules). z 10 is the plane in focus at t 0: the bright-field plane
+  with the lowest standard deviation (402, against 458–477 away from focus), the measure the dataset's
+  `in_focus_plane_annotations` parquet records per position. That parquet was not decoded, so the plane is
+  measured, not quoted; the nuclei are visible from z 8 to z 16.
+
+**Do not pair the nuclear segmentation with the VE-cadherin projection.** The first version of this binding
+did, and the review saw nucleus outlines crossing cell borders. The label is not misplaced: it has the grid,
+scale and timepoint of the other stores. Flips (0.79–0.82), shifts of 10 px or more in any direction
+(0.84–0.92 at 10 px, 0.72–0.85 at 30 px) and earlier timepoints (0.86 one earlier) all fit the cell
+segmentation worse than in place (0.93, the mean share of a nucleus inside one cell); against the nuclei the validation store used to split the cells its
+centroids are off by a median of about 1 px with no trend across the field (so no scale difference). A
+shift of 4 px in x or the nuclei of one or two timepoints later fit marginally better (0.93 → 0.94), far less than the
+crossings seen.
+But the masks are larger than those seeds and 28% of them lie less than 95% inside one cell of the
+cell segmentation, and the VE-cadherin channel does not show nuclei at all, so that pair draws an annotation
+of something the image does not contain.
+
+**A plane-access array yields four crops in a row**, so a `harness crop --n 4` of this binding shows one of
+the two pairs, whichever the seed draws first.
 
 Tested on that data with `harness smoke` and `harness crop --n 4`. Other chunkings (chunks cutting t, z, y
 and x), `.` keys, `F` order, big-endian, zlib, uncompressed, missing chunks, NGFF 0.3 and pre-0.3 axes,
