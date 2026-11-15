@@ -1,0 +1,21 @@
+record: allen-emt-timelapse-hips-colonies
+record_commit: 33a53209f11e2173560c3230304c194297b342ed
+snippets_commit: 3621d82de687d68ad865eed4f26cdf6bfffc15d1
+raw:
+  - snippet: ome-zarr2-http-timepoint
+    urls: ["https://allencell.s3.amazonaws.com/aics/emt_timelapse_dataset/data/3500007015_10_E3_N-cadherin_E-cadherin_raw_converted.ome.zarr/0/.zarray"]
+    params: {}
+labels:
+  - snippet: ome-zarr2-http-timepoint
+    urls: ["https://allencell.s3.amazonaws.com/aics/emt_timelapse_dataset/data/3500007015_10_EcadNcad_all_cells_mask.ome.zarr/0/.zarray"]
+    params: {}
+    pairs_with: 0
+    label_key: unknown-cell-semantic
+    segmentation_type: binary
+reasons:
+  - "ome-zarr2-http-timepoint: the record's stores are OME-Zarr images (Zarr v2, OME-NGFF 0.4, blosc-lz4, dimension_separator '/') in an S3 bucket read over https, and their level arrays are rank 5 in tczyx order; an Array has no t axis, so the reader presents one timepoint as czyx. zarr2-http, the other zarr reader, has no way to drop the time axis and does not read the multiscales scale"
+  - "urls are the record's technical.sample.urls (fixed 4-channel image 3500007015_10 and its all-cells mask, paired by Data ID in the manifest although the file stems differ) with '/0/.zarray' appended: the snippet takes one level array, not the image group; level 0 is the full-resolution array (1, 4, 30, 1248, 1848), and the .zarray is an object that exists, so `harness fetch` and the prefetch of `harness stage`, which fetch every binding url whole, get a file with validators instead of the directory's 404"
+  - "no t param on either array: both stores are fixed samples with a time axis of length 1 (raw (1, 4, 30, 1248, 1848), mask (1, 1, 30, 1248, 1848)), so the only timepoint, 0, is taken on the raw and on its label alike. A live timelapse of this record (T up to 1001) needs an explicit t, the same on the raw and its all-cells mask"
+  - "axes: the group's multiscales axes are t, c, z, y, x, matching the record's tczyx. The raw is presented without t as czyx 4 x 30 x 1248 x 1848 (channels bright-field, mEGFP and two immunostains per the store's omero metadata); the mask's channel axis has one entry, which the snippet does not present, so the label is zyx 30 x 1248 x 1848 and is read at the raw's z, y, x whichever raw channel a crop is drawn from"
+  - "voxel size z 2880, y 270.83, x 270.83 nm comes from the multiscales scale of dataset '0' (2.88, 0.2708, 0.2708 micrometer); the record's imaging.voxel_size_nm is null because it differs per image"
+  - "label_key: annotations.source 'mixed' -> unknown; all_cells_mask marks cells -> cell; encoding binary -> semantic; segmentation_type binary (uint8 values {0, 255})"
