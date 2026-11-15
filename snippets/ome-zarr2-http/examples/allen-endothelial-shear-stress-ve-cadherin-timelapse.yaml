@@ -1,0 +1,30 @@
+record: allen-endothelial-shear-stress-ve-cadherin-timelapse
+record_commit: 33a53209f11e2173560c3230304c194297b342ed
+snippets_commit: 3621d82de687d68ad865eed4f26cdf6bfffc15d1
+raw:
+  - snippet: ome-zarr2-http
+    urls: ["https://allencell.s3.amazonaws.com/aics/endo_cell_state_dynamics/image_zarr/20250319_0d94f8d3054e4e8c99af07dd92774798_P0.ome.zarr/0/.zarray"]
+    params: {t: 0, c: 0, z_project: max}
+labels:
+  - snippet: ome-zarr2-http
+    urls: ["https://allencell.s3.amazonaws.com/aics/endo_cell_state_dynamics/cdh5_classic_seg_zarr/20250319_0d94f8d3054e4e8c99af07dd92774798_P0.ome.zarr/0/.zarray"]
+    params: {t: 0, c: 0, z: 0}
+    pairs_with: 0
+    label_key: auto_pred-cell-instance
+    segmentation_type: instance
+  - snippet: ome-zarr2-http
+    urls: ["https://allencell.s3.amazonaws.com/aics/endo_cell_state_dynamics/nuclear_labelfree_seg_zarr/20250319_0d94f8d3054e4e8c99af07dd92774798_P0.ome.zarr/0/.zarray"]
+    params: {t: 0, c: 0, z: 0}
+    pairs_with: 0
+    label_key: auto_pred-nucleus-instance
+    segmentation_type: instance
+reasons:
+  - "ome-zarr2-http: the record's arrays are levels of OME-Zarr v2 stores (NGFF 0.4 multiscales, axes t c z y x, blosc chunks of one yx plane, '/' chunk keys) in an S3 bucket read over https; zarr2-http, the only other Zarr reader, has no time axis and does not read the multiscales scale"
+  - "urls are the record's technical.sample.urls with '/0/.zarray' appended: the snippet takes a level array, not the group, level 0 is the full resolution the record describes, and the .zarray is an object with validators that `harness fetch` can fetch whole"
+  - "t: 0 on all three: the harness has no time axis, so one timepoint is one array; the stores share the time axis (543 timepoints, 5 min, same scale), so the same t pairs them. t 0 is the timepoint at which the pairing below was checked bit for bit; other timepoints bind the same way, one raw entry (with its two labels) per t"
+  - "z_project: max on the raw: both labels are single-plane (z = 1) while the raw has 25 planes, and the dataset says the segmentation was made on the maximum intensity projection: cdh5_seg_validations_zarr/<same name> names its channels VE-cadherin_mEGFP_maximum_intensity_projection, ..., Nuclei_labelfree_segmentation, VE-cadherin_mEGFP_segmentation_split_by_nuclei, ... Checked on this position: validation t 0 channel 0 equals the max over all 25 z planes of raw t 0 channel 0 in every pixel, and validation channel 6 equals cdh5_classic_seg t 0 in every pixel. No single raw plane is the labels' plane (in_focus_plane_annotations was not needed)"
+  - "c: 0 on the raw: channel 0 is VE-cadherin_mEGFP (omero.channels), the channel that was projected and segmented; channel 1 is bright-field, whose maximum projection over z is not an image the labels were made on, so it is not bound"
+  - "c: 0, z: 0 on the labels: each label store has one channel and one z plane (t x 1 x 1 x 1712 x 1744); naming them drops the two axes, so raw and labels are all yx 1712 x 1744"
+  - "the nucleus label pairs with the same raw: the label-free nuclear segmentation is a 2D mask of the same field, and the dataset itself lays it over the VE-cadherin projection (validation channel 5, used to split the cells in channel 6). Nuclei are not stained in the mEGFP channel, so this label marks where they are, not something visible in the raw"
+  - "voxel size y, x 382.016 nm from the multiscales scale of level 0 (0.3820158766750814 micrometer), matching the record's 382; a projection has no z size"
+  - "label_key: annotations.source automatic -> auto_pred; classes 'VE-cadherin cell segmentation' -> cell and 'nucleus' -> nucleus; encoding instance-ids -> instance"
