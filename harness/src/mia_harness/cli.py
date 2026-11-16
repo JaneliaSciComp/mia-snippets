@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .api import CROP
 from .check import check_stage
+from .describe import PLANES, describe_arrays, describe_file
 from .fetch import fetch
 from .io import _split, from_env
 from .plan import load_plan
@@ -65,6 +66,17 @@ def main(argv: list[str] | None = None) -> int:
                                     "per line; with ::<glob>, the file urls the glob stands for in a binding")
     s.add_argument("url")
     s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
+    s = sub.add_parser("describe", help="what a file says about itself (format, layout, channel and object names, "
+                                        "metadata; no snippet code), or with --binding what the bound arrays "
+                                        "measure on a few planes; JSON on stdout")
+    s.add_argument("address", nargs="?", help="a url, <zip>::<member>, or a glob (its first match), as `list` "
+                                              "takes them; a url ending in / is a Zarr or N5 store, or a directory")
+    s.add_argument("--binding", type=Path, help="describe this binding's arrays instead of a file")
+    s.add_argument("--snippets", type=Path, help="snippet snapshot directory (with --binding)")
+    s.add_argument("--record", type=Path, help="with --binding: also smoke's checks against the record")
+    s.add_argument("--planes", type=int, default=PLANES, help="planes measured per label array (with --binding)")
+    s.add_argument("--work", type=Path, default=Path.cwd(), help="job workspace (default: current directory)")
+    s.add_argument("--out", type=Path, help="also write the JSON here")
     s = sub.add_parser("tensorize", help="one crop descriptor through a tensorizer: sample.npz + .json (buffers spec §4)")
     s.add_argument("pyramid", type=Path, help="a staged v<i>.zarr directory (raw/ and labels/ inside)")
     s.add_argument("--tensorizers", type=Path, required=True, help="tensorizer snapshot directory")
@@ -88,6 +100,9 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("dir", type=Path)
     s.add_argument("--out", type=Path, required=True, help="directory for <crop_id>/overlay.png")
     args = p.parse_args(argv)
+    if args.cmd == "describe" and (bool(args.address) == bool(args.binding)
+                                   or bool(args.binding) != bool(args.snippets)):
+        p.error("describe takes an address, or --binding with --snippets")
 
     if args.cmd == "verify":
         result = verify(args.dir, args.binding, args.existing, size=args.size)
@@ -126,6 +141,14 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"list failed: {type(e).__name__}: {e}", file=sys.stderr)
                 return 1
             return 0
+        if args.cmd == "describe":
+            found = (describe_arrays(args.binding, args.snippets, args.record, io, planes=args.planes)
+                     if args.binding else describe_file(args.address, io))
+            text = json.dumps(found, indent=2) + "\n"
+            print(text, end="")
+            if args.out:
+                args.out.write_text(text)
+            return 0 if found["ok"] else 1
         if args.cmd == "stage":
             try:
                 path = args.plan
