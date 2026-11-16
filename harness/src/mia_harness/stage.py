@@ -14,7 +14,8 @@ import zarr
 from .api import Array
 from .binding import ArrayBinding, Binding, LabelBinding, binding_hash, load_binding
 from .io import IO, BudgetExceeded, HostNotAllowed, _split
-from .plan import LevelPlan, PlanInput, StagePlan, derive_samples, planned_bytes, stage_plan
+from .plan import (LevelPlan, PlanInput, StagePlan, derive_samples, planes_per_split, planned_bytes, share_out,
+                   stage_plan)
 from .provenance import (VOXEL_AXIS, Artifact, Geometry, Plan, Provenance, SourceFile, Verification,
                          convention_attributes, stage_step,
                          VolumeSummary, VoxelAxis, merge_geometry, stage_json, summary)
@@ -90,8 +91,9 @@ def _channels(array: Array) -> int:
 
 
 def _plan_volume(i: int, raw: Array, binding: Binding, labels: list[Array], rule_input: PlanInput,
-                 voxel: dict[str, VoxelAxis], errors: list[str]) -> _Volume | None:
-    """Raw `i`'s samples and its groups' plans, or None after an error line. Reads no voxel."""
+                 voxel: dict[str, VoxelAxis], errors: list[str], counts: dict[str, int]) -> _Volume | None:
+    """Raw `i`'s samples (`counts` per split, its share of the record's) and its groups' plans, or None after an
+    error line. Reads no voxel."""
     rule = rule_input.rule
     vox, missing = _voxel_size(raw, voxel)
     if missing:
@@ -105,10 +107,7 @@ def _plan_volume(i: int, raw: Array, binding: Binding, labels: list[Array], rule
                           f"{list(_shape(raw))}")
             return None
     axes = _canonical(raw.axes)
-    samples = derive_samples(rule, binding.record, i, axes, _shape(raw), {a: v.nm for a, v in vox.items()})
-    if not any(samples.values()):
-        errors.append(f"raw {i}: no samples planned")
-        return None
+    samples = derive_samples(rule, binding.record, i, axes, _shape(raw), {a: v.nm for a, v in vox.items()}, counts)
 
     def group(kind: Literal["raw", "label"], array: Array, b: ArrayBinding, path: str, name: str) -> _Group:
         axes = _canonical(array.axes)   # same boxes for every group; a label's chunk tuples lack the raw's c
@@ -229,9 +228,10 @@ def prefetch(binding, io: IO) -> None:
 
 def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan: PlanInput,
           voxel: dict[str, VoxelAxis], out: Path, seed: int = 0, stage_bytes: int | None = None) -> dict:
-    """Fetch every source once (bounded by the job's byte cap, cached for a rebuild), open the arrays, plan every
-    raw and refuse a plan over `stage_bytes` before any voxel is written; then write v<i>.zarr per raw with its
-    labels, check the geometry, write provenance and stage.json."""
+    """Fetch every source once (bounded by the job's byte cap, cached for a rebuild), open the arrays, share the
+    record's crops among its raws, plan each raw that drew one and refuse a plan over `stage_bytes` before any
+    voxel is written; then write v<i>.zarr per planned raw with its labels, check the geometry, write provenance
+    and stage.json."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     if stage_bytes is None:
@@ -252,8 +252,14 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
                             record=binding.record, record_commit=binding.record_commit)
         prefetch(binding, io)
         raws, labels = open_arrays(binding, Path(snapshot), io)
-        planned = [v for i, raw in enumerate(raws)
-                   if (v := _plan_volume(i, raw, binding, labels, plan, voxel, errors)) is not None]
+        # the record's crops shared among its raws by the planes each holds; a raw that drew none is not staged
+        shares = share_out(plan.rule, binding.record,
+                           [planes_per_split(plan.rule, binding.record, i, _canonical(raw.axes), _shape(raw))
+                            for i, raw in enumerate(raws)])
+        planned = [v for i, raw in enumerate(raws) if any(shares[i].values())
+                   and (v := _plan_volume(i, raw, binding, labels, plan, voxel, errors, shares[i])) is not None]
+        if not planned and not errors:
+            errors.append("no samples planned")
         budget = sum(planned_bytes(g.plan, np.dtype(g.array.dtype).itemsize, _channels(g.array))
                      for v in planned for g in v.groups)
         if budget > stage_bytes:

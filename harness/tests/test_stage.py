@@ -12,6 +12,7 @@ from rangeserver import server  # noqa: F401  (fixture)
 
 from mia_harness import cli
 from mia_harness.binding import binding_hash
+from mia_harness.check import check_stage
 from mia_harness.cache import DatasetCache
 from mia_harness.io import IO
 from mia_harness.plan import LevelPlan, PlanInput, PlanRule, derive_samples, planned_bytes, stage_plan
@@ -117,7 +118,8 @@ def test_stage_refuses_a_plan_over_the_byte_cap(tmp_path, io, server):
     b, r = write(tmp_path, (3, 600, 700))
     source_bytes = served(server, b)
     plan = plan_input((1, 2, 4), 64, {"train": 50})
-    samples = derive_samples(plan.rule, "r", 0, "zyx", (3, 600, 700), {a: v.nm for a, v in VOXEL.items()})
+    samples = derive_samples(plan.rule, "r", 0, "zyx", (3, 600, 700), {a: v.nm for a, v in VOXEL.items()},
+                             {"train": 50})
     budget = planned_bytes(stage_plan(samples, "zyx", (3, 600, 700), (1, 2, 4), 64), 2, 1)
     rep = stage(b, SNAP, r, io, plan=plan, voxel=VOXEL, out=tmp_path / "out", stage_bytes=1000)
     assert not rep["ok"] and rep["errors"][0] == f"plan exceeds stage cap: {budget} > 1000 bytes"
@@ -176,7 +178,37 @@ def test_stage_refuses_a_label_of_another_shape(tmp_path, io):
 def test_stage_with_nothing_to_sample_says_so(tmp_path, io):
     b, r = write(tmp_path, (3, 200, 200))
     rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 2}), voxel=VOXEL, out=tmp_path / "out")
-    assert rep["errors"] == ["raw 0: no samples planned"]
+    assert rep["errors"] == ["no samples planned"]
+
+
+def write_two(tmp_path, first, second):
+    """Binding + record for two npy-local raws of these shapes; returns (binding, record)."""
+    b, r = write(tmp_path, first)
+    d = yaml.safe_load(b.read_text())
+    path = tmp_path / "raw_b.npy"
+    np.save(path, np.arange(np.prod(second), dtype=np.uint16).reshape(second))
+    d["raw"].append({"snippet": "npy-local", "urls": [], "params": {"path": str(path)}})
+    b.write_text(yaml.safe_dump(d))
+    return b, r
+
+
+def test_stage_shares_a_records_crops_among_its_volumes(tmp_path, io, server):
+    b, r = write_two(tmp_path, (3, 600, 700), (30, 600, 700))
+    served(server, b)
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 40}), voxel=VOXEL, out=tmp_path / "out")
+    assert rep["ok"], rep["errors"]
+    train = {volume["path"]: len(volume["samples"]["train"]) for volume in rep["volumes"]}
+    assert sum(train.values()) == 40 and train["v1.zarr"] > train.get("v0.zarr", 0)   # 18 train planes against 2
+
+
+def test_stage_writes_only_volumes_that_drew_a_crop(tmp_path, io, server):
+    b, r = write_two(tmp_path, (3, 600, 700), (30, 600, 700))
+    served(server, b)
+    out = tmp_path / "out"
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 1}), voxel=VOXEL, out=out)
+    assert rep["errors"] == [] and len(rep["volumes"]) == 1
+    assert [d.name for d in sorted(out.glob("v*.zarr"))] == [rep["volumes"][0]["path"]]
+    assert check_stage(out)["ok"]
 
 
 def test_stage_cli(tmp_path, monkeypatch, server, capsys):
