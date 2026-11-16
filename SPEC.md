@@ -191,7 +191,41 @@ harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan pl
                                                                        # written level-0 chunks per channel
 harness check-stage DIR   # 0.6 schemas, sample coverage and zarr.json digests of a stage output, recorded in it;
                           # loads no snippet code
+harness list    <url>                                                  # the members of a zip or the names of an HTTP
+                                                                       # directory index (a url ending in /); with
+                                                                       # ::<glob>, the file urls the glob stands for
+harness describe <address> [--out FILE]                                # what one file says about itself, as JSON on
+                                                                       # stdout; no snippet code
+harness describe --binding <binding.yaml> --snippets <dir> [--record <record.yaml>] [--planes 5] [--out FILE]
+                                                                       # what the bound arrays measure on a few planes
 ```
+
+`describe` answers what a binding's author cannot know without looking, and runs no model: the same input gives
+the same JSON. It exits like smoke: 0 when `ok`, 1 with `errors` otherwise, and a refused host is in
+`host_not_allowed`.
+
+- **A file.** `<address>` is a url, `<zip>::<member>`, or a glob as `list` takes it, which stands for its first match
+  (`url` names it and `matched` says how many there were). Headers and metadata only, at most 64 MiB whatever the
+  job's cap. `format` is what the first bytes say, and the other keys are that format's:
+  `tiff` / `ome-tiff` (`first_page`: shape, axes, dtype, compression, photometric, colormap, resolution; `imagej`;
+  `ome.images[]` with sizes, physical pixel sizes and `channels[]` named in file order; `series[]`, or `series_error`
+  when listing them would pass the cap), `mrc` (dims, mode, cell and voxel size, origin, axis order, text labels),
+  `hdf5` (`nodes[]`: path, shape, dtype, chunks, compression, attrs), `imod` (model dims, scale, offsets, pixel size;
+  `objects[]` with `number` from 1 as a binding names it, `name`, contours, points, `open`, `scattered_points` and the
+  `sections` it covers), `png` and `jpeg` (size, bit depth, mode, palette), `zip` (member names). A url ending in `/`
+  is `zarr` or `n5` when it holds their metadata documents (`metadata`, and `arrays` for the datasets of a multiscale
+  group), otherwise `directory` with its index's names. Any other file is `unknown`, with its first bytes as `magic`
+  and, when they are text, as `text`; that is not an error.
+- **A binding's arrays**, opened through their snippets as smoke opens them. Each label array, on `--planes` planes
+  evenly spaced through z (the central 1024×1024 pixels of each): `fraction_nonzero`, the number of distinct nonzero
+  `ids`, and how many 4-connected components each id has, as `one_component_ids`, `median_components` and
+  `max_components`. One component per id is what instance ids look like; a few ids with many components each is what
+  semantic ids look like. Each raw array, on its middle plane: `min`, `p1`, `p50`, `p99`, `max` per channel (the first
+  8). With `--record`, smoke's `warnings` and label-against-raw errors are reported too. What was measured before the
+  byte cap is kept, and the cap is then the error.
+
+Everything a file states is untrusted data: each string is cut to 300 characters with control characters replaced,
+each list or mapping to 100 entries and nesting to 8 levels, marked `... (cut)`.
 
 The stage CLI changed its inputs in this version (`--plan`/`--voxel-size` replace `--levels/--patch/--voxel-size-nm`),
 so a worker pinned to this harness must send the new flags. Do not advance a deployment's harness checkout to this
