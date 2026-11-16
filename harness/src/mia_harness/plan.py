@@ -114,9 +114,10 @@ def share_out(rule: PlanRule, record: str, planes: list[dict[str, int]]) -> list
 
 def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],
                    voxel_size_nm: dict[str, float], counts: dict[str, int]) -> dict[str, list[dict]]:
-    """`counts[split]` sample descriptors per split, placed at random: a plane of the split, then a position whose
-    coarsest footprint lies inside the volume (its start a multiple of the coarsest factor, so every level's start
-    lands on its own grid). Crops of a split may overlap; a split without a plane gets none. A larger count
+    """Sample descriptors per split from `counts[split]` draws, placed at random: a plane of the split, then a
+    position whose coarsest footprint lies inside the volume (its start a multiple of the coarsest factor, so every
+    level's start lands on its own grid). Crops of a split may overlap, but a position drawn again is not listed
+    twice, so a small volume gives fewer crops than draws; a split without a plane gets none. A larger count
     extends a smaller count's list; finer levels sit inside their coarsest footprint."""
     planes = shape[axes.index("z")] if "z" in axes else 1
     extents = [shape[axes.index(axis)] for axis in ("y", "x")]
@@ -127,10 +128,14 @@ def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: t
     for split, planes_of_split in planes_by_split.items():
         rng = random.Random(f"{rule.seed}:{record}:v{volume}:{split}")
         accepted: list[dict] = []
+        drawn: set[tuple[int, ...]] = set()
         for _ in range(counts.get(split, 0) if planes_of_split else 0):
             z = rng.choice(planes_of_split)
             plane = {"z": z} if "z" in axes else {}
             first = [rng.randrange((extent - footprint) // coarsest + 1) * coarsest for extent in extents]
+            if (z, *first) in drawn:
+                continue
+            drawn.add((z, *first))
             centre_nm = [(start + footprint / 2) * voxel_size_nm[axis] for start, axis in zip(first, "yx")]
             starts = {str(factor): [start_index(centre, voxel_size_nm[axis], factor, rule.patch, extent)
                                     for centre, axis, extent in zip(centre_nm, "yx", extents)]

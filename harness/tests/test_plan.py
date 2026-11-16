@@ -77,10 +77,21 @@ def test_crops_are_random_inside_the_volume_on_their_splits_planes():
     assert len({tuple(s["starts"]["4"]) for s in drawn["train"]}) > 4   # positions, not four tiles
 
 
-def test_a_volume_exactly_one_footprint_wide_starts_every_crop_at_zero():
+def test_a_volume_exactly_one_footprint_wide_holds_one_crop_at_zero():
     drawn = derive_samples(RULE, "r", 0, "yx", (256, 256), {"y": 10.0, "x": 10.0}, {"train": 5, "val": 5, "test": 5})
-    assert sum(len(s) for s in drawn.values()) == 5   # the one plane is in one split; the others get []
+    # the one plane is in one split and has one position: five draws of it are one crop, the other splits get []
+    assert sum(len(s) for s in drawn.values()) == 1
     assert all(s["starts"] == {"1": [96, 96], "2": [32, 32], "4": [0, 0]} for split in drawn.values() for s in split)
+
+
+def test_a_position_drawn_twice_is_one_crop_and_a_larger_count_still_only_adds():
+    """A 260x260 plane holds 2x2 positions (starts 0 and 4 on each axis): no list repeats one, however many draws."""
+    few = derive_samples(RULE, "r", 0, "yx", (260, 260), {"y": 10.0, "x": 10.0}, {"train": 3, "val": 3, "test": 3})
+    many = derive_samples(RULE, "r", 0, "yx", (260, 260), {"y": 10.0, "x": 10.0}, {"train": 99, "val": 99, "test": 99})
+    for split, samples in many.items():
+        keys = [tuple(s["starts"]["1"]) for s in samples]
+        assert len(keys) == len(set(keys)) and len(keys) in (0, 4)
+        assert samples[:len(few[split])] == few[split]
 
 
 def test_2d_volume_has_no_plane_key():
@@ -96,7 +107,7 @@ def test_crops_of_a_split_may_overlap():
                      channel_recipe=None)
     drawn = derive_samples(dense, "r", 0, "zyx", (2, 512, 512), VOX, dense.samples)
     for split, samples in drawn.items():
-        assert len(samples) == 50
+        assert 40 < len(samples) <= 50   # a position drawn twice is listed once
         boxes = [{"raw": 0, "plane": s["plane"], "y": s["starts"]["4"][0] * 4, "x": s["starts"]["4"][1] * 4}
                  for s in samples]
         assert any(overlap_frac(a, b, 256) > 0 for i, a in enumerate(boxes) for b in boxes[i + 1:])
