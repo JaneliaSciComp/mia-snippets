@@ -1,0 +1,12 @@
+name: imod-model-mask
+spec_version: 1
+summary: One object of an IMOD binary contour model (.mod), or the same class from several models of one image, rasterized onto the model's image grid as a zyx uint8 {0,1} mask, filled (even-odd) or as contour outlines.
+formats: [other]
+containers: [http, s3]
+params:
+  object: {type: int, required: false, doc: "1-based number of the model object to rasterize, as 3dmod and imodinfo number them (the order of the OBJT chunks); with several urls the same number is used in every model. Exactly one of `object` and `objects` must be set"}
+  objects: {type: str, required: false, doc: "for several urls whose models number the same class differently: comma-separated 1-based object numbers, one per url in the binding's url order, e.g. '2,4'; the mask is 1 where any model has its object. Reason required in binding"}
+  draw: {type: str, required: false, doc: "'fill' (default): closed contours filled by the even-odd rule, so a contour nested in another is a hole; 'outline': only the pixels the contour lines pass through, e.g. a membrane as a line instead of the region it encloses. Open contours need 'outline'. Reason required in binding when set"}
+requires: [numpy]
+tested_on: [empiar-10553-gemmata-fib-sem-membranes]
+supersedes: null
