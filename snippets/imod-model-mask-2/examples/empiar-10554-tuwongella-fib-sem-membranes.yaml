@@ -1,0 +1,87 @@
+record: empiar-10554-tuwongella-fib-sem-membranes
+record_commit: bd965a656de8f35269c064a77912455b3d4058e7
+snippets_commit: 5ffb8985369cfeddf2ed2ba08fa3faa6cf2223e9
+raw:
+  - snippet: tiff-zip-member-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/Aligned%20464%20of%20464.tif"]
+    params: {}
+labels:
+  - snippet: imod-model-mask-2
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C1.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C2.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C3.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C4.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C5.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C6.mod"
+    params: {objects: "6,1,2,3,1,1", draw: outline}
+    pairs_with: 0
+    label_key: manual_gt-cell_envelope-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask-2
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C2.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C3.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C4.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C5.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C6.mod"
+    params: {objects: "3,3,2,3,2", draw: outline}
+    pairs_with: 0
+    label_key: manual_gt-cytoplasmic_membrane-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask-2
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C2.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C3.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C4.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C5.mod"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C6.mod"
+    params: {objects: "2,1,1,2,3", open_contours: close}
+    pairs_with: 0
+    label_key: manual_gt-poly_phosphate_granules-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C1.mod"]
+    params: {object: 1}
+    pairs_with: 0
+    label_key: manual_gt-large_vesicle-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C1.mod"]
+    params: {object: 2, draw: outline}
+    pairs_with: 0
+    label_key: manual_gt-membrane_damage-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C1.mod"]
+    params: {object: 3}
+    pairs_with: 0
+    label_key: manual_gt-expelled_vesicle-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C1.mod"]
+    params: {object: 4, draw: outline}
+    pairs_with: 0
+    label_key: manual_gt-ruptured_membrane_vesicle-semantic
+    segmentation_type: binary
+  - snippet: imod-model-mask-2
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10554/data/181129_3dmod_Timmobilis_C1.mod"]
+    params: {object: 5}
+    pairs_with: 0
+    label_key: manual_gt-empty_vesicles-semantic
+    segmentation_type: binary
+reasons:
+  - "raw: record technical.arrays[0] is one ImageJ TIFF stack (data/Aligned 464 of 464.tif, zyx, 464x2082x3720, uint16, uncompressed) at a plain https URL from technical.sample.urls, read with default params (no axes override). The draft's tiff-zip-member is superseded in the catalog by tiff-zip-member-2, which reads a plain TIFF the same way, so the binding names that one"
+  - "labels with imod-model-mask-2: the record's label array is six IMOD binary contour models (format other, encoding polygons, 'Contours need rasterizing to masks'); every model header has dims 3720x2082x464, the raw's grid, and the model-to-image transform in each MINX chunk is scale 1, shift 0, so each object rasterizes to a zyx 464x2082x3720 mask that pairs with raw 0"
+  - "imod-model-mask-2 and not imod-model-mask: the older snippet refuses to fill the poly-phosphate granules of C3 (one contour flagged open, below), and its outline marks a stray pixel for each of the one-point contours in C3's cell envelope (two, 42 and 265 px off the envelope) and C5's cytoplasmic membrane (one)"
+  - "model URLs: only C3 is in technical.sample.urls; the other five are data.download_url plus the names the layout tree gives (181129_3dmod_Timmobilis_C1.mod ... C6.mod), which path_pattern data/181129_3dmod_Timmobilis_C?.mod covers. All six were fetched and parsed"
+  - "one label per class over all models that have it: each model outlines one cell of the same stack, and two labels of one raw cannot share a label_key, so a class is one mask that is 1 where any model has it. C1 (the damaged cell) has a cell envelope but no cytoplasmic membrane or granule object, so those two classes list C2-C6 only"
+  - "objects per class, one number per url, from the OBJT names in the files. Cell envelope (C1-C6) 6,1,2,3,1,1: 'Cell Envelope (C1)' ... '(C6)'. Cytoplasmic membrane (C2-C6) 3,3,2,3,2: 'Cytoplasmic Membrane (C2)', '(C3)', 'Cytoplasmic membrane (C4)', '(C5)', 'Cytoplasmic Membrane (C6)'. Poly-phosphate granules (C2-C6) 2,1,1,2,3: 'Poly-phosphate granules (C2)', 'Poly-Posphate granules (C3)', 'Poly-P granules (C4)', '(C5)', 'Poly-p granules (C6)'. The models order their objects differently, hence objects and not object"
+  - "C1-only classes, object numbers in C1.mod: 1 'Large vesicle (C1)', 2 'Membrane damage (C1)', 3 'Expelled vesicle 2 (C1)', 4 'Ruptered membrane vesicle (C1)', 5 'Empty vesicles (C1)'; the label_keys use the record's class names (expelled_vesicle, ruptured_membrane_vesicle)"
+  - "draw: outline for cell envelope and cytoplasmic membrane: the contours trace the membranes, so the outline is the class the record names; filled they would be the whole cell and the cytoplasm (with invaginations as holes). Their contours are all closed, so draw: fill also works: a human should confirm which is wanted (the record does not say). Same choice as the sister dataset empiar-10553"
+  - "draw: outline for membrane damage and ruptured membrane vesicle: both are open objects in the model (membrane damage: lines whose ends are about as far apart as the line is long; ruptured vesicle: a vesicle outline whose ends are up to 95 px apart), which have no inside to fill"
+  - "draw: fill (default) for poly-phosphate granules, large vesicle, expelled vesicle and empty vesicles: closed contours drawn around bodies, so the class is the enclosed region. Whether the three vesicle classes should instead be their membranes (outline) is the same open question as for the envelope"
+  - "open_contours: close for poly-phosphate granules: one of C3's 39 granule contours (section 54) is flagged open, but it is a complete 16-point circle of radius 19.6 px whose ends are one polygon side (7.6 px) apart, between closed contours of the same granule on sections 53 and 55; it is a closed shape with a wrong flag, so it is filled like the others. No other contour of the five granule objects is open"
+  - "label_keys manual_gt-<class>-semantic with segmentation_type binary: annotations are manual (provenance manual_gt), each mask is {0,1} for one class, and binary folds to semantic in the key. Encoding 'polygons' has no kind in the label_key rule; the rasterizer emits one binary mask per class and does not number the cells, granules or vesicles as instances"
+  - "coverage is partial: six cells of the stack are modelled, each only on the sections that carry its contours (cell envelopes: C1 z 333..446, C2 189..303, C3 20..124, C4 171..274, C5 118..230, C6 292..388; C2's cytoplasmic membrane is drawn on 6 sections only, z 274..298); everywhere else the masks are 0, which is 'not annotated', not 'background'. Most envelope contours carry IMOD contour flag 0x20 and may be interpolated between hand-drawn sections"
+  - "voxel size: the raw's comes from the TIFF (8 x 8 x 20 nm, as the record); the snippet does not report the models' pixsize (3 nm; C2: 1 pixel) and z scale 6.47, which the record notes conflict with the TIFF calibration"
