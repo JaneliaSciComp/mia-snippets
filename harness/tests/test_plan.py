@@ -1,7 +1,7 @@
 import pytest
 
-from mia_harness.plan import (PlanRule, capacity, derive_samples, planned_bytes, split_planes, stage_plan,
-                              start_index)
+from mia_harness.plan import (PlanRule, derive_samples, planes_per_split, planned_bytes, share_out, split_planes,
+                              stage_plan, start_index)
 from mia_harness.sample import overlap_frac
 
 RULE = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 10, "val": 3, "test": 3},
@@ -24,13 +24,33 @@ def test_start_index_rounds_then_clamps():
     assert start_index(0.0, 10.0, 1, 64, 600) == 0 and start_index(1e9, 10.0, 4, 64, 600) == 150 - 64
 
 
+COUNTS = {"train": 10, "val": 3, "test": 3}
+
+
+def test_planes_per_split_is_zero_for_a_volume_under_the_footprint():
+    assert planes_per_split(RULE, "r", 0, "zyx", (10, 600, 700)) == {"train": 6, "val": 2, "test": 2}
+    assert planes_per_split(RULE, "r", 0, "yx", (200, 200)) == {"train": 0, "val": 0, "test": 0}   # footprint 256
+
+
+def test_share_out_follows_planes_and_only_adds():
+    planes = [{"train": 6, "val": 2, "test": 2}, {"train": 60, "val": 20, "test": 20},
+              {"train": 0, "val": 0, "test": 0}]
+    rule = PlanRule(**{**RULE.__dict__, "samples": {"train": 1100, "val": 3, "test": 3}})
+    shares = share_out(rule, "r", planes)
+    assert [sum(s[name] for s in shares) for name in ("train", "val", "test")] == [1100, 3, 3]
+    assert shares[2] == {"train": 0, "val": 0, "test": 0}
+    assert 60 <= shares[0]["train"] <= 140   # 1/11 of 1100
+    more = share_out(PlanRule(**{**RULE.__dict__, "samples": {"train": 2200, "val": 3, "test": 3}}), "r", planes)
+    assert all(m["train"] >= s["train"] for m, s in zip(more, shares))
+    assert share_out(rule, "r", [planes[2]]) == [{"train": 0, "val": 0, "test": 0}]   # nothing fits: no crops
+
+
 def test_derive_is_deterministic_and_a_prefix():
-    a = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX)
-    b = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX)
-    assert a == b and len(a["train"]) == 10 and set(a) == {"train", "val", "test"}
-    more_rule = PlanRule(**{**RULE.__dict__, "samples": {"train": 20, "val": 3, "test": 3}})
-    more = derive_samples(more_rule, "r", 0, "zyx", (10, 600, 700), VOX)
-    assert more["train"][:10] == a["train"]
+    a = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX, COUNTS)
+    assert a == derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX, COUNTS)
+    assert len(a["train"]) == 10 and set(a) == {"train", "val", "test"}
+    more = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX, {**COUNTS, "train": 25})
+    assert more["train"][:10] == a["train"] and len(more["train"]) == 25
     for s in a["train"]:
         assert set(s["starts"]) == {"1", "2", "4"}
 
@@ -38,57 +58,68 @@ def test_derive_is_deterministic_and_a_prefix():
 def test_derived_planes_are_the_registry_split_of_the_volume_dir():
     """The registry splits `<record>/<volume path>` (v<i>.zarr); a sample on another split's plane would leak."""
     for volume in (0, 1):
-        derived = derive_samples(RULE, "r", volume, "zyx", (10, 600, 700), VOX)
+        derived = derive_samples(RULE, "r", volume, "zyx", (10, 600, 700), VOX, COUNTS)
         by_split = split_planes(f"r/v{volume}.zarr", 10, RULE.split)
         for split, samples in derived.items():
             assert samples and all(s["plane"]["z"] in by_split[split] for s in samples)
 
 
-def test_capacity_counts_the_planes_of_each_split():
-    """2x2 coarsest tiles per plane: val and test hold 2 planes each, so they cap at 8 though train holds 6."""
-    greedy = PlanRule(**{**RULE.__dict__, "samples": {"train": 100, "val": 100, "test": 100}})
-    derived = derive_samples(greedy, "r", 0, "zyx", (10, 600, 700), VOX)
-    assert len(derived["train"]) == 2 * 2 * 6 and len(derived["val"]) == 2 * 2 * 2 and len(derived["test"]) == 8
+def test_crops_are_random_inside_the_volume_on_their_splits_planes():
+    wanted = {"train": 400, "val": 50, "test": 50}   # far over the 2x2 footprints a plane holds side by side
+    planes = split_planes("r/v0.zarr", 10, RULE.split)
+    drawn = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX, wanted)
+    for split, samples in drawn.items():
+        assert len(samples) == wanted[split]
+        for sample in samples:
+            assert sample["plane"]["z"] in planes[split]
+            y, x = sample["starts"]["4"]
+            assert 0 <= y <= (600 - 256) // 4 and 0 <= x <= (700 - 256) // 4
+    assert len({tuple(s["starts"]["4"]) for s in drawn["train"]}) > 4   # positions, not four tiles
 
 
-def test_capacity_caps_and_a_split_fills_it_exactly():
-    assert capacity(600, 700, 10, 64, (1, 2, 4)) == 2 * 2 * 10
-    tiny = derive_samples(RULE, "r", 0, "yx", (256, 256), {"y": 10.0, "x": 10.0})
-    assert sum(len(v) for v in tiny.values()) == 1   # one plane, one position: one sample in one split
-    evals = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX)["val"]
-    assert len(evals) == 3 and len({(s["plane"]["z"], tuple(s["starts"]["4"])) for s in evals}) == 3
+def test_a_volume_exactly_one_footprint_wide_holds_one_crop_at_zero():
+    drawn = derive_samples(RULE, "r", 0, "yx", (256, 256), {"y": 10.0, "x": 10.0}, {"train": 5, "val": 5, "test": 5})
+    # the one plane is in one split and has one position: five draws of it are one crop, the other splits get []
+    assert sum(len(s) for s in drawn.values()) == 1
+    assert all(s["starts"] == {"1": [96, 96], "2": [32, 32], "4": [0, 0]} for split in drawn.values() for s in split)
+
+
+def test_a_position_drawn_twice_is_one_crop_and_a_larger_count_still_only_adds():
+    """A 260x260 plane holds 2x2 positions (starts 0 and 4 on each axis): no list repeats one, however many draws."""
+    few = derive_samples(RULE, "r", 0, "yx", (260, 260), {"y": 10.0, "x": 10.0}, {"train": 3, "val": 3, "test": 3})
+    many = derive_samples(RULE, "r", 0, "yx", (260, 260), {"y": 10.0, "x": 10.0}, {"train": 99, "val": 99, "test": 99})
+    for split, samples in many.items():
+        keys = [tuple(s["starts"]["1"]) for s in samples]
+        assert len(keys) == len(set(keys)) and len(keys) in (0, 4)
+        assert samples[:len(few[split])] == few[split]
 
 
 def test_2d_volume_has_no_plane_key():
-    drawn = derive_samples(RULE, "r", 0, "yx", (600, 700), {"y": 10.0, "x": 10.0})   # the one plane is in one split
+    drawn = derive_samples(RULE, "r", 0, "yx", (600, 700), {"y": 10.0, "x": 10.0}, COUNTS)   # one plane, one split
     assert [s["plane"] for samples in drawn.values() for s in samples[:1]] == [{}]
 
 
-def test_no_two_samples_of_a_split_overlap_at_any_level():
-    """Every split fills its capacity with disjoint coarsest footprints; finer crops sit inside them."""
-    dense = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 8, "val": 8},
+def test_crops_of_a_split_may_overlap():
+    """One plane per split holds 2x2 footprints side by side; 50 crops on it overlap, each finer crop inside its
+    coarsest footprint."""
+    dense = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 50, "val": 50},
                      split={"policy": "fractions", "fractions": {"train": 0.5, "val": 0.5}, "seed": 0},
                      channel_recipe=None)
-    drawn = derive_samples(dense, "r", 0, "zyx", (2, 512, 512), VOX)   # 2x2 tiles per plane, one plane per split
+    drawn = derive_samples(dense, "r", 0, "zyx", (2, 512, 512), VOX, dense.samples)
     for split, samples in drawn.items():
-        assert len(samples) == 4
-        for factor in ("1", "2", "4"):
-            size = 64 * int(factor)
-            boxes = [{"raw": 0, "plane": s["plane"], "y": s["starts"][factor][0] * int(factor),
-                      "x": s["starts"][factor][1] * int(factor)} for s in samples]
-            assert all(overlap_frac(a, b, size) == 0 for i, a in enumerate(boxes) for b in boxes[i + 1:])
+        assert 40 < len(samples) <= 50   # a position drawn twice is listed once
+        boxes = [{"raw": 0, "plane": s["plane"], "y": s["starts"]["4"][0] * 4, "x": s["starts"]["4"][1] * 4}
+                 for s in samples]
+        assert any(overlap_frac(a, b, 256) > 0 for i, a in enumerate(boxes) for b in boxes[i + 1:])
         for s in samples:   # a finer crop lies inside the coarsest footprint
             (y4, x4), (y1, x1) = s["starts"]["4"], s["starts"]["1"]
             assert 4 * y4 <= y1 and y1 + 64 <= 4 * y4 + 256 and 4 * x4 <= x1 and x1 + 64 <= 4 * x4 + 256
 
 
-def test_grid_offset_is_random_but_shared_within_a_split():
-    drawn = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX)
-    for samples in drawn.values():
-        starts = {tuple(s["starts"]["4"][i] % 64 for i in (0, 1)) for s in samples}
-        assert len(starts) == 1   # one grid per split
-    other = derive_samples(PlanRule(**{**RULE.__dict__, "seed": 1}), "r", 0, "zyx", (10, 600, 700), VOX)
-    assert other["train"][0]["starts"]["4"] != drawn["train"][0]["starts"]["4"] or other["train"] != drawn["train"]
+def test_another_seed_draws_other_crops():
+    drawn = derive_samples(RULE, "r", 0, "zyx", (10, 600, 700), VOX, COUNTS)
+    other = derive_samples(PlanRule(**{**RULE.__dict__, "seed": 1}), "r", 0, "zyx", (10, 600, 700), VOX, COUNTS)
+    assert other["train"] != drawn["train"]
 
 
 def test_stage_plan_boxes_align_and_only_touched_chunks_are_planned():

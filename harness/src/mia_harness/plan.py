@@ -4,6 +4,7 @@ import hashlib
 import itertools
 import json
 import random
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -73,12 +74,6 @@ def split_planes(volume_id: str, planes: int, split: dict) -> dict[str, list[int
     return out
 
 
-def capacity(extent_y: int, extent_x: int, planes: int, patch: int, levels: tuple[int, ...]) -> int:
-    """How many non-overlapping coarsest-level footprints fit in the volume."""
-    footprint = patch * max(levels)
-    return (extent_y // footprint) * (extent_x // footprint) * planes
-
-
 def patch_start(centre_nm: float, scale: float, shift: float, patch: int, n: int) -> int:
     """First index of a patch centred on centre_nm on a level grid of n voxels (scale and shift in nm), clamped."""
     if n < patch:
@@ -91,33 +86,57 @@ def start_index(centre_nm: float, voxel_nm: float, factor: int, patch: int, exte
     return patch_start(centre_nm, factor * voxel_nm, (factor - 1) / 2 * voxel_nm, patch, extent_raw // factor)
 
 
+def planes_per_split(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...]) -> dict[str, int]:
+    """How many of the volume's planes each split holds; none when the coarsest footprint exceeds its y or x."""
+    planes = shape[axes.index("z")] if "z" in axes else 1
+    # the registry's volume id (record/<volume dir>), so both repos put every plane in the same split
+    by_split = split_planes(f"{record}/v{volume}.zarr", planes, rule.split)
+    footprint = rule.patch * max(rule.levels)
+    fits = all(shape[axes.index(axis)] >= footprint for axis in "yx")
+    return {split: len(chosen) if fits else 0 for split, chosen in by_split.items()}
+
+
+def share_out(rule: PlanRule, record: str, planes: list[dict[str, int]]) -> list[dict[str, int]]:
+    """Per volume, how many of the record's `samples[split]` crops it gets: each crop picks a volume in proportion
+    to the planes it holds in the split (`planes`, one entry per volume). The picks of a split come in order from
+    one Random, so a larger count only adds to each volume's share."""
+    shares: list[dict[str, int]] = [{} for _ in planes]
+    for split in rule.split["fractions"]:
+        weights = [held.get(split, 0) for held in planes]
+        picked: Counter[int] = Counter()
+        if any(weights):
+            rng = random.Random(f"{rule.seed}:{record}:{split}")
+            picked.update(rng.choices(range(len(planes)), weights=weights, k=rule.samples.get(split, 0)))
+        for index, share in enumerate(shares):
+            share[split] = picked[index]
+    return shares
+
+
 def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],
-                   voxel_size_nm: dict[str, float]) -> dict[str, list[dict]]:
-    """Sample descriptors per split, none overlapping: each split tiles every plane it holds with coarsest
-    footprints (one grid offset per split, so the tiles stay disjoint), shuffles the (plane, tile) cells with one
-    Random and takes the first `min(samples[split], capacity)` (spec §2.5). A larger count extends a smaller
-    count's list; finer levels sit inside their coarsest footprint, so no two samples of a split share a pixel."""
+                   voxel_size_nm: dict[str, float], counts: dict[str, int]) -> dict[str, list[dict]]:
+    """Sample descriptors per split from `counts[split]` draws, placed at random: a plane of the split, then a
+    position whose coarsest footprint lies inside the volume (its start a multiple of the coarsest factor, so every
+    level's start lands on its own grid). Crops of a split may overlap, but a position drawn again is not listed
+    twice, so a small volume gives fewer crops than draws; a split without a plane gets none. A larger count
+    extends a smaller count's list; finer levels sit inside their coarsest footprint."""
     planes = shape[axes.index("z")] if "z" in axes else 1
     extents = [shape[axes.index(axis)] for axis in ("y", "x")]
     coarsest = max(rule.levels)
     footprint = rule.patch * coarsest
-    tiles = [extent // footprint for extent in extents]
-    # the registry's volume id (record/<volume dir>), so both repos put every plane in the same split
     planes_by_split = split_planes(f"{record}/v{volume}.zarr", planes, rule.split)
     out: dict[str, list[dict]] = {}
     for split, planes_of_split in planes_by_split.items():
-        count = min(rule.samples.get(split, 0), capacity(*extents, len(planes_of_split), rule.patch, rule.levels))
         rng = random.Random(f"{rule.seed}:{record}:v{volume}:{split}")
-        # the grid's offset: a multiple of the coarsest factor, so every level's start lands on its own grid
-        offsets = [rng.randrange(extent - n * footprint + 1) // coarsest * coarsest if n else 0
-                   for extent, n in zip(extents, tiles)]
-        cells = [(z, ty, tx) for z in planes_of_split for ty in range(tiles[0]) for tx in range(tiles[1])]
-        rng.shuffle(cells)
         accepted: list[dict] = []
-        for z, ty, tx in cells[:count]:
+        drawn: set[tuple[int, ...]] = set()
+        for _ in range(counts.get(split, 0) if planes_of_split else 0):
+            z = rng.choice(planes_of_split)
             plane = {"z": z} if "z" in axes else {}
-            centre_nm = [(offset + tile * footprint + footprint / 2) * voxel_size_nm[axis]
-                         for offset, tile, axis in zip(offsets, (ty, tx), "yx")]
+            first = [rng.randrange((extent - footprint) // coarsest + 1) * coarsest for extent in extents]
+            if (z, *first) in drawn:
+                continue
+            drawn.add((z, *first))
+            centre_nm = [(start + footprint / 2) * voxel_size_nm[axis] for start, axis in zip(first, "yx")]
             starts = {str(factor): [start_index(centre, voxel_size_nm[axis], factor, rule.patch, extent)
                                     for centre, axis, extent in zip(centre_nm, "yx", extents)]
                       for factor in rule.levels}
