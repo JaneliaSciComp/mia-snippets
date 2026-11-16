@@ -1,0 +1,14 @@
+record: empiar-10070-muscle-mitochondria-fib-sem
+record_commit: 3bf401a3f5a214dfe6b9beb313fceb3c03a84641
+snippets_commit: bb4669ae660e7b3537804970ea50efaf8811238f
+raw:
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10070/data/b3talongmusc20130301.mrc"]
+    params: {mode0: uint8}
+labels: []
+reasons:
+  - "mrc-http-3 instead of the draft's mrc-http-2: the record's one raw array is a single MRC file, mode 0 with no IMOD stamp (imodStamp and imodFlags are 0; header label 'tif2mrc: Converted to MRC format. 08-Mar-13'). mrc-http-2 has no params and reads such a file as int8, and smoke warned that int8 is not the record's uint8"
+  - "mode0 uint8: the stored bytes are unsigned 8-bit grey values. The record says so (dtype uint8, 39-160 on the middle slice, the int8 reading wraps, paper: 8-bit images), and it was measured again on planes z = 0, 145, 200, 250, 290: as uint8 the values span 39..163 with one smooth histogram that falls steadily through 127/128 (40,518 voxels at 127, 33,307 at 128, 27,150 at 129) and 0.2-3.5% of each plane above 127; as int8 every one of those planes spans exactly -128..127 with nothing between about -93 and 39, and the mean difference between horizontal neighbours rises from 6.6-6.8 to 7.5-16.4 grey levels. The header's own dmin/dmax of -128/127 is that wrapped reading. z = 145 reproduces the record's numbers (39-160, mean 100.3, p1 73, p99 129)"
+  - "shape 291 x 1595 x 1675 zyx and voxel size 15 nm on z, y and x come from the header (cell 43650 x 239250 x 251250 A over 291 x 1595 x 1675 samples) and match the record"
+  - "planes z = 21..118 of the file are all zero as deposited (middle row of every third plane, and direct range requests: z = 20 and 119 hold image data, 21 and 118 are zero). The reader returns them unchanged; a 4-crop test wrote 4 crops of tissue and rejected 5 candidates on content. The header's dmean of 95.5 fits a volume without that gap, so the gap looks like damage to the deposited file rather than part of the acquisition; it is not something a binding can repair"
+  - "No labels bound: the record's only annotations are STL surface meshes (data/Figure1/*.stl, data/Figure2/*.stl), not voxel arrays; no catalog snippet reads STL and the record says their units and origin relative to the MRC grid are not stated, so they cannot be rasterized onto the raw grid from what is known"
