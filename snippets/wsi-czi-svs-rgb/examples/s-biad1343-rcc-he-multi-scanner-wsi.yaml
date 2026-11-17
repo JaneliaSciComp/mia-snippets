@@ -1,0 +1,22 @@
+record: s-biad1343-rcc-he-multi-scanner-wsi
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/343/S-BIAD1343/Files/Multiple%20scanners_HE%20WSI/iCAIRD-1082_Leica-089.svs"]
+    params: {}
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/343/S-BIAD1343/Files/Multiple%20scanners_HE%20WSI/iCAIRD%20-1083-HE-ZeissAxioZ1-Grant-07_06_2021.czi"]
+    params: {}
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/343/S-BIAD1343/Files/Multiple%20scanners_HE%20WSI/iCAIRD%20-1083-HE-ZeissAxioZ1-Louise-10_06_2021.czi"]
+    params: {}
+labels: []
+reasons:
+  - "urls: three slides, one per scanner the record describes as arrays: the record's sample Leica .svs (technical.sample, case 1082), the Zeiss .czi the record inspected (case 1083, scanner Grant) and the same case on the second Zeiss scanner (Louise). One slide is one array, since slide shapes differ; the other 99 .svs and 198 .czi files have the same naming and, by the record, the same layout, and can be bound the same way, one entry each. They were not read here, so they are not claimed"
+  - "raw 0 with wsi-czi-svs-rgb instead of the draft's tiff-zip-member-2: same pixels (first page of the SVS, 25331x27887 RGB uint8, the record's shape with the samples as c: cyx 3x25331x27887), but read by 240x240 JPEG tile, so a patch costs the tiles it touches instead of the whole 126 MB base page, and voxel size 503 nm is taken from the Aperio description (MPP = 0.5030)"
+  - "raw 1 and 2 with wsi-czi-svs-rgb, no params: each CZI holds one scene of Bgr24 JPEG XR tiles (raw 1: 700 full-resolution tiles of 2236x2236 on a 25x28 grid without overlap, among 1533 subblocks; the rest are pyramid copies), placed at the directory's pixel positions: cyx 3x55170x60644 (the XML's SizeY/SizeX) and 3x50821x56323, uint8, c = red, green, blue as for the SVS"
+  - "voxel size of the CZIs, 220.1 nm, comes from the file's Scaling metadata and agrees with the study's 0.22 um/px; the record's voxel_size_nm is null because the scanners differ (Leica 503 nm), so the arrays of this binding are at different scales"
+  - "black is 'not scanned' in the CZIs: the Axio Scan stored a tile at every grid position and left what it did not scan at (0, 0, 0); in raw 1 about a third of the tiles are entirely black and tiles at the edge of the scanned region are partly black. The SVS background is white (about 243). The snippet returns both as stored"
+  - "no labels: the record has no annotations. The slides of one case on different scanners are separate, unregistered scans (record notes), so they are bound as independent raws, not as channels or pairs"
+  - "not bound: the 199 .ndpi and 100 .isyntax slides, which the record does not describe as arrays and this snippet does not read"

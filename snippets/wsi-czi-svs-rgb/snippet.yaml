@@ -1,0 +1,10 @@
+name: wsi-czi-svs-rgb
+spec_version: 1
+summary: One brightfield whole-slide image at a plain URL as cyx uint8 (c = red, green, blue), read tile by tile by byte range; either a tiled colour Zeiss CZI mosaic (Bgr24 JPEG XR tiles, e.g. Axio Scan; one scene, stitched by placing each full-resolution tile where the file says, with its own ZISRAW parser) or the first, full-resolution page of a tiled 8-bit RGB TIFF such as an Aperio SVS (voxel size from the Aperio MPP).
+formats: [czi, svs, tiff]
+containers: [http, s3]
+params:
+  scene: {type: int, required: false, doc: "CZI only. The scene (S index of the subblock directory) to read when the file holds several; a file with several scenes is an error without it, and the error lists them. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad1343-rcc-he-multi-scanner-wsi]
+supersedes: null
