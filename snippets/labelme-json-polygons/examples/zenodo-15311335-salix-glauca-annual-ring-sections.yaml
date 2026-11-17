@@ -1,0 +1,23 @@
+record: zenodo-15311335-salix-glauca-annual-ring-sections
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://zenodo.org/api/records/15311335/files/Salix_DiskoIsland.zip/content::Salix_DiskoIsland/images/W_F07_C_S5.jpg"]
+    params: {}
+labels:
+  - snippet: labelme-json-polygons
+    urls: ["https://zenodo.org/api/records/15311335/files/Salix_DiskoIsland.zip/content::Salix_DiskoIsland/annotations/W_F07_C_S5.json"]
+    params: {ids: instance}
+    pairs_with: 0
+    label_key: manual_gt-annual_ring-instance
+    segmentation_type: instance
+reasons:
+  - "labelme-json-polygons instead of the draft's tiff-jpeg-voc-zip-glob: the labels are LabelMe 5.5.0 JSON polygons, which no catalog snippet read (the draft's snippet reads VOC XML boxes and refused the file's '{' header); the draft's boxes/classes params belong to that snippet and are dropped"
+  - "url is record data.download_url with zip member paths from harness list (as in the draft); every member of the zip is deflated, so each file is fetched whole"
+  - "one raw and one label per image, and only the record's sample pair W_F07_C_S5 is bound (as in the draft): an array has one shape and the sections differ in size (record shape_varies; the 7 annotation files read while testing declare 7 different sizes, 4430x4480 up to 18434x17394), so the 50 JPEGs cannot be one z array. The other 49 pairs bind the same way, images/<stem>.jpg with annotations/<stem>.json; they are left out here because Zenodo answered 429 TOO MANY REQUESTS after 7 of the 50 annotation files while testing (as it did to the match agent), and a binding that opens all 100 members is refused the same way. NEEDS A HUMAN DECISION whether to bind more pairs through a mirror or a slower job"
+  - "raw image-tiles-glob with no params (the draft's choice, which passed smoke alone): the RGB samples stay a c axis, cyx (3, 4430, 4480) uint8; safranin and astra blue are a colour signal"
+  - "label grid 4430x4480 from the JSON's imageHeight/imageWidth, equal to the JPEG's size; the JSON's imagePath is W_F07_C_S5.jpg, the bound raw (same stem, record alignment_notes)"
+  - "ids instance (the snippet's default, stated because it decides the label): each of the 6 polygons is its own id, its 1-based number in the file's shapes list, here 1 pith, 2..6 the rings 2016..2020. In other files of this dataset the shapes are not in year order (e.g. 1W04S20 lists 2019 before 2018 and pith last), so an id is a polygon's number in its file, not a year; no classes param because the ring years differ per section"
+  - "smaller polygons on top (the snippet's rule) is what makes the ids rings: each year's polygon is the outline of the whole stem up to that ring boundary and encloses the earlier years and the pith (checked on this file: the polygon areas grow pith < 2016 < ... < 2020 and all 6 ids are present after painting, 723,313 px for the pith up to 3,152,712 px for 2017), so painting largest first leaves each year its own annulus and the pith its disc. The outlines are hand-drawn and not strictly nested: 1 of the 48 vertices of the 2019 outline lies outside the 2020 outline, and the sliver it cuts off stays 2019 (in the 7 files read while testing, 5 have such crossings; in all 7 the area order is pith, then the years ascending). The bark outside the 2020 outline and the slide background are 0"
+  - "label_key manual_gt-annual_ring-instance, segmentation_type instance (the draft's): annotations.source manual, record annotation type instance-segmentation. The pith is not an annual ring but is kept as an instance (id 1): dropping its polygon would hand its pixels to the 2016 ring"
