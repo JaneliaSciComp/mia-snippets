@@ -20,10 +20,13 @@ one file per z plane (`zyx`), or `yx` for a single file. The `nd2` package is no
   returned as stored, `uint8` or `uint16`; nothing is scaled.
 - **Voxel size.** `y` and `x` from `dCalibration` (um per pixel) of `ImageMetadataSeqLV|0!` when `bCalibrated`
   is true, as nm; otherwise `None`. It is taken from the first file. There is never a `z` size.
-- **Access.** `chunk` when the first file is read through `io.open` (a stored member or a Range-capable plain
-  URL): `read` then asks for the rows of the region only. `file` when `io.open` raises `NeedsFetch` (a deflated
-  member, a server ignoring Range): each file is staged whole with `io.fetch` when a plane of it is first
-  read. `open_array` reads only the first file's metadata; for a deflated member that still stages that file.
+- **Access.** `plane` for several files: a plane is one file, so the harness draws several crops on one plane
+  and reads it once, instead of one file per crop. Each file costs requests of its own (a deflated member is
+  staged whole with `io.fetch` when its plane is first read, in two or three requests; a stored member or a
+  Range-capable plain URL is read by range, metadata first), and a host such as Zenodo limits requests per
+  minute. For one file: `chunk` when it is read through `io.open`, so `read` asks for the rows of the region
+  only; `file` when `io.open` raises `NeedsFetch` (a deflated member, a server ignoring Range). `open_array`
+  reads only the first file's metadata; for a deflated member that still stages that file.
 - **Params.** None.
 
 ## Known limits
@@ -35,8 +38,10 @@ one file per z plane (`zyx`), or `yx` for a single file. The `nd2` package is no
 - Legacy ND2 (JPEG-2000 based, before NIS-Elements 3) is not read.
 - The ND2 text metadata of the tested files mentions a 35-plane z loop of the acquisition; each file still
   holds one frame, and the snippet goes by the frame count in the attributes.
-- Over HTTP each deflated member costs two requests (local header, compressed bytes), made lazily per plane;
-  the harness does not retry a request that fails in transit.
+- Over HTTP each deflated member costs two or three requests (its local header, then its compressed bytes in
+  pieces of 8 MiB), made when its plane is first read. The harness retries a dropped connection or a 5xx, but
+  not a `429 Too Many Requests`: a host that limits requests per minute (Zenodo: 133, counted per client
+  address, so shared with other jobs) can still fail a job that is itself well under the limit.
 
 ## Tested on
 

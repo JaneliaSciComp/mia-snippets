@@ -177,8 +177,11 @@ class _Stack:
         self.axes = "zyx" if len(urls) > 1 else "yx"
         self.dtype = first.dtype.newbyteorder("=")
         self.voxel_size_nm = first.voxel_size_nm        # of the first file; z is a file index, not a length
-        # rows by range from a stored member or a plain URL; a deflated member is staged whole
-        self.access = "chunk" if ranged else "file"
+        # Several files: one file per plane, so the plane is the read unit; the harness then draws its crops
+        # plane by plane and each file is asked for once, not once per crop (every file costs requests of its
+        # own: its metadata by range, or the whole of a deflated member). One file: rows by range from a stored
+        # member or a plain URL; a deflated member is staged whole, here at open.
+        self.access = "plane" if len(urls) > 1 else "chunk" if ranged else "file"
 
     def read(self, region: dict[str, int | slice]) -> np.ndarray:
         y, x = region.get("y", slice(None)), region.get("x", slice(None))
