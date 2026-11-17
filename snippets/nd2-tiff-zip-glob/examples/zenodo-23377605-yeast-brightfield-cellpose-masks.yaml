@@ -2,20 +2,20 @@ record: zenodo-23377605-yeast-brightfield-cellpose-masks
 record_commit: 209795d252de12cb42b7ed23372e1026fda18337
 snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
 raw:
-  - snippet: nd2-zip-glob
+  - snippet: nd2-tiff-zip-glob
     urls: ["https://zenodo.org/records/23377605/files/20260611_141152_330.zip::20260611_141152_330/raw/*.nd2"]
     params: {}
 labels:
-  - snippet: tiff-zip-glob-rgb
+  - snippet: nd2-tiff-zip-glob
     urls: ["https://zenodo.org/records/23377605/files/20260611_141152_330.zip::20260611_141152_330/derived/masks/*_mask.tif"]
     params: {}
     pairs_with: 0
     label_key: auto_pred-cell-instance
     segmentation_type: instance
 reasons:
-  - "nd2-zip-glob for the raw: the images are Nikon ND2 files (record technical.arrays[0].format nd2), which no other snippet reads (the match agent's smoke with tiff-zip-member-2 failed with 'not a TIFF file: header da ce be 0a'). Each is one uncompressed 2304x2304 uint16 frame of one brightfield component (ImageAttributesLV: uiSequenceCount 1, uiComp 1, eCompression none), which is what the snippet reads; the members are deflated, so each is fetched whole when a plane of it is read"
+  - "nd2-tiff-zip-glob for the raw: the images are Nikon ND2 files (record technical.arrays[0].format nd2), which no other snippet reads (the match agent's smoke with tiff-zip-member-2 failed with 'not a TIFF file: header da ce be 0a'). Each is one uncompressed 2304x2304 uint16 frame of one brightfield component (ImageAttributesLV: uiSequenceCount 1, uiComp 1, eCompression none), which is what the snippet reads; the members are deflated, so each is fetched whole when a plane of it is read"
   - "raw url with a member glob: 20260611_141152_330/raw/*.nd2 (the record's path_pattern) expands to the 64 members (listing_complete: true), sorted by name and stacked as z, so all 16 wells x 4 fields are bound rather than the one field record.yaml samples. z is the position in the sorted file list, not a depth: the array is zyx 64x2304x2304 where the record describes one file as yx 2304x2304"
-  - "tiff-zip-glob-rgb for the label, no params: the masks are single-page uint32 YX TIFFs without a sample axis (record technical.arrays[1]: uint32, uncompressed, 2304x2304), one per raw image, in deflated zip members; that snippet stacks the members a glob matches along z and passes a YX page through unchanged, so the label is zyx 64x2304x2304 uint32 on the raw's grid. tiff-zip-member-2 (the draft) reads one member only"
+  - "nd2-tiff-zip-glob for the label too, no params: the masks are single-page uint32 YX TIFFs (record technical.arrays[1]: uint32, uncompressed, 2304x2304), one per raw image, in deflated zip members; the snippet stacks the members a glob matches along z and returns each page as stored, so the label is zyx 64x2304x2304 uint32 on the raw's grid. tiff-zip-glob-rgb reads these masks identically, but the crop jobs at f7d507d and 53c0f7e died on Zenodo's '429 TOO MANY REQUESTS' (133 requests a minute per client address, shared with other jobs; the second job had made 5 requests), which the harness does not retry: this snippet waits Retry-After and asks again, and a job is only safe when both sides do. tiff-zip-member-2 (the draft) reads one member only"
   - "pairing by sorted order: every mask is named <raw stem>_mask.tif (record alignment_notes) and all 64 raw stems have the same length (Well<W>_Point<W>_000<n>_Channelbrightfield_Seq<NNNN>), so sorting raw/<stem>.nd2 and derived/masks/<stem>_mask.tif by name orders both by stem; checked on the zip listing: the k-th mask name is the k-th raw stem + _mask.tif for all 64"
   - "label_key auto_pred-cell-instance, segmentation_type instance: the masks are Cellpose-SAM predictions (annotations.source automatic), each pixel holding the integer id of its cell with 0 = background (record encoding instance-ids); the objects are yeast cells"
   - "voxel size from the file: each ND2 states dCalibration 0.1625 um/px with bCalibrated true, reported as y, x = 162.5 nm, the record's imaging.voxel_size_nm; no z size, the files are 2D"
