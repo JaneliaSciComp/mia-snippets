@@ -1,0 +1,38 @@
+record: idr0082-pennycuick-cis-lung-he-wsi
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: ndpi-ndpa-regions
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/IDR/idr0082-pennycuick-lesions/20200517-ftp/S32_HandE.ndpi"]
+    params: {}
+  - snippet: ndpi-ndpa-regions
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/IDR/idr0082-pennycuick-lesions/20200517-ftp/S1_HandE.ndpi"]
+    params: {}
+labels:
+  - snippet: ndpi-ndpa-regions
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/IDR/idr0082-pennycuick-lesions/20200517-ftp/S32_HandE.ndpi.ndpa"
+      - "https://ftp.ebi.ac.uk/pub/databases/IDR/idr0082-pennycuick-lesions/20200517-ftp/S32_HandE.ndpi"
+    params: {classes: [CIS, Stroma]}
+    pairs_with: 0
+    label_key: manual_gt-cis_stroma_region-semantic
+    segmentation_type: semantic
+  - snippet: ndpi-ndpa-regions
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/IDR/idr0082-pennycuick-lesions/20200517-ftp/S1_HandE.ndpi.ndpa"
+      - "https://ftp.ebi.ac.uk/pub/databases/IDR/idr0082-pennycuick-lesions/20200517-ftp/S1_HandE.ndpi"
+    params: {classes: [CIS, Stroma]}
+    pairs_with: 1
+    label_key: manual_gt-cis_stroma_region-semantic
+    segmentation_type: semantic
+reasons:
+  - "urls: two of the 112 slides, S32 (the record's technical.sample, the smallest NDPI) and S1 (the largest the record probed), each as its own raw entry with its own label, because slides differ in shape (shape_varies) and a snippet array is one slide. The other 110 slides of 20200517-ftp/ follow the same naming (SN_HandE.ndpi with SN_HandE.ndpi.ndpa) and can be bound the same way; they were not read here, so they are not claimed. 20200417-ftp/ is an earlier upload of S1 to S3 and is left unbound"
+  - "raw with ndpi-ndpa-regions instead of the draft's tiff-zip-member-2, no params: tiff-zip-member-2 decodes the whole page for every read, which is 3.4 GB for S1 (30976x36864x3). This snippet reads the same first page (the full-resolution level) as yxc uint8, S32 10752x8192x3 and S1 30976x36864x3 as the record says, but fetches and decodes only the 8-row JPEG restart strips a region touches. On S32 its pixels are identical to tifffile's whole-page decode on every region compared"
+  - "voxel size is each file's own XResolution/YResolution: S32 states 43990 x 43992 pixels per cm, so x 227.32 nm and y 227.31 nm, which agrees with the record's 227.3 nm"
+  - "label urls are the slide's .ndpa and its .ndpi again: NDPA points are nanometres from the slide centre, and only the NDPI says where its image lies in that frame (XOffsetFromSlideCentre / YOffsetFromSlideCentre, tags 65422 / 65423; S32: 8914376 and 3022500 nm) and how large a pixel is. x_px = (x_nm - XOffset) / x_pixel_nm + width / 2, the same in y; the NDPI's header is read for it, no pixel"
+  - "coordinate frame, which the record leaves open (alignment unknown), checked on S32 against its 16x level: mean darkness (255 - mean RGB) inside the filled regions is 119.2 as mapped, against 31.4 over the whole slide, 76.7 with y flipped, 61.5 with x flipped, 52.1 with both, and 84 to 99 when moved 320 px along either axis; an overlay shows each outline drawn around one piece of tissue"
+  - "classes: [CIS, Stroma] from the record's classes, so CIS = 1, Stroma = 2, 0 = not annotated. S32 has 9 CIS regions and 1 Stroma region, all closed freehand outlines, as the record says; they fill 3,802,715 and 320,606 of its 88.1 million pixels"
+  - "class order matters: S32's Stroma region lies inside a CIS outline (the stroma within a lesion). Regions are painted in the order of classes, so Stroma is kept there and CIS is the outline minus its stroma"
+  - "label_key manual_gt-cis_stroma_region-semantic and segmentation_type semantic, as the match agent drafted: manual outlines, filled with class ids. Separate regions of one class share an id, so this is not an instance label"
+  - "the outlines are loose: a CIS region includes the glass and any other tissue inside the line, and tissue outside every outline is unannotated, not background"
+  - "smoke warns that label dtype uint8 is not the record's 'unknown': the record cannot state a dtype for polygons; uint8 is what the snippet fills (up to 255 classes)"
