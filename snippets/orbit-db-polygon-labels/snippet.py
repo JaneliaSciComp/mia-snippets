@@ -206,7 +206,9 @@ def _span(key: int | slice, n: int) -> tuple[int, int, int | np.ndarray]:
 
 
 class _Labels:
-    axes, access, dtype = "yx", "chunk", np.dtype("uint16")
+    # "plane": the slide's outlines are all in memory once opened, so a whole plane costs no more bytes than a
+    # box, and the harness can then look over the plane for the few annotated pixels of a sparsely drawn slide
+    axes, access, dtype = "yx", "plane", np.dtype("uint16")
 
     def __init__(self, shape: tuple[int, int], voxel_size_nm: dict[str, float] | None,
                  polygons: list[tuple[int, np.ndarray, np.ndarray]]):

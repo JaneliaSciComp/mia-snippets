@@ -52,4 +52,6 @@ write methods, externalizable classes, enums, proxies and exceptions are refused
 - Coverage is whatever the annotator drew. In the tested slide only one of the two kidney sections is
   annotated, so 0 means "not annotated", not "background".
 - Ellipses, rectangles and other Orbit shapes are not handled (none occur in the tested database).
-- `access` is `chunk`: any region costs only the polygons that touch it.
+- `access` is `plane`: the database is fetched whole and the slide's outlines are all parsed when the array is
+  opened, so no read costs further bytes. A region is filled from the polygons that touch it; a whole plane of a
+  large slide is a large array (uint16, 757 MB for the tested 14080x26880 slide).
