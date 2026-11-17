@@ -1,0 +1,47 @@
+record: zenodo-3375528-tissue-segmentation-wsi-sample
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+- snippet: tiff-pyramid-level
+  urls:
+  - https://zenodo.org/records/3375528/files/tongue_hne_00.tif
+  params:
+    level: 1
+labels:
+- snippet: tiff-pyramid-level
+  urls:
+  - https://zenodo.org/records/3375528/files/tongue_hne_00_mask_cl2_sp0.5.tif
+  params:
+    level: 0
+    class_id: 6
+  pairs_with: 0
+  label_key: manual_gt-tissue-semantic
+  segmentation_type: binary
+reasons:
+- 'urls: the slide whose mask is the record''s technical.sample file (tongue_hne_00), and that mask; both snippets
+  take exactly one url per array. The other nine slides follow the same path_patterns but are not bound here.'
+- 'tiff-pyramid-level for both: each file is a tiled pyramidal BigTIFF (slide: 9 pages, JPEG tiles, RGB; mask: 8
+  pages, LZW tiles, each page half the one before, 512x512 tiles). tifffile shows only page 0 as a series, and
+  page 0 of the slide is 218682x95310x3 (62.5 GB decoded), so the level is named in the binding and reads are by
+  tile.'
+- 'raw level 1, label level 0: the mask is drawn at half the slide''s resolution (sp0.5 in its name), so its page 0
+  (109341x47655) is on the grid of the slide''s page 1 (109341x47655x3). Both pages state the same pixel size in
+  their own resolution tags, 4294967295/208815 px per cm = 486.185 nm, and overlaying coarser pages of both
+  (slide page 6 on mask page 5, 3416x1489) shows the mask outlining the two tissue sections. This is the finest
+  grid the two share; slide page 0 (243.1 nm) has no mask on its grid.'
+- 'raw axes yxc from the file (tifffile YXS, 3 samples, PhotometricInterpretation RGB); label axes yx. The harness
+  compares them outside c.'
+- 'class_id 6 = tissue, measured, because the record gives encoding unknown and no classes for the mask TIFFs.
+  The whole of mask page 5 holds exactly the values 0, 3 and 6 (45%, 27% and 27% of the pixels). Against slide
+  page 6 on the same grid: 0 lies where the slide is pure white (255,255,255: not scanned), 3 on the scanned
+  glass around the sections (mean RGB 239,239,239) and 6 on the stained sections (mean RGB 208,167,187). The
+  six-value sibling tongue_hne_00_mask_cl6_sp0.5.tif agrees: its ids 5 and 6 are this mask''s 6 and its ids 1-4
+  this mask''s 3.'
+- 'segmentation_type binary with class_id, not semantic on the stored values: the label_key names one class,
+  tissue, and binary encodes a != 0, so the stored map would mark the background (3) as tissue too. With class_id
+  6 the snippet returns 1 on tissue and 0 elsewhere, which is the mask the key names; background and not-scanned
+  are both 0.'
+- 'label_key manual_gt-tissue-semantic as drafted: annotations.source manual (the masks are the rasterised manual
+  ASAP polygons), class tissue, kind semantic from annotations.types.'
+- 'the cl6 mask and the ASAP XML are not bound: there is no label name for their further classes (Artifacts,
+  Edge, SmallTissue), the cl6 ids are not documented, and no snippet rasterises ASAP polygons.'
