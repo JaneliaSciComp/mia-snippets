@@ -52,6 +52,17 @@ in `read`; it does so the same way for every read, from the table alone.
 
 `examples/empiar-10017-beta-galactosidase-particle-coordinates.yaml`: 84 Falcon-II micrographs
 (4096×4096 float32 MRC, read by `mrc-http-3`) and their 84 `.coord` tables, 40863 manually picked
-beta-galactosidase particles, one instance label per micrograph with `radius: 12`. The example binding's
+beta-galactosidase particles, one instance label per micrograph with `radius: 12`.
+
+The raw crops of this dataset can look broken at the border: the image stops and its last row or column
+repeats to the edge. That is in the files, not from a reader. Every one of the 84 micrographs is a
+3914×3921 image (rows 96..4009, columns 68..3988) padded to 4096×4096 by replicating its edge pixels: 96
+rows above, 86 below, 68 columns left, 107 right, 8.5% of the file, identical in all 84. It was measured
+on bytes fetched with plain HTTP range requests, and `mrc-http-3` returns the same bytes. This snippet reads
+no pixels and paints nothing there of its own accord: one pick of the 40863 lies in the margin (two rows
+in), and discs of picks near the border reach into it. Keeping crops out of the margin would be the
+harness's job (a snippet never crops); see the binding's reasons for the numbers.
+
+The example binding's
 `snippets_commit` is the commit before this snippet's own (a binding can't name the commit that adds it); a
 binding written by the worker names a commit that contains the snippet.
