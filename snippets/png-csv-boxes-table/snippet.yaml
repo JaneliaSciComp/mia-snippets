@@ -1,0 +1,16 @@
+name: png-csv-boxes-table
+spec_version: 1
+summary: The PNG images a CSV table names, one row per z plane in row order (samples kept as c), or the pixel boxes one column of that table holds for them (a Python-literal list of {top, left, height, width[, type]} per row) rasterised on the grid of the row's PNG. The one url is the table; `image_url` is a template that turns a row's file name into its image's url, so a file store without a directory index needs no glob. A lone 0,0,0,0 box is the table's "none here" and gives an all-background plane.
+formats: [png, csv]
+containers: [http]
+params:
+  image_url: {type: str, required: true, doc: "the url of a row's image, with {name} once where the file name from `name_column` goes, e.g. https://zenodo.org/api/records/<id>/files/{name}/content. The same value on the image array and its box arrays; reason required in binding"}
+  name_column: {type: str, required: true, doc: "the header of the column holding each row's image file name (a bare name: no path). Rows are z planes in table order, and a name in two rows raises; reason required in binding"}
+  delimiter: {type: str, required: false, doc: "the table's one-character cell delimiter. Default ','; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of rows the table must have. Open fails on another number, so a changed table is noticed instead of shifting z; reason required in binding"}
+  boxes_column: {type: str, required: false, doc: "the header of the column of box lists. Set: the array is that column's boxes, rasterised (zyx, uint16). Not set: the array is the images. Reason required in binding"}
+  boxes: {type: str, required: false, doc: "with `boxes_column` only, and required with it: 'instance' fills each box with its 1-based number in its cell; 'semantic' fills it with the 1-based index of its `type` in `classes` (1 for boxes without a type). 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "with `boxes_column` only: every `type` string the column's boxes use (compared after stripping spaces), in class id order (semantic id = position, from 1). Required when the boxes have a `type` (a box whose type is not listed raises, in both modes), refused when they have none. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-7484518-malaria-thick-smear-parasites]
+supersedes: null
