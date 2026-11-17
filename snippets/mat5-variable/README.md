@@ -22,6 +22,13 @@ id map. The parser is the snippet's own (`struct`, `zlib`, numpy): the allowlist
   `read` fetches the named variables' elements and inflates them whole, since a zlib stream has no random
   access, and keeps the result in memory (rows × columns bytes for a mask); later reads cost no bytes. A file
   that cannot be read by range (a deflated zip member) is staged whole with `io.fetch`.
+- **Few requests.** A host may count requests, not bytes: zenodo.org answers 429 after 133 a minute, and the
+  harness does not retry a 429. So when opening finds one of several names, it asks at once for the stretch
+  the names still looked for would fill if they came next at the same size (at most 8 MiB, one request): for
+  masks saved together that is the case, their headers are then not a request each, and the bytes are the ones
+  the first `read` needs. When the guess is wrong, up to 8 MiB per name were fetched for nothing. A variable
+  is read in pieces of 32 MiB, which `io` asks for as four ranges of 8 MiB at once, not one request per MiB.
+  `Case1Vf.mat` (eight masks of 1.1 MB each behind a 16 MB variable) takes 4 range requests this way, not 11.
 - **Voxel size.** Always `None`: the format has no place for it.
 
 ## Params
@@ -49,12 +56,34 @@ it is a label: a MAT-file also holds intermediate results (thresholds, masked im
 
 ## Example
 
-`examples/zenodo-4064835-glass-fibre-composite-sem-bundles.yaml`: two stitched backscatter SEM mosaics
-(11381×15406 and 7559×41693 uint16 TIFF) with `Case2Vf.mat` and `Case1Vf.mat`, whose logical variables
-`BW1..BWn` mark the fibre bundle regions on the mosaic's grid; the binding reads them as one binary mask per
-image. Checked on this data: every variable has its mosaic's shape, and the row/column order is fixed by the
-file's own `BW`, which the scripts compute as a threshold of the image (`BW = I>th`, `I = uint8(O/256)`): over
-300 full rows of Case 2 (4.6 million pixels) `BW` read through this snippet equals `TIFF // 256 > 53` at every
-pixel, while the same mask flipped or transposed agrees on about half. `BW1` and `BW6` of Case 1 overlap, so
-`ids` refuses that file and the binding uses the union. The example binding's `snippets_commit` is the commit before this snippet's own (a binding
-can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet.
+`examples/zenodo-4064835-glass-fibre-composite-sem-bundles.yaml`: the Case 2 stitched backscatter SEM mosaic
+(11381×15406 uint16 TIFF) with `Case2Vf.mat`, whose logical variables `BW1` and `BW2` mark the fibre bundle
+regions on the mosaic's grid; the binding reads them as one binary mask. Checked on this data: every variable
+has the mosaic's shape, and the row/column order is fixed by the file's own `BW`, which the script computes as
+a threshold of the image (`BW = I>th`, `I = uint8(O/256)`): over 300 full rows of Case 2 (4.6 million pixels)
+`BW` read through this snippet equals `TIFF // 256 > 53` at every pixel, while the same mask flipped or
+transposed agrees on about half. The example binding's `snippets_commit` is the commit before this snippet's
+own (a binding can't name the commit that adds it); a binding written by the worker names a commit that
+contains the snippet.
+
+**Case 1 of the same record is left out of the binding, for the host's request limit only.** The snippet reads
+`Case1Vf.mat` as well: `BW1..BW8` are 7559×41693, the shape of the Case 1 mosaic, their union has 46,631,147
+pixels set, and `BW1` and `BW6` overlap, so `ids` refuses that file. But its raw is an 809.6 MB LZW TIFF that
+`tiff-zip-member-2` reads whole in 8 MiB ranges, about 100 requests, and a job that reads both pairs makes about 155 where
+zenodo.org allows 133 a minute: the crop job on the binding with both was refused with 429 on that TIFF. The
+binding with Case 2 alone makes 49 (counted on a crop job of 8 crops). Once the harness waits out a 429 (the response says `retry-after: 60`), or
+a TIFF snippet reads strips by row range, Case 1 is these two entries:
+
+```yaml
+raw:
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/api/records/4064835/files/Case1-Panorama%20-%20correlation%20matching.tif/content"]
+    params: {}
+labels:
+  - snippet: mat5-variable
+    urls: ["https://zenodo.org/api/records/4064835/files/Case1Vf.mat/content"]
+    params: {variable: "BW1,BW2,BW3,BW4,BW5,BW6,BW7,BW8"}
+    pairs_with: 1          # the index of the Case 1 raw
+    label_key: manual_gt-fibre_bundle-semantic
+    segmentation_type: binary
+```

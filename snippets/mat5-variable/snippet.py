@@ -4,6 +4,10 @@ several same-sized variables combined into one uint8 mask (`union`) or id map (`
 The file is a 128-byte header and one data element per variable; -v7 files wrap each in a zlib stream. Opening
 reads the element tags and the first bytes of each variable's header (class, dims, name). The first `read`
 inflates the named variables whole: a zlib stream has no random access.
+
+Requests are kept few, because a host may allow only so many a minute (Zenodo: 133, and it answers the next
+one 429): the stretch of the file the named variables are expected to fill is asked for at once, and a long
+variable is read in long pieces, which `io` splits into a few ranges of 8 MiB.
 """
 import struct
 import zlib
@@ -23,7 +27,9 @@ MX_CLASSES = {6: "f8", 7: "f4", 8: "i1", 9: "u1", 10: "i2", 11: "u2", 12: "i4", 
 MX_NAMES = {1: "cell", 2: "struct", 3: "object", 4: "char", 5: "sparse", 16: "function", 17: "opaque"}
 FLAG_COMPLEX, FLAG_LOGICAL = 0x08, 0x02
 HEAD = 512              # inflated bytes that hold a variable's flags, dims, name and data tag
-PIECE = 1 << 20         # compressed bytes per read, and columns' worth of work per step when combining
+PIECE = 1 << 20         # inflated bytes per step (x4), and columns' worth of work per step when combining
+AHEAD = 8 << 20         # most bytes asked for ahead of the walk through the variables: one request of io's
+GULP = 32 << 20         # compressed bytes per read of a variable: io asks for them as 4 ranges of 8 MiB at once
 COMBINE = ("union", "ids")
 
 
@@ -116,7 +122,7 @@ def _stream(fh: BinaryIO, var: _Var) -> Iterator[bytes]:
     fh.seek(var.offset + 8 if var.compressed else var.offset)
     inflate = zlib.decompressobj() if var.compressed else None
     while left > 0:
-        chunk = fh.read(min(left, PIECE))
+        chunk = fh.read(min(left, GULP))    # not 1 MiB at a time: that is one request per MiB, one by one
         if not chunk:
             raise ValueError(f"variable {var.name!r} is cut off: the file ends {left} bytes early")
         left -= len(chunk)
@@ -207,8 +213,14 @@ def open_array(src: Source, io: IO) -> Array:
         seen.append(var.name)
         if var.name in names:
             found[var.name] = var
-            if len(found) == len(names):
+            left = len(names) - len(found)
+            if not left:
                 break
+            # The names still looked for are most often the next elements, about as long as this one (BW1, BW2,
+            # ... of one size). Without this, each of their headers is a request of its own; with it the stretch
+            # they would fill, which the first read needs anyway, is one request (the bytes land in io's cache).
+            fh.seek(var.offset)
+            fh.read(min((8 + var.nbytes) * (left + 1) + 4 * HEAD, AHEAD))
     missing = [n for n in names if n not in found]
     if missing:
         raise KeyError(f"no variable {missing} in the file; variables: {seen}")
