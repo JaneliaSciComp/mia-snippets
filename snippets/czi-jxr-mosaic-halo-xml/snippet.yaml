@@ -1,0 +1,10 @@
+name: czi-jxr-mosaic-halo-xml
+spec_version: 1
+summary: One tiled Zeiss CZI mosaic (one scene, one z, one time; Gray8/Gray16/Gray32Float tiles, JPEG XR, uncompressed or zstd) at a plain URL, stitched as cyx by placing each full-resolution tile where the file says, read tile by tile by byte range with its own ZISRAW parser; or, with a HALO .annotations XML url beside the CZI, the polygons of the named annotation layers (NegativeROA regions as holes) filled onto that mosaic's grid as yx uint8 semantic ids.
+formats: [czi, other]
+containers: [http, s3]
+params:
+  layers: {type: list, required: false, doc: "label form only, and required there. The HALO annotation layer names (Annotation/@Name) to fill, e.g. [Stroma, Tumour]: the first is id 1, the second id 2, and so on; a layer not listed is not in the label. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [s-biad1237-lung-adenocarcinoma-mif-wsi]
+supersedes: null
