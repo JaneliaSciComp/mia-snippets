@@ -2,941 +2,941 @@ record: empiar-10017-beta-galactosidase-particle-coordinates
 record_commit: 9fa0b1b286a46aa3b28a8eef1e86f75eab101c87
 snippets_commit: db126cbac2759c1c1ff1a605229c7523bd800546
 raw:
-  - snippet: mrc-http-3
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-14_33_35_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-14_57_34_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_07_41_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_14_01_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_17_31_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_27_22_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_30_21_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_33_42_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_36_26_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_41_22_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_43_48_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_46_37_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_53_09_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_26_22_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_44_07_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_48_06_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_51_03_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_55_40_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_59_12_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_02_43_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_14_17_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_17_05_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_23_32_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_26_54_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_34_38_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_37_29_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_40_47_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_46_08_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_49_17_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_07_45_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_10_19_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_13_12_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_21_21_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_07_37_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_16_58_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_21_25_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-23_58_14_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_13_13_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_19_28_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_24_19_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_32_38_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_45_25_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_54_11_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_59_38_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_05_13_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_10_55_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_16_43_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_22_31_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_33_04_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_35_58_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_39_04_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_45_42_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_49_10_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_56_06_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_58_43_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_01_38_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_21_05_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_30_25_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_33_08_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_36_13_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_39_18_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_42_04_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_47_14_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_50_10_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_52_54_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_55_34_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_58_06_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_01_23_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_06_44_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_14_23_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_17_02_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_19_23_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_22_02_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_24_53_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_27_39_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_07_00_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_23_00_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_36_20_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_45_47_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_58_22_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_12_03_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_16_22_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_20_02_0.mrc"]
-    params: {}
-  - snippet: mrc-http-3
+    params: {rows: [96, 4009], columns: [68, 3988]}
+  - snippet: mrc-unpadded-xy-points
     urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_27_05_0.mrc"]
-    params: {}
+    params: {rows: [96, 4009], columns: [68, 3988]}
 labels:
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-14_33_35_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-14_33_35_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 0
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-14_57_34_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-14_57_34_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 1
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_07_41_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_07_41_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 2
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_14_01_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_14_01_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 3
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_17_31_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_17_31_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 4
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_27_22_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_27_22_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 5
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_30_21_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_30_21_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 6
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_33_42_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_33_42_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 7
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_36_26_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_36_26_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 8
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_41_22_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_41_22_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 9
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_43_48_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_43_48_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 10
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_46_37_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_46_37_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 11
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_53_09_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-15_53_09_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 12
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_26_22_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_26_22_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 13
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_44_07_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_44_07_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 14
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_48_06_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_48_06_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 15
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_51_03_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_51_03_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 16
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_55_40_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_55_40_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 17
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_59_12_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-16_59_12_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 18
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_02_43_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_02_43_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 19
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_14_17_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_14_17_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 20
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_17_05_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_17_05_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 21
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_23_32_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_23_32_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 22
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_26_54_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_26_54_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 23
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_34_38_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_34_38_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 24
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_37_29_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_37_29_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 25
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_40_47_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_40_47_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 26
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_46_08_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_46_08_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 27
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_49_17_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-17_49_17_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 28
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_07_45_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_07_45_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 29
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_10_19_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_10_19_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 30
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_13_12_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_13_12_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 31
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_21_21_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-18_21_21_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 32
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_07_37_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_07_37_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 33
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_16_58_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_16_58_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 34
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_21_25_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-19_21_25_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 35
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-23_58_14_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_12-23_58_14_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 36
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_13_13_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_13_13_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 37
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_19_28_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_19_28_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 38
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_24_19_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_24_19_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 39
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_32_38_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_32_38_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 40
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_45_25_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_45_25_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 41
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_54_11_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_54_11_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 42
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_59_38_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-00_59_38_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 43
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_05_13_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_05_13_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 44
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_10_55_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_10_55_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 45
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_16_43_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_16_43_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 46
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_22_31_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_22_31_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 47
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_33_04_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_33_04_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 48
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_35_58_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_35_58_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 49
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_39_04_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_39_04_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 50
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_45_42_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_45_42_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 51
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_49_10_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_49_10_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 52
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_56_06_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_56_06_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 53
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_58_43_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-01_58_43_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 54
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_01_38_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_01_38_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 55
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_21_05_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_21_05_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 56
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_30_25_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_30_25_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 57
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_33_08_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_33_08_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 58
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_36_13_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_36_13_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 59
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_39_18_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_39_18_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 60
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_42_04_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_42_04_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 61
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_47_14_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_47_14_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 62
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_50_10_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_50_10_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 63
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_52_54_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_52_54_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 64
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_55_34_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_55_34_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 65
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_58_06_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-02_58_06_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 66
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_01_23_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_01_23_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 67
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_06_44_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_06_44_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 68
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_14_23_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_14_23_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 69
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_17_02_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_17_02_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 70
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_19_23_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_19_23_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 71
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_22_02_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_22_02_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 72
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_24_53_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_24_53_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 73
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_27_39_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-03_27_39_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 74
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_07_00_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_07_00_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 75
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_23_00_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_23_00_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 76
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_36_20_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_36_20_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 77
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_45_47_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_45_47_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 78
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_58_22_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-09_58_22_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 79
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_12_03_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_12_03_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 80
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_16_22_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_16_22_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 81
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_20_02_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_20_02_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 82
     label_key: manual_gt-particle-points
     segmentation_type: instance
-  - snippet: xy-points-mrc-grid
+  - snippet: mrc-unpadded-xy-points
     urls:
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_27_05_0.coord"
       - "https://ftp.ebi.ac.uk/empiar/world_availability/10017/data/Falcon_2012_06_13-10_27_05_0.mrc"
-    params: {radius: 12}
+    params: {rows: [96, 4009], columns: [68, 3988], radius: 12}
     pairs_with: 83
     label_key: manual_gt-particle-points
     segmentation_type: instance
 reasons:
-  - "raw: 84 micrographs, one MRC file each (harness describe of the first: mode 2 float32, 4096x4096x1, axis order 1 2 3), bound as one array per file because mrc-http-3 takes exactly one URL per array; file list from harness list of the record download_url with ::*.mrc (84 matches, the record's n_items)"
-  - "mrc-http-3 presents each file as zyx with z = 1; the record gives yx 4096x4096"
-  - "no mode0 param: the files are mode 2, not mode 0"
-  - "voxel size is not in the file (MRC cell is 0 0 0); the record gives 0.177 nm in x and y. The labels report none either (a points table states none)"
-  - "raw: the border of every micrograph is replicated edge pixels, and that is what the files hold, not something the reader adds. In all 84 files rows 0..95 are copies of row 96, rows 4010..4095 copies of row 4009, columns 0..67 copies of column 68 and columns 3989..4095 copies of column 3988: the image proper is rows 96..4009 by columns 68..3988 (3914 x 3921), and 8.5% of each 4096x4096 file is this margin, the same in every file. Measured on the first and last 192 rows of each file fetched with plain HTTP range requests (curl, no harness, no snippet); for Falcon_2012_06_12-14_33_35_0 mrc-http-3 returns those rows bit for bit. A crop that reaches the margin shows the image stop and its last row or column repeat to the edge of the file (what review saw in crop 003 of batch 0 of round i27657350-e1794882943220, the data stopping two thirds of the way down, is what a 256-pixel crop starting near row 3838 shows; that crop's box was not available here to confirm). mrc-http-3 returns the file as it is; a snippet never crops (SPEC), so the margin stays in the raw"
-  - "labels against that margin: 40862 of the 40863 picks are inside the image proper; one (x 1407, y 4011, row 271 of Falcon_2012_06_12-15_46_37_0.coord) is two rows into the bottom margin. Discs of picks near the border reach into the margin"
-  - "labels with xy-points-mrc-grid: each micrograph has a same-stem .coord, a headerless whitespace-separated X Y text table (record encoding points-table, alignment same-grid). All 84 were read: 40863 rows (153 to 782 per file), every line two non-negative integers, x 93..3963 and y 120..4011, so every point is inside the 4096x4096 grid. One label per micrograph, pairs_with the raw of the same stem (raw and label lists are in the same sorted order)"
-  - "two urls per label, [table, same-stem MRC]: the table does not state the image size, so the snippet takes the grid (z 1, y 4096, x 4096, as mrc-http-3 presents the raw) from the MRC's header; 1024 bytes of it are read, no pixels"
-  - "X is the column and Y the row counted from the first row of the MRC data, as mrc-http-3 returns it (no flip). Checked on Falcon_2012_06_12-14_33_35_0: the micrograph's 32-pixel block means at the 632 points are 1.29 standard deviations below the image mean with row = y, col = x, and within 0.1 of zero (random positions: 0.007 +/- 0.033) with y flipped, x flipped, both flipped or x and y swapped; the average of the 632 windows around the points is a dark particle about 60 pixels across with a bright fringe, centred on the point within a few pixels in x and y. Checked on that one micrograph only"
+  - "raw: 84 micrographs, one MRC file each (harness describe of the first: mode 2 float32, 4096x4096x1, axis order 1 2 3), one array per file; file list from harness list of the record download_url with ::*.mrc (84 matches, the record's n_items)"
+  - "raw with mrc-unpadded-xy-points and rows [96, 4009], columns [68, 3988], not mrc-http-3: the files are 4096x4096 but the micrograph in each is 3914x3921, file rows 96..4009 by columns 68..3988. Rows 0..95 repeat row 96, rows 4010..4095 repeat row 4009, columns 0..67 repeat column 68 and columns 3989..4095 repeat column 3988, bit for bit: 8.5% of every file is this replicated-edge padding. mrc-http-3 returns the file as it is, so its array included the padding, and review twice rejected crops that reached it (round i27657350-e1794882943220 crop 003; round i27657350-e1794942169353 crops 000 and 008: a band of one repeated edge row or column). The reader had returned every pixel of its stated extent and no crop ran past it; the stated extent was larger than the image. With rows and columns the array is the micrograph only, [1, 3914, 3921], and a crop cannot reach the padding"
+  - "how rows and columns were measured: two whole files (Falcon_2012_06_12-14_33_35_0 and Falcon_2012_06_13-10_27_05_0, the first and the last, fetched with curl): walking in from each side, the first row or column that differs from its neighbour is row 96, row 4009, column 68, column 3988 in both, the corner blocks are one constant, and inside those bounds no two adjacent rows or columns are equal. All 84 files, by plain range requests for file rows 95..97 and 4008..4010: in every one row 95 = row 96 != row 97, row 4010 = row 4009 != row 4008, columns 0..67 = column 68 != column 69 and columns 3989..4095 = column 3988 != column 3987. The snippet repeats the column check on every row it reads and the row check on every read that touches the image's first or last row, and raises if a left-out pixel is not such a copy, so these params cannot cut image away"
+  - "record against the binding: the record gives yx 4096x4096, the size of the file; the arrays are zyx [1, 3914, 3921], the micrograph without its padding, z = 1. Array pixel [0, y, x] is file pixel [y + 96, x + 68]"
+  - "values as stored: float32, mode 2, unnormalised summed counts (record). Voxel size is not in the file (MRC cell is 0 0 0), so the arrays report none; the record gives 0.177 nm in x and y"
+  - "labels with the same snippet: each micrograph has a same-stem .coord, a headerless whitespace-separated X Y text table (record encoding points-table, alignment same-grid). All 84 were read: 40863 rows (153 to 782 per file), every line two non-negative integers, x 93..3963 and y 120..4011, all inside the 4096x4096 file. One label per micrograph, pairs_with the raw of the same stem (raw and label lists are in the same sorted order)"
+  - "two urls per label, [table, same-stem MRC], and the raw's rows and columns: the table does not state the image size, so the snippet takes the file's grid from the MRC header (1024 bytes, no pixels) and, with the same rows and columns as the raw, presents the points on the raw's grid: a point X Y marks label[0, Y - 96, X - 68]"
+  - "picks against the padding: 40862 of the 40863 picks are inside the micrograph, the closest 24 pixels from its edge, so every one of their radius-12 discs is whole. One pick (x 1407, y 4011, line 271 of Falcon_2012_06_12-15_46_37_0.coord) is in the bottom padding, two rows below the micrograph's last row; it is kept, and the upper part of its disc (id 271) is in the label's last rows. A human may prefer to drop it"
+  - "X is the column and Y the row counted from the first row of the MRC data, no flip. Checked on Falcon_2012_06_12-14_33_35_0: the micrograph's 32-pixel block means at the 632 points are 1.29 standard deviations below the image mean with row = y, col = x, and within 0.1 of zero (random positions: 0.007 +/- 0.033) with y flipped, x flipped, both flipped or x and y swapped; the average of the 632 windows around the points is a dark particle about 60 pixels across with a bright fringe, centred on the point within a few pixels in x and y. Checked on that one micrograph only, on the whole file before the padding was left out; the offset moves raw and points together"
   - "coordinates taken as 0-based pixel indices; the files do not decide 0- against 1-based: every value in all 84 files is a multiple of 3 (picked on a 3x-binned display, it seems), no value is 0 or 4096, and one pixel is far below that precision"
   - "segmentation_type instance: a point is one particle, and its id is its 1-based row number in its .coord file, so ids are unique within a micrograph, not across micrographs. SPEC has no type for points; instance keeps particles apart where binary would merge them (the snippet's values also encode as binary if a human prefers a {0,1} marker mask)"
   - "label_key manual_gt-particle-points by the label-key rule: provenance manual (the record's 'manually selected coordinates by Richard Henderson'), class particle, encoding points-table"
