@@ -1,0 +1,53 @@
+record: zenodo-7419283-pnn-pv-mouse-brain-atlas
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/hiRes/AL1A_002_A1_1-C1.tif"]
+    params: {}
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/hiRes/AL1A_002_A1_1-C2.tif"]
+    params: {}
+labels:
+  - snippet: png-mask-csv-points-tiff-grid
+    urls:
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/counts/AL1A_002_A1_1-cells_C1.csv"
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/hiRes/AL1A_002_A1_1-C1.tif"
+    params: {}
+    pairs_with: 0
+    label_key: auto_pred-perineuronal_net-instance
+    segmentation_type: instance
+  - snippet: png-mask-csv-points-tiff-grid
+    urls:
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/masks/AL1A_002_A1_1-mask.png"
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/hiRes/AL1A_002_A1_1-C1.tif"
+    params: {label_factor: 5}
+    pairs_with: 0
+    label_key: auto_pred-tissue-semantic
+    segmentation_type: binary
+  - snippet: png-mask-csv-points-tiff-grid
+    urls:
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/counts/AL1A_002_A1_1-cells_C2.csv"
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/hiRes/AL1A_002_A1_1-C2.tif"
+    params: {}
+    pairs_with: 1
+    label_key: auto_pred-parvalbumin_cell-instance
+    segmentation_type: instance
+  - snippet: png-mask-csv-points-tiff-grid
+    urls:
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/masks/AL1A_002_A1_1-mask.png"
+      - "https://zenodo.org/api/records/7419283/files/rawData.zip/content::AL1A/hiRes/AL1A_002_A1_1-C2.tif"
+    params: {label_factor: 5}
+    pairs_with: 1
+    label_key: auto_pred-tissue-semantic
+    segmentation_type: binary
+reasons:
+  - "only the record's sample slice AL1A_002_A1_1 is bound, as in the draft: the zip holds 421 slices, each a separate yx image of its own shape, one TIFF per channel, and Zenodo answers 429 after a handful of reads of the 48.7 GB zip (it did again while this binding was tested)"
+  - "raws: tiff-zip-member-2 with no params, unchanged from the draft: C1 = WFA (perineuronal nets), C2 = parvalbumin, both YX 6669x7641 uint8"
+  - "png-mask-csv-points-tiff-grid for all four labels instead of the draft's image-tiles-glob: no catalog snippet reads a points table, and both PNG readers refuse a 1-bit PNG. Each label's urls are the label file and the TIFF it annotates; the snippet reads the TIFF's header for the grid (6669x7641) and returns the label on it"
+  - "labels 0 and 2, the point tables (not bound in the draft): <slice>-cells_C1.csv pairs with raw 0 and <slice>-cells_C2.csv with raw 1 (record: the table of channel k holds the objects of <slice>-C<k>.tif, x,y in hiRes pixels). No params: the pixel holding a point (row floor(y), column floor(x)) takes the point's 1-based row number, everything else is 0. Checked on the files: 586 PNN and 568 PV points, no two in one pixel, all inside the image and inside the tissue mask; the raw's mean in a 9x9 window at the points is 58 (C1) and 132 (C2) against image means of 17 and 26, and 23-50 with x and y swapped or an axis flipped; rings drawn at the points on a full-resolution detail lie on the stained cells"
+  - "NEEDS A HUMAN DECISION, points as segmentation_type instance: the record's encoding is points-table, which has no segmentation_type. Bound as instance because every nonzero id is one object, but an object is ONE pixel, a position and not the outline of a net or a cell; a consumer must not take it for a mask. The harness can still place crops on these labels (it searches the plane for nonzero pixels)"
+  - "label keys auto_pred-perineuronal_net-instance and auto_pred-parvalbumin_cell-instance: class words from the record's classes (C1 perineuronal net (WFA), C2 parvalbumin cell). Source auto_pred follows the draft's reading of the record for this dataset (annotations.source automatic); the record block does not say how the counts were made, so a human should confirm it for the points"
+  - "labels 1 and 3, the tissue mask, label_factor 5: the 1-bit PNG is 1334x1529 and the TIFFs are 6669x7641, i.e. each axis divided by 5 and rounded up (record: 1/5 scale in both axes). The snippet returns the stored bits as 0 and 1 with each PNG pixel repeated 5x5 on the TIFF's grid (the last PNG row and column are cut to 4 and 1 raw pixels), nothing interpolated. Checked: the array equals the PNG's bits repeated 5x5; the raw's mean is 32.6 inside the mask and 0.35 outside (C1; 47.7 and 1.75 for C2); the mask's outline drawn over the 5x reduced raw follows the tissue edge. Where exactly the reduced grid sits on the full one is not documented; see the snippet's README"
+  - "the one mask file is bound twice, once per raw (labels 1 and 3), because C1 and C2 are two raws on one grid and a label pairs with one raw; label_key auto_pred-tissue-semantic and segmentation_type binary are the draft's"
+  - "no voxel size: none in the TIFF tags (72 dpi default), the CSVs or the PNG (record voxel_size_nm null)"
