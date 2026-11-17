@@ -38,6 +38,12 @@ read with `image-tiles-glob`.
   is staged whole with `io.fetch`, so the PNG header of a deflated member costs the whole PNG once, the same
   cache entry the raw array's read of that plane uses. `open_array` reads the first GeoJSON and its PNG's header
   only; the last painted plane is kept.
+- **429 Too Many Requests.** A read (`io.expand`, a GeoJSON, a PNG header) that the server answers with 429 is
+  asked again after the seconds its `Retry-After` header names plus one (30 s when it names none; at least 1 s,
+  at most 120 s), up to 3 times, and then the 429 is raised. The harness retries dropped connections and 5xx
+  only, and a host that counts requests per client address (Zenodo: 133 a minute when tested) counts all the
+  jobs behind one address together. Only this snippet's reads wait: a 429 on a read of the raw array's snippet
+  is still that job's error.
 
 ## Known limits
 

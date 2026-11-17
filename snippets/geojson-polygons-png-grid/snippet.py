@@ -8,9 +8,12 @@ so the inner rings of a polygon are holes); pixel (row r, column c) covers x in 
 QuPath. Without `classes` a feature is painted with its 1-based number in its file (instance ids); with `classes`
 it is painted with the 1-based index of its `properties.classification.name` in that list (semantic ids). 0 is
 background, and a file without features is an all-background plane. `open_array` reads the first file and its
-PNG's header; `read` gets the others, one GeoJSON (and one PNG header) per z plane.
+PNG's header; `read` gets the others, one GeoJSON (and one PNG header) per z plane. A request the server answers
+with 429 Too Many Requests is asked again after the wait the server names.
 """
 import json
+import time
+from typing import Callable, TypeVar
 
 import numpy as np
 
@@ -19,26 +22,56 @@ from mia_harness.api import IO, Array, NeedsFetch, Source
 SPEC_VERSION = 1
 
 PNG = b"\x89PNG\r\n\x1a\n"
+WAITS = 3                                   # times one read waits out a 429 before the 429 is raised
+WAIT_S = (1.0, 30.0, 120.0)                 # the shortest wait, the wait when the server names none, the longest
+T = TypeVar("T")
 Rings = list[np.ndarray]                    # the rings of one feature, each (n, 2) float64 as x, y
 Feature = tuple[int, str | None, Rings]     # 1-based number in the file, class name, rings
 
 
+def _patient(ask: Callable[[], T]) -> T:
+    """`ask()`, asked again when the server answers 429 Too Many Requests, after the seconds its Retry-After
+    header names. The harness retries dropped connections and 5xx but raises a 429 at once, and a host that counts
+    requests per client address (Zenodo: about 130 a minute) counts every job behind that address together, so a
+    job that asks for little can still be told to wait. Nothing was received or charged for a 429. Any other
+    error, and the 429 after WAITS waits, is raised as it came."""
+    for waits_left in range(WAITS, -1, -1):
+        try:
+            return ask()
+        except Exception as e:      # the harness's HTTP error is recognised by its response, not by its type:
+            response = getattr(e, "response", None)                     # a snippet imports no HTTP module
+            if not waits_left or getattr(response, "status_code", None) != 429:
+                raise
+            try:
+                wait = float(response.headers.get("retry-after"))       # seconds; a date or no header: WAIT_S[1]
+            except (AttributeError, TypeError, ValueError):
+                wait = WAIT_S[1]
+            time.sleep(min(max(wait, WAIT_S[0]), WAIT_S[2]) + 1.0)      # a second more: past the server's reset
+    raise AssertionError("unreachable")
+
+
 def _bytes(io: IO, url: str) -> bytes:
-    try:
-        with io.open(url) as f:
-            return f.read()
-    except NeedsFetch:          # a deflated member, or a server without Range: stage the whole file
-        return io.fetch(url).read_bytes()
+    def ask() -> bytes:
+        try:
+            with io.open(url) as f:
+                return f.read()
+        except NeedsFetch:      # a deflated member, or a server without Range: stage the whole file
+            return io.fetch(url).read_bytes()
+
+    return _patient(ask)
 
 
 def _png_size(io: IO, url: str) -> tuple[int, int]:
     """(height, width) from a PNG's IHDR, the first chunk: 33 bytes by range, or of the staged file."""
-    try:
-        with io.open(url) as f:
-            head = f.read(33)
-    except NeedsFetch:
-        with open(io.fetch(url), "rb") as f:
-            head = f.read(33)
+    def ask() -> bytes:
+        try:
+            with io.open(url) as f:
+                return f.read(33)
+        except NeedsFetch:
+            with open(io.fetch(url), "rb") as f:
+                return f.read(33)
+
+    head = _patient(ask)
     if len(head) < 24 or head[:8] != PNG or head[12:16] != b"IHDR":
         raise ValueError(f"{url}: not a PNG file: header={head[:8]!r}; the grid of a label plane is read from "
                          "the PNG header of its image")
@@ -186,7 +219,7 @@ class _Polygons:
 def _expand(urls: tuple[str, ...], io: IO) -> list[str]:
     """Each glob url (`<zip>::<glob>`, `<dir>/::<glob>`) becomes its matching files, sorted by name; other urls
     pass through. Binding order is kept across urls."""
-    out = [u for url in urls for u in io.expand(url)]
+    out = [u for url in urls for u in _patient(lambda: io.expand(url))]
     if len(set(out)) != len(out):
         raise ValueError("the urls (after glob expansion) name the same file twice")
     return out
