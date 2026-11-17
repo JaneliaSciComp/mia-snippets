@@ -1,0 +1,14 @@
+name: via-csv-boxes-png-grid
+spec_version: 1
+summary: A set of VIA (VGG Image Annotator) CSV box annotations, one CSV per image, rasterised on the grid of the one PNG in each CSV's own folder (not the image its filename column names), from zip members or an HTTP directory chosen by glob (or plain URLs), one CSV per z plane. The rect regions are painted by row number (instance) or by the class in a region attribute (semantic); a CSV without regions is an all-background plane. Reads the '#filename' header and unquoted attribute values some exports have.
+formats: [csv, other]
+containers: [zip, http]
+params:
+  boxes: {type: str, required: true, doc: "how the rect regions are painted on the yx grid. 'instance' fills each box with its 1-based row number among the file's regions (not region_id, which starts at 0 or 1 depending on the export); 'semantic' fills it with the 1-based index of its class in `classes`. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: true, doc: "every class string the files use, in class id order (semantic id = position, from 1). A region whose class is not listed raises, in both modes. From the record's classes; reason required in binding"}
+  class_key: {type: str, required: true, doc: "the key in region_attributes whose value is the region's class, e.g. particle_class. VIA attribute names are the annotator's own, so there is no default; a region without it raises. Reason required in binding"}
+  overhang: {type: int, required: false, doc: "how many pixels a box may reach beyond the image edge; such a box is clipped to the image. Default 0: a box that leaves the image raises, since it may be drawn on another grid. Set it to the largest overhang found in the files; reason required in binding"}
+  image_ext: {type: str, required: false, doc: "the extension, without the dot, of the one PNG in each CSV's folder that gives its grid (matched case-insensitively). Default png; reason required in binding"}
+requires: [numpy]
+tested_on: [zenodo-5149062-hiv1-virion-tem-detection]
+supersedes: null
