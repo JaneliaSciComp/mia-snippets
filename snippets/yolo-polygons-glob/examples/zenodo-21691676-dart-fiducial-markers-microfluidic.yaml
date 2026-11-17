@@ -1,0 +1,38 @@
+record: zenodo-21691676-dart-fiducial-markers-microfluidic
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: c21e8d4c672d093165cde5fcfabba89c8197342c
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://zenodo.org/records/21691676/files/dart_train_test_dataset.zip::dmc-dataset/*/images/*.png"]
+    params: {}
+labels:
+  - snippet: yolo-polygons-glob
+    urls: ["https://zenodo.org/records/21691676/files/dart_train_test_dataset.zip::dmc-dataset/*/labels_segment/*.txt"]
+    params:
+      images: ["https://zenodo.org/records/21691676/files/dart_train_test_dataset.zip::dmc-dataset/*/images/*.png"]
+      fill: instance
+      classes: [cross, circle]
+    pairs_with: 0
+    label_key: manual_gt-fiducial_marker-instance
+    segmentation_type: instance
+  - snippet: yolo-polygons-glob
+    urls: ["https://zenodo.org/records/21691676/files/dart_train_test_dataset.zip::dmc-dataset/*/labels_segment/*.txt"]
+    params:
+      images: ["https://zenodo.org/records/21691676/files/dart_train_test_dataset.zip::dmc-dataset/*/images/*.png"]
+      fill: class
+      classes: [cross, circle]
+    pairs_with: 0
+    label_key: manual_gt-fiducial_marker-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw: image-tiles-glob over the zip glob dmc-dataset/*/images/*.png (record path_pattern), unchanged from the draft; harness describe of one member says png, 2560x2160, 8-bit grey, so each file is one z plane (zyx) and the array is [319, 2160, 2560] uint8: the 80 test images, then the 239 train images, each sorted by name"
+  - "labels: yolo-polygons-glob instead of the draft's image-tiles-glob, which rejects text. The files under labels_segment/ are YOLO segmentation text (`class x1 y1 x2 y2 ...`, normalised), which no catalog snippet rasterised; this snippet fills each polygon on the grid of the file's image"
+  - "images param: the raw's own glob. A YOLO file does not state its image size, so each label plane takes its grid from the PNG header of the image at the same position. Both globs are sorted by name and the snippet checks that position k of each has the same file name (<uuid>.txt, <uuid>.png); all 319 pair (compared while testing), so label plane k annotates raw plane k"
+  - "fill instance (label 0): each line of a file is one marker, so its 1-based line number is the marker's id in that plane; ids restart in every plane. 286 files hold 2 to 4 polygons (942 in all) and 33 files are empty and read as background planes, as the record says"
+  - "fill class (label 1), added to the draft so the cross/circle distinction is not lost: values 1 = cross (YOLO id 0), 2 = circle (YOLO id 1). The record leaves the ids null; they are assigned here from the data: the 942 polygons are 472 of id 0 and 470 of id 1, the README's '472 cross + 470 circle annotations', and their shapes agree (polygon area / bounding box area is 0.42..0.67 for id 0, a plus shape, and 0.74..0.86 for id 1, a disc is 0.785). The record's classes should gain ids 0 (cross) and 1 (circle)"
+  - "classes [cross, circle]: the record's two class names in the YOLO id order found above; the snippet raises on any other class id (none occurs in the 319 files)"
+  - "pixel convention: every vertex in the 319 files is a whole pixel once multiplied by the image size (to the 6 decimals of the text), with one-pixel diagonal steps: the polygons are contours of boundary pixels traced from masks. The snippet therefore labels a pixel when it lies inside a polygon or on its outline, which gives the traced mask back; no two markers overlap"
+  - "label_key: annotations.source manual -> manual_gt (the draft's choice); class fiducial_marker from the record's description (fiducial markers: crosses and circles); one polygon per marker -> instance, the class map -> semantic"
+  - "labels_bbox/*.txt (YOLO boxes of the same markers) is not bound: the boxes say nothing the polygons do not: each of the 942 is the extent of its polygon's vertices (all compared while testing)"
+  - "smoke warns that the labels' dtype uint16 is not the record's float32: the record describes the text's normalised coordinates, the array holds the ids painted from them (at most 4 per plane here)"
+  - "voxel size: neither the PNGs nor the YOLO text carry one; the record's notes give 66 nm for the marker images, from the paper"
