@@ -1,0 +1,10 @@
+name: czi-mosaic-imagej-roi
+spec_version: 1
+summary: One tiled Zeiss CZI mosaic (one scene, one z, one time; Gray8/Gray16/Gray32Float tiles, uncompressed or zstd) at a plain URL, stitched as cyx by placing each full-resolution tile where the file says, read tile by tile by byte range with its own ZISRAW parser; or, with .roi urls beside the CZI, the ImageJ area ROIs (freehand, polygon, traced, rectangle, oval) filled onto that mosaic's grid as yx uint16 instance ids.
+formats: [czi, other]
+containers: [http, s3]
+params:
+  skip_lines: {type: bool, required: false, doc: "label form only. true: ROI files that are lines (straight line, polyline, freeline, angle, point), which enclose no pixels, are left out of the label; absent or false: such a file is an error. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [s-biad3159-llc-tumor-tcell-roi-confocal]
+supersedes: null
