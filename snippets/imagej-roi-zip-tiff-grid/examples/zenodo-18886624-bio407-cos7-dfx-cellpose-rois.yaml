@@ -1,0 +1,23 @@
+record: zenodo-18886624-bio407-cos7-dfx-cellpose-rois
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-member-2
+    urls:
+      - "https://zenodo.org/records/18886624/files/Upload%20to%20Zenodo.zip::Upload to Zenodo/Processed Images and Segmentation Masks/Processed Images/1_Control_P1.tif"
+    params: {}
+labels:
+  - snippet: imagej-roi-zip-tiff-grid
+    urls:
+      - "https://zenodo.org/records/18886624/files/Upload%20to%20Zenodo.zip::Upload to Zenodo/Processed Images and Segmentation Masks/Segmentation Masks/1_Control_P1_rois.zip"
+      - "https://zenodo.org/records/18886624/files/Upload%20to%20Zenodo.zip::Upload to Zenodo/Processed Images and Segmentation Masks/Processed Images/1_Control_P1.tif"
+    params: {vertices: pixels}
+    pairs_with: 0
+    label_key: auto_pred-cell-instance
+    segmentation_type: instance
+reasons:
+  - "urls: the record's technical.sample pair 1_Control_P1.tif and 1_Control_P1_rois.zip; the other 53 pairs have the same layout by the zip listing (name.tif pairs with name_rois.zip, as the record's ROI-measurement macro opens them) and would be bound the same way. They were not read here, so they are not claimed"
+  - "raw with tiff-zip-member-2, no params: ImageJ hyperstack cyx 3x2048x2048 uint16 per the record; the member is deflated, so it is fetched whole"
+  - "label with imagej-roi-zip-tiff-grid: the ROI zip is a member of the record's zip (a zip nested in a zip) holding 94 .roi files, all type 7 freehand with integer coordinates. The label urls name the raw TIFF again because an .roi holds coordinates only: the snippet reads the TIFF's header for the 2048x2048 grid and its 162.38 nm pixel size, and none of its pixels"
+  - "vertices: pixels, not ImageJ's default: the outlines are Cellpose's (--save_rois), which writes the boundary pixels of each mask as the vertices. In all 94 ROIs every vertex is one pixel step (straight or diagonal) from the next and the header's right/bottom are the largest x/y, not one past them. Filled as 'pixels' the 94 cells cover 3,815,395 px, no pixel is in two cells and touching cells abut (about 100 one-pixel gaps between cells in the whole field); filled as ImageJ 'corners' each cell loses its bottom and right boundary pixels (3,780,759 px) and about 31,600 one-pixel gaps open between touching cells"
+  - "label_key auto_pred-cell-instance, segmentation_type instance: annotations are automatic (Cellpose v3), class cell from the record's classes, one ROI per cell; the id is the ROI's 1-based position in the ROI zip's directory (1..94), the order ImageJ's ROI Manager lists them in"

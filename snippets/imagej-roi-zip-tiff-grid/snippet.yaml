@@ -1,0 +1,10 @@
+name: imagej-roi-zip-tiff-grid
+spec_version: 1
+summary: One ImageJ ROI zip (a RoiSet of polygon, freehand or traced outlines, one .roi per object, as the ROI Manager and Cellpose's --save_rois write it; a plain URL or a zip member, so also a zip nested in a zip) filled onto the yx grid of the TIFF it was drawn on, as yx instance ids in the zip's ROI order. The TIFF gives only the shape and voxel size. `vertices` says whether outline coordinates are pixel corners (ImageJ) or the outline's own pixels (Cellpose).
+formats: [other, tiff]
+containers: [zip, http]
+params:
+  vertices: {type: str, required: false, doc: "what an outline coordinate is. 'corners' (default): ImageJ's convention, an integer coordinate is a pixel corner and a pixel belongs to the ROI when the outline encloses its centre. 'pixels': an integer coordinate is the pixel of that index, as Cellpose writes the boundary pixels of a mask; a pixel belongs to the ROI when the outline passes through it or encloses it. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-18886624-bio407-cos7-dfx-cellpose-rois]
+supersedes: null
