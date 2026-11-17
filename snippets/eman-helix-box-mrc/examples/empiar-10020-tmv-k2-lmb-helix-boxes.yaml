@@ -1,0 +1,141 @@
+record: empiar-10020-tmv-k2-lmb-helix-boxes
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_02_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_03_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_04_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_05_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_06_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_07_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_08_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_09_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_10_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_11_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_12_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_13_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_14_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_15_stack.mrc"]
+    params: {}
+labels:
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_02.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_02_stack.mrc"]
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_03.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_03_stack.mrc"]
+    params: {}
+    pairs_with: 1
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_04.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_04_stack.mrc"]
+    params: {}
+    pairs_with: 2
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_05.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_05_stack.mrc"]
+    params: {}
+    pairs_with: 3
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_06.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_06_stack.mrc"]
+    params: {}
+    pairs_with: 4
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_07.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_07_stack.mrc"]
+    params: {}
+    pairs_with: 5
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_08.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_08_stack.mrc"]
+    params: {}
+    pairs_with: 6
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_09.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_09_stack.mrc"]
+    params: {}
+    pairs_with: 7
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_10.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_10_stack.mrc"]
+    params: {}
+    pairs_with: 8
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_11.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_11_stack.mrc"]
+    params: {}
+    pairs_with: 9
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_12.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_12_stack.mrc"]
+    params: {}
+    pairs_with: 10
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_13.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_13_stack.mrc"]
+    params: {}
+    pairs_with: 11
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_14.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_14_stack.mrc"]
+    params: {}
+    pairs_with: 12
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_15.box", "https://ftp.ebi.ac.uk/empiar/world_availability/10020/data/K2_15_stack.mrc"]
+    params: {}
+    pairs_with: 13
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+reasons:
+  - "raw, as in the draft: the 14 *_stack.mrc files under the record's download_url, one mrc-http-3 array each (it takes one URL per array), no params; each opens as zyx 22x3750x3645 float32, the record's shape and dtype"
+  - "z is the movie's frame axis: the record says axes tyx (22 dose-fractionated frames per micrograph), bindings have no t, and mrc-http-3 presents an MRC's first axis as z. So a crop is one frame of one movie, not the frame sum the helices were picked on; a single K2 frame is very noisy. NEEDS A HUMAN DECISION whether single frames are wanted from this record (no snippet sums or aligns frames, and a reader must not)"
+  - "labels with eman-helix-box-mrc, one per stack, paired by stem as the record says (K2_NN.box with K2_NN_stack.mrc): urls are the .box file and the same stack again, because a .box file states no image size and the snippet reads that MRC's 1024-byte header for the grid. The label is zyx 22x3750x3645 like its raw, with the same plane on every frame: the 2D picks apply to all 22 frames of the movie, which is how this binding settles the pairing the match agent left open"
+  - "what the files hold (all 14 read): 75 helices, 1 to 9 per file, every box 260x260 px, rows strictly alternating -1 (start) / -2 (end). (x, y) is the box corner, so the axis end point is (x + 130, y + 130): all 150 end points lie on the 3645x3750 grid, although some corners do not (y = -3, -51, -55 in K2_02.box). Each helix is filled as the 260 px wide band between its two end points; the filled area of each matches length x 260 except where bands overlap or leave the grid, and no helix is hidden"
+  - "coordinate frame: box x is the column and y the row of the MRC as stored, nothing flipped (EMAN's y = 0 is the file's first row, which mrc-http-3 returns as row 0). Checked on K2_02, mean of frames 0, 7, 14, 21 on four 32-row strips (rows 400, 1000, 2600, 3300): where a boxed helix crosses a strip, the 100 px along its axis are darker than the flanks 150 to 250 px away in 7 of 7 crossings (-0.04 to -0.17 counts, mean -0.082 on an image mean of 6.9, protein darker than ice). With y flipped the same measure has mixed signs (mean +0.001 over 7 crossings) and with x and y exchanged it is positive (2 crossings). The contrast is weak (about 1 %, a few frames of a low-dose movie), so this supports the direct reading but a look at an overlay on the frame sum would settle it; only K2_02 was measured"
+  - "label_key manual_gt-virus-instance, segmentation_type instance: the record's title says 'manually boxed helix coordinates' -> manual_gt; the record gives no class (classes: null) and the boxes mark tobacco mosaic virus rods -> virus, my choice of class word, a human should confirm it (tobacco_mosaic_virus or helical_filament are the alternatives); each helix is filled with its own number (1-based order in the file) -> instance. The record's encoding is boxes-table, which has no kind in the label-key rule: the label is a filled, rotated box per helix, 260 px (29.3 nm) wide around an 18 nm virus, not a pixel-accurate outline, and a consumer must not take it for one"
+  - "coverage is partial: only the stretches the depositor chose for helical processing are boxed, so 0 is 'not boxed', not 'background'"
+  - "smoke warns that the label dtype uint16 is not the record's 'unknown': the record describes the text table, the snippet returns ids"
+  - "voxel size: both snippets report 0.1 nm from the MRC header's cell, which the record's notes call the unset default (1 A/px); the record keeps EMPIAR's 0.1126 nm. The readers report what the file says"
