@@ -9,9 +9,13 @@ Three forms, told apart by the urls and params of the binding entry:
 
 A PNG is one deflate stream, so every file is read and decoded whole (`access: file`). `open_array` reads PNG
 headers only (signature + IHDR); the GeoJSON is read and rasterised on the first `read`.
+
+A host that answers 429 TOO MANY REQUESTS is asked again after the wait its Retry-After header names.
 """
 import json
 import struct
+import time
+from typing import Callable, TypeVar
 
 import imagecodecs
 import numpy as np
@@ -26,6 +30,9 @@ SAMPLES = {0: 1, 2: 3, 4: 2, 6: 4}      # IHDR colour type -> samples per pixel 
 DTYPES = {8: np.dtype("uint8"), 16: np.dtype("uint16")}     # IHDR bit depth -> dtype, stored values unchanged
 GEOJSON = (".json", ".geojson")
 MAX_IDS = 65535
+ATTEMPTS = 6                # tries of one step (a glob expansion, a header, a file) while the host answers 429
+WAIT, MAX_WAIT = 30, 90     # seconds before try k + 1 when the answer names no wait (k * WAIT), and at most
+T = TypeVar("T")
 
 
 class _Png:
@@ -92,14 +99,48 @@ class _Polygons:
         return self._mask[region.get("y", slice(None)), region.get("x", slice(None))]
 
 
+def _throttled(e: Exception, tries: int) -> float | None:
+    """Seconds to wait after try number `tries` failed with `e`, when `e` is the HTTP client's error for a 429
+    TOO MANY REQUESTS answer (told by class name, since a snippet may not import the client): the answer's
+    Retry-After in seconds plus one, or `tries` * WAIT when it has none or an HTTP date; MAX_WAIT at most. None
+    for every other error."""
+    response = getattr(e, "response", None)
+    if "HTTPStatusError" not in {c.__name__ for c in type(e).__mro__} or getattr(response, "status_code", 0) != 429:
+        return None
+    try:
+        after = float(response.headers.get("retry-after")) + 1
+    except (AttributeError, TypeError, ValueError):
+        after = tries * WAIT
+    return min(max(after, 1), MAX_WAIT)
+
+
+def _patient(step: Callable[[], T]) -> T:
+    """`step()`, tried up to ATTEMPTS times while the host answers 429: the harness retries dropped connections
+    and 5xx answers itself but takes a 429 as final, and a rate limit counted per address is used up by other
+    jobs too. What an earlier try fetched (cached blocks, a zip's directory, staged members) is not asked for
+    again. Any other error is raised at once."""
+    for attempt in range(ATTEMPTS):
+        try:
+            return step()
+        except Exception as e:      # BudgetExceeded, HostNotAllowed, a 404, ValueError: _throttled is None
+            wait = _throttled(e, attempt + 1)
+            if wait is None or attempt == ATTEMPTS - 1:
+                raise
+            time.sleep(wait)
+    raise AssertionError("unreachable")
+
+
 def _data(io: IO, url: str, n: int = -1) -> bytes:
     """The first `n` bytes of the file, or all of it: by range when the server allows, else staged whole."""
-    try:
-        with io.open(url) as fh:
-            return fh.read(n)
-    except NeedsFetch:      # a deflated zip member, or a server without Range / Content-Length
-        data = io.fetch(url).read_bytes()
-        return data if n < 0 else data[:n]
+    def get() -> bytes:
+        try:
+            with io.open(url) as fh:
+                return fh.read(n)
+        except NeedsFetch:      # a deflated zip member, or a server without Range / Content-Length
+            data = io.fetch(url).read_bytes()
+            return data if n < 0 else data[:n]
+
+    return _patient(get)
 
 
 def _header(data: bytes, url: str) -> tuple[tuple[int, int], np.dtype, int]:
@@ -185,7 +226,7 @@ def open_array(src: Source, io: IO) -> Array:
         raise ValueError(f"params.sample must be an integer sample index, got {sample!r}")
     if y_up is not None and not isinstance(y_up, bool):
         raise ValueError(f"params.y_up must be true or false, got {y_up!r}")
-    urls = [u for url in src.urls for u in io.expand(url)]
+    urls = [u for url in src.urls for u in _patient(lambda url=url: io.expand(url))]
     if len(set(urls)) != len(urls):
         raise ValueError("the urls (after glob expansion) name the same file twice")
     documents = [u for u in urls if _is_geojson(u)]

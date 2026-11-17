@@ -1,6 +1,6 @@
 name: png-field-sample-geojson
 spec_version: 1
-summary: One field of view stored as PNG files plus a GeoJSON annotation, at plain URLs or as zip members; grey 8/16-bit PNGs, one per channel, as cyx (one url is yx); or one sample plane of an RGB/RGBA PNG as yx (sample); or, given a .json/.geojson url and one PNG of the field for the grid, the GeoJSON Polygon/MultiPolygon features filled onto that grid as yx uint16 instance ids. Each file is read and decoded whole.
+summary: One field of view stored as PNG files plus a GeoJSON annotation, at plain URLs or as zip members; grey 8/16-bit PNGs, one per channel, as cyx (one url is yx); or one sample plane of an RGB/RGBA PNG as yx (sample); or, given a .json/.geojson url and one PNG of the field for the grid, the GeoJSON Polygon/MultiPolygon features filled onto that grid as yx uint16 instance ids. Each file is read and decoded whole; a 429 answer is waited out and asked again.
 formats: [png, json]
 containers: [zip, http]
 params:

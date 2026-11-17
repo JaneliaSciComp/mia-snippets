@@ -50,6 +50,12 @@ only the grid (its header's height and width; none of its pixels is read).
   file is kept; the polygon label is read and filled once, on the first `read`, and kept. `open_array` reads
   only one PNG header (signature + `IHDR`). A stored zip member or a Range-capable URL is read through `io.open`;
   a deflated member raises `NeedsFetch` and is staged whole with `io.fetch`, header read included.
+- **A throttling host.** A step that makes requests (a glob expansion, a header, a file) is tried up to 6 times
+  while the host answers `429 TOO MANY REQUESTS`, which the harness takes as final. The wait is the answer's
+  `Retry-After` in seconds plus one, or 30, 60, 90 s when it names none; 90 s at most. The error is told by
+  class name, as a snippet may not import the HTTP client. What an earlier try fetched (cached blocks, the
+  zip's directory, staged members) is not asked for again. Every other error is raised at once; dropped
+  connections and 5xx answers are retried by the harness.
 - **Voxel size** `None`: a PNG's `pHYs` chunk is a print resolution and GeoJSON has none.
 - Refused: palette PNGs and bit depths below 8.
 
@@ -58,9 +64,11 @@ only the grid (its header's height and width; none of its pixels is read).
 - One field per binding entry. A dataset of hundreds of field folders needs one raw and its labels listed per
   field; the snippet cannot return several arrays from one glob (SPEC §2: one `open_array`, one array), and it
   does not stack fields because their shapes differ.
-- Each array opened costs at least one zip member (two requests for a deflated one). Zenodo answered
-  `429 TOO MANY REQUESTS` during testing when nine fields (54 members) were read in one go; the harness does not
-  retry that status.
+- Each array opened costs at least one zip member (two requests for a deflated one), and a field read whole
+  costs 12 requests. Zenodo counts requests per address in windows of about a minute (`x-ratelimit-limit: 133`
+  on this record's zip) and other jobs behind the same address use the same count: it answered `429` when nine
+  fields (54 members) were read in one go, and to the third request of a crop job. The snippet waits a 429 out
+  (above); a limit that stays used up for more than about five minutes still fails the job.
 - The polygon filler samples pixel centres; it is not anti-aliased and a polygon thinner than a pixel can vanish.
 - Tested on real data: 8- and 16-bit grey channels, 8-bit RGB masks, single-ring `Polygon` features with
   `y_up: true`, deflated zip members. Holes, `MultiPolygon`, y-down, RGBA, grey+alpha and plain URLs were run on
