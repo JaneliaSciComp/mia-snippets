@@ -47,14 +47,16 @@ label form names the image it is for.
   dataset's authors use) round outlines differently; the difference is confined to outline pixels.
 - Semantic only: two touching polygons of one class become one region. Instance ids per polygon are not
   offered.
-- **Other scanners of the tested dataset are not verified, and P1000 looks offset.** In `scc.json`, polygons
-  leave the stated `width` x `height` in 39 of the 44 `*_p1000.tif` images (all listed as 4482 x 10859), by
-  hundreds of pixels (for `scc_08_p1000.tif`, x reaches 5106 and y 11666), and in 8 `gt450`, 2 `nz210` and
-  1 `nz20` images by up to about 200 pixels. No `cs2` image has any. The dataset's annotations were drawn on
-  one scan and carried to the others, so small overshoots may be tissue outside a scan's field of view, but the
-  P1000 numbers suggest polygons in another frame than the TIFF. The snippet refuses these images without
-  `clip: true`; before setting it, overlay the label on the image. Zenodo's rate limit (429) stopped the check
-  of `scc_08_p1000.tif` here.
+- **The other scanners of the tested dataset need `clip`, and only one such image was checked.** In `scc.json`,
+  polygons leave the stated `width` x `height` in 39 of the 44 `*_p1000.tif` images (all listed as
+  4482 x 10859), by hundreds of pixels, and in 8 `gt450`, 2 `nz210` and 1 `nz20` images by up to about 200
+  pixels. No `cs2` image has any. The snippet refuses these images without `clip: true`. For
+  `scc_08_p1000.tif` (5 of 11 polygons leave the grid, by up to 807 px; x reaches 5106, y 11666) the polygons
+  were checked against the image outside the harness: 94.1% of the pixels inside them are tissue, 72 to 78%
+  when moved 150 px in any direction, and the best shift at 1/8 scale is 8 px up, one search step from zero.
+  So there the polygons are in the TIFF's frame and the TIFF simply ends before the annotated tissue does:
+  `clip: true` is right for it. Only 53% of that image's tissue is inside a polygon (96% for the CS2 scan), so
+  0 is not "background" there. The other 49 such images were not looked at; check each scanner before binding.
 
 ## Tested on
 
