@@ -1,0 +1,34 @@
+record: zenodo-12804564-mouse-ovary-follicle-boxes
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-tiles-json-boxes
+    urls: ["https://zenodo.org/records/12804564/files/ovary_cuts.zip::01_ovary_cuts/ovaries_images/1C_e/1C_e__roi7.tif"]
+    params: {}
+labels:
+  - snippet: tiff-tiles-json-boxes
+    urls:
+      - "https://zenodo.org/records/12804564/files/ovary_cuts.zip::01_ovary_cuts/roi_annotation/1C_e$1C_e__roi7$.json"
+      - "https://zenodo.org/records/12804564/files/ovary_cuts.zip::01_ovary_cuts/ovaries_images/1C_e/1C_e__roi7.tif"
+    params: {boxes: instance, classes: [PMF, Primaire, Secondaire]}
+    pairs_with: 0
+    label_key: manual_gt-follicle-instance
+    segmentation_type: instance
+  - snippet: tiff-tiles-json-boxes
+    urls:
+      - "https://zenodo.org/records/12804564/files/ovary_cuts.zip::01_ovary_cuts/roi_annotation/1C_e$1C_e__roi7$.json"
+      - "https://zenodo.org/records/12804564/files/ovary_cuts.zip::01_ovary_cuts/ovaries_images/1C_e/1C_e__roi7.tif"
+    params: {boxes: semantic, classes: [PMF, Primaire, Secondaire]}
+    pairs_with: 0
+    label_key: manual_gt-follicle-semantic
+    segmentation_type: semantic
+reasons:
+  - "tiff-tiles-json-boxes instead of the draft's tiff-zip-member-2 (raw) and tiff-jpeg-voc-zip-glob (label): the annotation is a COCO-like JSON file, which no catalog snippet reads (the two box rasterisers read VOC XML), and the JSON does not state the image size (its 'image' key holds only a filepath), so the label needs the paired TIFF's header for its grid; the raw is bound with the same snippet because it reads a region by decoding only the 256x256 JPEG tiles it touches, where tiff-zip-member-2 decodes the whole page for every read (306 MB for this section, the smallest of 643). The TIFF is a deflated zip member, so it is staged whole (3.2 MB) and the raw reports file access"
+  - "urls: only the record's technical.sample pair, section 1C_e__roi7 (6000x17000x3 uint8) and its annotation. The record says shape_varies, so each of the 643 sections is its own raw with its own labels and cannot be stacked or globbed; the other 642 pairs have the same layout by the zip listing (every ovaries_images/<folder>/<folder>__roi<n>.tif has a roi_annotation/<folder>$<folder>__roi<n>$.json, compared while testing) and can be bound the same way, but they were not read here, so they are not claimed"
+  - "raw, no params: cyx 3x6000x17000 uint8, the RGB samples kept as c 0..2 (R, G, B; the file is YCbCr JPEG, converted to RGB by the decoder): H&E is a colour stain. The record's axes yxs are the file's order; the snippet presents the samples as c"
+  - "label urls are the JSON and the raw TIFF again: the snippet reads the TIFF's header for the 6000x17000 grid and no TIFF pixel; pairing per the record's alignment_notes (<folder>$<folder>__roi<n>$.json <-> ovaries_images/<folder>/<folder>__roi<n>.tif); the JSON's own image.filepath also ends in 1C_e/1C_e__roi7.tif"
+  - "bbox is [x, y, width, height] with the corner at the top left, in pixels of the TIFF (record alignment_notes): the 12 boxes of this file (3 PMF of 150x150, 9 Primaire of 300x300) all lie inside the 17000-wide, 6000-high image only when read that way round (x up to 13411, y up to 6119 before clipping: the box at y 5819 with height 300 crosses the bottom edge by 119 rows and is cut to the grid)"
+  - "classes [PMF, Primaire, Secondaire]: the record's classes, which are the names the file's categories declare (ids 0, 1, 2); semantic ids are 1 PMF, 2 Primaire, 3 Secondaire (the file's category id + 1, because 0 is background). The snippet refuses a file that declares a category outside this list"
+  - "NEEDS A HUMAN DECISION, boxes as two labels per raw (as tiff-jpeg-voc-zip-glob's example does): the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. Bound so that nothing in the table is lost: boxes instance (each box filled with its 1-based number in the file, segmentation_type instance, label_key manual_gt-follicle-instance) tells the follicles apart, and boxes semantic (each box filled with its class id, segmentation_type semantic, label_key manual_gt-follicle-semantic, the draft's key) carries the follicle stage. Both are filled squares of a fixed size per class (150 px PMF, 300 px Primaire, 500 px Secondaire) centred on a follicle, not follicle outlines: a consumer must not take them for pixel-accurate masks. Where boxes overlap the smaller one is on top"
+  - "label_key source manual_gt: the boxes come from hand-placed markers (each annotation carries a MarkerGuid; the draft's choice)"
+  - "voxel size: the snippet reports none, because the TIFF header has no calibration; the record's 121.5 nm comes from the dataset's offset/<folder>.json (MicronPerPixel 0.12155), which the snippet does not read"
