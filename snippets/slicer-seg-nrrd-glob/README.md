@@ -64,8 +64,10 @@ own file's header.
 TIF, bound with `image-tiles-glob`) and their Slicer segmentations, in three zips: `test.zip` (92 pairs) and
 `region.zip` (859) with seven sarcomere region classes, `glycogen.zip` (100) with Glycogen and Background. Raw
 and label are `zyx` (92 | 859 | 100, 2048, 2048), label `uint8`. All 92 test headers and 20 of the 859 region
-headers name the same seven segments with values 1 to 7. In `glycogen.zip` the stored values differ between
-files: one file stores Glycogen as 1 and 3, an empty `Segment_3` as 2 and Background as 4, which this snippet
-reads as 1 and 2 like the others. The example binding's `snippets_commit` is the commit before this snippet's
+headers (every 45th by name; the others were not opened) name the same seven segments with values 1 to 7. In
+`glycogen.zip` the stored values differ between files: 99 store Glycogen as 1 and Background as 2, and one
+stores Glycogen as 1 and 3, an empty `Segment_3` as 2 and Background as 4, which this snippet reads as 1 and 2
+like the others. Every test and glycogen label plane was read through the snippet and compared with the
+file's raw values renamed by hand. The example binding's `snippets_commit` is the commit before this snippet's
 own (a binding can't name the commit that adds it); a binding written by the worker names a commit that
 contains the snippet.
