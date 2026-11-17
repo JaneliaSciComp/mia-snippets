@@ -1,0 +1,9 @@
+name: png-instance-masks-zip
+spec_version: 1
+summary: One binary grey PNG per object, <image>_<k>.png, as zip members chosen by glob; the masks of each image are merged into one instance-id plane (pixel = k where mask k is non-zero, the highest k where masks overlap, uint16) and the images are stacked along z. The zip is opened once and read by range, not one request per mask.
+formats: [png]
+containers: [zip]
+params: {}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-10475962-in-cellulo-crystals-maskrcnn]
+supersedes: null
