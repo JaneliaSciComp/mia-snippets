@@ -1,0 +1,26 @@
+record: zenodo-5030552-orbit-kidney-glomeruli-wsi
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/records/5030552/files/glomeruli.zip::test/6533682.tiff"]
+    params: {}
+labels:
+  - snippet: orbit-db-polygon-labels
+    urls:
+      - "https://zenodo.org/records/5030552/files/glomeruli.zip::orbit.db"
+      - "https://zenodo.org/records/5030552/files/glomeruli.zip::test/6533682.tiff"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-glomerulus-instance
+    segmentation_type: instance
+reasons:
+  - "urls: only the record's technical.sample slide, test/6533682.tiff (the smallest, FastRed mouse). The other 87 slides have a row in orbit.db each and bind the same way, one raw and one label entry per slide; they were not read here, so they are not claimed"
+  - "raw with tiff-zip-member-2, no params, as the match agent tested it: pyramidal RGB TIFF, a deflated zip member fetched whole, 14080x26880x3 uint8"
+  - "label urls are orbit.db and the raw TIFF again: the database holds outlines only, so orbit-db-polygon-labels reads the TIFF's header for the grid (14080x26880) and uses its file name to find the slide's RAW_DATA_FILE row (FILESIZE 171556108 equals the member's length). No TIFF pixel is read for the label"
+  - "coordinate frame, which the record leaves open: the points are NOT full-resolution pixels as stored. Each PolygonExt carries the zoom it was drawn at (scale, percent) and full-resolution = point * 100 / scale. Checked on this slide: stored x reaches 46453 on a 26880-wide slide, while rescaled outlines span x 16072..24997, y 3115..11066, all inside the slide and inside one of its two inclusion areas; the median outline has the area of a 59 um circle (mouse glomerulus); mean green inside minus outside the first 60 outlines is +32.7 as read against -14.9 to +3.8 when shifted 120 px in y or x; and an overlay shows the outlines on the Bowman's capsules of the right kidney section"
+  - "which annotations: 93 of the slide's 96 rows are plain annotations (Orbit subtype 0) and are the glomeruli. The other 3 are left out: two inclusion areas (subtype 3) of about 9600x11400 and 9900x8700 px around the two kidney sections, and one exclusion (subtype 2) around a glomerulus at the torn tissue edge. Over the whole database 20547 of 21037 rows are subtype 0; 4 are subtype 1, 340 subtype 2 and 146 subtype 3"
+  - "label_key manual_gt-glomerulus-instance and segmentation_type instance, as the match agent intended: one manual outline per glomerulus (readme: manual drawn glomeruli annotations), each filled with its own id, the 1-based position of its row among the slide's rows by RAW_ANNOTATION_ID (93 ids in 2..96)"
+  - "coverage is partial: only the right kidney section of this slide is annotated (the left one lies in an inclusion area but has no outline), and labelled pixels are 0.32% of the slide, so 0 means 'not annotated', not 'background'. A crop policy that needs labelled crops should draw near the outlines"
+  - "voxel size: the label reports 456.35 nm for y and x from the TIFF's XResolution/YResolution (21913 pixels per centimetre), which answers the record's open question about the resolution tags; the record has voxel_size_nm null and tiff-zip-member-2 reports none for the raw because the file is neither OME nor ImageJ. A human should add it to the record"
+  - "label dtype uint16 against the record's 'unknown' is smoke's only warning: the record did not decode the label"
