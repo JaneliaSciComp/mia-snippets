@@ -31,8 +31,12 @@ id map. The parser is the snippet's own (`struct`, `zlib`, numpy): the allowlist
   32 MiB, which `io` asks for as four ranges of 8 MiB at once, not one request per MiB. `Case1Vf.mat` (eight
   masks of 1.1 MB each behind a 16 MB variable) takes 4 range requests this way, not 11. Since the limit is
   shared with whatever else comes from the address, a 429 can still meet the first request: the snippet then
-  sleeps for the answer's `Retry-After` (plus a second; 60 s when there is none, 120 s at most) and makes the
-  read again, up to 4 times per read, so a refused job costs minutes, not a failed run. Ranges that did
+  sleeps and makes the read again, up to 7 times per read, so a refused job costs minutes, not a failed run.
+  The sleep is the answer's `Retry-After` plus a second (60 s when there is none), but at least 2, 4, 8, … s
+  from one refusal to the next and 120 s at most, about 4 minutes in all. The floor is there because Zenodo's
+  `Retry-After` is the time until one more request is let through, not until the address is under its limit:
+  0 to 11 s were seen while other clients of the address kept `x-ratelimit-remaining` between 0 and 10, and
+  then the request made a second later is refused again. Ranges that did
   arrive are in `io`'s cache and are not asked for twice. Any other error is raised as it comes.
 - **Voxel size.** Always `None`: the format has no place for it.
 
@@ -74,7 +78,11 @@ contains the snippet.
 The raw of the example is read with `tiff-series-glob`, for the same request limit: `tiff-zip-member-2`
 reads the same pixels but fetches the page whole (44 requests), and the crop job on that binding was refused
 with 429 on the TIFF. The mosaic is uncompressed, so `tiff-series-glob` reads a crop's rows by range and asks
-again after a 429. Counted on a crop job of 8 crops: 18 requests and 68 MB with this binding (14 for the TIFF,
+again after a 429, three times within 7 s. That is not always enough: the crop job at 743343b made 4 crops
+and lost the fifth to a refusal that outlasted those 7 s (it fetched 48,773,972 bytes, which is the 40,385,364
+of its four crops and one 8 MiB range of the fifth patch, whose second range was refused), while the same job
+run again made 8 of 8. Waiting longer on the raw side takes a successor of
+`tiff-series-glob` or the harness; this snippet's own reads wait as said above. Counted on a crop job of 8 crops: 18 requests and 68 MB with this binding (14 for the TIFF,
 4 for the MAT-file), 49 requests and the whole 351 MB TIFF before. The threshold check above gives the same answer through
 `tiff-series-glob`.
 
@@ -83,7 +91,7 @@ again after a 429. Counted on a crop job of 8 crops: 18 requests and 68 MB with 
 pixels set, and `BW1` and `BW6` overlap, so `ids` refuses that file. But its raw is an 809.6 MB LZW TIFF, which
 no snippet can read by row range: it is fetched whole, about 100 requests of 8 MiB, within a minute that
 allows 133 from the whole address, and the crop job on the binding with both pairs was refused with 429 on
-that TIFF. Once the harness waits out a 429 (the response says `retry-after: 60`), Case 1 is these two entries:
+that TIFF. Once the harness waits out a 429, Case 1 is these two entries:
 
 ```yaml
 raw:

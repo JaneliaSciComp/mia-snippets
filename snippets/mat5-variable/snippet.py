@@ -7,9 +7,11 @@ inflates the named variables whole: a zlib stream has no random access.
 
 Requests are kept few, because a host may allow only so many a minute (Zenodo: 133, and it answers the next
 one 429): the stretch of the file the named variables are expected to fill is asked for at once, and a long
-variable is read in long pieces, which `io` splits into a few ranges of 8 MiB. A 429 is waited out for as long
-as its Retry-After says and the read is made again: the limit is the host's for everything that comes from one
-address, so a job that makes few requests still meets it when other jobs share the address.
+variable is read in long pieces, which `io` splits into a few ranges of 8 MiB. A 429 is waited out and the read
+is made again: the limit is the host's for everything that comes from one address, so a job that makes few
+requests still meets it when other jobs share the address. The wait is the answer's Retry-After, but never
+less than a time that doubles with every refusal: Zenodo's Retry-After is the time until one request is let
+through (0 to 11 s were seen), and while other jobs take that one too, asking again at once is refused again.
 """
 import struct
 import time
@@ -34,7 +36,7 @@ PIECE = 1 << 20         # inflated bytes per step (x4), and columns' worth of wo
 AHEAD = 8 << 20         # most bytes asked for ahead of the walk through the variables: one request of io's
 GULP = 32 << 20         # compressed bytes per read of a variable: io asks for them as 4 ranges of 8 MiB at once
 COMBINE = ("union", "ids")
-WAITS = 4               # times a 429 is waited out before it is raised
+WAITS = 7               # times a 429 is waited out before it is raised: 2, 4, ... 64, 120 s at least, 4 minutes
 WAIT, LONGEST = 60, 120  # seconds to wait when the answer has no usable Retry-After, and the longest wait taken
 T = TypeVar("T")
 
@@ -55,9 +57,9 @@ class _Var:
 
 
 def _patient(step: Callable[[], T]) -> T:
-    """`step()`, made again after a 429 once the time its Retry-After names has passed. Any other error is raised
-    at once: `io` already retries what fails in transit. The status is read off the error, since a snippet may
-    not import the HTTP client."""
+    """`step()`, made again after a 429 once the time its Retry-After names has passed, and no sooner than
+    2, 4, 8, ... s after the refusal before. Any other error is raised at once: `io` already retries what fails
+    in transit. The status is read off the error, since a snippet may not import the HTTP client."""
     for waited in range(WAITS + 1):
         try:
             return step()
@@ -66,7 +68,7 @@ def _patient(step: Callable[[], T]) -> T:
             if waited == WAITS or getattr(response, "status_code", None) != 429:
                 raise
             after = str(getattr(response, "headers", {}).get("retry-after", "")).strip()
-            time.sleep(min(int(after) + 1 if after.isdigit() else WAIT, LONGEST))
+            time.sleep(min(max(int(after) + 1 if after.isdigit() else WAIT, 2 ** (waited + 1)), LONGEST))
     raise AssertionError("unreachable")
 
 
