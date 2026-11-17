@@ -68,8 +68,8 @@ errors, 379 MB fetched (245 MB of it the raw snippet's open).
 
 - `Core_A5_cell_nuclei.geojson` (78.6 MB): 38,146 cell objects, 19,737 classified `Cells` and 18,409 `Not_cells`;
   28,837 have a `nucleusGeometry` (17,789 of the Cells, 11,048 of the Not_cells); 29 MultiPolygons among 66,983
-  geometries. All of them filled gives 38,146 ids on 38.4 % of the plane; a whole plane takes 2 to 3 s after about
-  10 s of parsing. Outlines span x 153.9..4626.9 and y 41.4..4468.5: x exceeds the image's 4493 rows, so x is the
+  geometries. All of them filled gives 38,146 ids on 38.4 % of the plane; parsing the file and filling a whole
+  plane takes 2 to 3 s together. Outlines span x 153.9..4626.9 and y 41.4..4468.5: x exceeds the image's 4493 rows, so x is the
   4720-pixel axis.
 - `Core_A5_tumor_boundary.geojson` (325 KB): 68 `TUMOR` annotation polygons, 29.4 % of the plane.
 - **Frame check** against DAPI (channel 0, whole plane): mean intensity inside the nucleus outlines of the Cells is
