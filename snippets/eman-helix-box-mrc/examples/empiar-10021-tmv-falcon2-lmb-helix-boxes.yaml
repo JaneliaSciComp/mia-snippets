@@ -1,0 +1,324 @@
+record: empiar-10021-tmv-falcon2-lmb-helix-boxes
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_39_53_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_41_17_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_42_11_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_43_50_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_44_42_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_45_33_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_47_18_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_50_41_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_51_51_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_53_56_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_54_52_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_55_42_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_56_45_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_57_53_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_01_33_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_02_27_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_07_02_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_09_18_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_11_43_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_12_32_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_15_10_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_16_47_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_17_36_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_18_28_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_20_09_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_27_24_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_30_10_stack.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_32_06_stack.mrc"]
+    params: {}
+labels:
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_39_53.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_39_53_stack.mrc"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_41_17.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_41_17_stack.mrc"
+    params: {}
+    pairs_with: 1
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_42_11.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_42_11_stack.mrc"
+    params: {}
+    pairs_with: 2
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_43_50.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_43_50_stack.mrc"
+    params: {}
+    pairs_with: 3
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_44_42.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_44_42_stack.mrc"
+    params: {}
+    pairs_with: 4
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_45_33.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_45_33_stack.mrc"
+    params: {}
+    pairs_with: 5
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_47_18.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_47_18_stack.mrc"
+    params: {}
+    pairs_with: 6
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_50_41.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_50_41_stack.mrc"
+    params: {}
+    pairs_with: 7
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_51_51.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_51_51_stack.mrc"
+    params: {}
+    pairs_with: 8
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_53_56.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_53_56_stack.mrc"
+    params: {}
+    pairs_with: 9
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_54_52.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_54_52_stack.mrc"
+    params: {}
+    pairs_with: 10
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_55_42.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_55_42_stack.mrc"
+    params: {}
+    pairs_with: 11
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_56_45.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_56_45_stack.mrc"
+    params: {}
+    pairs_with: 12
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_57_53.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-14_57_53_stack.mrc"
+    params: {}
+    pairs_with: 13
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_01_33.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_01_33_stack.mrc"
+    params: {}
+    pairs_with: 14
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_02_27.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_02_27_stack.mrc"
+    params: {}
+    pairs_with: 15
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_07_02.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_07_02_stack.mrc"
+    params: {}
+    pairs_with: 16
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_09_18.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_09_18_stack.mrc"
+    params: {}
+    pairs_with: 17
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_11_43.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_11_43_stack.mrc"
+    params: {}
+    pairs_with: 18
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_12_32.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_12_32_stack.mrc"
+    params: {}
+    pairs_with: 19
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_15_10.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_15_10_stack.mrc"
+    params: {}
+    pairs_with: 20
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_16_47.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_16_47_stack.mrc"
+    params: {}
+    pairs_with: 21
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_17_36.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_17_36_stack.mrc"
+    params: {}
+    pairs_with: 22
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_18_28.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_18_28_stack.mrc"
+    params: {}
+    pairs_with: 23
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_20_09.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_20_09_stack.mrc"
+    params: {}
+    pairs_with: 24
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_27_24.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_27_24_stack.mrc"
+    params: {}
+    pairs_with: 25
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_30_10.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_30_10_stack.mrc"
+    params: {}
+    pairs_with: 26
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_32_06.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10021/data/Falcon_2014_03_14-15_32_06_stack.mrc"
+    params: {}
+    pairs_with: 27
+    label_key: manual_gt-tmv_helix-instance
+    segmentation_type: instance
+reasons:
+  - "raw: one mrc-http-3 array per movie stack, unchanged from the draft (the snippet takes exactly one URL per array); the 28 *_stack.mrc files are the harness list of the record's download_url. mrc-http-3 presents a stack as zyx 16x4096x4096 float32: z is the record's t, the 16 dose-fractionated frames of one micrograph"
+  - "labels: one eman-helix-box-mrc array per .box, pairs_with the stack of the same stem (<name>.box, <name>_stack.mrc: the record's pairing). The draft bound no labels because no catalog snippet reads EMAN helix .box text"
+  - "label urls are the .box and its stack again: a .box holds coordinates only, so the snippet reads the stack's 1024-byte MRC header for the grid the helices are painted on; no stack pixel is read for a label"
+  - "how a start/end box pair is rasterised, which the record leaves open: as the filament, not as the two end boxes. In EMAN's helix box format the centres of the -1 and -2 boxes are the two ends of the helix axis and the box size is the helix width (EMAN1 boxer, e2helixboxer), so each helix is filled as the rectangle of the box width around the axis between the two centres. The end boxes alone would label two squares at the tips and leave the virus between them as background"
+  - "how a per-micrograph 2D label pairs with a 16-frame stack, which the record leaves open: the label is zyx 16x4096x4096 with the same plane on every frame. The frames are successive exposures of one field, and the boxes were drawn on the micrograph, so every frame carries them. Inter-frame drift is not in the files and is not modelled; it is a few pixels against bands 170 to 280 px wide"
+  - "coordinate frame: x is the column and y the row of the MRC as stored (row 0 = first row in the file, as mrc-http-3 returns it), no flip. Checked on frame 0 of Falcon_2014_03_14-14_39_53_stack.mrc: tobacco mosaic virus's 23 A layer line (21.68 px at the record's 1.061 A/px) stands 24.7 sigma above the neighbouring frequencies in the band of helix 2 at the stated position (peak at 21.66 px), against 3.4 with y flipped, -0.1 with x flipped, 0.4 transposed and 0.9 to 1.4 with the band moved 300 or 600 px sideways; in 60 px strips it is confined to within about 90 px of the stated axis. Helix 1 of that file (852 px long) shows no clear layer line in one frame at any position (1.9 stated), so it neither confirms nor contradicts"
+  - "label_key manual_gt-tmv_helix-instance, segmentation_type instance: the record gives the label no class (classes null); title and sample say the boxed helices are tobacco mosaic virus rods, boxed by hand. Each helix has its own id, its 1-based number in its .box (ids restart in every file). A human should confirm the class word"
+  - "NEEDS A HUMAN DECISION, boxes not masks: the record's encoding is boxes-table. The filled band is as wide as the annotator's box (280 px in 27 files, 170 px in Falcon_2014_03_14-15_18_28.box), wider than the 18 nm (about 170 px) virus in all but that file, so the band's edge is not the virus outline. Not every rod on a micrograph is boxed, so 0 means 'not boxed', not 'no virus'"
+  - "voxel size: nothing bound. The header of the first stack (the only one whose values were looked at) gives x and y a cell of 1 A over all 4096 samples (unset), so mrc-http-3 and the label both report 2.44e-5 nm for x and y; the record keeps EMPIAR's 0.1061 nm. A human should decide whether the header value may be published with the crops"
+  - "label dtype uint16 gives a smoke warning on all 28 labels: the record's label dtype is 'unknown' (the labels are text), so no array dtype can match it"

@@ -1,0 +1,9 @@
+name: eman-helix-box-mrc
+spec_version: 1
+summary: "One EMAN helix .box text file (lines 'x y w h flag'; a helix is a start box, flag -1, then an end box, flag -2) rasterised on the grid of the MRC micrograph or movie stack it was boxed on: each helix filled, with its 1-based number in the file, as the rectangle of the box width around the axis between the two box centres. zyx uint16 with the MRC's shape (read from its header, no pixels), every z plane (movie frame) the same, so it pairs with the stack as mrc-http-3 presents it. urls: the .box and the MRC."
+formats: [other]
+containers: [http, s3]
+params: {}
+requires: [numpy]
+tested_on: [empiar-10021-tmv-falcon2-lmb-helix-boxes]
+supersedes: null
