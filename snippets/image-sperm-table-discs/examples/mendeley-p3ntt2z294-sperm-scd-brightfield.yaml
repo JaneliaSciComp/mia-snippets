@@ -1,0 +1,27 @@
+record: mendeley-p3ntt2z294-sperm-scd-brightfield
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-sperm-table-discs
+    urls: ["https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/4b42bad7-7145-4a43-baeb-b4939f4fab16"]
+    params: {}
+labels:
+  - snippet: image-sperm-table-discs
+    urls:
+      - "https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/eef8057b-77f1-4bcf-b3c4-105a15388253"
+      - "https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/4b42bad7-7145-4a43-baeb-b4939f4fab16"
+    params: {draw: head}
+    pairs_with: 0
+    label_key: manual_gt-cell-points
+    segmentation_type: instance
+reasons:
+  - "urls: only the record's technical.sample pair, Images/293.jpg (technical.sample.urls[0]) and Annotations/293.txt (urls[1]). The other 129 images and tables have no URL in the record (download_url is null, the files are opaque S3 object ids), so they are not bound; each can be bound the same way, one raw and one label, once the record lists its URLs. The 78 PNG images were not read here"
+  - "raw with image-sperm-table-discs instead of the draft's image-tiles-glob, no params: the same pixels, an RGB JPEG read as stored with its samples as c (cyx 3x2048x3072 uint8, c = R, G, B; record axes yxs 2048x3072x3 uint8). One snippet reads both arrays of the pair"
+  - "label with image-sperm-table-discs instead of the draft's placeholder jpeg-xml-boxes-numbers (XML only): the file is the record's points table, 42 rows of six ';'-separated numbers (tail X; tail Y; head X; head Y; minor-axis length; max halo thickness, in image pixels)"
+  - "label urls are the table and the raw JPEG again: the table holds coordinates only and the object ids carry no file name, so the snippet reads the JPEG's header for the 2048x3072 grid the discs are painted on; no JPEG pixel is decoded for the label. The pairing is the record's (293.txt labels 293.jpg, same stem, technical.sample.description)"
+  - "draw: head, a design decision the issue leaves open: each sperm is a disc centred on its head point whose diameter is its minor-axis length (21.7 to 42.7 px here), filled with the row's 1-based number in the file. It uses only what the table measures and stays inside the stained head core; a bare point would be one pixel in a 256x256 crop. The discs are not head outlines: the table has no major axis or angle. The 42 discs do not overlap. draw: halo (radius = minor axis / 2 + max halo thickness, 10.2 to 70.3 px) is the alternative for head plus halo; it is an upper bound and 4 of the 42 discs are partly covered by a neighbour, so it is not bound. The tail points are not drawn"
+  - "coordinate frame: X is the column and Y the row of the stored JPEG (X reaches 3047, past the 2048 rows; the JPEG has no Exif orientation). Checked on the pixels: the green channel averages 56 inside the head discs against 164 over the image, 108 to 125 with the discs moved 40 px along either axis, 161 to 162 with x or y mirrored and 169 with x and y exchanged; outlines drawn on the image sit on the dark head cores"
+  - "NEEDS A HUMAN DECISION, segmentation_type instance and label_key manual_gt-cell-points: the record's encoding is points-table, which has no segmentation_type. instance is used because every row is one sperm with its own id (1..42). The label_key is kept from the draft binding (annotations.source manual, each row one cell, kind from the record's encoding) so the name is the one the record yields; the pixels under that name are discs, not single points and not masks"
+  - "coverage is sparse: only the 42 measured sperm are marked (0.5 % of the pixels). Stained cells without a row are in the image (e.g. the one at x 1563, y 1555, 190 px from the nearest head point), so 0 means 'not annotated', not 'background'"
+  - "smoke warning 'label 0: dtype uint16 is not the record's [float64]' is expected: float64 is the dtype of the table's numbers, uint16 that of the ids painted from it"
+  - "no voxel size bound: none in the JPEG header or the table (record voxel_size_nm null, 20x objective only)"
