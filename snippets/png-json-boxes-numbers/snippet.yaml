@@ -1,0 +1,15 @@
+name: png-json-boxes-numbers
+spec_version: 1
+summary: A set of numbered 8- or 16-bit PNG images (samples kept as c, or the ones `samples` names, e.g. RGB without alpha), or the boxes of the one COCO-style JSON that annotates them (images[], categories[], annotations[].bbox as corners or xywh) rasterised on each image's grid, one image per z plane in ascending file number. `numbers` chooses the images of one array by file number in both kinds, so a set whose images come in several shapes is bound as one array per shape. An image without annotations is an all-background plane. Voxel size from the PNG pHYs chunk.
+formats: [png, json]
+containers: [http, zip]
+params:
+  numbers: {type: list, required: false, doc: "the file numbers (last run of digits in the file name) of the images this array holds, as numbers and inclusive 'a-b' runs; a PNG array leaves out the other urls, a JSON array the other images[]. Every number must be a file's. Planes are in ascending number whatever the order written. Without it the array holds every url / every image the JSON lists. For the images of one shape; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of images the array must have. Open fails on another number, so a changed file set is noticed instead of shifting z; reason required in binding"}
+  samples: {type: list, required: false, doc: "PNG files only: the 0-based samples kept as c, in this order, e.g. [0, 1, 2] for the RGB of an RGBA file. Without it every sample is a c plane; reason required in binding"}
+  bbox: {type: str, required: false, doc: "JSON only, and required for it: what annotations[].bbox holds. 'corners' is [x1, y1, x2, y2], 'xywh' is COCO's [x, y, width, height]; pixels of the image, 0-based, far corner exclusive. Reason required in binding"}
+  boxes: {type: str, required: false, doc: "JSON only, and required for it: how the boxes are painted. 'instance' fills each box with its 1-based number among the painted boxes of its image, in annotations[] order; 'semantic' fills it with its category id. 0 is background; where boxes overlap the smaller is on top, of two of one size the later. Reason required in binding"}
+  classes: {type: list, required: false, doc: "JSON only, and required for it: the categories[].name strings whose boxes are painted; boxes of the file's other categories are left out. A name the file does not list raises. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-6547151-midog-2022-training-mitoses]
+supersedes: null
