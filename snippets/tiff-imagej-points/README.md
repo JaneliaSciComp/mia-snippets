@@ -55,6 +55,12 @@ and voxel size; no pixel of the TIFF is read. A glob url (`<zip url>::<folder>/*
   name the `.roi` members.
 - A ROI embedded in a TIFF's ImageJ metadata is not read.
 - The raw form holds the whole decoded plane in memory; it is meant for single images, not mosaics.
+- Requests. Every byte comes through `io`, which makes one request for a zip's directory and two per member
+  (its 30-byte local header, then its data); a member bound twice (the TIFF of a raw and of its label, a `.roi`
+  under two labels) is fetched once. `io` does not retry a `429`, and the snippet does not either (retries are
+  the harness's): on a host that limits requests per minute (Zenodo), a job fails outright when the limit is
+  used up, by the job itself or by other clients at the same address. A binding over many folders of one zip
+  costs two requests per file.
 
 ## Example
 
@@ -64,6 +70,8 @@ and the folder's `1258-1491.roi`, a 19-point multi-point ROI marking cell-cell j
 the zip's 85 `.roi` files were parsed (Zenodo then answered 429): all are type 10, version 228, sub-pixel, 6 to
 38 points each (1044 in all), and **every point has counter 0**, so the files do not hold the junction class
 (`ids: counter` would give one class); 46 points in 3 files carry stack position 2, the rest 0. On an
-overlay of the C1 image the 19 points all lie inside the vessel, on or next to its dark (stained) lines. The example binding's
+overlay of the C1 image the 19 points all lie inside the vessel, on or next to its dark (stained) lines. The
+example binding costs 8 requests (1 HEAD, 1 for the zip's directory, 2 for each of its 3 members) and 4,529,895
+bytes; a crop job on a filled cache costs the HEAD only. The example binding's
 `snippets_commit` is the commit before this snippet's own (a binding can't name the commit that adds it); a
 binding written by the worker names a commit that contains the snippet.
