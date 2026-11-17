@@ -1,51 +1,63 @@
-"""VGG Image Annotator (VIA) polygon regions from one JSON zip member, filled onto the grid of the JPEG images
-that sit beside it in the zip: one z plane per image, in member-name order.
+"""VGG Image Annotator (VIA) polygon annotations and the JPEG images they annotate, as zip members: either the
+images themselves (`read: image`) or their polygon regions filled onto the image grid (`read: instance` or
+`semantic`), one z plane per image in url order.
 
-The url names the JSON (`<zip url>::<member>.json`). The planes are the JPEG members of the JSON's own folder
-that `params.images` picks, sorted by name; each must have exactly one VIA entry with its file name, and every
-entry must name a file of that folder. A pixel is
-filled when its centre lies inside a polygon: with the region's 1-based number in its image (`fill: instance`)
-or with the 1-based index of its `attribute` value in `classes` (`fill: semantic`). `open_array` reads the zip's
-directory, the JSON and the first image's JPEG header; `read` fills the planes it is asked for and reads no
-further byte.
+The urls name one VIA JSON and the JPEG images (member urls or member globs). The planes are the images, sorted
+by url; with `annotated_only` only those whose VIA entry has at least one region. A raw and a label bound with
+the same urls and `annotated_only` therefore have the same planes in the same order. A label pixel is filled
+when its centre lies inside a polygon: with the region's 1-based number in its image (`instance`) or with the
+1-based index of its `attribute` value in `classes` (`semantic`).
+
+Every file is read whole with `io.fetch`, once: `open_array` fetches the JSON and the first image (for the JPEG
+frame header: grid and sample count; nothing is decoded), an image `read` fetches and decodes the images it is
+asked for, and a label `read` fetches nothing.
 """
 import json
-from fnmatch import fnmatchcase
+import time
 from pathlib import Path
-from typing import BinaryIO
+from typing import Callable, TypeVar
 
+import imagecodecs
 import numpy as np
 
-from mia_harness.api import IO, Array, NeedsFetch, Source
+from mia_harness.api import IO, Array, Source
 
 SPEC_VERSION = 1
 
-FILLS = ("instance", "semantic")
-HEAD = 1 << 16      # bytes of a JPEG read first for its frame header; the whole file only when that is not enough
+READS = ("image", "instance", "semantic")
+HEAD = 1 << 16      # bytes of a JPEG searched first for its frame header; the whole file only when that is not enough
 # JPEG start-of-frame markers: SOF0..SOF15 without DHT (C4), JPG (C8) and DAC (CC)
 SOF = frozenset(range(0xC0, 0xD0)) - {0xC4, 0xC8, 0xCC}
+
+TRIES = 8           # times an io call is made when the server keeps answering 429 Too Many Requests
+T = TypeVar("T")
 
 Polygon = tuple[np.ndarray, np.ndarray, str | None]     # x and y of the vertices, the region's class or None
 
 
-def _source(io: IO, url: str) -> BinaryIO | Path:
-    try:
-        return io.open(url)
-    except NeedsFetch:          # a deflated member: stage it whole
-        return io.fetch(url)
+def _patient(call: Callable[[], T]) -> T:
+    """`call()`, made again when the server answers 429 Too Many Requests, after the wait its Retry-After header
+    asks for (1 to 60 s, 60 s when it names none), up to TRIES times in all. The harness's io retries dropped
+    connections and 5xx but treats a 429 as final, and a host's request quota is shared by every job behind one
+    address. Any other error is raised as it is; io keeps nothing of a failed call, so the call is simply repeated."""
+    for left in range(TRIES - 1, -1, -1):
+        try:
+            return call()
+        except Exception as e:
+            response = getattr(e, "response", None)     # an HTTP status error carries the response
+            if not left or getattr(response, "status_code", None) != 429:
+                raise
+            try:
+                wait = float(response.headers.get("retry-after"))
+            except (AttributeError, TypeError, ValueError):
+                wait = 60.0
+            time.sleep(min(max(wait, 1.0), 60.0) + 1.0)
+    raise AssertionError("unreachable")
 
 
-def _read(src: BinaryIO | Path, n: int = -1) -> bytes:
-    """The first `n` bytes of the file, all of it by default."""
-    if isinstance(src, Path):
-        with src.open("rb") as f:
-            return f.read(n)
-    src.seek(0)
-    return src.read(n)
-
-
-def _jpeg_size(data: bytes) -> tuple[int, int] | None:
-    """(Y, X) from the start-of-frame segment, or None when `data` ends before it; nothing is decoded."""
+def _jpeg_frame(data: bytes) -> tuple[int, int, int, int] | None:
+    """(Y, X, samples, bits per sample) from the start-of-frame segment, or None when `data` ends before it;
+    nothing is decoded."""
     pos = 2
     while pos + 4 <= len(data) and data[pos] == 0xFF:
         marker = data[pos + 1]
@@ -54,9 +66,10 @@ def _jpeg_size(data: bytes) -> tuple[int, int] | None:
         elif marker in (0x01, 0xD8) or 0xD0 <= marker <= 0xD7:      # markers without a length
             pos += 2
         elif marker in SOF:
-            if pos + 9 > len(data):
+            if pos + 10 > len(data):
                 break
-            return int.from_bytes(data[pos + 5:pos + 7], "big"), int.from_bytes(data[pos + 7:pos + 9], "big")
+            return (int.from_bytes(data[pos + 5:pos + 7], "big"), int.from_bytes(data[pos + 7:pos + 9], "big"),
+                    data[pos + 9], data[pos + 4])
         elif marker == 0xDA:                            # start of scan: no frame header came before it
             break
         else:
@@ -64,16 +77,19 @@ def _jpeg_size(data: bytes) -> tuple[int, int] | None:
     return None
 
 
-def _grid(io: IO, url: str) -> tuple[int, int]:
-    """(Y, X) of the JPEG at `url`, from its header."""
-    src = _source(io, url)
-    head = _read(src, HEAD)
-    if head[:3] != b"\xff\xd8\xff":
-        raise ValueError(f"{url} is not a JPEG (starts {head[:4]!r}); the grid is read from a JPEG header")
-    size = _jpeg_size(head) or _jpeg_size(_read(src))
-    if size is None or min(size) <= 0:
+def _frame(path: Path, url: str) -> tuple[int, int, int]:
+    """(Y, X, samples) of the 8-bit JPEG staged at `path`, from its header."""
+    with path.open("rb") as f:
+        head = f.read(HEAD)
+        if head[:3] != b"\xff\xd8\xff":
+            raise ValueError(f"{url} is not a JPEG (starts {head[:4]!r}); the images of a VIA JSON are read as JPEG")
+        frame = _jpeg_frame(head) or _jpeg_frame(head + f.read())
+    if frame is None or min(frame[:2]) <= 0:
         raise ValueError(f"{url}: no JPEG start-of-frame segment with an image size found")
-    return size
+    if frame[2] not in (1, 3) or frame[3] != 8:
+        raise ValueError(f"{url}: a JPEG of {frame[2]} samples of {frame[3]} bits; this snippet reads 8-bit grey "
+                         "and three-sample JPEGs only")
+    return frame[:3]
 
 
 def _entries(doc: object, url: str) -> dict[str, list[dict]]:
@@ -143,92 +159,115 @@ def _inside(x: np.ndarray, y: np.ndarray, ny: int, nx: int) -> tuple[int, int, n
     return r0, c0, (np.cumsum(flips[:, :-1], axis=1) % 2).astype(bool)   # inside: an odd number of edges to the left
 
 
-class _Planes:
-    """One (Y, X) uint16 plane per image, axes [z]yx, filled from that image's regions when it is read."""
+class _Stack:
+    """One plane per image, axes [z] + the plane's own ([c]yx for an image, yx for a label); a plane is made when
+    it is read and the last one is kept, so the c planes and the crops of one image share it."""
 
-    def __init__(self, names: list[str], regions: list[list[dict]], grid: tuple[int, int], fill: str,
-                 attribute: str | None, classes: list[str] | None):
-        self._names, self._regions, self._grid = names, regions, grid
-        self._fill, self._attribute, self._classes = fill, attribute, classes
-        self._last: tuple[int, np.ndarray] | None = None        # the last plane filled
-        many = len(names) > 1
-        self.axes = "zyx" if many else "yx"
-        self.shape = ((len(names),) if many else ()) + grid
-        self.dtype = np.dtype("uint16")
-        self.voxel_size_nm = None       # a VIA file has pixel coordinates only
-        self.access = "plane"           # a y/x region costs filling its image's polygons; no bytes are fetched
+    def __init__(self, n: int, plane_axes: str, plane_shape: tuple[int, ...], dtype: str,
+                 plane: Callable[[int], np.ndarray]):
+        self._n, self._plane_axes, self._plane_shape, self._make = n, plane_axes, plane_shape, plane
+        self._last: tuple[int, np.ndarray] | None = None
+        self.axes = ("z" if n > 1 else "") + plane_axes
+        self.shape = ((n,) if n > 1 else ()) + plane_shape
+        self.dtype = np.dtype(dtype)
+        self.voxel_size_nm = None       # neither a VIA file nor a JPEG (its JFIF density is a print size) has one
+        self.access = "plane"           # one file per plane: any y/x region costs that whole image or its polygons
 
     def read(self, region: dict[str, int | slice]) -> np.ndarray:
-        y, x = region.get("y", slice(None)), region.get("x", slice(None))
+        cut = tuple(region.get(ax, slice(None)) for ax in self._plane_axes)
         if "z" not in self.axes:
-            return self._plane(0)[y, x]
+            return self._plane(0)[cut]
         z = region.get("z", slice(None))
         if not isinstance(z, slice):
-            return self._plane(range(len(self._names))[z])[y, x]     # IndexError when out of range, like numpy
-        planes = [self._plane(k)[y, x] for k in range(len(self._names))[z]]
+            return self._plane(range(self._n)[z])[cut]      # IndexError when out of range, like numpy
+        planes = [self._plane(k)[cut] for k in range(self._n)[z]]
         if planes:
             return np.stack(planes)
-        return np.empty((0, *np.empty(self._grid, self.dtype)[y, x].shape), self.dtype)     # an empty z range
+        return np.empty((0, *np.empty(self._plane_shape, self.dtype)[cut].shape), self.dtype)   # an empty z range
 
     def _plane(self, k: int) -> np.ndarray:
-        """Image k's polygons, largest first, so the smaller of two overlapping regions is on top (file order
-        breaks ties). 0 is background."""
-        if self._last is not None and self._last[0] == k:
-            return self._last[1]
-        polygons = _polygons(self._regions[k], self._attribute, self._classes, self._names[k])
-        if len(polygons) > 65535:
-            raise ValueError(f"{self._names[k]}: {len(polygons)} regions exceed uint16 ids")
-        masks = [_inside(px, py, *self._grid) for px, py, _ in polygons]
-        out = np.zeros(self._grid, np.uint16)
-        for i in sorted(range(len(masks)), key=lambda i: -int(masks[i][2].sum())):
-            r0, c0, mask = masks[i]
-            value = i + 1 if self._fill == "instance" else self._classes.index(polygons[i][2]) + 1
-            out[r0:r0 + mask.shape[0], c0:c0 + mask.shape[1]][mask] = value
-        self._last = (k, out)
-        return out
+        if self._last is None or self._last[0] != k:
+            self._last = (k, self._make(k))
+        return self._last[1]
 
 
-def _member_url(src: Source, io: IO) -> tuple[str, str]:
-    """(zip url, member name) of the one JSON the binding names."""
-    urls = [u for url in src.urls for u in io.expand(url)]
-    if len(urls) != 1:
-        raise ValueError(f"the urls name {len(urls)} files; one array reads one VIA JSON, bind each as its own label")
-    url = urls[0]
-    i = url.find("::", max(url.find("/", url.find("://") + 3), 0))
-    if i < 0:
-        raise ValueError(f"{url}: the VIA JSON must be a zip member, '<zip url>::<member>.json'; its images are "
-                         "looked up beside it in the zip")
-    return url[:i], url[i + 2:]
+def _image(io: IO, url: str, shape: tuple[int, ...]) -> np.ndarray:
+    """The decoded JPEG at `url` as (Y, X) or (3, Y, X) uint8, checked against the first image's header."""
+    data = _patient(lambda: io.fetch(url)).read_bytes()     # the member whole; io checks its size and CRC
+    if data[:2] != b"\xff\xd8":
+        raise ValueError(f"{url} is not a JPEG (starts {data[:4]!r})")
+    a = np.asarray(imagecodecs.jpeg_decode(data))
+    if a.ndim == 3:
+        a = np.moveaxis(a, 2, 0)            # the samples become c
+    if a.shape != shape or a.dtype != np.uint8:
+        raise ValueError(f"{url}: decoded as {a.dtype} {a.shape}, not the uint8 {shape} of the first image's "
+                         "header; all images of one array must agree")
+    return a
+
+
+def _label(regions: list[dict], grid: tuple[int, int], read: str, attribute: str | None, classes: list[str] | None,
+           where: str) -> np.ndarray:
+    """One image's polygons on its grid, largest first, so the smaller of two overlapping regions is on top (file
+    order breaks ties). 0 is background."""
+    polygons = _polygons(regions, attribute, classes, where)
+    if len(polygons) > 65535:
+        raise ValueError(f"{where}: {len(polygons)} regions exceed uint16 ids")
+    masks = [_inside(px, py, *grid) for px, py, _ in polygons]
+    out = np.zeros(grid, np.uint16)
+    for i in sorted(range(len(masks)), key=lambda i: -int(masks[i][2].sum())):
+        r0, c0, mask = masks[i]
+        value = i + 1 if read == "instance" else classes.index(polygons[i][2]) + 1
+        out[r0:r0 + mask.shape[0], c0:c0 + mask.shape[1]][mask] = value
+    return out
+
+
+def _file_name(url: str) -> str:
+    """The file name of a member url or a plain url: what follows its last '/' (or the '::' of a top-level member)."""
+    return url[max(url.rfind("/"), url.rfind("::") + 1) + 1:]
 
 
 def open_array(src: Source, io: IO) -> Array:
-    fill, attribute, classes = src.params.get("fill"), src.params.get("attribute"), src.params.get("classes")
-    images = src.params.get("images", "*.jpg")
-    if fill not in FILLS:
-        raise ValueError(f"params.fill must be one of {FILLS}, got {fill!r}")
-    if (attribute is None) != (classes is None) or (fill == "semantic" and classes is None):
-        raise ValueError("params.attribute and params.classes go together, and params.fill 'semantic' needs both")
+    read, attribute, classes = src.params.get("read"), src.params.get("attribute"), src.params.get("classes")
+    only = src.params.get("annotated_only", False)
+    if read not in READS:
+        raise ValueError(f"params.read must be one of {READS}, got {read!r}")
+    if (attribute is None) != (classes is None) or (read == "semantic" and classes is None):
+        raise ValueError("params.attribute and params.classes go together, and params.read 'semantic' needs both")
+    if read == "image" and attribute is not None:
+        raise ValueError("params.attribute and params.classes describe the regions; drop them for read 'image'")
     if attribute is not None and (not isinstance(attribute, str) or not attribute):
         raise ValueError(f"params.attribute must be a region attribute name, got {attribute!r}")
     if classes is not None and not (isinstance(classes, list) and classes and len(set(classes)) == len(classes)
                                     and all(isinstance(c, str) and c for c in classes)):
         raise ValueError(f"params.classes must be a list of distinct class names, got {classes!r}")
-    if not isinstance(images, str) or not images or "/" in images:
-        raise ValueError(f"params.images must be a file name pattern such as '*.jpg', got {images!r}")
-    zip_url, member = _member_url(src, io)
-    folder = member[:member.rfind("/") + 1]
-    beside = {n[len(folder):] for n in io.list(zip_url) if n.startswith(folder) and "/" not in n[len(folder):]}
-    names = sorted(n for n in beside if n and fnmatchcase(n, images))
-    if not names:
-        raise ValueError(f"no member of {zip_url} in {folder!r} matches {images!r}")
-    url = f"{zip_url}::{member}"
+    if not isinstance(only, bool):
+        raise ValueError(f"params.annotated_only must be true or false, got {only!r}")
+    urls = sorted({u for url in src.urls for u in _patient(lambda: io.expand(url))})
+    jsons = [u for u in urls if u.lower().endswith(".json")]
+    images = [u for u in urls if u not in jsons]
+    if len(jsons) != 1 or not images:
+        raise ValueError(f"the urls name {len(jsons)} .json files and {len(images)} others; one array reads one "
+                         "VIA JSON and the images it annotates")
+    names = [_file_name(u) for u in images]
+    if len(set(names)) != len(names):
+        raise ValueError("two of the image urls have the same file name; a VIA entry names its image by file name")
     try:
-        entries = _entries(json.loads(_read(_source(io, url))), url)
+        entries = _entries(json.loads(_patient(lambda: io.fetch(jsons[0])).read_bytes()), jsons[0])
     except (UnicodeDecodeError, json.JSONDecodeError) as e:
-        raise ValueError(f"{url} is not JSON: {e}") from None
-    unannotated, unknown = sorted(set(names) - set(entries)), sorted(set(entries) - beside)
-    if unannotated or unknown:
-        raise ValueError(f"{url}: {len(unannotated)} of the {images!r} files of {folder!r} have no entry "
-                         f"{unannotated[:3]}, and {len(unknown)} entries name no file of that folder {unknown[:3]}")
-    grid = _grid(io, f"{zip_url}::{folder}{names[0]}")
-    return _Planes(names, [entries[n] for n in names], grid, fill, attribute, classes)
+        raise ValueError(f"{jsons[0]} is not JSON: {e}") from None
+    unannotated = [n for n in names if n not in entries]
+    if unannotated:
+        raise ValueError(f"{jsons[0]}: {len(unannotated)} of the {len(names)} images have no entry: "
+                         f"{unannotated[:3]}")
+    if only:
+        images = [u for u, n in zip(images, names) if entries[n]]
+        names = [n for n in names if entries[n]]
+        if not images:
+            raise ValueError(f"{jsons[0]}: none of the images has a region, and params.annotated_only is set")
+    y, x, samples = _frame(_patient(lambda: io.fetch(images[0])), images[0])
+    if read == "image":
+        shape = (y, x) if samples == 1 else (samples, y, x)
+        return _Stack(len(images), "yx" if samples == 1 else "cyx", shape, "uint8",
+                      lambda k: _image(io, images[k], shape))
+    return _Stack(len(images), "yx", (y, x), "uint16",
+                  lambda k: _label(entries[names[k]], (y, x), read, attribute, classes, names[k]))

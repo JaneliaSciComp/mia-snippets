@@ -1,13 +1,13 @@
 name: via-json-polygon-zip
 spec_version: 1
-summary: The polygon regions of one VGG Image Annotator (VIA) JSON zip member, filled onto the grid of the JPEG images beside it in the zip, one z plane per image in member-name order, as uint16 instance ids (region number per image) or class ids (from a region attribute).
+summary: The JPEG images a VGG Image Annotator (VIA) JSON annotates (RGB samples kept as c), or its polygon regions filled onto their grid as uint16 instance ids (region number per image) or class ids (from a region attribute); JSON and images are zip members, one z plane per image in url order, optionally only the images that carry regions.
 formats: [json, jpeg]
 containers: [zip]
 params:
-  fill: {type: str, required: true, doc: "'instance' fills each polygon with its 1-based region number in its image (ids restart in every plane); 'semantic' fills it with the 1-based index of its `attribute` value in `classes`. 0 is background; where polygons overlap the smaller one is on top. Reason required in binding"}
-  attribute: {type: str, required: false, doc: "the VIA region attribute that holds a region's class, e.g. 'Hco_stage'. Set together with `classes`; required for fill 'semantic'. Reason required in binding"}
-  classes: {type: list, required: false, doc: "every value `attribute` takes, in class id order (semantic id = position, from 1). A region whose value is missing or not listed raises, in both fills. From the record's classes; reason required in binding"}
-  images: {type: str, required: false, doc: "fnmatch pattern over the file names (no folder) of the JSON's own folder in the zip that picks the annotated images; they are the z planes, sorted by name. Default '*.jpg'. It must pick the files the paired raw reads, in the same order; reason required in binding"}
-requires: [numpy]
+  read: {type: str, required: true, doc: "'image' reads the JPEG images themselves (a raw). 'instance' fills each polygon with its 1-based region number in its image (ids restart in every plane); 'semantic' fills it with the 1-based index of its `attribute` value in `classes`. In a label 0 is background, and where polygons overlap the smaller one is on top. Reason required in binding"}
+  attribute: {type: str, required: false, doc: "labels only: the VIA region attribute that holds a region's class, e.g. 'Hco_stage'. Set together with `classes`; required for read 'semantic'. Reason required in binding"}
+  classes: {type: list, required: false, doc: "labels only: every value `attribute` takes, in class id order (semantic id = position, from 1). A region whose value is missing or not listed raises, in both label forms. From the record's classes; reason required in binding"}
+  annotated_only: {type: bool, required: false, doc: "true: the planes are only the images whose VIA entry has at least one region (VIA writes an entry with `regions: []` for every image that was loaded and never annotated). Absent or false: every image named by the urls is a plane. Set it the same on a raw and its labels; reason required in binding"}
+requires: [numpy, imagecodecs]
 tested_on: [zenodo-5734143-haemonchus-larvae-maskrcnn]
 supersedes: null
