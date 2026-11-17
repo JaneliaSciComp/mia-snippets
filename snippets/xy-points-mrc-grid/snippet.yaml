@@ -1,0 +1,10 @@
+name: xy-points-mrc-grid
+spec_version: 1
+summary: "A headerless text table of X Y pixel coordinates, one point per line (e.g. picked particle centres, .coord), as a zyx uint32 instance label on the grid of the MRC image the points were picked on: each point is one pixel, or a disc of `radius` pixels, holding the point's 1-based row number. Urls are [points table, MRC]; only the MRC's header is read."
+formats: [csv]
+containers: [http, s3]
+params:
+  radius: {type: int, required: false, doc: "pixels, >= 0; default 0: each point marks exactly its own pixel. With radius r every pixel whose centre is within r pixels of a point is marked (a disc 2r + 1 pixels across), and where discs overlap a pixel takes the nearest point. The table states no size, so a radius is the binding's choice of marker, not the object's extent. Reason required in binding when set"}
+requires: [numpy]
+tested_on: [empiar-10017-beta-galactosidase-particle-coordinates]
+supersedes: null
