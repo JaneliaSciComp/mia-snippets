@@ -1,0 +1,24 @@
+record: zenodo-10449491-liposome-cryoem-vesicle-contours-chol
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-csv-contours
+    urls: ["https://zenodo.org/records/10449491/files/PA2_00052_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+labels:
+  - snippet: tiff-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449491/files/PA2_00052_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449491/files/PA2_00052_driftcorr_phaseflip_hp.tiff"
+    params: {origin: bottom-left}
+    pairs_with: 0
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+reasons:
+  - "urls: only PA2_00052, the one micrograph whose URL the record states (technical.sample.urls); the Zenodo files URL is not a listable directory (harness list: 404), so the other 10 pairs cannot be bound until their file names are in the record. They follow the same pairing rule (<stem>.tiff and <stem>-memnet-contours.csv) and were not read here, so they are not claimed"
+  - "raw with tiff-csv-contours, no params: a plain single-page TIFF, one float32 sample per pixel, uncompressed, one strip per row; read as yx 3838x3710 float32, the record's shape and dtype. The file states no pixel size (ResolutionUnit none, no X/YResolution), so voxel_size_nm is None; the record's 0.273 nm is not from the file"
+  - "label urls are the contour CSV and the raw TIFF again: the CSV holds vertices only, so the snippet reads the TIFF's header for the shape of the grid the polygons are filled onto; no TIFF pixel is read for the label"
+  - "origin: bottom-left, which corrects the record (technical.arrays alignment_notes says y = row): the CSV's y is counted up from the bottom edge. Measured on PA2_00052 with the micrograph smoothed over 7x7 px: along the six outlines placed at row = 3837 - y the mean is -19, -18, -28, -25, -24 and -7 (dark, the membrane; -50 to -33 on the same outlines shrunk by 3%), while at row = y it is -2, -1, 2, -4, 0 and 1 (background; two of the outlines then lie on the carbon film). An overlay shows the same: flipped, each outline runs along the membrane of one vesicle; unflipped, none does. x needs no change"
+  - "the flip is known to within about a pixel only: row = 3837 - y (pixel centres at integer coordinates, the snippet's convention) and row = 3838 - y - 0.5 (corners at integers) differ by half a pixel, far less than the ~15 px membrane, and the data cannot tell them apart"
+  - "label_key auto_pred-vesicle-instance and segmentation_type instance, as the match agent intended: MEMNET contours are automatic, the class is vesicle (technical.arrays classes), and each contour_id (1..6 in this file) is one closed outline of 36 to 55 vertices about 19.5 px apart, filled with its contour_id. The outline runs along the membrane, so the filled region is the vesicle with its membrane up to about the outer leaflet"
+  - "coverage is partial: 6 vesicles are outlined in PA2_00052 and at least 4 more are visible without a contour (one multilamellar, some small or touching the carbon edge), so 0 means 'not outlined', not 'background'"
