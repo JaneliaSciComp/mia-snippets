@@ -1,0 +1,26 @@
+record: s-biad3159-llc-tumor-tcell-roi-confocal
+record_commit: 9fa0b1b286a46aa3b28a8eef1e86f75eab101c87
+snippets_commit: db126cbac2759c1c1ff1a605229c7523bd800546
+raw:
+  - snippet: czi-mosaic-imagej-roi
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/159/S-BIAD3159/Files/Fig_5C_EV3A/Mouse_2_CD8.czi"]
+    params: {}
+labels:
+  - snippet: czi-mosaic-imagej-roi
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/159/S-BIAD3159/Files/Fig_5C_EV3A/Mouse_2_CD8%20RoiSet/::*.roi"
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/159/S-BIAD3159/Files/Fig_5C_EV3A/Mouse_2_CD8.czi"
+    params: {skip_lines: true}
+    pairs_with: 0
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+reasons:
+  - "urls: only the record's technical.sample pair, Mouse_2_CD8.czi and its 'Mouse_2_CD8 RoiSet/' folder (the smallest scan). The other three scans (Mouse_1_CD4, Mouse_1_CD8, Mouse_2_CD4) have the same layout by the record and can be bound the same way, one raw and one label each; they were not read here, so they are not claimed"
+  - "raw with czi-mosaic-imagej-roi, no params: the CZI holds 100 full-resolution subblocks (4 channels x 25 tiles of 2048x2048, Gray8, zstd1) which the snippet places at the directory's pixel positions: cyx 4x9421x9421 uint8, the record's shape and the XML's SizeX/SizeY. Channels in file order: AF555-T1, AF488-T2, AF647-T3, DAPI-T3"
+  - "voxel size 103.58 nm comes from the CZI's Scaling metadata and disagrees with the record's 300 nm (harvester: paper Methods). The snippet reports what the file says; the scan is a 20x/0.8 tile scan with 2048-pixel tiles of about 212 um, which fits 103.58 nm. A human should correct the record or confirm"
+  - "label urls are the RoiSet glob and the raw CZI again: an .roi file holds coordinates only, so the snippet reads the CZI's header for the shape and voxel size of the grid the ROIs are filled onto; no CZI pixel is read for the label"
+  - "skip_lines: true, and the record is wrong about the ROI count: the folder's 74 files are 37 freehand outlines (sub-pixel coordinates, 111 to 427 points) and 37 straight lines (13 to 785 px long). Only the outlines enclose pixels, so the label has 37 nuclei, not 74. The lines are left out; what they measure is not documented (my reading: a per-cell distance measurement, e.g. to the nearest vessel, since the study is about proximity to CD31+ vessels)"
+  - "coordinate frame, which the record leaves open: ROI coordinates are taken as pixels of the stitched mosaic (x right, y down from the canvas corner). Checked on the first 12 outlines: mean intensity inside them is 15.4 (AF555-T1) and 14.1 (DAPI-T3) at the stated positions, against 7.6 to 8.5 and 8.5 to 11.2 when moved 60 px in any direction and 2.4 and 4.4 with x and y exchanged"
+  - "label_key manual_gt-nucleus-instance and segmentation_type instance, as the match agent intended: one manual outline per T cell nucleus, each filled with its own id (the 1-based position of its file in the name-sorted folder listing, so the 37 ids lie in 1..74 and are not consecutive)"
+  - "coverage is sparse: 37 outlined nuclei on a 9421x9421 scan full of unannotated nuclei, so 0 means 'not annotated', not 'background'"
+  - "the 7 RGB TIFF exports (Fig_*.tif) and the 7 figure-field CZIs are not annotated and are left unbound"
