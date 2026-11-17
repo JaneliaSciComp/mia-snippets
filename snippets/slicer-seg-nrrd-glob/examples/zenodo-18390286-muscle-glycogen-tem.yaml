@@ -1,0 +1,42 @@
+record: zenodo-18390286-muscle-glycogen-tem
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://zenodo.org/records/18390286/files/test.zip::test/*.TIF"]
+    params: {}
+  - snippet: image-tiles-glob
+    urls: ["https://zenodo.org/records/18390286/files/region.zip::region/*.TIF"]
+    params: {}
+  - snippet: image-tiles-glob
+    urls: ["https://zenodo.org/records/18390286/files/glycogen.zip::glycogen/*.TIF"]
+    params: {}
+labels:
+  - snippet: slicer-seg-nrrd-glob
+    urls: ["https://zenodo.org/records/18390286/files/test.zip::test/*.seg.nrrd"]
+    params: {segments: [A-band, I-band, intermyofibrillar, myofibril, sarco, mitochondria, z-disc]}
+    pairs_with: 0
+    label_key: manual_gt-sarcomere_region-semantic
+    segmentation_type: semantic
+  - snippet: slicer-seg-nrrd-glob
+    urls: ["https://zenodo.org/records/18390286/files/region.zip::region/*.seg.nrrd"]
+    params: {segments: [A-band, I-band, intermyofibrillar, myofibril, sarco, mitochondria, z-disc]}
+    pairs_with: 1
+    label_key: manual_gt-sarcomere_region-semantic
+    segmentation_type: semantic
+  - snippet: slicer-seg-nrrd-glob
+    urls: ["https://zenodo.org/records/18390286/files/glycogen.zip::glycogen/*.seg.nrrd"]
+    params: {segments: [Glycogen, Background]}
+    pairs_with: 2
+    label_key: manual_gt-glycogen-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw: one single-page 2048x2048 uint8 TIF per image (record technical.arrays), bound per zip as a member glob with image-tiles-glob, one file per z plane; a stack of independent 2D images (record dimensionality 2D), not a volume. No params: the TIFs have no samples. Every member of the three zips is deflated, so each plane is fetched whole (about 4 MB)"
+  - "labels: slicer-seg-nrrd-glob because every label is a 3D Slicer .seg.nrrd (NRRD0004, unsigned char, sizes 2048 2048 1, gzip) and no other snippet reads NRRD; the size-1 third axis is dropped, so each file is one yx plane"
+  - "pairing: each zip holds <stem>.TIF and <stem>.seg.nrrd for every stem and nothing else (zip directories: test 92 + 92, region 859 + 859, glycogen 100 + 100); the two globs of a zip expand sorted by name to the same stems in the same order, so label plane k is the segmentation of raw plane k"
+  - "grid: the label plane is returned as stored (NRRD axis 0 = x, identity space directions, Segmentation_ReferenceImageExtentOffset 0 0 0) with no transpose or flip. Checked on test/g_0004: the classes explain 33% of the TIF's intensity variance as read and at most 12% in the 7 other flips and transposes; on glycogen/b_0153 the Glycogen pixels have mean intensity 60 as read (dark granules) and 122 to 149 in the other orientations"
+  - "segments of test and region: the record's classes in id order, which are the names and label values of every header read (all 92 test files, 20 of the 859 region files, every 45th by name): 1 A-band, 2 I-band, 3 intermyofibrillar, 4 myofibril, 5 sarco, 6 mitochondria, 7 z-disc. Both arrays take the same list, so the shared label_key has one id per class. myofibril is named by every header and held by no pixel of those files"
+  - "segments of glycogen: 1 Glycogen, 2 Background (record alignment_notes). The ids are fixed by name because the stored values are not: a file of glycogen.zip stores Glycogen as 1 and 3, an empty Segment_3 as 2 and Background as 4, and reads as 1 and 2 through its names. Segment_3 is not listed: no pixel has it, and a plane that had pixels of an unlisted segment would raise instead of dropping them"
+  - "0 is kept as 0: pixels with no segment (partial annotation, record alignment_notes). The glycogen and region planes read hold it; most test planes do not"
+  - "test_ss.zip not bound: 84 TIF without masks (record notes)"
+  - "label keys from the draft: annotations.source manual -> manual_gt; encoding semantic-ids -> semantic; the class slugs sarcomere_region and glycogen are the match agent's and unconfirmed"
