@@ -1,0 +1,9 @@
+name: nd2-zip-glob
+spec_version: 1
+summary: Single-frame Nikon ND2 images (NIS-Elements Ver3 chunk files, one uncompressed grey 8- or 16-bit frame each) from zip members or plain URLs chosen by glob (or listed one by one), stacked along z; one file is yx. The ND2 container is parsed by the snippet; a deflated member is fetched whole.
+formats: [nd2]
+containers: [zip, http]
+params: {}
+requires: [numpy]   # no nd2 package (not on the allowlist): chunk map, attributes and calibration are parsed in snippet.py
+tested_on: [zenodo-23377605-yeast-brightfield-cellpose-masks]
+supersedes: null
