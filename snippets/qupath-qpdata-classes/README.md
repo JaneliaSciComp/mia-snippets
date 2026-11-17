@@ -7,6 +7,11 @@ ids onto the pixel grid of one slide: `yx`, `uint8`, the slide's full size, 0 wh
 
 - **urls**: exactly one `data.qpdata`, a zip member (`<zip>::<member>`) or a plain URL. No globs. The file is
   fetched whole (`access` is `file`); the largest seen is 9.8 MB.
+- **429 is waited out.** When the server answers the fetch with 429 Too Many Requests, it is asked again after
+  20, 40 and 60 s, then the error is raised. Zenodo counts 133 requests per client address in any 60 s, and in a
+  binding the labels are opened after the raws, which may have used that up; the harness itself treats a 429 as
+  final. Every other error is raised at once. This covers only this snippet's own file: a raw snippet that
+  fetches large files from the same host can still end the job (see the example binding's `reasons`).
 - **The Java object stream is never deserialized.** A `.qpdata` is written by `ObjectOutputStream`. The snippet
   walks the stream's grammar (class descriptions, field values, block data, back references; protocol 2) into
   plain records and takes three things from them: the image description (a JSON string, data file version 3 or

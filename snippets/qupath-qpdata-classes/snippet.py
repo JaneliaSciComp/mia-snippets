@@ -7,6 +7,7 @@ descriptions, field values, block data, back references) into plain records, fro
 cropped slides; the JSON says where each crop sits, and that maps the ROIs back onto the slide. See README.md."""
 import json
 import struct
+import time
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,7 @@ WRITE_METHOD, SERIALIZABLE, EXTERNALIZABLE, BLOCK_DATA = 1, 2, 4, 8          # c
 PRIMITIVE = {"B": ">b", "C": ">H", "D": ">d", "F": ">f", "I": ">i", "J": ">q", "S": ">h", "Z": ">?"}
 BAND = 1 << 22                  # pixels filled at a time
 UNITS_NM = {"µm": 1000.0, "um": 1000.0, "nm": 1.0, "mm": 1e6}
+WAITS = (20.0, 40.0, 60.0)      # seconds before each further fetch of a file a server refused with 429
 
 
 class _Desc:
@@ -432,6 +434,22 @@ class _Labels:
         return out[yi][..., xi]
 
 
+def _fetch(io: IO, url: str) -> Path:
+    """`io.fetch(url)`, asked again after each of WAITS when the server answers 429 Too Many Requests. A host
+    that counts requests per client and minute (Zenodo: 133 in any 60 s) answers so once the job's other arrays
+    have used the minute up, and `io` takes a 429 as final. Any other error is raised at once. Told by class
+    name, since a snippet may not import the HTTP client."""
+    for wait in (*WAITS, None):
+        try:
+            return io.fetch(url)
+        except Exception as e:      # BudgetExceeded, HostNotAllowed, a 404, ...: not a matter of waiting
+            status = getattr(getattr(e, "response", None), "status_code", None)
+            if wait is None or status != 429 or "HTTPStatusError" not in {c.__name__ for c in type(e).__mro__}:
+                raise
+            time.sleep(wait)
+    raise AssertionError("unreachable")
+
+
 def open_array(src: Source, io: IO) -> Array:
     if len(src.urls) != 1:
         raise ValueError(f"qupath-qpdata-classes reads one data.qpdata, got {len(src.urls)} urls")
@@ -441,4 +459,4 @@ def open_array(src: Source, io: IO) -> Array:
     if not isinstance(classes, list) or not classes or not all(isinstance(c, str) and c for c in classes) \
             or len(set(classes)) != len(classes) or len(classes) > 255:
         raise ValueError("param 'classes' is required: a list of 1 to 255 different class names; ids follow its order")
-    return _Labels(io.fetch(src.urls[0]), image, list(classes))
+    return _Labels(_fetch(io, src.urls[0]), image, list(classes))
