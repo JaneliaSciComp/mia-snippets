@@ -1,0 +1,11 @@
+name: zarr2-zip-jpegxr-cz-markers
+spec_version: 1
+summary: One Zarr v2 array of JPEG XR chunks (compressor imagecodecs_jpegxr) stored as members of a zip, read chunk by chunk as yx or yxc; or, with a Zeiss ZEN .cz graphics file (GraphicsDocument XML) before the array's url, that file's Marker points (default) or Rectangle regions drawn on the array's yx grid as instance ids.
+formats: [zarr, other]
+containers: [zip]
+params:
+  element: {type: str, required: false, doc: "label form only. marker (default): each Marker element marks the pixel that holds its point. rectangle: each Rectangle element is filled, rotated about its centre by its Rotation. An element's id is its 1-based position among the elements of that kind in the file. Reason required in binding when set"}
+  radius: {type: int, required: false, doc: "label form with element marker only. Each marker is drawn as a disc of this many pixels around its pixel instead of the single pixel (default 0); where discs overlap the later marker wins. The file gives points, so the disc is a drawing choice, not an outline. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [s-biad1165-nft-tau-wsi-point-annotations]
+supersedes: null
