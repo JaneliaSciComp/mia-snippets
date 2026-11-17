@@ -57,7 +57,8 @@ images differ in shape under hashed file names; `shape` does that here.
 - Images of a shape that `shape` does not name are not in the array. Binding every shape of a very mixed
   folder takes one raw and one label entry per shape.
 - JPEG is lossy; Exif orientation is not read (the decoder returns the stored pixel grid, which is what
-  Roboflow exports are annotated on; none of the example's images has an Exif block).
+  Roboflow exports are annotated on; none of the example's 1,497 bound haustoria images has an Exif block,
+  the GUS tiles were not all looked at).
 - YOLO box labels (`cx cy w h`), oriented boxes and keypoints are not read. PNG or TIFF images are not read.
 - Shape and label checks beyond open happen at `read`, not at `open`.
 
@@ -65,7 +66,8 @@ images differ in shape under hashed file names; `shape` does that here.
 
 `examples/zenodo-15570004-bluvision-haustoria-gus-yolo.yaml`: one 1.31 GB zip at zenodo.org with two Roboflow
 YOLOv8 segmentation sets of GUS-stained barley and wheat epidermis, each split into train/valid/test, one
-class each (`gus`, `hau`). The GUS set is 1052 / 301 / 150 tiles of 2048x2048 RGB; the haustoria set is 1378 /
+class each (`gus`, `hau`). The GUS set is 1052 / 301 / 150 RGB tiles, 2048x2048 per the record and in the tiles read while testing (the
+first of each split and four of test; reading all 1,503 was stopped by Zenodo's 429 rate limit); the haustoria set is 1378 /
 394 / 196 small cell crops, of which 1059 / 293 / 145 are 150x350 and the rest come in about 400 other shapes
 of one to three images each. Bound as six `zcyx` raws and six instance labels; the haustoria raws take
 `shape: [150, 350]`. The example binding's `snippets_commit` is the commit before this snippet's own (a binding
