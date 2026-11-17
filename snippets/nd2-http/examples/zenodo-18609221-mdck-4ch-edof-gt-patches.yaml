@@ -1,0 +1,17 @@
+record: zenodo-18609221-mdck-4ch-edof-gt-patches
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: nd2-http
+    urls: ["https://zenodo.org/records/18609221/files/ND%20Acquisition%2013.nd2"]
+    params: {}
+labels: []
+reasons:
+  - "raw is the record's role raw array, the ND2 fields of view, read with nd2-http: the file's ImageAttributesLV says 4 components, 2304 x 2304, 16 bits in memory, uncompressed (eCompression 2), one frame (uiSequenceCount 1), so the array is cyx 4x2304x2304 uint16, the record's axes, shape and dtype. No params: frame is only for files with several frames"
+  - "urls: only the record's technical.sample file, ND Acquisition 13.nd2. The other 35 ND2 files (path_pattern *.nd2, shape_varies false) are one field of view each and bind the same way, one raw per file; they were not read here, so they are not claimed. Zenodo has no directory index to glob and answers 429 when many files are opened at once (each raw costs a HEAD and two range requests to open)"
+  - "the draft's raw, the 424 PNG patches read with image-tiles-glob, is left out: the record gives them role target (contrast-stretched uint8 patches derived from the fields of view), not raw, and an example binding names only its own snippet. The match agent's smoke shows image-tiles-glob reads them (shape [424, 4, 512, 512]); whether they are bound as a second raw set is a human decision"
+  - "channels are the file's components in file order; the record names them DAPI, EGFP, mCherry, Alexa-647 (filter names; stains DAPI, F-actin, vimentin, Lamin A). The snippet does not read names. Per-channel min/max of this file as read are 12869/3329/2857/1627 and 57316/18985/27078/25998, the same ordering of levels as the record's nd2-package reading of ND Acquisition 10 (min 11525/3754/3302/1838), and neighbouring pixels of each channel correlate 0.96 to 1.00 along both y and x, so the interleaved (y, x, c) layout and the channel order are read correctly"
+  - "voxel size 108.06 nm (y and x) comes from the file's SLxCalibration.dCalibration (0.108061920548265 um, bValid true) and differs from the record's 110 nm, which the record took from the README and file names. The snippet reports what the file says; a human should decide which the record keeps"
+  - "the record's alignment note for the patches (<raw stem>_tile_<row>_<col>.png is a 512x512 crop of <raw stem>.nd2) could not be confirmed and looks wrong for this pair: normalised cross-correlation of each channel of 'ND Acquisition 13_tile_0_5.png' against the same channel of this file at every offset peaks at only 0.51 to 0.72, at a different place per channel, also with the patch transposed or flipped (a plain crop would give about 1 at one place). My reading: the patches are processed (they are extended-depth-of-field targets) or cut from a resampled image, not pixel crops of the raw. This does not affect the raw binding"
+  - "no labels bound: the record has no annotations; the patches are reconstruction targets, not masks"
+  - "the snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it)"
