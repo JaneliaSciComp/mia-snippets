@@ -1,0 +1,10 @@
+name: tiff-csv-contours
+spec_version: 1
+summary: One single-plane, single-sample TIFF at a plain URL as yx (uncompressed pixel data read by byte range, only the rows asked for); or, with a contour .csv beside the TIFF (header row, then one row per vertex - contour id, x, y in pixels of that image), each contour's closed polygon filled onto the TIFF's grid as yx uint16 instance ids equal to the CSV's contour ids.
+formats: [tiff, csv, other]
+containers: [http, s3]
+params:
+  y_up: {type: bool, required: false, doc: "label form only. true: the CSV's y is counted upward from the image's bottom row, so a vertex (x, y) is at column x, row height - 1 - y. Absent or false: y is the row, counted down from the top row. The CSV does not say which; set it on evidence (the contours lie on the structures they outline only one way up) and give that evidence in the binding's reasons"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-10449449-liposome-cryoem-vesicle-contours]
+supersedes: null
