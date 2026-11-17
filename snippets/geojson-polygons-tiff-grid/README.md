@@ -59,3 +59,23 @@ fails and names the classifications the file holds, so a misspelt class does not
 - The parts not run on real data: `MultiPolygon` in the binary form, bare-list and single-feature files, holes,
   `keep_classes`, `empty_ok` and the ImageJ voxel size were run on synthetic input only, compared pixel for pixel with
   a brute-force point-in-polygon test.
+
+## Tested on
+
+`s-biad3612-hnscc-codex-tma-cells` (examples/): core `Core_A5`, a 77 x 4493 x 4720 uint16 OME-TIFF (BigTIFF, 2.17 GB,
+506.7 nm), with its two QuPath GeoJSON files. `harness smoke` of the example binding: ok, labels 4493 x 4720, no
+errors, 379 MB fetched (245 MB of it the raw snippet's open).
+
+- `Core_A5_cell_nuclei.geojson` (78.6 MB): 38,146 cell objects, 19,737 classified `Cells` and 18,409 `Not_cells`;
+  28,837 have a `nucleusGeometry` (17,789 of the Cells, 11,048 of the Not_cells); 29 MultiPolygons among 66,983
+  geometries. All of them filled gives 38,146 ids on 38.4 % of the plane; a whole plane takes 2 to 3 s after about
+  10 s of parsing. Outlines span x 153.9..4626.9 and y 41.4..4468.5: x exceeds the image's 4493 rows, so x is the
+  4720-pixel axis.
+- `Core_A5_tumor_boundary.geojson` (325 KB): 68 `TUMOR` annotation polygons, 29.4 % of the plane.
+- **Frame check** against DAPI (channel 0, whole plane): mean intensity inside the nucleus outlines of the Cells is
+  216.9 where the file puts them, against 111.9 outside them; 207.9 to 212.6 with the outlines moved 3 pixels up,
+  down, left or right, 188.7 to 189.3 moved 15 pixels, 163.9 and 169.7 flipped in y or x, and 171.1 with x and y
+  exchanged. So the outlines sit on the nuclei with no offset, flip or transpose.
+- **The two classes.** Median filled area is 191 pixels for Cells and 185 for Not_cells, but mean DAPI is 216.9 in
+  the nuclei of Cells against 155.6 in those of Not_cells (203.9 against 158.9 in the cell outlines), and 90 % of
+  Cells have a nucleus outline against 60 % of Not_cells. The example binding drops `Not_cells`.
