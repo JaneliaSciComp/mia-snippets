@@ -36,9 +36,10 @@ catalog decodes a page or a file per read.
 
 `open_array` reads the 8-byte header and the IFDs up to the chosen page, with that page's tile offset and
 byte count tables, and no pixel data. Through `io` that is whole 1 MiB blocks: on the slides it was tested on
-(the IFD of each page follows its tiles) 2 MiB per slide at level 0, and one more block per level walked.
-Binding every slide of a large collection therefore costs about 2 MiB and two requests per slide before the
-first crop: 2,502 slides are about 5.2 GB, more than a 5 GB job cap, so bind as many slides as the job's cap
+(the IFD of each page follows its tiles) 2 MiB per slide at level 0, 3 MiB when the IFD and its tables cross a
+block boundary, and at least one more block per level walked.
+Binding every slide of a large collection therefore costs 2 to 3 MiB and two requests per slide before the
+first crop: 2,502 slides are 5.2 GB or more, over a 5 GB job cap, so bind as many slides as the job's cap
 and time allow rather than a whole collection of thousands.
 
 A 256×256 box overlaps 1 to 4 tiles of 512×512; their bytes come in the 1 MiB blocks that hold them. The file
