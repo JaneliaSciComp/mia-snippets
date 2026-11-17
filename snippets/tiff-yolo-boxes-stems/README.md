@@ -49,10 +49,30 @@ that mixes images and tables raises.
 - **The labels are boxes, not masks.** The array says where a box was drawn, not where the object's outline is.
   Whether a binding may call this `instance` or `semantic` is a human's decision (the record's encoding is
   `boxes-table`, for which the binding has no `segmentation_type`); see the example binding's `reasons`.
-- **Access.** `plane`: one file is one plane (all of its `c`). A stored member or a Range-capable plain URL is
-  read through `io.open`; a deflated member raises `NeedsFetch` and is staged whole with `io.fetch`.
-  `open_array` reads the first file only (an image's header; a table's bytes and its image's header). The last
-  decoded file is kept, so reading its `c` planes in turn decodes it once.
+- **Access.** `plane`: one file is one plane (all of its `c`). `open_array` reads the first file only (an image's
+  header; a table's rows and its image's header); `read` gets the others. The last decoded file is kept, so
+  reading its `c` planes in turn decodes it once.
+- **Few requests.** The way a file is asked for is chosen to cost a rate-limited host as few requests as it can:
+  - An image (a file named `.tif` / `.tiff`) is staged whole with `io.fetch`: two requests the first time (the
+    zip member's local header and its data; an image is decoded whole anyway), none after that for any array of
+    the job or of a later job with the same dataset cache. So the header a table asks for and the pixels its raw
+    array reads are the same two requests, and a staged image is read offline.
+  - A table (any other name) is read by range with `io.open`: the member's local header every time it is opened,
+    its bytes once per job. It is not staged, because `io.fetch` cannot ask for an empty stored member (the range
+    of no bytes is answered with 416) and tables without rows are common. A deflated member (`NeedsFetch`) is
+    staged. A file with another name that begins as a TIFF is then staged as an image; what a file is, is still
+    decided by its bytes.
+  - Counted on the example: opening its 4 raws and 8 labels costs 21 requests (about twice that when images
+    were read by range too), and a new plane read as raw, instance and semantic label 4 or 5 (2 for the image,
+    1 for each table open, 1 more when the table's bytes are not in a cached block yet).
+- **Waiting on 429.** A step that makes requests (a glob's expansion, a listing, one file) and is answered with
+  HTTP 429 *Too Many Requests* is tried again, up to 6 times: after the answer's `Retry-After` seconds + 1,
+  not less than 10 s and not more than 90 s (10 s when the header names no seconds). The harness does not wait
+  on 429 itself; it does ask again after a dropped connection or a 5xx, so the snippet leaves those to it. The
+  error is told by class name and status, as a snippet may not import the HTTP client. Every other error
+  (`BudgetExceeded`, `HostNotAllowed`, a 404, the snippet's own) is raised at once. A read that meets a spent
+  limit therefore takes up to minutes longer instead of failing; a limit that does not lift within about six
+  minutes still fails with the 429.
 - **dtype.** The image's own; `uint16` for tables. **Voxel size:** `None`; TIFF resolution tags describe print
   size and a YOLO table has none.
 
@@ -61,10 +81,14 @@ that mixes images and tables raises.
 - One array per image shape. A set in which nearly every image has its own shape becomes many arrays, some of
   one file, and each array costs requests at open (below); nothing in this snippet pads or crops to a common
   grid, because a snippet is a pure reader.
-- Requests: opening an image array costs the first file's zip local header and TIFF header (2 to 3 range
-  requests), a table array the first table and its image's header (about 4, fewer when the blocks are already in
-  the job's cache). A host with a request limit (Zenodo: 133 per minute, shared by everyone behind one address,
-  answered with 429, which the harness does not retry) limits how many arrays one binding can hold.
+- Requests: opening an image array costs 2 (its first image, staged), a table array 2 (its first table; the
+  image is its raw's first, already staged) or 1 (the same table again, for the other `boxes` mode). A host with
+  a request limit (Zenodo: `x-ratelimit-limit: 133` a minute, shared by everyone behind one address) is waited
+  for, so the limit costs time, not the read; a binding of hundreds of arrays opens over minutes.
+- Bytes: a table's grid costs its whole image (some MB here) where a header would do. That is free when the raw
+  is read too, as in every crop or stage of a paired label, and wasted only by a reader of labels alone. A table
+  costs the 1 MiB cache block (or two) it lies in.
+- A stored member named `.tif` / `.tiff` that is empty cannot be staged (416); it is no image either way.
 - Shape and row checks beyond the first file happen at `read`, not at `open`.
 - No multi-page, planar (`SYX`) or palette TIFF, no JPEG or PNG images, no pyramid levels or voxel size.
 - YOLO variants with more than five fields per row (confidence, polygons, oriented boxes, track ids) raise.

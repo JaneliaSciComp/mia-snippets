@@ -9,10 +9,15 @@ box number (`boxes: instance`) or by the class id + 1 (`boxes: semantic`). A fil
 all-background plane. The kind is taken from the first file's leading bytes (TIFF magic or not), not from its
 name. `open_array` reads the first file (and, for a table, its image's header) without decoding pixels; `read`
 gets the rest.
+
+Requests are kept few, for hosts that limit them: an image is staged whole with `io.fetch`, once per job and
+dataset cache, so the header a table asks for and the pixels its raw array reads are the same two requests; a
+table is read by range. A step answered with HTTP 429 (a host's request limit) waits and asks again.
 """
 import math
+import time
 from pathlib import Path
-from typing import BinaryIO
+from typing import Callable, TypeVar
 
 import numpy as np
 import tifffile
@@ -24,32 +29,66 @@ SPEC_VERSION = 1
 BOX_MODES = ("instance", "semantic")
 TIFF_MAGIC = (b"II*\x00", b"MM\x00*", b"II+\x00", b"MM\x00+")
 IMAGE_EXTS = ("tif", "tiff")
+ATTEMPTS = 6                    # of one step that makes requests, while the host answers 429
+WAITS = (10.0, 90.0)            # seconds before asking again: at least, and at most (a limit counted by the minute)
+T = TypeVar("T")
 
 Box = tuple[int, float, float, float, float]        # class id, x0, y0, x1, y1 in pixels (fractional)
 
 
-def _source(io: IO, url: str) -> BinaryIO | Path:
+def _wait(e: Exception) -> float | None:
+    """Seconds to wait before a step answered with HTTP 429 (too many requests) is tried again: the answer's
+    Retry-After + 1 within WAITS, the least of WAITS when it names no seconds; None for any other error. Told
+    by class name, since a snippet may not import the HTTP client."""
+    response = getattr(e, "response", None)
+    if "HTTPStatusError" not in {c.__name__ for c in type(e).__mro__} or getattr(response, "status_code", 0) != 429:
+        return None
     try:
-        return io.open(url)
-    except NeedsFetch:          # a deflated member, or a server without Range: stage the whole file
-        return io.fetch(url)
+        told = float(response.headers.get("retry-after")) + 1
+    except (AttributeError, TypeError, ValueError):     # no header, or an HTTP date
+        told = WAITS[0]
+    return min(max(told, WAITS[0]), WAITS[1]) if math.isfinite(told) else WAITS[1]
 
 
-def _all_bytes(src: BinaryIO | Path) -> bytes:
-    if isinstance(src, Path):
-        return src.read_bytes()
-    src.seek(0)
-    return src.read()
+def _retry(step: Callable[[], T]) -> T:
+    """`step()`, tried up to ATTEMPTS times while the host answers 429; any other error is raised at once (the
+    harness itself asks again after a dropped connection or a 5xx)."""
+    for attempt in range(ATTEMPTS):
+        try:
+            return step()
+        except Exception as e:      # BudgetExceeded, HostNotAllowed, a 404, ValueError: raised as they are
+            wait = _wait(e)
+            if wait is None or attempt == ATTEMPTS - 1:
+                raise
+            time.sleep(wait)
+    raise AssertionError("unreachable")
 
 
-def _is_tiff(src: BinaryIO | Path) -> bool:
-    if isinstance(src, Path):
-        with src.open("rb") as f:
-            return f.read(4) in TIFF_MAGIC
-    src.seek(0)
-    head = src.read(4)
-    src.seek(0)
-    return head in TIFF_MAGIC
+def _is_tiff(path: Path) -> bool:
+    with path.open("rb") as f:
+        return f.read(4) in TIFF_MAGIC
+
+
+def _content(io: IO, url: str) -> Path | bytes:
+    """A file by what its leading bytes say: a TIFF as a local Path, staged whole; anything else as its bytes.
+
+    The name only chooses the way there. A file named .tif / .tiff is staged at once (`io.fetch`: the member's
+    local header and its data the first time, no request after that, whichever array asks). Any other file is
+    opened by range (`io.open`: the local header every time, the data once per job), which also reads an empty
+    stored member, a range `io.fetch` cannot ask for; a deflated one is staged."""
+    if url.rpartition(".")[2].lower() not in IMAGE_EXTS:
+        def by_range() -> bytes | None:
+            try:
+                f = io.open(url)
+            except NeedsFetch:
+                return None
+            head = f.read(4)
+            return None if head in TIFF_MAGIC else head + f.read()
+
+        if (data := _retry(by_range)) is not None:
+            return data
+    path = _retry(lambda: io.fetch(url))
+    return path if _is_tiff(path) else path.read_bytes()
 
 
 def _tiff_series(tif: tifffile.TiffFile, url: str) -> tifffile.TiffPageSeries:
@@ -64,10 +103,10 @@ def _tiff_series(tif: tifffile.TiffFile, url: str) -> tifffile.TiffPageSeries:
 
 def _image_header(io: IO, url: str) -> tuple[tuple[int, ...], np.dtype]:
     """(Y, X) or (Y, X, S) and the dtype of a TIFF, from its header."""
-    src = _source(io, url)
-    if not _is_tiff(src):
+    path = _content(io, url)
+    if not isinstance(path, Path):
         raise ValueError(f"{url}: not a TIFF file")
-    with tifffile.TiffFile(src) as tif:
+    with tifffile.TiffFile(path) as tif:
         s = _tiff_series(tif, url)
         return tuple(s.shape), np.dtype(s.dtype)
 
@@ -147,14 +186,15 @@ class _Planes:
         self._io, self._urls, self._boxes, self._classes = io, urls, boxes, classes
         self._last: tuple[int, np.ndarray] | None = None    # the last decoded file: its c planes are read in turn
         self._listed: dict[str, list[str]] = {}             # container url -> its names, for finding images
-        self._table = not _is_tiff(_source(io, urls[0]))
+        first = _content(io, urls[0])
+        self._table = not isinstance(first, Path)
         if self._table:
             if boxes not in BOX_MODES or not classes:
                 raise ValueError(f"{urls[0]} is not a TIFF, so it is read as a YOLO box table: set params.boxes "
                                  f"({' or '.join(BOX_MODES)}) and params.classes (the names, in class id order)")
             shape, _ = _image_header(io, self._image(urls[0]))
             self._file_shape = shape[:2]
-            _yolo(_all_bytes(_source(io, urls[0])), self._file_shape, len(classes), urls[0])   # fails at open
+            _yolo(first, self._file_shape, len(classes), urls[0])      # a bad first table fails at open
             self._file_dtype = np.dtype("uint16")
         else:
             if boxes is not None or classes is not None:
@@ -165,7 +205,7 @@ class _Planes:
         self.axes = "z" + ("c" if c else "") + "yx"
         self.shape = (len(urls),) + c + self._file_shape[:2]
         self.dtype = self._file_dtype
-        self.access = "plane"           # a y/x region costs its file, read by range or staged whole
+        self.access = "plane"           # a y/x region costs its file
         self.voxel_size_nm = None       # TIFF resolution tags describe print size; a YOLO table has none
 
     def _image(self, url: str) -> str:
@@ -174,7 +214,7 @@ class _Planes:
         folder, name = (member if sep else url).rpartition("/")[::2]
         container = zip_url if sep else url[:len(url) - len(name)]
         if container not in self._listed:
-            self._listed[container] = self._io.list(container)
+            self._listed[container] = _retry(lambda: self._io.list(container))
         stem = name.rpartition(".")[0]
         prefix = folder + "/" if sep and folder else ""
         found = [n for n in self._listed[container]
@@ -202,17 +242,17 @@ class _Planes:
         if self._table:
             image = self._image(url)
             shape = _image_header(self._io, image)[0][:2]
-            src = _source(self._io, url)
-            if _is_tiff(src):
+            data = _content(self._io, url)
+            if isinstance(data, Path):
                 raise ValueError(f"{url} is a TIFF among YOLO tables; one array holds images or tables, not both")
-            a = (_paint(shape, _yolo(_all_bytes(src), shape, len(self._classes), url), self._boxes, url)
+            a = (_paint(shape, _yolo(data, shape, len(self._classes), url), self._boxes, url)
                  if shape == self._file_shape else None)
         else:
-            src = _source(self._io, url)
-            if not _is_tiff(src):
+            path = _content(self._io, url)
+            if not isinstance(path, Path):
                 raise ValueError(f"{url} is not a TIFF among TIFF images; one array holds images or tables, "
                                  "not both")
-            with tifffile.TiffFile(src) as tif:
+            with tifffile.TiffFile(path) as tif:
                 s = _tiff_series(tif, url)      # another shape is refused before its pixels are read
                 shape = tuple(s.shape)
                 a = np.asarray(s.asarray()) if shape == self._file_shape and s.dtype == self._file_dtype else None
@@ -229,7 +269,7 @@ def _expand(urls: tuple[str, ...], io: IO) -> list[str]:
     """Each glob url (`<zip>::<glob>`, `<dir>/::<glob>`) becomes its matching files, other urls stand for
     themselves; all of them together are sorted by stem (the url without its last extension), whatever the order
     of the urls: two image globs (`*.tiff`, `*.tif`) then pair plane for plane with one table glob (`*.txt`)."""
-    out = sorted((u for url in urls for u in io.expand(url)), key=_stem_key)
+    out = sorted((u for url in urls for u in _retry(lambda: io.expand(url))), key=_stem_key)
     if not out:
         raise ValueError("the urls match no file")
     if len(set(out)) != len(out):
