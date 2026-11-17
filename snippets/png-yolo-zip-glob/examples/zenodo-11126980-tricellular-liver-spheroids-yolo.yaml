@@ -1,0 +1,60 @@
+record: zenodo-11126980-tricellular-liver-spheroids-yolo
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/train/*.png"]
+    params: {}
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/val/*.png"]
+    params: {}
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/test/*.png"]
+    params: {}
+labels:
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/train/*.txt"]
+    params: {boxes: instance, classes: [Healthy, Unhealthy]}
+    pairs_with: 0
+    label_key: manual_gt-spheroid-instance
+    segmentation_type: instance
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/train/*.txt"]
+    params: {boxes: semantic, classes: [Healthy, Unhealthy]}
+    pairs_with: 0
+    label_key: manual_gt-spheroid-semantic
+    segmentation_type: semantic
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/val/*.txt"]
+    params: {boxes: instance, classes: [Healthy, Unhealthy]}
+    pairs_with: 1
+    label_key: manual_gt-spheroid-instance
+    segmentation_type: instance
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/val/*.txt"]
+    params: {boxes: semantic, classes: [Healthy, Unhealthy]}
+    pairs_with: 1
+    label_key: manual_gt-spheroid-semantic
+    segmentation_type: semantic
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/test/*.txt"]
+    params: {boxes: instance, classes: [Healthy, Unhealthy]}
+    pairs_with: 2
+    label_key: manual_gt-spheroid-instance
+    segmentation_type: instance
+  - snippet: png-yolo-zip-glob
+    urls: ["https://zenodo.org/records/11126980/files/tri-cellular_liver_spheroids_dataset.zip::tri-culture_spheroids_dataset/test/*.txt"]
+    params: {boxes: semantic, classes: [Healthy, Unhealthy]}
+    pairs_with: 2
+    label_key: manual_gt-spheroid-semantic
+    segmentation_type: semantic
+reasons:
+  - "png-yolo-zip-glob for the labels instead of the draft's tiff-jpeg-voc-zip-glob: the annotations are YOLO text, one <stem>.txt beside each <stem>.png, rows '<class> <x_center> <y_center> <width> <height>' as fractions of the image; no catalog snippet reads them (the two box snippets take VOC-like XML). The draft's params and label keys are kept as they were"
+  - "png-yolo-zip-glob for the raws too instead of the draft's image-tiles-glob, so one snippet sorts both sides of a pair: it reads the same RGB PNG members with the samples as c (zcyx, c = R, G, B; the record says the samples are not identical) and orders a glob's files by stem, the order its label globs get. params {}: nothing to choose for an image"
+  - "three raws, one per split folder (train 413, val 51, test 52 PNGs, as the record's layout says), so the record's splits stay separate; each is a z stack of independent 2D fields, not a 3D volume (record dimensionality 2D)"
+  - "labels pair with the raw of the same folder by file stem (record: '<32-hex-id>.png + <32-hex-id>.txt side by side'): both globs are sorted by stem, and the snippet takes each label plane's grid from the IHDR of the PNG with its stem, so plane k of a label is the annotation of plane k of its raw whenever the two globs hold the same stems; the zip's listing has a .txt for every .png in each folder (413, 51, 52)"
+  - "classes [Healthy, Unhealthy]: the record's classes (id 0 Healthy, id 1 Unhealthy, from the zip's dataset.yaml names), in YOLO id order, so semantic ids are 1 Healthy, 2 Unhealthy (YOLO id + 1, because 0 is background). A row with any other class id raises"
+  - "the '?' the match agent saw at the end of each row is a carriage return (the files have CRLF line ends, shown as '?' by harness describe, which replaces control characters); the snippet splits fields on any whitespace, so it is not part of the last number"
+  - "all 516 annotation files were read and painted while testing: 4,370 rows (the record's 4,370 spheroids), 4,176 of class 0 and 194 of class 1, at most 20 per file. train/1C43C05C82D872064DDB806197D5532D.txt is empty (an all-background plane); one row of test/9484472A1D68087DAF021788B7E9BEE1.txt has width and height 0 and paints nothing (4,369 boxes are painted); 10 train boxes reach 1 or 2 pixels past the left or top edge and are clipped to the image; no box is hidden completely by others"
+  - "NEEDS A HUMAN DECISION, boxes as two labels per raw (as in the catalog's VOC box example): the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. boxes instance (each box filled with its row number in its file, segmentation_type instance, label_key manual_gt-spheroid-instance) tells the spheroids apart, and boxes semantic (each box filled with its class id + 1, segmentation_type semantic, label_key manual_gt-spheroid-semantic) carries Healthy/Unhealthy. Both are filled rectangles, not spheroid outlines: a consumer must not take them for pixel-accurate masks. Where boxes overlap the smaller one is on top"
+  - "label_key manual_gt-spheroid-*: annotations.source manual; the boxes mark spheroids (record description: 'YOLO-format boxes for 4,370 spheroids'), the draft's choice"
