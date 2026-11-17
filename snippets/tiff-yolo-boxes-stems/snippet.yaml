@@ -1,0 +1,12 @@
+name: tiff-yolo-boxes-stems
+spec_version: 1
+summary: A set of 2D single-page TIFF images (grey, or RGB samples kept as c), or of the YOLO box tables beside them (rows 'class_id x_center y_center width height' as fractions of the image size) rasterised on the grid of the TIFF with the same stem, from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane. `stems` chooses the files of one array by name, so a set whose images come in several shapes is bound as one array per shape. A table without rows is an all-background plane.
+formats: [tiff, other]
+containers: [zip, http]
+params:
+  stems: {type: list, required: false, doc: "the stems (file name without directory and last extension, e.g. 'a' for a.tiff and a.txt, 'b.tiff' for b.tiff.tif and b.tiff.txt) of the files this array holds; the other files the urls stand for are left out. Every stem must be exactly one file's. For the files of one image shape, and the same list for the images and their tables; reason required in binding"}
+  boxes: {type: str, required: false, doc: "YOLO tables only, and required for them: how the boxes are painted on the yx grid. 'instance' fills each box with its 1-based row number among the file's boxes; 'semantic' fills it with its class id + 1. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "YOLO tables only, and required for them: the class names in class id order (obj.names / the data yaml; semantic id = class id + 1 = position from 1). A row whose class id has no name raises, in both modes. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-12665681-siliceous-microfossils-yolo]
+supersedes: null
