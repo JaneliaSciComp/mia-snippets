@@ -2,6 +2,7 @@ import hashlib
 import io as stdio
 import json
 import os
+import time
 import zipfile
 
 import httpx
@@ -422,3 +423,74 @@ def test_files_are_fetched_four_requests_at_a_time_whatever_their_size(server, m
     paths = io.fetch_all([server.url(f"/{i}.bin") for i in range(len(bodies))])
     assert [p.read_bytes() for p in paths] == bodies and io.bytes_fetched == sum(map(len, bodies))
     assert 1 < server.peak <= 4
+
+
+@pytest.fixture
+def sleeps(monkeypatch):
+    """The pauses the harness takes, recorded and not slept."""
+    taken = []
+    monkeypatch.setattr(time, "sleep", lambda seconds: taken.append(seconds) if seconds else None)
+    return taken
+
+
+def test_a_429_waits_as_long_as_the_server_says_and_asks_again(server, make_io, sleeps, monkeypatch):
+    import mia_harness.io as io_module
+    server.files["/d.bin"] = DATA
+    server.fail, server.fail_mode, server.extra_headers = 5, "429", {"Retry-After": "7"}
+    io = make_io()
+    assert io.fetch(server.url("/d.bin")).read_bytes() == DATA      # more refusals than a dropped request gets tries
+    assert sleeps == [7] * 5 and io.bytes_fetched == len(DATA)
+    assert server.requests == [("HEAD", "/d.bin")] * 6 + [("GET", "/d.bin")]
+    monkeypatch.setattr(io_module, "RATE_PATIENCE", 20)
+    server.files["/e.bin"], server.fail = DATA, 5
+    with pytest.raises(httpx.HTTPStatusError):                       # 7 + 7 s waited, a third wait would pass 20 s
+        io.fetch(server.url("/e.bin"))
+    assert server.heads().count("/e.bin") == 3
+
+
+def test_a_429_without_a_usable_hint_backs_off(server, make_io, sleeps):
+    server.files["/d.bin"] = DATA
+    server.fail, server.fail_mode, server.extra_headers = 2, "429", {"Retry-After": "Wed, 21 Oct 2015 07:28:00 GMT"}
+    assert make_io().fetch(server.url("/d.bin")).read_bytes() == DATA
+    assert sleeps == [1.0, 4.0]
+
+
+def test_requests_pause_until_the_reset_when_the_server_says_few_are_left(server, make_io, sleeps):
+    server.files["/d.bin"] = DATA
+    server.extra_headers = {"X-RateLimit-Remaining": "3", "X-RateLimit-Reset": str(int(time.time()) + 30)}
+    io = make_io()
+    f = io.open(server.url("/d.bin"))               # the HEAD: nothing said yet, so no pause before it
+    assert sleeps == []
+    assert f.read(10) == DATA[:10]                  # before the GET: until the reset the HEAD's answer named
+    assert len(sleeps) == 1 and 25 < sleeps[0] <= 30
+    server.extra_headers = {"X-RateLimit-Remaining": "100", "X-RateLimit-Reset": "5"}
+    f.seek(BLOCK)
+    f.read(10)                                      # one pause per notice (the GET's own said 3 again) ...
+    f.seek(2 * BLOCK)
+    f.read(10)                                      # ... and none once plenty are left
+    assert len(sleeps) == 2
+    server.extra_headers = {"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": "12"}   # a reset in seconds from now
+    f.seek(3 * BLOCK)
+    f.read(10)
+    assert io.fetch(server.url("/d.bin")).read_bytes() == DATA
+    assert sleeps[2:] == [12] or (len(sleeps) == 3 and 11 < sleeps[2] <= 12)
+
+
+def test_a_small_zip_member_is_one_request_header_and_data_together(server, make_io):
+    stored, deflated = os.urandom(5000), b"hello " * 10000
+    long_extra = zipfile.ZipInfo("x.bin")
+    long_extra.extra = b"\xfe\xca" + (3000).to_bytes(2, "little") + bytes(3000)   # a local header longer than guessed
+    buf = stdio.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("s.bin", stored, compress_type=zipfile.ZIP_STORED)
+        z.writestr("d.bin", deflated, compress_type=zipfile.ZIP_DEFLATED)
+        z.writestr(long_extra, stored, compress_type=zipfile.ZIP_DEFLATED)
+        z.writestr("last.bin", deflated, compress_type=zipfile.ZIP_DEFLATED)       # ends near the zip's end
+    server.files["/z.zip"] = buf.getvalue()
+    z, io = server.url("/z.zip"), make_io()
+    io.list(z)
+    for name, data, requests in (("s.bin", stored, 1), ("d.bin", deflated, 1), ("last.bin", deflated, 1),
+                                 ("x.bin", stored, 2)):
+        gets = len(server.gets())
+        assert io.fetch(f"{z}::{name}").read_bytes() == data
+        assert len(server.gets()) - gets == requests, name

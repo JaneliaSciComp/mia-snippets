@@ -6,7 +6,7 @@ import pytest
 from rangeserver import server  # noqa: F401  (fixture)
 
 from mia_harness.cache import DatasetCache
-from mia_harness.io import BLOCK, IO
+from mia_harness.io import BLOCK, HEADER_SLACK, IO
 
 KEY = "0" * 64
 
@@ -100,11 +100,12 @@ def test_member_hits_cost_only_the_directory_read(server, tmp_path):
     z = server.url("/z.zip")
     first = make_io(tmp_path, "j1")
     first.list(z)
-    for name, data in members.items():         # a miss costs the local header and the compressed bytes
-        before = first.bytes_fetched
+    for name, data in members.items():         # a miss costs the local header, the compressed bytes and the
+        before = first.bytes_fetched           # slack asked for in case the header is longer than guessed
         assert first.fetch(f"{z}::{name}").read_bytes() == data
         info = zipfile.ZipFile(buf).getinfo(name)
-        assert first.bytes_fetched - before == 30 + info.compress_size
+        header = 30 + len(name)
+        assert header + info.compress_size <= first.bytes_fetched - before <= header + HEADER_SLACK + info.compress_size
     first.close()
     second = make_io(tmp_path, "j2")
     second.list(z)                              # the one central-directory tail read per zip per job

@@ -21,7 +21,8 @@ class RangeServer:
         self.range_shift = 0                     # answer a Range request this many bytes later than asked
         self.gzip = False                        # serve a gzip variant (own ETag) to clients that accept it
         self.fail = 0                            # answer this many more requests badly, as `fail_mode` says
-        self.fail_mode = "truncate"              # "truncate": half the body, then close; "503": a 503
+        self.fail_mode = "truncate"              # "truncate": half the body, then close; "503", "429": that status
+        self.extra_headers: dict[str, str] = {}  # sent with every answer to a file's path (rate limit headers)
         self.requests: list[tuple[str, str]] = []  # (method, path), every request in order
         self.delay = 0.0                         # seconds each request takes before it is answered
         self.peak = 0                            # the most requests ever in flight at once
@@ -100,21 +101,25 @@ class _Handler(BaseHTTPRequestHandler):
         if m and not s.ignore_range:
             start, end, status = int(m[1]), min(len(data), int(m[2]) + 1 if m[2] else len(data)), 206
             start, end = start + s.range_shift, min(len(data), end + s.range_shift)
-        if s.fail > 0 and (body or s.fail_mode == "503"):   # a truncated HEAD is no failure: it has no body
+        if s.fail > 0 and (body or s.fail_mode != "truncate"):   # a truncated HEAD is no failure: it has no body
             s.fail -= 1
-            if s.fail_mode == "503":
-                status, start, end = 503, 0, 0
+            if s.fail_mode != "truncate":
+                status, start, end = int(s.fail_mode), 0, 0
             self.send_response(status)
+            for name, value in s.extra_headers.items():
+                self.send_header(name, value)
             self.send_header("Content-Length", str(end - start))
             if status == 206:
                 self.send_header("Content-Range", f"bytes {start}-{end - 1}/{len(data)}")
             self.end_headers()
-            if body and status != 503:
+            if body and status < 400:
                 self.wfile.write(data[start:start + (end - start) // 2])
             return                                  # the connection closes: a body shorter than promised
         self.send_response(status)
         self.send_header("Content-Length", str(end - start))
         self.send_header("Accept-Ranges", "bytes")
+        for name, value in s.extra_headers.items():
+            self.send_header(name, value)
         self.send_header("ETag", f'"{etag}"')
         self.send_header("Vary", "Accept-Encoding")
         if gz:
