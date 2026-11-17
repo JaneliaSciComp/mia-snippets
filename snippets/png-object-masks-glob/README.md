@@ -53,7 +53,7 @@ mask 731, outside 162; flipped or transposed masks give no contrast).
 ## Known limits
 
 - One array is one image. Stacking several images' masks along z is not done here.
-- The first read costs all the files: about 30 s of PNG decoding for 381 files of 2048x2048.
+- The first read costs all the files: 15 to 25 s of PNG decoding for 381 files of 2048x2048.
 - A zip on a server without Range is staged whole (`io.fetch` of the zip), which the byte cap may refuse.
 - An offline job (a re-stage from the dataset cache) finds the zip only if the whole zip is in the cache; the
   blocks read by range are not kept there.
