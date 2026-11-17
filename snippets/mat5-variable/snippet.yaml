@@ -1,0 +1,11 @@
+name: mat5-variable
+spec_version: 1
+summary: One 2D numeric or logical variable of a MATLAB 5 MAT-file (save -v6/-v7, zlib-compressed or not; not the HDF5 -v7.3) as a yx array in row/column order, or several same-sized variables combined into one uint8 {0,1} mask or id map; from a plain URL or a zip member.
+formats: [other]
+containers: [http, s3, zip]
+params:
+  variable: {type: str, required: true, doc: "name of the variable to read, as MATLAB's `whos -file` lists it, e.g. 'BW1'; or several names separated by commas, e.g. 'BW1,BW2', combined as `combine` says. Names are per file: say in the binding's reasons what each is"}
+  combine: {type: str, required: false, doc: "how the named variables become one uint8 array: 'union' (the default for several names) is 1 where any of them is nonzero; 'ids' gives the k-th name the id k (from 1) where it is nonzero and refuses variables that overlap. Unset with one name: the variable's own values and dtype. Reason required in binding when set"}
+requires: [numpy]
+tested_on: [zenodo-4064835-glass-fibre-composite-sem-bundles]
+supersedes: null

@@ -1,0 +1,32 @@
+record: zenodo-4064835-glass-fibre-composite-sem-bundles
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/api/records/4064835/files/Case2-PCB2_BSQ2_Correlation%20matching.tif/content"]
+    params: {}
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/api/records/4064835/files/Case1-Panorama%20-%20correlation%20matching.tif/content"]
+    params: {}
+labels:
+  - snippet: mat5-variable
+    urls: ["https://zenodo.org/api/records/4064835/files/Case2Vf.mat/content"]
+    params: {variable: "BW1,BW2"}
+    pairs_with: 0
+    label_key: manual_gt-fibre_bundle-semantic
+    segmentation_type: binary
+  - snippet: mat5-variable
+    urls: ["https://zenodo.org/api/records/4064835/files/Case1Vf.mat/content"]
+    params: {variable: "BW1,BW2,BW3,BW4,BW5,BW6,BW7,BW8"}
+    pairs_with: 1
+    label_key: manual_gt-fibre_bundle-semantic
+    segmentation_type: binary
+reasons:
+  - "raw: the two stitched mosaics are plain single-page TIFFs (harness describe: Case 2 YX 11381x15406 uint16 uncompressed, Case 1 YX 7559x41693 uint16 LZW), read with tiff-zip-member-2 and no params; axes yx as the files and the record say"
+  - "Case 1 TIFF URL is the record's Zenodo file URL pattern with the file name from technical.layout.tree; harness describe opened it"
+  - "labels: Case*Vf.mat are MATLAB 5.0 MAT-files (little-endian, every variable a zlib-compressed miMATRIX), read with mat5-variable. Variables found in the files: Case2Vf.mat holds BW, BW1, BW2, maskedImage1, maskedImage2; Case1Vf.mat holds BW, BW1..BW8, maskedImage1..maskedImage8. Every one is 11381x15406 (Case 2) or 7559x41693 (Case 1), the shape of that case's stitched TIFF, so each label pairs with its own mosaic"
+  - "variable BW1,BW2 / BW1..BW8: the BWn are logical masks (class uint8, logical flag, values 0 and 1), one per fibre bundle region: Case*Vf.m computes each bundle's fibre volume fraction as sum(BWn.*BW)/sum(BWn). The label is the bundle class, so the bundles of one image are one mask; with no combine param several names are their union"
+  - "not combine ids: in Case1Vf.mat BW1 and BW6 overlap (the snippet refuses ids there), and the record's label encoding is binary"
+  - "BW is not bound: Case*Vf.m computes it as the Otsu threshold of the image (BW = I>th), a fibre/matrix segmentation by threshold, not a manual annotation. maskedImageN are the uint8 image inside bundle N (zero outside), not labels"
+  - "label_key manual_gt-fibre_bundle-semantic: annotations.source manual, masks mark manually drawn unidirectional fibre bundles, encoding binary; segmentation_type binary"
+  - "BMP tiles in Case2-PCB2.zip / Case1-Panorama.zip are not bound: no snippet reads BMP and they carry no masks"
