@@ -28,15 +28,25 @@ overview images with one mask each, where every slide has its own size and the m
   deflated one, which the dataset cache keeps) and decodes it whole whatever the region. The last two decoded
   files of the job are kept (a raw and its label), so the c planes and several crops of one image cost one
   decode, and memory does not grow with the number of arrays a binding lists. `read` returns a copy.
+- **Rate limits.** A host that answers `429 Too Many Requests` at open or at `read` is waited on: the snippet
+  sleeps for the response's `Retry-After` seconds (60 s when it is absent or a date, 120 s at most), makes the
+  call again, and raises the 429 after five waits. The harness's own retries cover dropped connections and 5xx
+  and leave a 4xx final, so without the wait one refused request ends the job. What `io` already holds
+  (validators, a zip's directory, blocks, fetched members) is not asked for twice.
 - **Voxel size.** `None`. A `pHYs` chunk is not read: it is a print density more often than a pixel size.
 
 ## Known limits
 
-- One request per file at open. A binding with hundreds of entries on a rate-limited host can be refused
-  before any crop is read: zenodo.org answered `429 TOO MANY REQUESTS` after about 110 range requests in 20 s
-  when all pairs of the example dataset were opened in one run, and the harness does not retry a 4xx. The
-  example therefore binds a few slides per cohort; the rest bind the same way once the files are in the
-  dataset cache or the harness waits on a 429.
+- Requests add up. Open costs one request per file (a 1 MiB block; small members of one zip share blocks), and
+  reading a deflated member through `io.fetch` one for its local header and one per 8 MiB. zenodo.org limits
+  them (its responses say `x-ratelimit-limit: 133`, `retry-after: 60`): a crop job on 17 pairs of the example
+  dataset ended on a 429 after 30 MB, and opening all 584 pairs in one run was refused after about 110 range
+  requests in 20 s. The example therefore binds 11 pairs (a cold crop job of 16 crops made 41 requests in
+  15 s), and the snippet waits on a 429. The waits are bounded, so a binding with hundreds of entries can
+  still fail, after minutes of waiting; the rest of the dataset binds the same way once the files are in the
+  dataset cache.
+- The wait on a 429 was tested on a fake `io` only (Retry-After as seconds, as a date, absent, too long; five
+  waits, then the error; other errors raised at once): the real runs after the change met no 429.
 - The 2- and 4-bit, 16-bit, alpha and stored-member paths were tested on synthetic files only; the example
   exercises 1-bit grey masks, RGB masks with identical samples (`samples: grey`) and 8-bit RGB images, all
   deflated zip members.

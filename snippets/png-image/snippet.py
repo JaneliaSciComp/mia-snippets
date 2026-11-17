@@ -4,8 +4,11 @@ A greyscale PNG is `yx`, 1-, 2- and 4-bit ones included: their stored values (0/
 returned, not the 0..255 the decoder stretches them to. A colour PNG's samples are a `c` axis (`cyx`), or one
 plane with `samples: grey` when they are identical copies. `open_array` reads the file's first 33 bytes (the
 IHDR chunk: size, bit depth, colour type), for a deflated zip member by inflating just the start of it through
-the zip; `read` gets and decodes the whole file.
+the zip; `read` gets and decodes the whole file. A host that answers 429 Too Many Requests is waited on for the
+time its Retry-After names and asked again, a few times, before the error is raised.
 """
+import time
+from typing import Callable, TypeVar
 from zipfile import ZipFile
 
 import imagecodecs
@@ -21,8 +24,32 @@ HEADER = 33                             # signature (8) + IHDR chunk (4 length, 
 SAMPLES = {0: 1, 2: 3, 4: 2, 6: 4}      # PNG colour type -> samples per pixel: grey, RGB, grey+alpha, RGBA
 DEPTHS = {0: (1, 2, 4, 8, 16), 2: (8, 16), 4: (8, 16), 6: (8, 16)}
 KEEP = 2                                # decoded files kept: a raw and its label, whatever the number of arrays
+WAITS = 5                               # times a 429 is waited out before it is raised
+WAIT = 60.0                             # seconds to wait when the 429 names no Retry-After
+LONGEST = 120.0                         # and the longest one wait may be, whatever Retry-After says
+T = TypeVar("T")
 
 _decoded: list[tuple[IO, str, np.ndarray]] = []     # the last KEEP files read, shared by every array of the job
+
+
+def _patiently(call: Callable[[], T]) -> T:
+    """`call()`, again after a wait when the host answers 429 Too Many Requests: a rate limit asks the client to
+    come back later (zenodo.org allows 133 requests a minute), and the harness's own retries leave a 4xx final.
+    The whole call is made again; what io cached of it (validators, a zip's directory, blocks) is not asked for
+    twice. Any other error, and the 429 after WAITS waits, is raised as it came."""
+    for left in range(WAITS, -1, -1):
+        try:
+            return call()
+        except Exception as e:
+            response = getattr(e, "response", None)     # httpx.HTTPStatusError carries it; snippets import no httpx
+            if not left or getattr(response, "status_code", None) != 429:
+                raise
+            try:
+                wait = float(response.headers.get("retry-after"))
+            except (AttributeError, TypeError, ValueError):     # absent, or an HTTP date
+                wait = WAIT
+            time.sleep(min(max(wait, 0.0), LONGEST))
+    raise AssertionError("unreachable")
 
 
 def _header(io: IO, url: str) -> bytes:
@@ -51,7 +78,7 @@ def _header(io: IO, url: str) -> bytes:
 class _Image:
     def __init__(self, io: IO, url: str, samples: str | None):
         self._io, self._url, self._samples = io, url, samples
-        head = _header(io, url)
+        head = _patiently(lambda: _header(io, url))
         if len(head) < HEADER or head[:8] != SIGNATURE or head[12:16] != b"IHDR":
             raise ValueError(f"{url}: not a PNG file: header={head[:8]!r}")
         width, height = int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
@@ -76,17 +103,20 @@ class _Image:
         idx = tuple(region.get(k, slice(None)) for k in self.axes)
         return np.array(self._image()[idx])         # a copy: the caller may write to it, the kept image stays
 
+    def _bytes(self) -> bytes:
+        """The whole file as it is stored."""
+        try:
+            with self._io.open(self._url) as fh:
+                return fh.read()
+        except NeedsFetch:      # deflated member, or a server without Range: stage the whole file
+            return self._io.fetch(self._url).read_bytes()
+
     def _image(self) -> np.ndarray:
         """The decoded file as the array presents it, (Y, X) or (C, Y, X)."""
         for io, url, a in _decoded:
             if io is self._io and url == self._url:
                 return a
-        try:
-            with self._io.open(self._url) as fh:
-                data = fh.read()
-        except NeedsFetch:      # deflated member, or a server without Range: stage the whole file
-            data = self._io.fetch(self._url).read_bytes()
-        a = np.asarray(imagecodecs.png_decode(data))
+        a = np.asarray(imagecodecs.png_decode(_patiently(self._bytes)))
         if a.shape != self._file_shape or a.dtype != self.dtype:
             raise ValueError(f"{self._url}: decoded as {a.dtype} {a.shape}, its header says {self.dtype} "
                              f"{self._file_shape}; a tRNS chunk (transparency the decoder turns into an alpha "
