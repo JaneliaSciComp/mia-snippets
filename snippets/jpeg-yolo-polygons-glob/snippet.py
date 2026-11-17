@@ -8,10 +8,12 @@ filled: by its 1-based row number in the file (`polygons: instance`) or by its c
 semantic`). An empty file is an all-background plane. The label form is the one with `params.polygons`; its
 planes follow the images `params.images` names, in name order, so they pair with the image form over that glob.
 `open_array` reads the first file's header (labels: the first label file and its JPEG's header), decoding
-nothing; `read` gets the rest.
+nothing; `read` gets the rest. A read the server answers with 429 Too Many Requests waits as long as the answer's
+Retry-After says and is asked again.
 """
 import math
-from typing import BinaryIO
+import time
+from typing import BinaryIO, Callable, TypeVar
 
 import imagecodecs
 import numpy as np
@@ -25,7 +27,39 @@ HEAD = 1 << 16      # bytes of a JPEG read for its header; the whole file only w
 # JPEG start-of-frame markers: SOF0..SOF15 without DHT (C4), JPG (C8) and DAC (CC)
 SOF = frozenset(range(0xC0, 0xD0)) - {0xC4, 0xC8, 0xCC}
 
+WAITS = 5           # times one read waits out a 429 before the 429 is its error
+WAIT = 60.0         # seconds to wait when the 429 has no Retry-After in seconds; no wait is longer than twice this
+
 Polygon = tuple[int, np.ndarray]        # class id, (n, 2) vertices as (x, y) fractions of width and height
+T = TypeVar("T")
+
+
+def _retry_after(e: Exception) -> float | None:
+    """The seconds to wait when `e` is the server's 429 Too Many Requests answer, else None. `io` raises its HTTP
+    client's status error for it, which carries the response; the error is known by that, not by its class."""
+    response = getattr(e, "response", None)
+    if getattr(response, "status_code", None) != 429:
+        return None
+    try:
+        wait = float(response.headers.get("retry-after"))
+    except (AttributeError, TypeError, ValueError):     # no header, or an HTTP date
+        wait = WAIT
+    return min(max(wait, 1.0), 2 * WAIT) if math.isfinite(wait) else WAIT
+
+
+def _patiently(work: Callable[[], T]) -> T:
+    """`work()`, again after the wait a 429 asks for, up to WAITS times: a host that limits requests per minute
+    and address (Zenodo) answers 429 to a job that made few, when others share its address. `io` retries dropped
+    connections and 5xx, not this. Every other error, and the 429 after the last wait, is raised as it is."""
+    for left in range(WAITS, -1, -1):
+        try:
+            return work()
+        except Exception as e:
+            wait = _retry_after(e)
+            if wait is None or not left:
+                raise
+            time.sleep(wait)
+    raise AssertionError("unreachable")
 
 
 def _file(io: IO, url: str) -> BinaryIO:
@@ -35,9 +69,13 @@ def _file(io: IO, url: str) -> BinaryIO:
         return io.fetch(url).open("rb")
 
 
-def _bytes(io: IO, url: str, n: int = -1) -> bytes:
+def _read(io: IO, url: str, n: int) -> bytes:
     with _file(io, url) as f:
         return f.read(n)
+
+
+def _bytes(io: IO, url: str, n: int = -1) -> bytes:
+    return _patiently(lambda: _read(io, url, n))
 
 
 def _orientation(exif: bytes) -> int | None:
@@ -220,7 +258,7 @@ def _container(url: str) -> str:
 
 def _expand(urls: list[str], io: IO) -> list[str]:
     """Each glob url as its matching files, sorted by name as `io.expand` sorts them; urls in the given order."""
-    out = [u for url in urls for u in io.expand(url)]
+    out = [u for url in urls for u in _patiently(lambda: io.expand(url))]
     if not out:
         raise ValueError("the urls match no file")
     if len(set(out)) != len(out):

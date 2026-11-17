@@ -47,6 +47,14 @@ It was written because the catalog's other annotation rasterisers for JPEG sets 
   `.txt` and its JPEG's header: the first 64 KiB of a stored JPEG, the whole member of a deflated one (as in
   the example, about 2.7 MB), which `io` keeps, so the image plane of the same crop costs no more. The last
   plane made is kept, so the three `c` planes of an image decode once.
+- **429 Too Many Requests.** A host that limits requests per minute and address answers 429 to a job that
+  itself made few, when other jobs share its address (Zenodo: 133 requests a minute; the first crop job on
+  this snippet was refused on about its ninth request). `io` retries dropped connections and 5xx answers but
+  raises a 429 at once, so the snippet waits it out: a listing or file read that fails with a 429 sleeps for
+  the answer's `Retry-After` seconds (60 when it has none; never under 1 or over 120) and is asked again, up
+  to 5 times; after that the 429 is the error. Nothing else is retried here, and the bytes still all come
+  through `io`. A file costs two requests (its 30-byte zip header and its data) the first time and none
+  after, so one z plane read through the image and both labels is four requests.
 - **dtype.** `uint8` for images, `uint16` for labels. **Voxel size:** `None` (JPEG densities are print sizes).
 
 ## Known limits
@@ -67,7 +75,10 @@ YOLO segmentation `.txt` each under `pollenbb16/labels/`. Bound as one `zcyx` ra
 two `zyx` labels on it, `polygons: instance` and `polygons: semantic`. While testing, every label file was read
 from the zip by range (6 MB): 16198 files, none empty, 36,383 polygons of 6 to 33 vertices, class ids 0-15,
 all coordinates within 0..1; two planes were read through all three arrays (19 and 2 instances), and the
-outlines of the 19 drawn on their image lie around the grains. Images were not all decoded: a JPEG of another
+outlines of the 19 drawn on their image lie around the grains. `harness crop --n 8` made 8 of 8 crops with no
+error (`harness verify` faulted them only for the licence, which the issue's copy of the record leaves out);
+the 429 wait was tested through the harness `IO` against a local server refusing three
+requests in ten. Images were not all decoded: a JPEG of another
 shape would raise at `read`. The example binding's `snippets_commit` is the commit before this snippet's own
 (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains
 the snippet.
