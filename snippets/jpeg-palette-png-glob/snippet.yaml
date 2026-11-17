@@ -1,0 +1,12 @@
+name: jpeg-palette-png-glob
+spec_version: 1
+summary: One image per file, JPEG or palette PNG (told apart by magic bytes), from zip members or an HTTP directory chosen by glob (or plain URLs), stacked along z; a colour JPEG's samples are a c axis (zcyx), a palette PNG is one uint8 plane of its stored indices or of its palette greys, and planes can be ordered by file stem to match another array's files.
+formats: [jpeg, png]
+containers: [zip, http]
+params:
+  palette: {type: str, required: false, doc: "palette PNG files only, and required for them: 'index' returns the stored palette indices; 'grey' returns each pixel's palette colour as one grey value and raises when a colour the file uses has R, G, B that differ or is transparent. Refused for JPEG files; reason required in binding"}
+  pair_urls: {type: list, required: false, doc: "the urls (globs included) of the array this one pairs with, exactly as that array's binding lists them. Plane k is then the file whose stem (name without directories and extension), less pair_suffix, equals the stem of file k of pair_urls, instead of the k-th file by sorted name; open fails unless the stems pair one to one. Reason required in binding"}
+  pair_suffix: {type: str, required: false, doc: "with pair_urls: what every file's stem ends with after the paired file's stem, e.g. '_mask' for <stem>_mask.png beside <stem>.jpg; default '' (same stems). Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-21493260-histology-tissue-folds]
+supersedes: null
