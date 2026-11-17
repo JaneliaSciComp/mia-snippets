@@ -1,0 +1,81 @@
+record: tyc-trapped-yeast-cells-instance-segmentation
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/images/[6AHij]*.tif"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/images/100x_*.tif"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/images/20.07.2016_*.tif"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/images/2017-*.tif"
+    params: {}
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/images/SPD_*.tif"
+    params: {}
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/images/14072021HK*.tif"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/test_ood/images/*.tif"
+    params: {}
+labels:
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/[6AHij]*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/100x_*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/20.07.2016_*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/2017-*.png"
+    params: {ids: rg, category_id: 1}
+    pairs_with: 0
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/[6AHij]*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/100x_*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/20.07.2016_*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/2017-*.png"
+    params: {ids: rg, category_id: 0}
+    pairs_with: 0
+    label_key: manual_gt-trap-instance
+    segmentation_type: instance
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/SPD_*.png"
+    params: {ids: rg, category_id: 1}
+    pairs_with: 1
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/SPD_*.png"
+    params: {ids: rg, category_id: 0}
+    pairs_with: 1
+    label_key: manual_gt-trap-instance
+    segmentation_type: instance
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/14072021HK*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/test_ood/labels/masks/*.png"
+    params: {ids: rg, category_id: 1}
+    pairs_with: 2
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: image-tiles-rg-ids
+    urls:
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/*/labels/masks/14072021HK*.png"
+      - "https://tudatalib.ulb.tu-darmstadt.de/server/api/core/bitstreams/2dc780f7-c025-4322-aea7-ef3a286cf093/content::labeled_set/test_ood/labels/masks/*.png"
+    params: {ids: rg, category_id: 0}
+    pairs_with: 2
+    label_key: manual_gt-trap-instance
+    segmentation_type: instance
+reasons:
+  - "image-tiles-rg-ids instead of image-tiles-glob, for raw and labels: the host answers HEAD without Content-Length (range GETs do answer 206), so the harness cannot read the zip's directory or a member by range (NeedsFetch from io.expand, io.open and io.fetch of a member, the match agent's 5 attempts); this snippet then stages labeled_set.zip whole (632,684,521 bytes, once per dataset cache) and reads the members from the local copy"
+  - "three raw arrays, because the files of one array must share shape and dtype and the 105 labeled images do not (all 105 opened): raw 0 is the 60 uint16 2048x2048 images, raw 1 the 18 uint8 2048x2048 SPD_* images (the upscaled Bakker et al. images of the record), raw 2 the 27 uint16 2304x2304 images (the 19 14072021HK* files and the 8 files of test_ood)"
+  - "urls are member globs over all four splits (train, val, test, test_ood): each glob expands sorted by name and the globs are concatenated in binding order as z, a stack of independent 2D images (record dimensionality 2D), not a volume. The file-name prefixes [6AHij]* (60x_, AH*, H2E_, img_, jd*), 100x_, 20.07.2016_ and 2017- select exactly the 60 files of raw 0; raw 2 takes test_ood whole because all 8 of its files are 2304x2304. Every image is bound once (60 + 18 + 27 = 105)"
+  - "each label lists its raw's globs with images/ -> labels/masks/ and .tif -> .png, in the same order; image and mask share the stem (record alignment_notes), so z index k of a label is the mask of z index k of its raw (checked on the zip directory: both expansions give the same stems in the same order, and each mask has its image's height and width)"
+  - "ids: rg: the masks are RGBA (87) or RGB (18) uint8 PNGs whose instance id is R + 256*G, 0 = background (record alignment_notes, from the official loader); checked on all 105 masks: blue is 0 everywhere, alpha is 255 everywhere, and the set of R + 256*G values of each mask equals the set of ids in its class JSON (up to 518 instances in one image, ids up to 519)"
+  - "category_id: one instance map holds traps and cells, and labels/classes/<stem>.json gives each id its class (trap = 0, cell = 1, record classes); every raw therefore has two labels, category_id 1 as manual_gt-cell-instance and category_id 0 as manual_gt-trap-instance, each keeping the stored ids of its class and 0 elsewhere"
+  - "label_key: annotations.source manual -> manual_gt (from the draft); encoding instance-ids -> instance; the class slug is the record's class name. segmentation_type instance: each id is one cell or one trap"
+  - "label dtype is uint16 (the composed id), not the record's uint8 (the PNG's samples), which smoke reports as a warning; so is raw 1, uint8 where the record's raw entry says uint16 (its alignment_notes name the uint8 SPD_* files)"
+  - "voxel size is not bound: the snippet returns none, as the record does (magnifications differ, 60x and 100x, part of the images were upscaled, and only some files carry an ImageJ calibration)"

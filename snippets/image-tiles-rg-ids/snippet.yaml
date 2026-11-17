@@ -1,0 +1,11 @@
+name: image-tiles-rg-ids
+spec_version: 1
+summary: "One grey image per file (PNG or single-page TIFF, told apart by magic bytes) from zip members chosen by glob (or plain URLs), stacked along z; with ids rg a colour PNG is read as the uint16 instance ids R + 256*G, and category_id keeps the instances of one class of the class JSON beside the mask; a zip whose server states no size or ignores Range is staged whole."
+formats: [png, tiff]
+containers: [zip, http]
+params:
+  ids: {type: str, required: false, doc: "'rg': each file is an 8-bit image with at least 3 samples (RGB or RGBA) whose instance id is R + 256*G, returned as one uint16 plane (0 = background); a nonzero blue sample raises, alpha is ignored. Without it a file must have no sample axis and is returned as decoded; reason required in binding"}
+  category_id: {type: int, required: false, doc: "with ids: keep only the instances whose category_id is this value in the class JSON beside the mask (<dir>/masks/<stem>.<ext> -> <dir>/classes/<stem>.json, {\"annotations\": [{\"id\": .., \"category_id\": ..}]}); the other instances become 0, ids are unchanged. A mask id without an annotation raises. The value's meaning comes from the record's classes; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [tyc-trapped-yeast-cells-instance-segmentation]
+supersedes: null
