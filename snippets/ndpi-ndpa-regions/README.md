@@ -9,8 +9,10 @@ The first page of the NDPI, which is its full-resolution level, as `yxc` uint8 (
 levels, the macro photograph and the map) are not presented.
 
 An NDPI level is one JPEG stream with restart markers, and the file lists where each restart interval starts
-(`McuStarts`). tifffile turns those into tiles (8 rows by up to 4096 columns on the tested slides), so a read
-fetches and decodes only the strips its region touches: `access` is `chunk`. A 256x256 crop is about 32 strips.
+(`McuStarts`). tifffile turns those into tiles (8 rows by 4096 columns on S32 of the tested record), so a read
+fetches and decodes only the strips its region touches: `access` is `chunk`. A 256x256 crop is about 32 rows of
+strips. Strips are stored row after row across the full width, so on a wide slide the strips of one crop are
+spread over a few MB of the file.
 On a server without range requests the file is staged whole and `access` is `file`.
 
 `voxel_size_nm` is from the page's `XResolution` and `YResolution` (pixels per centimetre or inch), so it is
@@ -31,7 +33,8 @@ NDPI's first page: a pixel holds the class id of the region whose outline enclos
 - **Fill.** Nonzero winding rule: a loop the pen made twice is still inside. Regions are painted in the order of
   `classes`, and within a class in file order, so where regions of two classes overlap the class later in the list
   is kept.
-- `access` is `plane`: the whole NDPA (a few MB) is read on the first read, whatever the region. Outlines are
+- `access` is `plane`: the whole NDPA (4 MB for S32, about 22 MB for S1) is read on the first read, whatever the
+  region. Outlines are
   kept as their crossings with the pixel rows, and only the window asked for is filled.
 
 ## Limits
