@@ -1,0 +1,39 @@
+record: aws-dharani-fetal-brain-nissl-annotated-sections
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-tiled-geojson-polygons
+    urls: ["https://dharani-fetal-brain-atlas.s3.amazonaws.com/data2d/specimen_1/Specimen_1_43.tif"]
+    params: {}
+  - snippet: tiff-tiled-geojson-polygons
+    urls: ["https://dharani-fetal-brain-atlas.s3.amazonaws.com/data2d/specimen_5/Specimen_5_1066.tif"]
+    params: {}
+labels:
+  - snippet: tiff-tiled-geojson-polygons
+    urls:
+      - "https://dharani-fetal-brain-atlas.s3.amazonaws.com/data2d/specimen_1/Specimen_1_43.json"
+      - "https://dharani-fetal-brain-atlas.s3.amazonaws.com/data2d/specimen_1/Specimen_1_43.tif"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-brain_structure-semantic
+    segmentation_type: semantic
+  - snippet: tiff-tiled-geojson-polygons
+    urls:
+      - "https://dharani-fetal-brain-atlas.s3.amazonaws.com/data2d/specimen_5/Specimen_5_1066.json"
+      - "https://dharani-fetal-brain-atlas.s3.amazonaws.com/data2d/specimen_5/Specimen_5_1066.tif"
+    params: {skip_lines: true}
+    pairs_with: 1
+    label_key: manual_gt-brain_structure-semantic
+    segmentation_type: semantic
+reasons:
+  - "urls: two annotated pairs. Raw 0 is the record's technical.sample.urls (Specimen_1_43.tif and its same-stem .json, the smallest annotated section, 461 MB). Raw 1 is Specimen_5_1066, the second largest annotated TIFF of the bucket listing (12.7 GB), added because the sample section's tissue covers about 1 % of its page: harness crop --n 4 on raw 0 alone made 0 crops from 80 candidates, all on empty slide, while 37 % of Specimen_5_1066 is annotated. File size costs nothing here, since only the tiles a crop touches are fetched. The other 464 annotated sections have the same layout by the record and can be bound the same way, one raw and one label each; they were not read here, so they are not claimed"
+  - "shape varies, as the record says: Specimen_1_43 is 64000x64000 (6 pyramid pages), Specimen_5_1066 is 80000x80000 (7 pages); each label takes its grid from its own TIFF"
+  - "skip_lines: true on label 1 only: 2 of the 199 features of Specimen_5_1066.json are LineStrings (acronyms CaS and POS, sulci drawn as lines), which enclose no pixels and are left out; the other 197 are Polygons of 144 structures. Specimen_1_43.json has Polygons only, so label 0 sets nothing"
+  - "raw with tiff-tiled-geojson-polygons, no params: Specimen_1_43.tif is a 6-page pyramidal BigTIFF (64000, 32000, ... 2000 px, each page RGB uint8 in 2000x2000 JPEG tiles). The snippet reads page 0 only, tile by tile by byte range: cyx 3x64000x64000 uint8, the record's yxs shape with the samples as c. A 256x256 patch costs the 1 to 4 tiles it touches (0.1 to 3 MB each), never the 461 MB file"
+  - "voxel size is not reported: the TIFF's XResolution is 10 px/cm, a writer default. The paper states 1 um per pixel for the annotated sections; that is the record's to carry, not the file's"
+  - "label urls are the GeoJSON and the raw TIFF again: the GeoJSON holds coordinates only, so the snippet reads the TIFF's header for the page-0 grid the polygons are filled onto; no TIFF pixel is read for the label"
+  - "coordinate frame, which the record left open: polygon coordinates are (x, -y) in page-0 pixels and the top-level 'rotation' key (270 in Specimen_1_43, 90 in Specimen_5_1066) is NOT applied. Checked by overlay on both sections: in Specimen_1_43 (8000 px pyramid level) the outlines trace the pial surface and the layer boundaries; in Specimen_5_1066 (1250 px level) the 197 filled polygons follow the cortical layers, the ventricles and the brainstem nuclei of a sagittal section, with either rotation value. Numbers for Specimen_1_43: Against a tissue mask of the 2000 px level (darkest channel < 215) the union of the 8 polygons has IoU 0.81 in this frame, 0.08 and 0.07 when also rotated by 90 or 270 degrees about the image centre, 0.00 rotated by 180, without the y negation, or transposed, and 0.76 and 0.75 when shifted 500 px (0.8 % of the width) in x or y"
+  - "label values are the ontology ids of properties.data.id (ontology/ontology.json: 495 structures, ids 1 to 6000, so uint16): Specimen_1_43 has 8 polygons of 4 structures, 48 SGL-TEMP, 49 MZ-TEMP, 50 CP-TEMP, 51 SP-TEMP. The polygons are bands that tile the section; they overlap on 23 of 708174 covered pixels at 1/8 scale (boundary slivers), and those of Specimen_5_1066 on 1579 of 577153 at 1/64 scale; there the smaller polygon is kept"
+  - "label_key manual_gt-brain_structure-semantic and segmentation_type semantic, as the match agent intended: manually drawn structure outlines, one id per structure, several polygons per id"
+  - "0 is 'outside every polygon': the slide background, and any tissue the annotators did not outline (the cerebellum of Specimen_5_1066, for one). The annotated tissue of Specimen_1_43 covers about 1 % of its page (y 31800 to 39100, x 25300 to 34500), so nearly every random crop of raw 0 is empty slide and is rejected by the harness's content filter; raw 1 is where crops come from"
+  - "dtype warnings from smoke for the labels: the record gives the GeoJSON's dtype as 'unknown'; the rasterized label is uint16"
