@@ -53,11 +53,16 @@ an array is one file, so every file keeps its own shape, and a mask is paired wi
   files and about 4N requests (a local header and the data, per file) at open. Binding all 302 pairs of the
   example dataset would be 604 arrays, about 1,200 requests and the whole 2.1 GB at every open; the example
   binds 6 pairs.
-- **Zenodo answered `429 TOO MANY REQUESTS`** to two of the four smoke runs made while this snippet was written
-  (after 2 and after 3 members of that run, with other requests to zenodo.org in the minutes before; its
-  headers state 133 requests a minute). The harness does not retry a 4xx, so the run fails; members already
-  fetched stay in the cache and the next run goes on from there; the fourth run, with 6 of the 12 files cached
-  by then, passed.
+- **A 429 is waited out, up to five times per call.** The harness retries a dropped connection and a 5xx,
+  but a `429 Too Many Requests` is final to it, and Zenodo counts requests per client address (its headers
+  state 133 per window, with a `Retry-After` of the seconds left in it), so jobs that leave through one
+  address share that count: the first crop job of this binding was refused on about its fifth request, and
+  two of the four smoke runs made while the snippet was written were refused too. So `open_array` and each
+  `read` that asks the network make the refused step again after a wait: `Retry-After` plus a second, at
+  least 2, 5, 15, 30 and 60 s for the first to the fifth wait and never more than 120 s. A sixth 429 in a
+  row is raised as it came. No other error is retried here. What `io` cached or staged before the 429 is
+  not asked for again. The wait belongs in the harness's own retry; it is here because a snippet PR may not
+  change the harness.
 - A palette PNG or a 1/2/4-bit grey PNG raises at open: the decoder would turn palette indices into colours and
   rescale low bit depths to 0..255, so the stored ids would be lost.
 - A PNG whose `tRNS` chunk makes the decoder add an alpha sample raises at `read` (the decoded shape is checked

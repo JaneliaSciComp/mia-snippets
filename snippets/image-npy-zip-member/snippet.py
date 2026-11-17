@@ -9,10 +9,15 @@ identical copies (a mask saved as RGB) and raises when they differ. Values are r
 
 `open_array` reads the file's header only (PNG `IHDR`, TIFF first IFD, `.npy` header); a deflated zip member
 has to be staged whole for that. Pixels are decoded at `read`.
+
+A request the server answers with 429 Too Many Requests is waited out and made again (`_patient`): the harness
+retries a dropped connection and a 5xx but takes a 429 as final, and a host that counts requests per client
+address (Zenodo) answers it to a job that has itself made only a few, when other jobs share its address.
 """
 import struct
+import time
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, Callable, TypeVar
 
 import imagecodecs
 import numpy as np
@@ -27,6 +32,34 @@ PNG = b"\x89PNG\r\n\x1a\n"
 NPY = b"\x93NUMPY"
 TIFF = (b"II*\x00", b"MM\x00*", b"II+\x00", b"MM\x00+")
 PNG_SAMPLES = {0: 1, 2: 3, 4: 2, 6: 4}      # IHDR colour type -> samples per pixel (3, palette, is refused)
+TOO_MANY_REQUESTS = 429
+WAITS = (2.0, 5.0, 15.0, 30.0, 60.0)        # the least seconds waited before each further attempt after a 429
+MAX_WAIT = 120.0                            # the most, whatever Retry-After says
+T = TypeVar("T")
+
+
+def _patient(work: Callable[[], T]) -> T:
+    """`work()`, made again after a wait each time a request in it is answered 429: as long as the answer's
+    Retry-After says (plus a second), at least the next of WAITS and at most MAX_WAIT. After the last of WAITS
+    the 429 is raised. Any other error is raised at once. `work` must be safe to repeat; what `io` has cached
+    or staged by then is not asked for again.
+
+    The 429 arrives as the harness client's status error, which a snippet may not import, so it is known by
+    its `response.status_code`.
+    """
+    for wait in (*WAITS, None):
+        try:
+            return work()
+        except Exception as e:
+            response = getattr(e, "response", None)
+            if wait is None or getattr(response, "status_code", None) != TOO_MANY_REQUESTS:
+                raise
+            try:
+                asked = float(response.headers.get("retry-after")) + 1.0    # seconds; an HTTP date is not parsed
+            except (AttributeError, TypeError, ValueError):
+                asked = 0.0
+            time.sleep(min(max(asked, wait), MAX_WAIT))
+    raise AssertionError("unreachable")
 
 
 class _File:
@@ -96,7 +129,7 @@ class _Image:
 
     def read(self, region: dict[str, int | slice]) -> np.ndarray:
         if self._image is None:
-            self._image = self._decode()
+            self._image = _patient(self._decode)
         return self._image[tuple(region.get(k, slice(None)) for k in self.axes)]
 
     def _decode(self) -> np.ndarray:
@@ -172,9 +205,13 @@ class _Npy:
 
     def _block(self, first: int, count: int) -> np.ndarray:
         size = self._stored.itemsize
-        with self._f.open() as fh:
-            fh.seek(self._offset + first * size)
-            data = fh.read(count * size)
+
+        def read() -> bytes:
+            with self._f.open() as fh:
+                fh.seek(self._offset + first * size)
+                return fh.read(count * size)
+
+        data = _patient(read)
         if len(data) != count * size:
             raise ValueError(f"{self._f.url}: the file ends before its header's shape {self.shape} of "
                              f"{self._stored} is complete")
@@ -185,6 +222,10 @@ def open_array(src: Source, io: IO) -> Array:
     samples = src.params.get("samples")
     if samples is not None and samples not in MODES:
         raise ValueError(f"params.samples must be one of {MODES}, got {samples!r}")
+    return _patient(lambda: _open(src, io, samples))
+
+
+def _open(src: Source, io: IO, samples: str | None) -> Array:
     urls = [u for url in src.urls for u in io.expand(url)]
     if len(urls) != 1:
         raise ValueError(f"an array is one file, but the urls name {len(urls)}; bind each file as its own "
