@@ -1,0 +1,28 @@
+record: empiar-10022-tmv-falcon2-embl-helix-boxes
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: mrc-http-3
+    urls: ["https://ftp.ebi.ac.uk/empiar/world_availability/10022/data/IntermediateImage_20131016_200656_stack.mrc"]
+    params: {}
+labels:
+  - snippet: eman-helix-box-mrc
+    urls:
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10022/data/IntermediateImage_20131016_200656.box"
+      - "https://ftp.ebi.ac.uk/empiar/world_availability/10022/data/IntermediateImage_20131016_200656_stack.mrc"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-virus-instance
+    segmentation_type: instance
+reasons:
+  - "raw as in the draft: only the record's sample stack is bound; mrc-http-3 takes exactly one URL per array, so the other 108 *_stack.mrc files (harness list of the record's download_url: 109 stacks, 109 .box files) would each be one more raw entry of the same form, each with one label entry of the form below"
+  - "harness describe of the sample stack (from the draft): MRC mode 2 float32, 4096 x 4096 x 7, axis order 1 2 3, no extended header; mrc-http-3 returns the 7 movie frames (record axes tyx) as z, so the raw is zyx [7, 4096, 4096]"
+  - "label with the new eman-helix-box-mrc instead of the draft's 'no label bound': the record's label array is EMAN helix .box text (encoding boxes-table), which no catalog snippet read. Its two urls are the .box file and the stack of the same stem (record alignment_notes: pairs with <name>_stack.mrc by stem); the .box states no image size, so the snippet takes the grid from that stack's MRC header and reads none of its pixels"
+  - "pairing a 2D annotation with 7 frames: the label is zyx [7, 4096, 4096] with the same plane on every z. The 7 planes are the dose-fractionated frames of one micrograph (record alignment_notes of the raw) and the helices were boxed once for that micrograph, so every frame carries the same helices; beam-induced drift between frames (a few pixels) is ignored against boxes 260 px wide"
+  - "geometry: each helix is two rows, flag -1 then -2, of equal 260 x 260 boxes; the snippet fills the rectangle from the centre of the start box to the centre of the end box, 260 px wide (the form EMAN's helix boxers write: end point minus half the box width as the corner). x is the column and y the row in the MRC's stored order, without a flip. Checked on pixels of frame 3 of this stack, rows 512..2560: for all 7 helices crossing those rows the rod (within 70 px of the axis) is darker than its flanks (110..250 px), by 0.7 to 3.2 counts on a mean of 398; with y flipped, x flipped, both, or x and y swapped the sign is mixed. One frame of one micrograph only: the server gave about 200 kB/s, so no whole stack was read"
+  - "the whole dataset was opened through the snippet while testing (not bound here): all 109 .box files against the header of their <stem>_stack.mrc. Every one parses under the snippet's rules (5 integer columns, -1 then -2 pairs, equal square boxes, both end points inside the grid), every stack header is 7 x 4096 x 4096, and the 109 files hold 928 helices, every box 260 x 260. So the other 108 pairs need no other params"
+  - "NEEDS A HUMAN DECISION, label kind: the record's encoding boxes-table has no segmentation_type and no label-key kind, and classes is null. The snippet numbers the helices of a file 1..n in file order (here 9), so segmentation_type instance and the key kind instance; a binary mask is the label != 0. As in the catalog's other box bindings the label is filled boxes, not outlines of the object: the 260 px (27.6 nm) wide rectangles are wider than the 18 nm TMV rod, so about a third of each is ice"
+  - "label_key manual_gt-virus-instance: source manual (the record's title: manually boxed helix coordinates); the record names no class, the boxed objects are tobacco mosaic virus particles (record organism and sample), so the class word is virus. A human should confirm the class word"
+  - "coverage: only the particles the authors chose to box carry an id; other rods in a micrograph and everything else are 0, which is 'not boxed', not 'background'"
+  - "smoke warns 'label 0: dtype uint16 is not the record's [unknown]': the record gives no dtype for a text table; uint16 is the snippet's id type"
+  - "voxel size: none from the label (.box states none); the raw's MRC header cell gives 0.1 nm/px, the unset default per the record, which keeps EMPIAR's 0.1062 nm/px"

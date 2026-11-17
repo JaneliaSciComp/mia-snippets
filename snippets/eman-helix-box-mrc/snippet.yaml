@@ -1,0 +1,9 @@
+name: eman-helix-box-mrc
+spec_version: 1
+summary: "The helices of one EMAN helix .box text file (rows x y w h flag, a row flagged -1 then one flagged -2 per helix) filled as zyx uint16 instance ids on the grid of the MRC stack they were boxed on: each helix is the rectangle from its start-box centre to its end-box centre, as wide as the box, and the same plane is returned for every frame of the stack. Takes two urls, the .box and its MRC, whose header alone is read for the grid."
+formats: [other]
+containers: [http, s3]
+params: {}
+requires: [numpy]
+tested_on: [empiar-10022-tmv-falcon2-embl-helix-boxes]
+supersedes: null
