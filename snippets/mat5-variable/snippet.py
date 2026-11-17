@@ -7,12 +7,15 @@ inflates the named variables whole: a zlib stream has no random access.
 
 Requests are kept few, because a host may allow only so many a minute (Zenodo: 133, and it answers the next
 one 429): the stretch of the file the named variables are expected to fill is asked for at once, and a long
-variable is read in long pieces, which `io` splits into a few ranges of 8 MiB.
+variable is read in long pieces, which `io` splits into a few ranges of 8 MiB. A 429 is waited out for as long
+as its Retry-After says and the read is made again: the limit is the host's for everything that comes from one
+address, so a job that makes few requests still meets it when other jobs share the address.
 """
 import struct
+import time
 import zlib
 from dataclasses import dataclass, replace
-from typing import BinaryIO, Iterator
+from typing import BinaryIO, Callable, Iterator, TypeVar
 
 import numpy as np
 
@@ -31,6 +34,9 @@ PIECE = 1 << 20         # inflated bytes per step (x4), and columns' worth of wo
 AHEAD = 8 << 20         # most bytes asked for ahead of the walk through the variables: one request of io's
 GULP = 32 << 20         # compressed bytes per read of a variable: io asks for them as 4 ranges of 8 MiB at once
 COMBINE = ("union", "ids")
+WAITS = 4               # times a 429 is waited out before it is raised
+WAIT, LONGEST = 60, 120  # seconds to wait when the answer has no usable Retry-After, and the longest wait taken
+T = TypeVar("T")
 
 
 @dataclass(frozen=True)
@@ -46,6 +52,41 @@ class _Var:
     stored: str | None = None    # numpy type code of the stored numbers, None for a class this snippet can't read
     data_start: int = 0     # offset of the numbers in the matrix element's (inflated) stream, tag included
     data_nbytes: int = 0
+
+
+def _patient(step: Callable[[], T]) -> T:
+    """`step()`, made again after a 429 once the time its Retry-After names has passed. Any other error is raised
+    at once: `io` already retries what fails in transit. The status is read off the error, since a snippet may
+    not import the HTTP client."""
+    for waited in range(WAITS + 1):
+        try:
+            return step()
+        except Exception as err:
+            response = getattr(err, "response", None)
+            if waited == WAITS or getattr(response, "status_code", None) != 429:
+                raise
+            after = str(getattr(response, "headers", {}).get("retry-after", "")).strip()
+            time.sleep(min(int(after) + 1 if after.isdigit() else WAIT, LONGEST))
+    raise AssertionError("unreachable")
+
+
+class _File:
+    """The file's seek and read, each read made through `_patient`. It keeps the position itself, so a read
+    that failed starts again where it started; the ranges that did arrive are in io's cache and cost nothing."""
+
+    def __init__(self, fh: BinaryIO):
+        self._fh, self._pos = fh, 0
+
+    def seek(self, pos: int) -> None:
+        self._pos = pos
+
+    def read(self, n: int) -> bytes:
+        def step() -> bytes:
+            self._fh.seek(self._pos)
+            return self._fh.read(n)
+        data = _patient(step)
+        self._pos += len(data)
+        return data
 
 
 def _tag(buf: bytes, pos: int, e: str) -> tuple[int, int, int, int]:
@@ -81,7 +122,7 @@ def _header(head: bytes, e: str, offset: int, nbytes: int, compressed: bool) -> 
     return replace(var, stored=MI_TYPES.get(stored), data_start=at, data_nbytes=n)
 
 
-def _endian(fh: BinaryIO) -> str:
+def _endian(fh: _File) -> str:
     fh.seek(0)
     header = fh.read(128)
     if header[:19] == b"MATLAB 7.3 MAT-file" or header[:8] == b"\x89HDF\r\n\x1a\n":
@@ -91,7 +132,7 @@ def _endian(fh: BinaryIO) -> str:
     return "<" if header[126:128] == b"IM" else ">"
 
 
-def _variables(fh: BinaryIO, e: str) -> Iterator[_Var]:
+def _variables(fh: _File, e: str) -> Iterator[_Var]:
     """Every named variable, in file order, from the element tags and the first bytes of each element."""
     pos = 128
     while True:
@@ -116,7 +157,7 @@ def _variables(fh: BinaryIO, e: str) -> Iterator[_Var]:
         pos += 8 + n
 
 
-def _stream(fh: BinaryIO, var: _Var) -> Iterator[bytes]:
+def _stream(fh: _File, var: _Var) -> Iterator[bytes]:
     """The variable's miMATRIX element, tag first, in pieces: inflated when the file wraps it in zlib."""
     left = var.nbytes if var.compressed else var.nbytes + 8
     fh.seek(var.offset + 8 if var.compressed else var.offset)
@@ -136,7 +177,7 @@ def _stream(fh: BinaryIO, var: _Var) -> Iterator[bytes]:
         yield inflate.flush()
 
 
-def _load(fh: BinaryIO, var: _Var, e: str) -> np.ndarray:
+def _load(fh: _File, var: _Var, e: str) -> np.ndarray:
     """The variable as a (rows, columns) array of its MATLAB class. MATLAB stores column after column."""
     stored = np.dtype(e + str(var.stored))
     out = np.empty(var.data_nbytes // stored.itemsize, dtype=stored)
@@ -155,7 +196,7 @@ def _load(fh: BinaryIO, var: _Var, e: str) -> np.ndarray:
 
 
 class _Variables:
-    def __init__(self, fh: BinaryIO, e: str, variables: list[_Var], combine: str | None):
+    def __init__(self, fh: _File, e: str, variables: list[_Var], combine: str | None):
         self._fh, self._e, self._vars, self._combine = fh, e, variables, combine
         self._data: np.ndarray | None = None
         self.axes = "yx"
@@ -203,9 +244,9 @@ def open_array(src: Source, io: IO) -> Array:
     if combine == "ids" and len(names) > 255:
         raise ValueError(f"combine 'ids' numbers at most 255 variables in uint8, got {len(names)}")
     try:
-        fh: BinaryIO = io.open(src.urls[0])
+        fh = _File(_patient(lambda: io.open(src.urls[0])))
     except NeedsFetch:      # a deflated zip member, or a server without Range: stage the whole file
-        fh = io.fetch(src.urls[0]).open("rb")
+        fh = _File(_patient(lambda: io.fetch(src.urls[0])).open("rb"))
     e = _endian(fh)
     found: dict[str, _Var] = {}
     seen: list[str] = []
