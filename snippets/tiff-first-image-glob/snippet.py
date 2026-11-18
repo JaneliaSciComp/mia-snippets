@@ -10,8 +10,13 @@ of full size is data, and a file that holds one is refused instead of losing it.
 The image is one grey page (zyx) or one page with interleaved samples (zcyx, c in the file's sample order).
 Values are returned as stored. Files are opened lazily: `open_array` reads the first file's tags only; `read`
 fetches the files it needs.
+
+A request the host refuses with 403 is asked again (`_again`): ftp.ebi.ac.uk at times answers the index of a
+directory it serves with 403 for a few seconds, and a binding of many folders needs every index to open.
 """
+import time
 from io import BytesIO
+from typing import Callable, TypeVar
 
 import numpy as np
 import tifffile
@@ -19,6 +24,30 @@ import tifffile
 from mia_harness.api import IO, Array, NeedsFetch, Source
 
 SPEC_VERSION = 1
+
+WAITS = (5.0, 20.0, 60.0)       # seconds before each further attempt of a request the host refused
+T = TypeVar("T")
+
+
+def _refused(e: Exception) -> bool:
+    """A 403 answer. `io` raises its HTTP client's status error, told here by class name since a snippet may
+    not import the client. Nothing else is asked again: `io` itself retries dropped connections, 5xx and 429,
+    a 404 is a file that is not there, and BudgetExceeded, HostNotAllowed and NeedsFetch are final."""
+    names = {c.__name__ for c in type(e).__mro__}
+    return "HTTPStatusError" in names and getattr(getattr(e, "response", None), "status_code", None) == 403
+
+
+def _again(step: Callable[[], T]) -> T:
+    """`step()`, repeated after each of WAITS while the host answers 403; the last 403 and any other error are
+    raised as they are."""
+    for wait in WAITS:
+        try:
+            return step()
+        except Exception as e:
+            if not _refused(e):
+                raise
+        time.sleep(wait)
+    return step()
 
 
 def _image(tif: tifffile.TiffFile, url: str) -> tifffile.TiffPageSeries:
@@ -95,7 +124,9 @@ class _Images:
 
     def _bytes(self, k: int) -> bytes:
         """File k whole: one request for a file read by range, instead of one per block tifffile seeks to."""
-        url = self._urls[k]
+        return _again(lambda: self._whole(self._urls[k]))
+
+    def _whole(self, url: str) -> bytes:
         try:
             with self._io.open(url) as fh:
                 return fh.read()
@@ -109,7 +140,7 @@ def _files(src: Source, io: IO) -> list[str]:
     count = src.params.get("count")
     if count is not None and (isinstance(count, bool) or not isinstance(count, int) or count < 1):
         raise ValueError(f"params.count must be a positive integer, got {count!r}")
-    files = [u for url in src.urls for u in io.expand(url)]
+    files = [u for url in src.urls for u in _again(lambda: io.expand(url))]
     if not files:
         raise ValueError("the urls name no file")
     if len(set(files)) != len(files):

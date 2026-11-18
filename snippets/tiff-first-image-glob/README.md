@@ -42,26 +42,39 @@ the same way, so a set that mixes exports with and without a preview is one arra
   file to parse its tags; no pixels are decoded. `read` gets each file it needs whole in one request through
   `io.open` (a stored member or a Range-capable URL) or, on `NeedsFetch` (a deflated member, a server ignoring
   Range), staged with `io.fetch`. The last decoded file is kept, so the `c` planes of one file decode once.
+- **A 403 is asked again.** When the host answers a listing or a file with HTTP 403, the snippet repeats that
+  step after 5, 20 and 60 s and raises the fourth 403 as it is (see "Directory listings"). Nothing else is
+  repeated here: `io` already retries dropped connections, 5xx and 429, a 404 is final, and so are
+  `HostNotAllowed`, `BudgetExceeded` and every error of the snippet's own checks.
 
 ## Directory listings
 
-Open costs one index page per folder URL, in sequence: the example's 278 folders of raw 5 took 186 s on
-ftp.ebi.ac.uk.
+Open costs one index page per directory, in sequence: the example's 278 folders of raw 5 took 186 s on
+ftp.ebi.ac.uk, and every one of the example's 290 directories has to answer for its job to open. That host
+does not always answer an index it serves. Two ways were seen, both gone a few minutes later:
 
-While this snippet was written that server answered 35 of the example's folder indexes (one date folder and
-34 well folders) with HTTP 200 and an **empty index page**, though each holds about 50 files; the same URLs
-listed completely a few minutes later, and four further passes over them agreed. It did the same once to the
-index of a plate folder that `image-tiles-glob` reads in the example, so this is the host, not this snippet,
-and any `<dir>/::<glob>` binding on it can meet it. What the snippet does about it:
+- **HTTP 403.** The crop job of this snippet's first version ended on `403 Forbidden` for the index of
+  `240711 E coli Plate 2 Non-confocal/Images/`, in an array `image-tiles-glob` read then. The same URL answered
+  200 with its 19,200 entries three times in a row afterwards. One pass of HEAD and GET over the example's
+  290 directories, made while this was written, met it in 6 of them, mostly in neighbouring requests: three
+  consecutive well folders of `2025-09-30/` and one of `2025-10-27_I/` refused both requests, and two more
+  of `2025-10-27_I/` refused the HEAD and answered the GET. All six answered 200 to both a few minutes later.
+  `io` raises a 4xx at once (only 5xx, 429 and transport errors are retried there), so one such answer among
+  290 listings fails the job. This snippet therefore repeats a refused step: `io.expand` of the URL, or the
+  read of a file, after 5, 20 and 60 s. A listing that failed is not kept by `io`, so the repeat is a new
+  request. A directory that is really forbidden costs 85 s before its 403 is raised. The example binds every
+  array through this snippet for that reason, the single-series Opera Phenix plates included.
+- **HTTP 200 with an empty index page.** 35 of the example's folder indexes (one date folder and 34 well
+  folders, each of about 50 files) came back so on one pass, and the index of a plate folder once; four
+  further passes agreed with the full listing. Here the snippet cannot ask again: `io` keeps a directory's
+  listing for the life of the job, and in a writable dataset cache it stores it under the directory's
+  validators. What it does is fail instead of reading a shorter array:
+  - a glob that matches nothing is an error from `io.expand` (`no member of <dir> matches <glob>`), so an
+    empty page fails the open and names the folder;
+  - `params.count` fails the open when the total is not the expected one, which covers a listing that is
+    short without being empty (not seen here, but nothing rules it out).
 
-- a glob that matches nothing is an error from `io.expand` (`no member of <dir> matches <glob>`), so an empty
-  page fails the open and names the folder; it never yields a shorter array;
-- `params.count` fails the open when the total is not the expected one, which covers a listing that is short
-  without being empty (not seen here, but nothing rules it out).
-
-Neither can ask again: `io` keeps a directory's listing for the life of the job, and in a writable dataset
-cache it stores it under the directory's validators. A job that fails this way has to be run again; if a
-stored empty listing persists, that is a harness matter.
+  A job that fails this way has to be run again; if a stored empty listing persists, that is a harness matter.
 
 ## Known limits
 
@@ -75,23 +88,39 @@ stored empty listing persists, that is a harness matter.
   axes `SYX`) are refused.
 - No recursive glob (see URLs). A binding over many folders is long, and its listing is as of the day it was
   written: a folder added later is not read, and with `count` a file added to a bound folder fails the open.
-- Only grey images with a thumbnail over HTTP directory indexes were read on real data. RGB images, zip
-  members (stored and deflated) and big-endian files were tried on synthetic files only.
+- Only grey images over HTTP directory indexes were read on real data (`uint8` with a thumbnail, `uint16`
+  without). RGB images, zip members (stored and deflated) and big-endian files were tried on synthetic files
+  only, and so was the repeat after a 403: against the harness's `IO` over a mock server that refuses an index
+  or a file a set number of times.
+- The repeat after a 403 tells the HTTP client's status error by its class name and `response.status_code`,
+  since a snippet may not import the client. If `io` raised another type for a refused request, the 403 would
+  be raised at the first answer, as before.
 
 ## Example
 
 `examples/s-biad1851-antibiotic-moa-brightfield.yaml`: BioStudies S-BIAD1851, brightfield images of *E. coli*
-and *K. pneumoniae* under antibiotics. The five Opera Phenix raws (single-series 2160×2160 `uint16` TIFFs) stay
-on `image-tiles-glob`, as in the issue's draft binding. This snippet reads the third sub-dataset,
+and *K. pneumoniae* under antibiotics, seven raws, all read by this snippet:
+
+| raw | what                                         | folders | files | shape (z, y, x)      | dtype  |
+|-----|----------------------------------------------|---------|-------|----------------------|--------|
+| 0   | K. pneumoniae plates 1-4, brightfield        | 4       | 9600  | 9600 × 2160 × 2160   | uint16 |
+| 1   | E. coli plates 1-4, ch4 brightfield          | 4       | 19192 | 19192 × 2160 × 2160  | uint16 |
+| 2   | E. coli plates 1-4, ch1 Hoechst 33342        | 4       | 19195 | 19195 × 2160 × 2160  | uint16 |
+| 3   | E. coli plates 1-4, ch2 SYTOX Green          | 4       | 19200 | 19200 × 2160 × 2160  | uint16 |
+| 4   | E. coli plates 1-4, ch3 FM4-64FX             | 4       | 19194 | 19194 × 2160 × 2160  | uint16 |
+| 5   | E. coli HZI (Keyence), 720×960 images        | 278     | 13788 | 13788 × 720 × 960    | uint8  |
+| 6   | E. coli HZI (Keyence), 1440×1920 images      | 4       | 200   | 200 × 1440 × 1920    | uint8  |
+
+Raws 0-4 are the Opera Phenix plates of the issue's draft binding, with its URLs: single-series TIFFs, which
+`image-tiles-glob` also reads and the draft bound to it. They are bound here so that a 403 on one of their
+indexes is asked again (see "Directory listings"); their counts are what the globs match in the plates'
+indexes, where the E. coli channels fall short of 4 × 4800 by the names the HTTP mirror serves as empty
+directories.
+
+Raws 5 and 6 are what the snippet was written for, the third sub-dataset
 `260619 E coli HZI TIFF/<date>/<well folder>/*.tif` (Keyence BZ-X810, 100x brightfield, `uint8`, LZW, each with
-the thumbnail series), as two raws by image size:
-
-| raw | folders | files | shape (z, y, x)    |
-|-----|---------|-------|--------------------|
-| 5   | 278     | 13788 | 13788 × 720 × 960  |
-| 6   | 4       | 200   | 200 × 1440 × 1920  |
-
-The folders and counts are from the HTTP indexes of the 10 date folders and their 282 well folders, checked
+the thumbnail series), as two raws by image size.
+Their folders and counts are from the HTTP indexes of the 10 date folders and their 282 well folders, checked
 against the BioStudies file list `260619 E coli HZI TIFF.json` (13,990 `.tif`, all labelled Brightfield, and
 54 `.lnk`). The two sizes show in that list's file sizes, 0.68-0.87 MB for 13,790 files and 2.5-2.8 MB for the
 200 files of four folders (`2025-10-30_I/2xClavulanate`, `2025-10-30_II/2xClavulanate`, `2xRelebactam`,

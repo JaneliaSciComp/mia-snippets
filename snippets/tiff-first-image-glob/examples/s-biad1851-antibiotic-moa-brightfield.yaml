@@ -2,41 +2,41 @@ record: s-biad1851-antibiotic-moa-brightfield
 record_commit: 209795d252de12cb42b7ed23372e1026fda18337
 snippets_commit: 1482c48ea38bc9d9c7c808040a8561945ae273dc
 raw:
-  - snippet: image-tiles-glob
+  - snippet: tiff-first-image-glob
     urls:
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/260205%20K%20pneumoniae%20TIFF/260205%20K%20pneumoniae%20Plate%201/Images/::*.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/260205%20K%20pneumoniae%20TIFF/260205%20K%20pneumoniae%20Plate%202/Images/::*.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/260205%20K%20pneumoniae%20TIFF/260205%20K%20pneumoniae%20Plate%203/Images/::*.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/260205%20K%20pneumoniae%20TIFF/260205%20K%20pneumoniae%20Plate%204/Images/::*.tiff"
-    params: {}
-  - snippet: image-tiles-glob
+    params: {count: 9600}
+  - snippet: tiff-first-image-glob
     urls:
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%201%20Non-confocal/Images/::*-ch4sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%202%20Non-confocal/Images/::*-ch4sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%203%20Non-confocal/Images/::*-ch4sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%204%20Non-confocal/Images/::*-ch4sk1fk1fl1.tiff"
-    params: {}
-  - snippet: image-tiles-glob
+    params: {count: 19192}
+  - snippet: tiff-first-image-glob
     urls:
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%201%20Non-confocal/Images/::*-ch1sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%202%20Non-confocal/Images/::*-ch1sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%203%20Non-confocal/Images/::*-ch1sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%204%20Non-confocal/Images/::*-ch1sk1fk1fl1.tiff"
-    params: {}
-  - snippet: image-tiles-glob
+    params: {count: 19195}
+  - snippet: tiff-first-image-glob
     urls:
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%201%20Non-confocal/Images/::*-ch2sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%202%20Non-confocal/Images/::*-ch2sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%203%20Non-confocal/Images/::*-ch2sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%204%20Non-confocal/Images/::*-ch2sk1fk1fl1.tiff"
-    params: {}
-  - snippet: image-tiles-glob
+    params: {count: 19200}
+  - snippet: tiff-first-image-glob
     urls:
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%201%20Non-confocal/Images/::*-ch3sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240711%20E%20coli%20Plate%202%20Non-confocal/Images/::*-ch3sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%203%20Non-confocal/Images/::*-ch3sk1fk1fl1.tiff"
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/240711%20E%20coli%20TIFF/240712%20E%20coli%20Plate%204%20Non-confocal/Images/::*-ch3sk1fk1fl1.tiff"
-    params: {}
+    params: {count: 19194}
   - snippet: tiff-first-image-glob
     urls:
       - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/851/S-BIAD1851/Files/260619%20E%20coli%20HZI%20TIFF/2025-09-18_I/2025-09-18_plate1_0.5xChloramphenicol_100x/::*.tif"
@@ -327,9 +327,10 @@ raw:
     params: {count: 200}
 labels: []
 reasons:
-  - "raws 0-4 stay on image-tiles-glob with the draft's urls and no params (Opera Phenix plates): harness describe shows each file is one single-page YX uint16 2160x2160 TIFF (K. pneumoniae r01c01f01p01-ch1: uncompressed; E. coli r01c01f01p01-ch4: LZW, tiled), matching the record's arrays (yx, 2160x2160, uint16); the snippet takes <dir>/::<glob> urls and stacks one field of view per z plane, so z is the field-of-view index, not depth"
+  - "raws 0-4 (Opera Phenix plates) keep the draft's urls but are read by tiff-first-image-glob, not the draft's image-tiles-glob: harness describe shows each file is one single-page YX uint16 2160x2160 TIFF (K. pneumoniae r01c01f01p01-ch1: uncompressed; E. coli r01c01f01p01-ch4: LZW, tiled), matching the record's arrays (yx, 2160x2160, uint16), and this snippet reads a file with one series as image-tiles-glob does (series 0, one file per z plane, so z is the field-of-view index, not depth). The reason for the change is the host: the crop job at 5c71284 ended on HTTP 403 for the index of '240711 E coli Plate 2 Non-confocal/Images/', a url of raw 1, which answered 200 with its full listing afterwards (three times in a row); the harness raises a 403 at once and image-tiles-glob has no second try, while this snippet asks a refused index or file again after 5, 20 and 60 s"
   - "raw 0 is the four K. pneumoniae plates (brightfield only, per the record notes); raws 1-4 are the four E. coli plates split by the channel in the file name, ch4 brightfield, ch1 Hoechst 33342, ch2 SYTOX Green, ch3 FM4-64FX (record alignment_notes), one raw per channel so a stack does not mix modalities"
   - "E. coli plate folder names (240711 Plate 1/2, 240712 Plate 3/4 under '240711 E coli TIFF/') are from harness list of that directory"
+  - "count 9600 (raw 0) and 19192, 19195, 19200, 19194 (raws 1-4): the number of files the globs match in the plates' indexes (harness list of each url: 4 x 2400 for K. pneumoniae; per E. coli plate 4800 a channel, less the names the HTTP mirror serves as empty directories, e.g. 8 ch4, 4 ch1 and 4 ch3 names of Plate 2), the same numbers as the match agent's report. A listing that came back short fails the open instead of shifting z"
   - "raws 5 and 6 on tiff-first-image-glob: the record's third raw array, '260619 E coli HZI TIFF/<date>/<well folder>/*.tif' (Keyence BZ-X810, 100x brightfield). Each file holds two TIFF series, a YX uint8 LZW image and a YXS 120x160x3 thumbnail page (harness describe; the record's unexplained '2 pages'), and every other glob snippet refuses a file with more than one series. This snippet reads series 0 of each file and leaves the thumbnail unread; one file per z plane, so z is the field-of-view index, not depth"
   - "one url per well folder (282 urls over the 10 date folders), each <folder>/::*.tif: an HTTP glob matches one directory's index only, and harness fetch and stage expand every url with io.expand, so a glob across sub-folders would not resolve there. The folder list is from the HTTP indexes of '260619 E coli HZI TIFF/', its 10 date folders and their 282 well folders, in listing order, and agrees with the BioStudies file list '260619 E coli HZI TIFF.json' (13,990 .tif and 54 .lnk; every .tif labelled Channel Brightfield with a Well Position, Sample ID and FOV, the 27 with irregular names such as ..._CH4_II.tif included), so *.tif takes every image and leaves the .lnk files out"
   - "two raws because the images have two sizes, and one array has one shape: raw 5 is the 278 folders of 720x960 images (record shape 720x960), raw 6 the 4 folders of 1440x1920 images (2025-10-30_I/2xClavulanate, 2025-10-30_II/2xClavulanate, 2xRelebactam, DMSO). The split is from the file sizes in the BioStudies file list, 682,512-872,372 bytes for every .tif of the 278 folders and 2,507,884-2,792,354 bytes for all 200 of the 4 folders, and harness describe of a file of each group ([720, 960] and [1440, 1920], both uint8 LZW with the 120x160x3 thumbnail)"
