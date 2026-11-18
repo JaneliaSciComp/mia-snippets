@@ -1,0 +1,11 @@
+name: png-field-sample-geojson
+spec_version: 1
+summary: One field of view stored as PNG files plus a GeoJSON annotation, at plain URLs or as zip members; grey 8/16-bit PNGs, one per channel, as cyx (one url is yx); or one sample plane of an RGB/RGBA PNG as yx (sample); or, given a .json/.geojson url and one PNG of the field for the grid, the GeoJSON Polygon/MultiPolygon features filled onto that grid as yx uint16 instance ids. Each file is read and decoded whole; a 429 answer is waited out and asked again.
+formats: [png, json]
+containers: [zip, http]
+params:
+  sample: {type: int, required: false, doc: "sample form only. 0-based index of the one sample (0 R, 1 G, 2 B, 3 alpha) of a single RGB, RGBA or grey+alpha PNG to return as yx, values unchanged, e.g. the plane of an RGB-coded mask that holds one class; reason required in binding, with what was measured in each sample"}
+  y_up: {type: bool, required: false, doc: "polygons form only. true: the GeoJSON y axis points up from the image's bottom edge, so a vertex (x, y) is at column x, row height - y; absent or false: y is the row, growing downwards. Reason required in binding, with how the frame was checked"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-4665863-hpa-cell-segmentation]
+supersedes: null

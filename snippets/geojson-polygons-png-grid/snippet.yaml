@@ -1,0 +1,11 @@
+name: geojson-polygons-png-grid
+spec_version: 1
+summary: GeoJSON FeatureCollections of Polygon / MultiPolygon features in image pixel coordinates (a QuPath export, one file per image), from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane, rasterised as uint16 labels on the grid of the PNG named by `image` (size from its header). A pixel is a feature's when its centre is inside the outline (even-odd); ids are each feature's 1-based number in its file, or with `classes` the 1-based index of properties.classification.name.
+formats: [json, other]
+containers: [zip, http]
+params:
+  image: {type: str, required: true, doc: "the PNG that gives a GeoJSON file's yx grid, relative to that file's directory, with one * that stands for the file's name without directory and extension, e.g. '../patches/*.png' for patch-geojsons/<stem>.geojson beside patches/<stem>.png; '..' steps up within the zip or below the host. Only the PNG's header is used. Reason required in binding"}
+  classes: {type: list, required: false, doc: "absent: instance ids, each feature painted with its 1-based number in its file. Given: semantic ids, each feature painted with the 1-based position of its properties.classification.name in this list; a feature whose class is not listed (or has none) raises. 0 is background either way; reason required in binding"}
+requires: [numpy]
+tested_on: [zenodo-20686174-oral-cytology-oscc-nuclei]
+supersedes: null

@@ -1,0 +1,69 @@
+record: zenodo-15570004-bluvision-haustoria-gus-yolo
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/gus_training_set_yolo/train/images/*.jpg"}
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/gus_training_set_yolo/valid/images/*.jpg"}
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/gus_training_set_yolo/test/images/*.jpg"}
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/haustoria_training_set_yolo/train/images/*.jpg", shape: [150, 350]}
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/haustoria_training_set_yolo/valid/images/*.jpg", shape: [150, 350]}
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/haustoria_training_set_yolo/test/images/*.jpg", shape: [150, 350]}
+labels:
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/gus_training_set_yolo/train/images/*.jpg", polygons: instance, classes: 1}
+    pairs_with: 0
+    label_key: manual_gt-gus_stained_cell-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/gus_training_set_yolo/valid/images/*.jpg", polygons: instance, classes: 1}
+    pairs_with: 1
+    label_key: manual_gt-gus_stained_cell-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/gus_training_set_yolo/test/images/*.jpg", polygons: instance, classes: 1}
+    pairs_with: 2
+    label_key: manual_gt-gus_stained_cell-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/haustoria_training_set_yolo/train/images/*.jpg", shape: [150, 350], polygons: instance, classes: 1}
+    pairs_with: 3
+    label_key: manual_gt-haustorium-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/haustoria_training_set_yolo/valid/images/*.jpg", shape: [150, 350], polygons: instance, classes: 1}
+    pairs_with: 4
+    label_key: manual_gt-haustorium-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-polygons-zip-glob
+    urls: ["https://zenodo.org/api/records/15570004/files/supplementary_data.zip/content"]
+    params: {glob: "supplementary_data/haustoria_training_set_yolo/test/images/*.jpg", shape: [150, 350], polygons: instance, classes: 1}
+    pairs_with: 5
+    label_key: manual_gt-haustorium-instance
+    segmentation_type: instance
+reasons:
+  - "jpeg-yolo-polygons-zip-glob instead of the draft's jpeg-zip-glob: the annotations are YOLO segmentation .txt files (one line per polygon: class id, then x y pairs as fractions of the image width and height), which no catalog snippet reads, and the haustoria images differ in shape within a split, which jpeg-zip-glob refuses at read; this snippet reads the images and rasterises the polygons of labels/<stem>.txt on the grid of images/<stem>.jpg"
+  - "the url is the record's one zip (data.download_url) and glob is anchored at each split's images/ folder; one raw per set and split, so the publication's train/valid/test splits stay separate (raw 0-2 GUS train/valid/test, raw 3-5 haustoria train/valid/test). Each raw is a z stack of independent 2D images in member-name order, not a volume (record dimensionality 2D); all three samples are kept as c 0..2 = R, G, B (record: RGB colour brightfield, channels differ)"
+  - "labels use the same glob (and shape) as their raw: the snippet takes the image list from it and derives each label file as <split>/labels/<stem>.txt, so z index k of a label is the annotation of z index k of its raw by construction. Every image of the six folders has a label file of the same stem (checked on the zip's directory: 1052/301/150 and 1378/394/196 stems, identical sets); 257 GUS and 985 haustoria label files are empty and read as background planes. The labels.cache files beside train/ and valid/ are Ultralytics caches, not read"
+  - "GUS raws take no shape param: the record gives the GUS tiles as 2048x2048 and the first image of each split is; without shape the snippet holds every image to the first one's shape and raises at read on one that differs, while shape would read all 1503 headers at open, which over HTTP touches nearly every 1 MiB block of the GUS images. NOT VERIFIED for all 1503 GUS tiles: reading them all while testing was stopped by Zenodo's 429 rate limit; the first image of each split and four test tiles are 2048x2048, and in those four the polygons (2 to 15 per tile, 0.7-3.9% of the pixels) lie on the blue GUS stain (mean R 37-89 inside against 153-158 outside), so x/y and the grid are right"
+  - "haustoria raws and labels take shape [150, 350]: the haustoria images are cell crops of many sizes (all 1968 JPEG headers read: 1059 of 1378 train, 293 of 394 valid and 145 of 196 test images are 150x350; the other 471 come in about 400 shapes of one to three images each, 75-297 px high and 131-863 px wide), and an array has one shape. NOT BOUND: those 471 odd-shaped images and the 657 polygons of their label files (436 train, 147 valid, 74 test, against 985 / 287 / 120 polygons bound); binding them takes one raw and one label per shape, which a human may add for the shapes worth having"
+  - "polygons instance, classes 1, segmentation_type instance: the record's label encoding is polygons, one object per line, so each polygon is filled with its 1-based line number in its file (ids restart in every plane); classes 1 is nc in each set's data.yaml (names [gus] and [hau]) and every one of the 10,607 lines has class id 0, so a semantic label would only repeat the instance mask as 0/1 and is not bound. In the bound haustoria planes (all 1497 read) every one of the 1392 polygons keeps at least one pixel after painting (smaller polygons on top), and 596 planes carry an annotation; the fills are polygon interiors by pixel centre, which can differ by a pixel along outlines from a rasteriser that rounds vertices"
+  - "label_key manual_gt-gus_stained_cell-instance for the GUS set (class gus: a GUS-stained, i.e. transformed, epidermal cell, per the record's sample description) and manual_gt-haustorium-instance for the haustoria set (class hau: a haustorium inside such a cell); the record gives only the slugs gus / hau, so the class names are this binding's reading and a human may rename them. Source manual_gt as in the match report: the sets are Roboflow annotation projects; neither the record nor the READMEs say whether the outlines were drawn by hand or model-assisted"
+  - "CNN classification crops (haustoria_training_set_cnn/*/*.png) not bound: image-level classes only, no mask, and PNG, which this snippet does not read; yolo_models/ holds weights and training curves, not data"
+  - "voxel size: the snippet reports None (JPEG and YOLO .txt carry no pixel size) and the record found none either"

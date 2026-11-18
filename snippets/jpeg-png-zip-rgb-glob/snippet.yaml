@@ -1,0 +1,12 @@
+name: jpeg-png-zip-rgb-glob
+spec_version: 1
+summary: RGB photographs stored as JPEG or PNG (told apart by each file's first bytes, not its name - a PNG named .jpg is read as a PNG) chosen by glob from the members of a zip (a plain URL, or a zip nested in another zip), one image per z plane with R, G, B as the c axis (zcyx). An RGBA PNG gives its three colour samples - its alpha is dropped only when fully opaque, else the file raises. Every image of an array must have the first one's height and width; `numbers` chooses the files of one array by file number, so a set whose images come in several sizes is bound as one array per size, nothing padded.
+formats: [jpeg, png]
+containers: [zip, http]
+params:
+  glob: {type: str, required: true, doc: "fnmatch pattern over the member names of each zip the urls name (`*` also crosses `/`), e.g. 'Thick_Infected/*.jpg'; every match is one z plane, sorted by name as strings. The name says nothing about the format: each file is a JPEG or a PNG by its first bytes. Anchor it at the folder: a bare '*.jpg' also matches macOS sidecars such as '__MACOSX/a/._b.jpg', which are neither and raise at read"}
+  numbers: {type: list, required: false, doc: "the file numbers (last run of digits in the member's file name, so 'Image01.jpg' is 1) of the files this array holds, as numbers and inclusive 'a-b' runs, e.g. ['1-1059'] or [3, 7, '60-61']; the glob's other matches are left out. Every number listed must be a file's, and two matches with the same number raise. For the files of one image size, found by reading every file's header once; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of files the array must have, from a complete listing. Open fails on another number, so a changed zip is noticed instead of shifting z; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [dataverse-o2wvwa-tanzania-malaria-blood-smears]
+supersedes: null

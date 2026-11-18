@@ -1,0 +1,43 @@
+record: s-biad1527-afb-dx-tuberculosis-wsi
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+- snippet: tiff-wsi-level0-tiles
+  urls:
+  - https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/527/S-BIAD1527/Files/Dataset1/Negative/AFB_NEG_S1_039.tif
+  params: {}
+- snippet: tiff-wsi-level0-tiles
+  urls:
+  - https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/527/S-BIAD1527/Files/Dataset1/Positive/AFB_POS_S1_001.tif
+  params: {}
+- snippet: tiff-wsi-level0-tiles
+  urls:
+  - https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/527/S-BIAD1527/Files/Dataset2/negative/AFB_NEG_S2_001.tif
+  params: {}
+- snippet: tiff-wsi-level0-tiles
+  urls:
+  - https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/527/S-BIAD1527/Files/Dataset2/positive/AFB_POS_S2_074.tif
+  params: {}
+labels: []
+reasons:
+- 'tiff-wsi-level0-tiles instead of tiff-zip-member-2: each slide is a 0.5 to 5 GB pyramidal BigTIFF whose level-0
+  page is 1024 px JPEG tiles; this snippet fetches only the tiles a region touches (4 MiB for a patch on a tile
+  corner), where tiff-zip-member-2 decodes the whole level-0 page for any region (218 MB for one patch of the
+  smallest slide; a four-slide smoke did not finish in 25 minutes)'
+- 'raw is the page labelled level=0 (page 2, mag 40), presented as cyx with c the three RGB samples (record:
+  axes yxs, channels 3, uint8); pages 0 and 1 (Label_Image, Probability_Image) and the lower levels are not bound'
+- 'tile placement: tiles are on the TIFF tile grid. The slides are VENTANA DP 200 files whose XMP says
+  Registration Method="None" with one AOI covering the whole level-0 page, and the level-0 page has no
+  TileJointInfo, so the tifffile warning "BIF series tiles are not stitched" does not apply; checked on
+  AFB_NEG_S1_039.tif against the file''s own level=5 page (correlation 0.91 across a four-tile corner, below 0.25
+  for flipped or swapped tiles)'
+- 'one raw entry per slide: level-0 shape differs per slide (record shape_varies: true), so slides cannot be
+  stacked into one array and a glob cannot stand for them'
+- 'four of the 421 slides are bound, one from each folder (Dataset1/Negative, Dataset1/Positive, Dataset2/negative,
+  Dataset2/positive), the same four the match agent tried: every job opens every bound array (3 MiB of header
+  blocks per slide), so all 421 would cost about 1.3 GB and 1,700 requests before the first crop; the other 417
+  bind the same way'
+- 'no labels: the record''s annotations are slide-level classes by folder name only (Positive/Negative), no mask
+  or point files'
+- 'voxel size 250 nm in y and x is reported by the snippet from the level-0 XResolution/YResolution (40000 px/cm),
+  matching the record'

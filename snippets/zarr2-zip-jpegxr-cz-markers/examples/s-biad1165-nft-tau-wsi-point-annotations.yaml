@@ -1,0 +1,34 @@
+record: s-biad1165-nft-tau-wsi-point-annotations
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: zarr2-zip-jpegxr-cz-markers
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/165/S-BIAD1165/Files/zipped_wsis/batch1.zip::batch1/1-102-Temporal_AT8.zarr"]
+    params: {}
+labels:
+  - snippet: zarr2-zip-jpegxr-cz-markers
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/165/S-BIAD1165/Files/annotations/annotations.zip::1-102-Temporal_AT8.cz"
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/165/S-BIAD1165/Files/zipped_wsis/batch1.zip::batch1/1-102-Temporal_AT8.zarr"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-neurofibrillary_tangle-points
+    segmentation_type: instance
+  - snippet: zarr2-zip-jpegxr-cz-markers
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/165/S-BIAD1165/Files/annotations/annotations.zip::1-102-Temporal_AT8.cz"
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/165/S-BIAD1165/Files/zipped_wsis/batch1.zip::batch1/1-102-Temporal_AT8.zarr"
+    params: {element: rectangle}
+    pairs_with: 0
+    label_key: manual_gt-annotated_region-instance
+    segmentation_type: instance
+reasons:
+  - "urls: one WSI and its annotation file, 1-102-Temporal_AT8 (the record's example array, the draft's choice). The other 21 annotated WSIs of batch1.zip bind the same way, one raw and its labels each; their .cz files were opened against their .zarray here (all markers and rectangles lie on the grid) but none of their pixels were read, so they are not claimed. 1-960-Temporal_AT8.cz has no Zarr array in either zip, and the 24 arrays of batch2.zip have no annotation file"
+  - "raw with zarr2-zip-jpegxr-cz-markers, no params: the array is a Zarr v2 directory inside batch1.zip (deflated members, so each chunk member is fetched whole) whose 5000x5000x3 chunks are JPEG XR images; the snippet presents it in storage order as yxc 116676x115406x3 uint8, the record's shape and its axes yxs (c = the RGB samples). The url is the array directory, not the draft's .zarray member (the snippet takes either)"
+  - "voxel size: the raw has none (the array has no .zattrs). The label reports 111.10 nm from the .cz file's Scaling (1.1110e-07 m per pixel), against the record's 110 nm"
+  - "label urls are the .cz member and the raw array again: a .cz holds coordinates only, so the snippet reads the array's .zarray for the shape of the grid the elements are drawn on; no chunk is read for a label"
+  - "points label, default element marker: each of the 288 Marker elements (one click on a neurofibrillary tangle) marks the one pixel that holds its point, with its own id (its 1-based position among the file's markers), so the label is yx uint16 with ids 1..288. label_key manual_gt-neurofibrillary_tangle-points as the match agent's report gives it (manual_gt-<class>-points); segmentation_type instance because each point is one tangle and the schema has no points type. radius is left at 0: the file gives points, not extents"
+  - "second label, element rectangle: the file's 3 Rectangle elements are the regions the annotators worked in (every marker of the file lies inside one), filled as ids 1..3. The points label is 0 both for 'no tangle' inside a rectangle and for 'not annotated' outside it, so the rectangles are what tells the two apart. The class name annotated_region is mine; the record does not name the rectangles (it calls them ROIs)"
+  - "coordinate frame, which the record leaves open: Marker X/Y and Rectangle Left/Top/Width/Height are taken as pixels of the Zarr array (x right, y down, no offset or scale), and a rectangle is turned clockwise about its centre by its Rotation. Checks are in the snippet README: all markers of all 22 annotated WSIs lie on their grids and inside their rectangles only with this rotation sense, and on this WSI the first 24 markers each sit on a neuron cell body ringed by brown AT8 deposit"
+  - "coverage is sparse: 288 pixels and three rectangles (21236x10681 px each) on a 116676x115406 scan, so random crops rarely hold a marker and most label crops are empty"
+  - "unwritten chunks: the zip holds 353 of this array's 576 chunk members (24x24 chunks of 5000x5000); the rest, the slide's empty margins including the origin chunk 0.0.0, read as fill_value 0 (black), not as white glass. The harness takes c as a plane axis, so a crop is one of the three RGB samples"

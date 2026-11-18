@@ -1,0 +1,31 @@
+record: zenodo-19830051-pollenbb16-chilean-pollen
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: jpeg-yolo-polygons-glob
+    urls: ["https://zenodo.org/records/19830051/files/pollenbb16.zip::pollenbb16/images/*.jpg"]
+    params: {}
+labels:
+  - snippet: jpeg-yolo-polygons-glob
+    urls: ["https://zenodo.org/records/19830051/files/pollenbb16.zip::pollenbb16/labels/*.txt"]
+    params: {polygons: instance, classes: 16, images: "pollenbb16/images/*.jpg"}
+    pairs_with: 0
+    label_key: manual_gt-pollen_grain-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-polygons-glob
+    urls: ["https://zenodo.org/records/19830051/files/pollenbb16.zip::pollenbb16/labels/*.txt"]
+    params: {polygons: semantic, classes: 16, images: "pollenbb16/images/*.jpg"}
+    pairs_with: 0
+    label_key: manual_gt-pollen_grain-semantic
+    segmentation_type: semantic
+reasons:
+  - "jpeg-yolo-polygons-glob for the raw instead of the draft's jpeg-zip-glob: the draft's raw passes smoke as it is, but an example binding names the snippet it tests throughout, and this snippet's image form reads the same members (RGB JPEG 2064x3088x3 uint8, record axes yxs) into the same array, zcyx [16198, 3, 2064, 3088], one image per z plane in member-name order"
+  - "raw url glob pollenbb16/images/*.jpg, the draft's params.glob moved into the url (this snippet takes `<zip>::<glob>` urls): anchored at the images folder of the record's layout tree, so the 9 preview PNGs under labels_bb/_preview and the other folders are left out"
+  - "RGB samples kept as c 0..2 (R, G, B): the record says brightfield RGB with 3 channels. z is a stack of independent fields (three focal planes fp0-fp2 per stage position, each its own file and plane), not depth (record dimensionality 2D)"
+  - "labels from pollenbb16/labels/*.txt, the YOLO segmentation polygons (record encoding polygons, alignment same-grid: rows of class id and x y pairs normalised to the image). labels_bb is not bound: it is a boxes-table of the same objects, coarser than the polygons"
+  - "images pollenbb16/images/*.jpg on both labels, the raw's glob: the label planes are those images in name order, each with the .txt of its stem (record alignment_notes: the label .txt shares the image stem), so z index k of a label is the annotation of z index k of the raw; the snippet refuses to open unless images and label files pair one to one (16198 of each in the record's listing). Each plane is filled on the grid its own JPEG header gives, since the coordinates are fractions of that image"
+  - "classes 16: the record's data_split.yaml has nc 16 with class ids 0-15; a row with another class id raises instead of being painted"
+  - "two labels on the raw, as the catalog's other annotation rasterisers bind them: polygons instance (each polygon filled with its 1-based row number in its file, ids restart on every plane; segmentation_type instance) tells the grains apart, and polygons semantic (class id + 1, so 1 anthemis_cotula ... 16 schinus_polygamus in the record's class order, 0 background; segmentation_type semantic) carries the species. An empty .txt would be an all-background plane in both, but this set has none: all 16198 label files were read while testing and each has 1 to 19 rows"
+  - "checked on the data while testing: the zip lists 16198 images and 16198 label files that pair one to one by stem; the label files hold 36,383 polygons in all (6 to 33 vertices each), every class id is 0-15, every coordinate is within 0..1 and no file fails to parse; outlines of the 19 filled polygons of Aristotelia_Chilensis_Biobio_Chile_R04_X10600_Y4750_fp0 drawn on its image lie around the grains"
+  - "label_key manual_gt-pollen_grain-instance / -semantic: source manual and the class word pollen_grain are the match agent's reading of the record (manual instance masks of pollen grains); pollen_grain is not a listed standard class, so a human should confirm it, and may drop the semantic label if species ids are not wanted"
+  - "no voxel size bound: none in the JPEG headers or the label text (record voxel_size_nm null)"

@@ -1,0 +1,22 @@
+record: zenodo-6806398-pns-cyst-nematode-cysts
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://zenodo.org/api/records/6806398/files/PNS-Cyst-Part1-Images.zip/content::PNS-Cyst-Part1-Images/image_*.png"
+    params: {}
+labels:
+  - snippet: png-palette-index-glob
+    urls:
+      - "https://zenodo.org/api/records/6806398/files/PNS-Cyst-Part1-Segmentations.zip/content::PNS-Cyst-Part1-Segmentations/gt_*.png"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-cyst-instance
+    segmentation_type: instance
+reasons:
+  - "raw stays on image-tiles-glob (from the draft): it is the catalog snippet that reads colour PNG zip members by glob; raw is 229 RGBA PNGs (record: yxs 3008x4112x4 uint8), read as zcyx (229, 4, 3008, 4112) with 4 c planes (R, G, B, alpha), one file per z plane"
+  - "labels on png-palette-index-glob instead of the draft's image-tiles-glob: the masks are 8-bit palette PNGs (colour type 3; harness describe of gt_078.png: mode palette, 256 palette colours, 4112x3008) whose stored palette indices are the instance ids, and image-tiles-glob and png-channels both refuse a palette PNG because the decoder would return the palette's colours; this snippet returns the stored indices as uint8, one file per z plane, zyx (229, 3008, 4112)"
+  - "globs anchored at the zip folders: harness list shows image_001..229.png and gt_001..229.png, so the two sorted sets pair plane for plane by number NNN (record alignment_notes: image_NNN.png pairs with gt_NNN.png); z is a stack of independent 2D images (record dimensionality 2D), not a volume"
+  - "label_key manual_gt-cyst-instance (from the draft): the Zenodo description says all cysts are manually outlined by experts and saved as indexed-PNG images; one id per cyst, 0 background (record encoding instance-ids)"
+  - "segmentation_type instance: record encoding instance-ids, ids consecutive per image (gt_001 has 1 cyst, gt_078 has 134), 0 background"

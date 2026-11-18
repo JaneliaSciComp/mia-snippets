@@ -1,0 +1,10 @@
+name: png-image
+spec_version: 1
+summary: One PNG per array (yx, or cyx for colour), from a zip member (stored or deflated) or a plain URL; 1/2/4-bit greyscale is returned as its stored values (a 1-bit mask as 0/1), and only the PNG header is read at open, so a set of images of different sizes is bound one entry per image.
+formats: [png]
+containers: [zip, http]
+params:
+  samples: {type: str, required: false, doc: "'grey': the file's samples are identical copies (a mask or grey image saved as RGB), so sample 0 is returned and the array has no c axis; differing samples raise, and a file without a sample axis passes through. Without it a file with samples is read as c (cyx) and a file without as yx; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-4993672-hashi-breast-invasive-wsi]
+supersedes: null

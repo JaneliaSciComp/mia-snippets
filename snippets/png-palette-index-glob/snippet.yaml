@@ -1,0 +1,9 @@
+name: png-palette-index-glob
+spec_version: 1
+summary: One palette (indexed-colour) PNG per file from zip members or an HTTP directory chosen by glob (or plain URLs), stacked along z (zyx); the values are the stored palette indices (the ids of an indexed-PNG mask) as uint8, never the palette colours.
+formats: [png]
+containers: [zip, http]
+params: {}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-6806398-pns-cyst-nematode-cysts]
+supersedes: null

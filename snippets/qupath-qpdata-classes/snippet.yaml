@@ -1,11 +1,10 @@
 name: qupath-qpdata-classes
 spec_version: 1
-summary: The classified objects (annotations and detections with polygon, rectangle or geometry ROIs) of one QuPath image entry's data.qpdata, a zip member or a plain URL, filled as class ids (yx uint8) onto the pixel grid of one slide the entry shows; for a QuPath montage ("sparse" image of cropped slides) the crop offsets in the file map the ROIs back onto the slide. The Java object stream is walked by its grammar, never deserialized.
+summary: The annotation objects of one QuPath image data file (data.qpdata, a Java serialization stream, from a zip member or a plain URL) whose classes the binding lists, filled onto the image's full-resolution pixel grid as a yx uint8 map of class ids (1 = the first listed class, 0 = no listed annotation); polygon and geometry (WKB polygon, multipolygon) ROIs, parsed without Java or QuPath.
 formats: [other]
 containers: [zip, http]
 params:
-  image: {type: str, required: true, doc: "file name of the slide whose grid the classes are filled onto, as the entry's image description names it (last part of the slide's uri, percent-decoded), e.g. '633 SVF 3+1 12w in vivo 2.tif'. The array has that slide's full size; pixels outside the part(s) the entry shows are 0"}
-  classes: {type: list, required: true, doc: "QuPath class names to fill, as QuPath shows them ('Parent: Child' for a derived class). The id of a class is its 1-based position in this list; objects of any other class, or of none, are left out. Where objects of two listed classes overlap, the class listed later wins. A name no object in the file has is an error"}
+  classes: {type: str, required: true, doc: "QuPath class names to rasterize, separated by commas, in id order: annotations of the first name are id 1, of the second id 2, and so on (at most 255). Names are matched exactly as QuPath shows them (e.g. 'Positive', 'Ignore*', 'Tumor: Positive' for a derived class); where annotations of two listed classes overlap, the pixel holds the class listed later. Annotations of unlisted classes and unclassified ones are left out. Reason required in binding: which classes, and why in that order"}
 requires: [numpy]
-tested_on: [zenodo-10680128-bone-cartilage-marrow-he-qupath]
+tested_on: [zenodo-23535439-hamster-lung-sars-cov-2-ihc-wsi]
 supersedes: null

@@ -1,0 +1,13 @@
+name: jpeg-yolo-boxes-glob
+spec_version: 1
+summary: A set of 8-bit JPEG images (RGB samples kept as c), or of the YOLO box tables that annotate them (.txt, one row per box - class id, x_center, y_center, width, height as fractions of the image) rasterised on the grid of the JPEG each table belongs to (labels/<stem>.txt -> images/<stem>.jpg, or the JPEG beside it), from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane. `skip` leaves files of another shape out of a glob, so a set whose images come in several shapes is bound as one array per shape. A table without rows is an all-background plane.
+formats: [jpeg, other]
+containers: [zip, http]
+params:
+  boxes: {type: str, required: false, doc: "set it when the urls are YOLO .txt box tables (without it they are JPEG images): how the rows are painted on the yx grid. 'instance' fills each box with its 1-based row number in the file; 'semantic' fills it with its YOLO class id + 1. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "box tables only, and required for them: the class names in YOLO class id order (the dataset's data.yaml `names`), so semantic id = position from 1 = class id + 1. A row whose class id has no name raises, in both modes; reason required in binding"}
+  image_ext: {type: str, required: false, doc: "box tables only: the extension, without the dot, of the JPEG a table annotates (`labels/<stem>.txt` is read on the grid of `images/<stem>.<image_ext>`, a table in a folder not named `labels` on that of `<stem>.<image_ext>` beside it). Default jpg"}
+  skip: {type: list, required: false, doc: "file stems (file name without its extension) left out of the files the urls stand for; the array holds every other file. Every stem must be exactly one file's. For the files of another image shape, bound as another array; give an image array and its box table array the same list. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-16945379-spider-mite-test-sets]
+supersedes: null

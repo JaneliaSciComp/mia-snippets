@@ -1,0 +1,14 @@
+name: tiff-tiles-csv-points
+spec_version: 1
+summary: One multi-page TIFF of single-sample pages (a PerkinElmer/Akoya QPTIFF pyramid's full-resolution level, e.g. cyx) from a zip member or a plain URL, read tile by tile (a deflated member is fetched whole once); or, with a .csv url beside the TIFF, a per-object CSV table of centroids in micrometres marked on that image's pixel grid as yx class ids or row numbers (a points table, not masks).
+formats: [tiff, csv]
+containers: [zip, http]
+params:
+  x_column: {type: str, required: false, doc: "label form. Name of the table column holding each point's x in micrometres from the image's left edge; default `x`"}
+  y_column: {type: str, required: false, doc: "label form. Name of the table column holding each point's y in micrometres from the image's top edge; default `y`"}
+  class_column: {type: str, required: false, doc: "label form. Name of the table column holding each point's class name; the point's pixel then holds that class's id (see `classes`). Without it the pixel holds the 1-based number of the point's data row (uint32). Reason required in binding"}
+  classes: {type: list, required: false, doc: "label form, required with class_column and only then. The class names in id order: the first is id 1. A value of the column that is not listed is an error, so every class is named in the binding"}
+  radius: {type: int, required: false, doc: "label form. Pixels around each centroid pixel that are marked too (a disk of this radius); default 0, the centroid's pixel alone. A disk is a drawing aid, not an outline of the object; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-23672666-quantcell-bone-marrow-codex]
+supersedes: null

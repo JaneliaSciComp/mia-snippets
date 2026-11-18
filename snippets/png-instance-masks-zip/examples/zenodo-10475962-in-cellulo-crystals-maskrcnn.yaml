@@ -1,0 +1,26 @@
+record: zenodo-10475962-in-cellulo-crystals-maskrcnn
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: png-instance-masks-zip
+    urls:
+      - "https://zenodo.org/records/10475962/files/Convolutional-Neural-Network-Approach-for-the-Automated-Identification-of-in-Cellulo-Crystals.zip::Convolutional-Neural-Network-Approach-for-the-Automated-Identification-of-in-Cellulo-Crystals/target_*/stage1_*/*/images_png/*.png"
+    params: {images: true}
+labels:
+  - snippet: png-instance-masks-zip
+    urls:
+      - "https://zenodo.org/records/10475962/files/Convolutional-Neural-Network-Approach-for-the-Automated-Identification-of-in-Cellulo-Crystals.zip::Convolutional-Neural-Network-Approach-for-the-Automated-Identification-of-in-Cellulo-Crystals/target_*/stage1_*/*/masks_png/*.png"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-crystal-instance
+    segmentation_type: instance
+reasons:
+  - "raw: the 534x534 RGB PNG copy (images_png/), not the 2136x2136 TIFF (images_tif/), because the record says the masks are on the 534 px PNG grid (4x smaller than the TIFF); read as zcyx (403, 3, 534, 534) uint8, c = R, G, B"
+  - "raw snippet and params.images true: png-instance-masks-zip's raw form instead of image-tiles-glob (the draft), which reads the same values (compared on z 0 and z 200) but with two requests per image and no wait on 429. The first crop job (head b8d1961) ended with Zenodo's 429 Too Many Requests after about ten requests and 9,050,836 bytes: the zip directory, raw plane 0, two label blocks and the 30-byte header of the next raw image, so the refused request was image-tiles-glob's. Zenodo allows 133 requests a minute per address (x-ratelimit-limit), shared with whatever else runs from it; the harness does not retry a 429, and an error in a raw read ends the crop job. This snippet reads a plane in one request and waits out a 429 (Retry-After, 60 s) up to five times per step, for raw and label alike"
+  - "urls are member globs of the record's one zip: target_*/stage1_*/*/images_png/*.png matches the 403 annotated images (target_G 49 train + 157 test, target_H 50 train + 147 test; one image per folder, checked on the zip directory). target_GH-mixedCrystals is not matched: its files are under images/ and it has no masks (record layout). z is a stack of independent 2D images (record dimensionality 2D), not a volume"
+  - "labels: png-instance-masks-zip instead of image-tiles-glob, which gives one z plane per mask file (the match agent's error: label zyx [29, 534, 534] against raw cyx [3, 534, 534]). masks_png/<image>_<k>.png is one binary mask per crystal (record: 534x534 uint8, values 0 and 255); the snippet merges the masks of each image into one plane with pixel = k, so the label is zyx (403, 534, 534). The glob target_*/stage1_*/*/masks_png/*.png matches 12,106 masks in the same 403 folders, 6 to 122 per image, k = 1..N without gaps (zip directory); the .DS_Store in one masks_png/ does not match *.png"
+  - "pairing: the raw form sorts by member name <set>/<stage>/<image>/images_png/<image>.png and the label planes by <set>/<stage>/<image>/masks_png/<image>.png (the label form's order: the mask name without _<k>), so both follow the folder name <image>; checked on the zip directory that the two lists name the same 403 folders in the same order and that each image file is named like its folder"
+  - "overlap: where crystal masks overlap the snippet keeps the highest k. On eight planes read (z 0, 89, 100, 180, 230, 297, 300, 402) pixels under more than one mask were 0.2% to 5.6% of the foreground and every k of the image was still present in its plane"
+  - "smoke warns that the label dtype uint16 is not the record's uint8: the record describes the single 0/255 mask files, the snippet returns instance ids and always uses uint16"
+  - "label_key manual_gt-crystal-instance (from the draft): the match agent read the record's annotation source as manual and the class as crystal (record classes); the README_Folders.txt in the zip was read while writing this binding and describes the image subsets and training stages, not how the masks were drawn, so the source rests on the record"
+  - "segmentation_type instance: one mask file per crystal, merged to one id per crystal; ids are unique within a plane only"

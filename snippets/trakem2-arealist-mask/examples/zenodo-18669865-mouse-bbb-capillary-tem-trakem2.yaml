@@ -1,0 +1,85 @@
+record: zenodo-18669865-mouse-bbb-capillary-tem-trakem2
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-glob-rgb
+    urls: ["https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*_RGB.tif"]
+    params: {samples: grey}
+labels:
+  - snippet: trakem2-arealist-mask
+    urls:
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*.xml.gz"
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*_RGB.tif"
+    params:
+      titles: ["ec", "ec_[0-9]*"]
+      others: ["pericyte", "pericyte_*", "pericytes", "peicyte", "pericyte bm", "periycte bm", "perciyte bm", "bm pericyte", "bm p", "bm to m p", "m p", "astrocyte bm", "astrocyte bm #*", "bm ef", "bm to m ef", "ef[0-9]*", "ef[_ ][0-9]*", "ef mitochondria", "mit area", "ef mit a", "efma", "tj", "tj_[0-9]*", "ef total", "ef_total", "other bm", "pvm", "ppvm", "dpvp*"]
+      image_suffix: _RGB
+    pairs_with: 0
+    label_key: manual_gt-endothelial_cell-semantic
+    segmentation_type: binary
+  - snippet: trakem2-arealist-mask
+    urls:
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*.xml.gz"
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*_RGB.tif"
+    params:
+      titles: ["pericyte", "pericyte_*", "pericytes", "peicyte"]
+      others: ["ec", "ec_[0-9]*", "pericyte bm", "periycte bm", "perciyte bm", "bm pericyte", "bm p", "bm to m p", "m p", "astrocyte bm", "astrocyte bm #*", "bm ef", "bm to m ef", "ef[0-9]*", "ef[_ ][0-9]*", "ef mitochondria", "mit area", "ef mit a", "efma", "tj", "tj_[0-9]*", "ef total", "ef_total", "other bm", "pvm", "ppvm", "dpvp*"]
+      image_suffix: _RGB
+    pairs_with: 0
+    label_key: manual_gt-pericyte-semantic
+    segmentation_type: binary
+  - snippet: trakem2-arealist-mask
+    urls:
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*.xml.gz"
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*_RGB.tif"
+    params:
+      titles: ["pericyte bm", "periycte bm", "perciyte bm", "bm pericyte", "bm p", "bm to m p", "m p"]
+      others: ["ec", "ec_[0-9]*", "pericyte", "pericyte_*", "pericytes", "peicyte", "astrocyte bm", "astrocyte bm #*", "bm ef", "bm to m ef", "ef[0-9]*", "ef[_ ][0-9]*", "ef mitochondria", "mit area", "ef mit a", "efma", "tj", "tj_[0-9]*", "ef total", "ef_total", "other bm", "pvm", "ppvm", "dpvp*"]
+      image_suffix: _RGB
+    pairs_with: 0
+    label_key: manual_gt-pericyte_basement_membrane-semantic
+    segmentation_type: binary
+  - snippet: trakem2-arealist-mask
+    urls:
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*.xml.gz"
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*_RGB.tif"
+    params:
+      titles: ["astrocyte bm", "astrocyte bm #*", "bm ef", "bm to m ef"]
+      others: ["ec", "ec_[0-9]*", "pericyte", "pericyte_*", "pericytes", "peicyte", "pericyte bm", "periycte bm", "perciyte bm", "bm pericyte", "bm p", "bm to m p", "m p", "ef[0-9]*", "ef[_ ][0-9]*", "ef mitochondria", "mit area", "ef mit a", "efma", "tj", "tj_[0-9]*", "ef total", "ef_total", "other bm", "pvm", "ppvm", "dpvp*"]
+      image_suffix: _RGB
+    pairs_with: 0
+    label_key: manual_gt-astrocyte_basement_membrane-semantic
+    segmentation_type: binary
+  - snippet: trakem2-arealist-mask
+    urls:
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*.xml.gz"
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*_RGB.tif"
+    params:
+      titles: ["ef[0-9]*", "ef[_ ][0-9]*"]
+      others: ["ec", "ec_[0-9]*", "pericyte", "pericyte_*", "pericytes", "peicyte", "pericyte bm", "periycte bm", "perciyte bm", "bm pericyte", "bm p", "bm to m p", "m p", "astrocyte bm", "astrocyte bm #*", "bm ef", "bm to m ef", "ef mitochondria", "mit area", "ef mit a", "efma", "tj", "tj_[0-9]*", "ef total", "ef_total", "other bm", "pvm", "ppvm", "dpvp*"]
+      image_suffix: _RGB
+    pairs_with: 0
+    label_key: manual_gt-astrocyte_endfoot-semantic
+    segmentation_type: binary
+  - snippet: trakem2-arealist-mask
+    urls:
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*.xml.gz"
+      - "https://zenodo.org/api/records/18669865/files/EM%20dataset.zip/content::EM dataset/S*V*_RGB.tif"
+    params:
+      titles: ["ef mitochondria", "mit area", "ef mit a", "efma"]
+      others: ["ec", "ec_[0-9]*", "pericyte", "pericyte_*", "pericytes", "peicyte", "pericyte bm", "periycte bm", "perciyte bm", "bm pericyte", "bm p", "bm to m p", "m p", "astrocyte bm", "astrocyte bm #*", "bm ef", "bm to m ef", "ef[0-9]*", "ef[_ ][0-9]*", "tj", "tj_[0-9]*", "ef total", "ef_total", "other bm", "pvm", "ppvm", "dpvp*"]
+      image_suffix: _RGB
+    pairs_with: 0
+    label_key: manual_gt-endfoot_mitochondria-semantic
+    segmentation_type: binary
+reasons:
+  - "raw, unchanged from the draft: glob 'EM dataset/S*V*_RGB.tif' over the record's download_url zip is the record's raw path_pattern; 174 independent 4096x4096 images, one per z plane (not a volume). samples: grey because the record says the TEM images are grey stored as RGB (samples_identical: true); the snippet raises if the samples differ"
+  - "labels with trakem2-arealist-mask (new): the annotations are TrakEM2 projects, zip members 'EM dataset/S<n>V<m>.xml.gz', one per image. Each label's urls are the project glob and the raw's image glob; the images are not read, they give the plane order. That is needed: sorted by name the two lists differ (S1V10.xml.gz after S1V1.xml.gz, S1V10_RGB.tif before S1V1_RGB.tif), so the project glob alone would misalign planes. image_suffix _RGB is what the image names add to the project names. All 174 images pair with exactly one project, including the names off the S<n>V<m> pattern (S3.V3, S33gmV1..V5)"
+  - "pixel frame: the masks are on the pixels of each project's image patch (o_width x o_height, 4096x4096 in all 174), not on the TrakEM2 canvas. 55 projects have a patch moved on the canvas (up to 897 px) and two have a larger canvas (S28V5 5120x5120, S6V4 4624x5048); the snippet undoes the patch transform. Checked on S12V3 (patch at -486, 897) against S12V3_RGB.tif: in the patch frame the pericyte basement membrane mask has mean intensity 44 and the endfoot mitochondria 58 (image mean 137; both are electron-dense), in the canvas frame 137 and 102. The record saw only S10V1, where the patch transform is the identity"
+  - "one binary mask per record class (segmentation_type binary, label_key manual_gt-<class>-semantic), as the catalog's other polygon binding does (imod-model-mask): classes overlap (mitochondria lie inside endfeet), which one class-id map could not hold without a paint order. Provenance manual_gt: TrakEM2 area lists are painted by hand; the record has no annotations.source, so a human should confirm. Numbered objects (EF_1.., Pericyte_1.., EC_1..) are separate instances in the files; the masks do not number them"
+  - "titles: the projects do not use one vocabulary. All 1,975 area-list titles of the 174 projects were listed (case and repeated blanks ignored) and each is assigned to one class or to `others`: EC = 'EC', 'ec', 'EC_<n>'; pericyte = 'Pericyte_<n>', 'pericyte', 'PERICYTES', 'PEICYTE' (typo), 'Pericyte_'; pericyte BM = 'Pericyte BM', 'bm p', 'BM Pericyte', 'BM TO M P', 'M P' (project-tree type bm_to_m_p), typos 'Periycte BM', 'Perciyte BM'; astrocyte BM = 'Astrocyte BM', 'Astrocyte BM #61', 'bm ef', 'BM TO M EF'; endfoot = 'EF_<n>', 'ef<n>', 'EF <n>'; endfoot mitochondria = 'EF Mitochondria', 'mit area', 'ef mit a', 'EFMA'. The equivalences 'bm ef' = astrocyte BM, 'bm p' = pericyte BM and 'mit area' = endfoot mitochondria are my reading of the abbreviations and of the project-tree types (bm_to_m_ef, bm_to_m_p, efma); a human should confirm them against READ ME.pdf"
+  - "10 area lists were never titled ('area_list'); the snippet names those by their project-tree type (ef2, ef3, ef8, pericyte, efma, ef_total), which the same patterns cover"
+  - "others, in no mask: tight junctions ('TJ', 'tj', 'TJ_<n>', 109 objects) are annotated but are not one of the record's six classes, so they are left out rather than given a class the record does not name: a human may want a seventh label. Also left out: 'ef total' / tree type ef_total (the summed endfoot area, which repeats the EF_<n> objects), 'Other BM' (5), 'PVM' and 'ppvm' (3, perivascular macrophage by my reading), 'DPVP1'..'DPVP 3' (4, only in S4V3, undocumented). Any title outside both lists raises, so nothing else is dropped"
+  - "the two projects the README calls corrupted, S4V3 and S5V1, gunzip and parse like the others (14 and 8 area lists) and are bound; S5V1 also holds a t2_ball, which is not an area and is ignored. Three area lists have no painted area (S21V6 EF_5, S25V10 EF_6, S39V15 EF_2) and add nothing"
+  - "coverage: not every project has every class (a class missing from a project gives an all-zero plane), and only one vessel per image is annotated, so 0 means 'not painted', not background"
+  - "voxel size: none from either array. The TIFFs' ImageJ calibration and the projects' t2_calibration differ per image (record: 1.75 to 2.63 nm/px), so the record keeps voxel_size_nm null"

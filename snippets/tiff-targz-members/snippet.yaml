@@ -1,0 +1,12 @@
+name: tiff-targz-members
+spec_version: 1
+summary: One TIFF that is a member of a tar.gz archive, as its own axes (yx for one greyscale page), or the TIFFs of one field that differ only in a channel token of the file name, stacked as cyx; the gzip stream is inflated by range reads up to the last wanted member's end, never fetched whole.
+formats: [tiff, ome-tiff]
+containers: [http, s3]
+params:
+  member: {type: str, required: false, doc: "the member's full name in the tar, or an fnmatch pattern for it (*, ?, [..]; * also matches /), e.g. n00_001/*--W00001--P00001--*--DAPI.tif; the first regular file in archive order that matches is read. Default: the first member ending in .tif or .tiff. With `channels` it selects the first channel's file and must have channels[0] in its file name. Members further into the archive cost every compressed byte before them"}
+  channels: {type: list, required: false, doc: "two or more channel tokens as the file names spell them, e.g. [DAPI, CY5]. The first member that `member` selects and that has channels[0] in its file name is channel 0; channel k is the member of the same name with the last channels[0] in the file name replaced by channels[k]. The array is then c + the members' axes, in the order listed. Default: one member, no c axis added; reason required in binding"}
+  axes: {type: str, required: false, doc: "override for one member's axes (letters from czyx, one per axis left after size-1 axes other than y and x are dropped), when the default is wrong: several pages are taken as z, samples per pixel as c; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [edinburgh-datashare-8803-dna-replication-edu-dapi-dl]
+supersedes: null

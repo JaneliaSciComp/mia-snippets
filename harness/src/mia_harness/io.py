@@ -26,8 +26,13 @@ BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB bloc
 PIECE = 8 * BLOCK        # anything longer (a run of missing blocks, a file, a zip member) is asked for in pieces
 PARALLEL = 4             # requests a job has in flight at once: a slow host limits each connection, not the client
 MAX_REDIRECTS = 10
+HEAD_REFUSED = (403, 405)   # what a host answers a HEAD it does not take, though it serves the file to a GET
 GLOB_CHARS = "*?["
 RETRY_WAIT = (1.0, 4.0, 16.0)   # seconds before each further attempt of a request a server dropped
+RATE_RESERVE = 8         # requests left in a host's rate limit window at which a job waits for the window's reset
+RATE_WAIT_MAX = 120.0    # the longest one wait for a rate limit, whatever the server asks for
+RATE_PATIENCE = 900.0    # seconds one request waits on 429s in all before the 429 is final
+HEADER_SLACK = 1024      # bytes asked for past a member's local header as guessed: its extra field is not in the directory
 S = TypeVar("S")
 T = TypeVar("T")
 
@@ -46,6 +51,7 @@ class IO:
         self.validators: dict[str, dict] = {}   # url -> {"etag", "last_modified", "size"}
         self._zips: dict[str, dict] = {}         # zip url -> members by name
         self._dirs: dict[str, list[str]] = {}    # directory url -> the names its index links to
+        self._resume: dict[str, float] = {}      # host -> the time its rate limit window resets, when nearly used up
 
     def close(self) -> None:
         if self._own_client:
@@ -79,11 +85,11 @@ class IO:
         info = self._member(url, member)
 
         def write(p: Path) -> None:
+            if info.compress_size <= PIECE or self._local(url) is not None:
+                self._retry(lambda: remotezip.extract(self._member_bytes(url, info), info, p))
+                return
             offset = self._data_offset(url, info)
             end = offset + info.compress_size
-            if info.compress_size <= PIECE or self._local(url) is not None:
-                self._retry(lambda: remotezip.extract(self._bytes(url, offset, end), info, p))
-                return
             stored = p.with_name(f"{p.name}.stored")   # the member as the zip holds it; inflated and checked from here
             try:
                 self._download(url, offset, end, stored)
@@ -168,6 +174,28 @@ class IO:
         head = self._retry(lambda: b"".join(self._bytes(url, info.header_offset, info.header_offset + 30)))
         return remotezip.data_offset(head, info)
 
+    def _member_bytes(self, url: str, info) -> Iterator[bytes]:
+        """The member's bytes as the zip holds them, its local header and data in one range request: a host that
+        limits requests counts each. A header longer than guessed costs a second request for the data."""
+        start = info.header_offset
+        end = min(self._size(url), start + 30 + len(info.filename.encode()) + HEADER_SLACK + info.compress_size)
+        chunks = self._bytes(url, start, end)
+        head = b""
+        for chunk in chunks:
+            head += chunk
+            if len(head) >= 30:
+                break
+        drop, left = remotezip.data_offset(head[:30], info) - start, info.compress_size
+        if drop + left > end - start:
+            chunks.close()
+            yield from self._bytes(url, start + drop, start + drop + left)
+            return
+        for chunk in itertools.chain([head], chunks):   # to the end, so a body cut short is noticed
+            chunk, drop = chunk[drop:], max(0, drop - len(chunk))
+            if chunk and left:
+                yield chunk[:left]
+                left -= len(chunk[:left])
+
     def _local(self, url: str) -> Path | None:
         """The whole file in the dataset cache (fetched before, or dropped by hand), or None."""
         return self.cache.get(_key(url, self._head(url)))
@@ -191,40 +219,59 @@ class IO:
     def _retry(self, attempt: Callable[[], T]) -> T:
         """`attempt` again after each RETRY_WAIT when the server drops the connection, times out, truncates the
         body or answers 5xx (EBI does all of these, to about one request in seven, often several in a row).
-        Anything else (a 404, the cap, a host, Range ignored) is final."""
+        A 429 (Zenodo's rate limit is per address, so every job of a deployment shares it) is asked again after
+        the wait the server names, for RATE_PATIENCE seconds in all. Anything else (a 404, the cap, a host, Range
+        ignored) is final."""
         # ponytail: the whole request again, not a resume; what is lost is one piece at most (PIECE)
-        for wait in (*RETRY_WAIT, None):
+        waits, refusals, waited = iter(RETRY_WAIT), 0, 0.0
+        while True:
             try:
                 return attempt()
             except (httpx.TransportError, httpx.HTTPStatusError, OSError) as e:
-                if wait is None or (isinstance(e, httpx.HTTPStatusError) and e.response.status_code < 500):
-                    raise
-                time.sleep(wait)
-        raise AssertionError("unreachable")
+                status = e.response.status_code if isinstance(e, httpx.HTTPStatusError) else None
+                if status == 429:
+                    headers = e.response.headers
+                    pause = (_until(headers.get("retry-after")) or _until(headers.get("x-ratelimit-reset"))
+                             or RETRY_WAIT[min(refusals, len(RETRY_WAIT) - 1)])
+                    refusals, waited = refusals + 1, waited + pause
+                    if waited > RATE_PATIENCE:
+                        raise
+                else:
+                    pause = next(waits, None)
+                    if pause is None or (status is not None and status < 500):
+                        raise
+                time.sleep(pause)
 
     def _head(self, url: str) -> dict:
-        """The URL's validators: a HEAD request when the host is allowed (so a changed upstream file is noticed),
+        """The URL's validators: asked of the host when it is allowed (so a changed upstream file is noticed),
         recorded in files.json for later; otherwise files.json, which is how an offline job (no hosts: a dataset a
         human dropped, or a re-stage from the cache) and every `manual://` URL resolve."""
-        # ponytail: HEAD only; if a host refuses HEAD, take size/validators from a ranged GET's Content-Range
         if url not in self.validators:
             if self._offline(url) and (known := self.cache.manifest_get(url)) is not None:
                 self.validators[url] = known
             elif url.startswith("manual://"):
                 raise FileNotFoundError(f"{url}: not in the raw cache's files.json; a human has to drop this file "
                                         "(buffers spec §3)")
-            else:   # a HEAD; for a host that is not allowed, _send raises HostNotAllowed
+            else:   # for a host that is not allowed, _send raises HostNotAllowed
                 self.validators[url] = self._retry(lambda: self._head_once(url))
                 if self.cache.writable:
                     self.cache.manifest_put(url, self.validators[url], "download")
         return self.validators[url]
 
     def _head_once(self, url: str) -> dict:
+        """The validators from a HEAD request. A host that refuses HEAD (403 from storage whose redirect is signed
+        for GET alone, as figshare's and Dataverse's are; 405) is asked for its first byte instead: the
+        Content-Range of that answer gives the size, and its body is not read."""
         with self._slots, closing(self._send("HEAD", url)) as r:
+            if r.status_code not in HEAD_REFUSED:
+                r.raise_for_status()
+                return _validators(r, r.headers.get("content-length"))
+        with self._slots, closing(self._send("GET", url, {"Range": "bytes=0-0"})) as r:
             r.raise_for_status()
-            size = r.headers.get("content-length")
-            return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
-                    "size": int(size) if size is not None else None}
+            if r.status_code == 206:
+                total = re.fullmatch(r"bytes \d+-\d+/(\d+)", r.headers.get("content-range", ""))
+                return _validators(r, total[1] if total else None)
+            return _validators(r, r.headers.get("content-length"))   # Range ignored: the whole file's length
 
     def _size(self, url: str) -> int:
         size = self._head(url)["size"]
@@ -320,8 +367,14 @@ class IO:
             host = (parts.hostname or "").lower()
             if parts.scheme not in ("http", "https") or host not in self.allowed_hosts:
                 raise HostNotAllowed(host or url, chain)
+            if (pause := self._resume.pop(host, 0.0) - time.time()) > 0:
+                time.sleep(pause)   # the host's last answer said its rate limit window is nearly used up
             r = self._client.send(self._client.build_request(method, url, headers=headers),
                                   stream=True, follow_redirects=False)
+            remaining = r.headers.get("x-ratelimit-remaining", "")
+            if remaining.isdigit() and int(remaining) <= RATE_RESERVE:
+                # the count is the host's, over every job at this address: jobs slow down together, unasked
+                self._resume[host] = time.time() + _until(r.headers.get("x-ratelimit-reset"))
             if not r.is_redirect:
                 return r
             r.close()
@@ -397,6 +450,25 @@ class _RangeFile(io.RawIOBase):
         data = self.read(len(m))
         m[:len(data)] = data
         return len(data)
+
+
+def _validators(r: httpx.Response, size: str | None) -> dict:
+    """What identifies the file behind an answer: its ETag, its Last-Modified and its size in bytes."""
+    return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
+            "size": int(size) if size is not None else None}
+
+
+def _until(value: str | None) -> float:
+    """Seconds to wait from a Retry-After or X-RateLimit-Reset header: seconds from now, or an epoch time (Zenodo
+    and GitHub send the reset so); at most RATE_WAIT_MAX, and 0 for a header that is missing or anything else."""
+    # ponytail: an epoch reset is compared with this host's clock; use the answer's Date header if clocks drift
+    try:
+        seconds = float(value)
+    except (TypeError, ValueError):
+        return 0.0
+    if seconds > 1e9:
+        seconds -= time.time()
+    return min(max(seconds, 0.0), RATE_WAIT_MAX)
 
 
 def _split(url: str) -> tuple[str, str | None]:

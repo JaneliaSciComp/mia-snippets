@@ -1,51 +1,86 @@
 # qupath-qpdata-classes
 
-Reads the classified objects of one QuPath image entry (`<project>/data/<n>/data.qpdata`) and fills them as class
-ids onto the pixel grid of one slide: `yx`, `uint8`, the slide's full size, 0 where nothing listed lies.
+Reads the annotations of one **QuPath image data file** (`data.qpdata`, the per-image file inside a QuPath
+project's `data/<entry id>/` folder) and fills them onto the image's full-resolution pixel grid as a `yx`
+`uint8` map of class ids. The url is a zip member (`<zip>::<entry>/data.qpdata`) or a plain HTTP(S)/S3 URL.
 
-## What it reads
+A `.qpdata` file is a Java object serialization stream (magic `aced0005`). No Java, QuPath or serialization
+library is on the harness allowlist, and `pickle`-like loaders are banned, so `snippet.py` walks the stream
+grammar itself with `struct`. Nothing is instantiated: an object is kept as its class names, its field values
+and the delimited data its class wrote.
 
-- **urls**: exactly one `data.qpdata`, a zip member (`<zip>::<member>`) or a plain URL. No globs. The file is
-  fetched whole (`access` is `file`); the largest seen is 9.8 MB.
-- **429 is waited out.** When the server answers the fetch with 429 Too Many Requests, it is asked again after
-  20, 40 and 60 s, then the error is raised. Zenodo counts 133 requests per client address in any 60 s, and in a
-  binding the labels are opened after the raws, which may have used that up; the harness itself treats a 429 as
-  final. Every other error is raised at once. This covers only this snippet's own file: a raw snippet that
-  fetches large files from the same host can still end the job (see the example binding's `reasons`).
-- **The Java object stream is never deserialized.** A `.qpdata` is written by `ObjectOutputStream`. The snippet
-  walks the stream's grammar (class descriptions, field values, block data, back references; protocol 2) into
-  plain records and takes three things from them: the image description (a JSON string, data file version 3 or
-  later), each object's class name (`PathClass.name`, joined as `Parent: Child` for a derived class) and each
-  ROI's coordinates. No class is loaded and no code from the file runs.
-- **Objects**: every annotation and detection in the hierarchy, at any depth, whose class is listed in `classes`.
-  ROIs read: `PolygonROI` (float x and y arrays), `RectangleROI`, and `GeometryROI` (WKB Polygon or MultiPolygon,
-  holes included). Any other ROI on a listed class (ellipse, line, points, the old `AreaROI`) is an error.
-- **Slide grid**: the image description is either one slide (`builderType: uri`) or a QuPath montage
-  (`builderType: sparse`): rectangles cropped from several slides, placed side by side. For a montage each region
-  gives its place in the montage and the rectangle it was cropped from on the slide; the ROIs inside a region are
-  moved by the difference, so they land on the slide's own grid. The slide's size and pixel size come from the
-  same description (`voxel_size_nm` from `pixelCalibration` when its unit is µm, nm or mm, else `None`); no slide
-  file is opened.
-- **Filling**: a pixel belongs to an object when its centre is inside, by the even-odd rule over all the object's
-  rings. Only the part of the slide the entry shows is filled; the rest is 0.
+## What is read
 
-## Params
+- **The stream**, as QuPath's `PathIO` writes it: a version line, a JSON string describing the image server,
+  the locale, image type, stains and workflow, then the `PathObjectHierarchy`. Reading stops after the
+  hierarchy. QuPath's path objects are `Externalizable` and written in block-data mode, so each object's content
+  is delimited in the stream: the snippet takes, from each `PathAnnotationObject`, the nested `PathClass`, the
+  nested ROI and the nested child objects, without relying on their positions.
+- **The grid** is the one the file states for its image: `server.metadata.width` x `height` of the JSON string,
+  the level-0 size of the slide the annotations were drawn on. `shape` is `(height, width)`. An image with
+  `sizeZ` or `sizeT` other than 1 is refused. `image_name` (not part of the Array protocol) holds
+  `server.metadata.name`, the slide's file name, for whoever checks the pairing.
+- **Voxel size** from `server.metadata.pixelCalibration` (`pixelHeight`, `pixelWidth`) when both are in µm,
+  times 1000; otherwise `None`.
+- **ROIs.** `PolygonROI` (its `x`/`y` float vertex arrays) and `GeometryROI` (its WKB bytes: Polygon,
+  MultiPolygon, or a GeometryCollection of them, either byte order, with holes). Any other ROI type on an
+  annotation of a listed class (rectangle, ellipse, line, polyline, points, the legacy `AreaROI`) is refused
+  at open with its name; on an unlisted class it is not looked at.
+- **Rasterization.** ROI coordinates are QuPath pixel coordinates: x right, y down, an integer coordinate being
+  a pixel corner. A pixel belongs to an annotation when its centre `(x + 0.5, y + 0.5)` is inside, by the
+  even-odd rule over the rings of a polygon (so a hole ring is a hole); the polygons of a multipolygon are
+  united. A centre exactly on an edge is inside on the left and top edges and outside on the right and bottom
+  ones. Parts of an annotation outside the image are cut off.
+- **Only annotation objects** (`PathAnnotationObject`), wherever they sit in the hierarchy. Detections, cells,
+  tiles and TMA cores are walked for their children but not drawn.
+- **Access `file`.** The file (tens of kB to a few MB) is read whole at open, by range, or staged with
+  `io.fetch` when it is a deflated zip member; open also parses it and checks `classes`. `read` only rasterizes:
+  the annotations whose bounding box meets the region, in strips of at most 16 megapixels.
 
-- `image` (required): the slide's file name as the entry names it, the last part of its `uri`, percent-decoded.
-  The error for a name the entry does not show lists the names it does.
-- `classes` (required): class names in id order (first is 1). Objects of other classes, or of none, are left
-  out. Where two listed classes overlap, the one listed later wins. A name no object has is an error that lists
-  the file's class names.
+## `classes` (required)
+
+Comma-separated QuPath class names, in id order: `classes: "Positive,Negative"` gives 1 where a `Positive`
+annotation is, 2 where a `Negative` one is and 0 elsewhere. One name gives a `{0,1}` mask of that class.
+
+- Names are matched exactly as QuPath shows them, `*` included (`Ignore*`, `Region*`); a derived class is
+  `Parent: Child`. A name cannot contain a comma. Spaces around a name are dropped.
+- Classes are painted in the order listed, so **where annotations of two listed classes overlap, the pixel
+  holds the class listed later**. List an enclosing class (e.g. a tissue outline) before the classes drawn
+  inside it.
+- Annotations of unlisted classes and unclassified annotations are left out: they read 0, the same as "not
+  annotated".
+- A listed class that has no annotation in this file is fine (its id is just absent, so ids stay the same
+  across the files of a project), but **if no annotation has any listed class the open fails** and the error
+  lists the classes the file does have with their counts. That is how a misspelt name shows.
+- The ids are the binding's choice, not the file's: a `.qpdata` has class names and colours, no class numbers.
+  Say in `reasons` which classes were taken, why in that order, and what the unlisted ones are.
+
+Take the names from the project's `summary.json` beside the `.qpdata` (`annotationClassificationCounts`), or
+from the error above.
 
 ## Known limits
 
-- Only pixel-for-pixel montages: a region shown at a downsample other than 1, or through a builder other than
-  `cropped` over `uri` (rotated, pyramidized, ...), is not matched or is an error.
-- One plane: an ROI with z or t other than 0 is an error.
-- Whether an object is an annotation or a detection, and its name, measurements, probability or lock state, are
-  ignored; choose by class name.
-- A class whose `writeObject` does not follow the stream grammar (none in QuPath 0.3 files seen) would stop the
-  walk with an error rather than be guessed at.
-- 0 means "no listed object here", which is not the same as background.
-- Tested on QuPath 0.3.0 files (data file version 3) of one project. The filled areas agree with the areas QuPath
-  stored beside the ROIs to within 1 percent; alignment to the slide pixels was not checked by eye.
+- Tested on real data: QuPath 0.5.1 files (data file version 3, stream protocol 2) with flat hierarchies of
+  `PolygonROI` and `GeometryROI` annotations, classes without parents; the geometries are big-endian WKB
+  Polygons with up to 14 rings and MultiPolygons of up to 36 polygons. All 42 `.qpdata` files of the tested
+  record's `Data.zip` were parsed (768 annotations: 736 polygons, 32 geometries), and for every annotation the
+  filled pixel count agrees with the area QuPath stored with the ROI (difference below 0.09 px per px of
+  perimeter). Nested hierarchies, derived classes, GeometryCollections, little-endian and 3D WKB were run on
+  synthetic input only.
+- Data files older than version 3 have no image-server JSON, so the grid is unknown and the open fails.
+  A stream written with protocol 1 (no block data for Externalizable objects) cannot be read without the classes
+  and is refused.
+- A self-intersecting polygon is filled even-odd; QuPath may treat such an outline differently.
+- The label is as large as the slide: reading the whole plane of a 100000 x 80000 slide allocates 8 GB. Boxes are
+  cheap.
+- Annotations are whatever the project's author drew: sparse training regions stay sparse, and 0 does not mean
+  background. `locked`, names, measurements and colours are not read. A ROI's z/t/c plane is ignored (the image
+  must be a single plane).
+
+## Tested on
+
+`zenodo-23535439-hamster-lung-sars-cov-2-ihc-wsi`: slide `115-23-47.svs` (read with `tiff-zip-member-2`) and
+`Data.zip::43/data.qpdata`, `classes: "Positive,Negative"`. Label `yx` 19867 x 9566, 262.238 nm; 24 Positive
+polygons (15554 px) and 2 Negative ones (13735 px). The coordinate frame was checked against the slide: the mean
+RGB inside the Positive polygons is 110/31/22 (DAB brown) and 205/179/150 with the polygons moved 40 px either
+way in x or y; inside Negative it is 225/226/244 (hematoxylin only), inside `Ignore*` 252/252/251 (white).

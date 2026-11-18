@@ -1,0 +1,24 @@
+record: zenodo-7418555-multiscanner-canine-scc-histology
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-coco-polygons
+    urls: ["https://zenodo.org/records/7418555/files/scc_08_cs2.tif"]
+    params: {}
+labels:
+  - snippet: tiff-coco-polygons
+    urls: ["https://zenodo.org/records/7418555/files/scc.json"]
+    params: {image: scc_08_cs2.tif}
+    pairs_with: 0
+    label_key: manual_gt-tissue-semantic
+    segmentation_type: semantic
+reasons:
+  - "urls: only the record's technical.sample pair, scc_08_cs2.tif and scc.json. The 220 TIFFs differ in shape, so each is its own raw with its own label (same scc.json, its own params.image); the others were not read through the snippet, so they are not claimed here"
+  - "raw with tiff-coco-polygons, no params: a plain pyramidal RGB BigTIFF, of which the snippet reads series 0 level 0 (page 0, the 4 um/px image): yxc 4338x5624x3 uint8, the record's shape. Its voxel size is None: the file's resolution tags hold a default (10 px/cm), the record's 4000 nm is the harvester's"
+  - "label: scc.json is one MS COCO file for all 220 images, so params.image scc_08_cs2.tif (the images[].file_name of the raw) selects its 11 polygons; the grid is that entry's height x width, 4338x5624, the TIFF's page 0"
+  - "label values are the COCO category_id as the record lists them (1 Bone, 2 Cartilage, 3 Dermis, 4 Epidermis, 5 Subcutis, 6 Inflamm/Necrosis, 11 SCC; 7-10, 12, 13 defined, unused), 0 where no polygon is. This image holds 6 (1,534,829 px) and 11 (1,262,015 px) only"
+  - "overlap rule: of overlapping polygons the one with the smaller area is on top. Measured on the 44 CS2 images: 4.2% of annotated pixels lie under polygons of two classes; of the 356 such polygon pairs 346 are one polygon inside another (the other 10 share 806 px of border), and the inner one is always the later in the file, so smaller-on-top and later-on-top give the same label here"
+  - "frame, checked on this image: 96.3% of the pixels inside the polygons are tissue (darker than 215 in some channel) and 96.0% of the tissue is inside a polygon; with the label moved 150 px in any direction 74 to 78% is tissue, with x and y exchanged 22%; a search over all shifts at 1/8 scale finds the best fit at 0 px down, 8 px right (one search step). So polygon coordinates are page-0 pixels, x right and y down, as the record says"
+  - "clip is not set: none of this image's polygons leaves the grid. That is not so for the other scanners: 39 of the 44 p1000 images (and 8 gt450, 2 nz210, 1 nz20) have polygons beyond the stated width or height, by hundreds of pixels on p1000, which the snippet refuses without clip. scc_08_p1000.tif was checked outside the harness (94.1% tissue inside its polygons, best shift within one search step of zero: same frame, the TIFF ends before the annotated tissue does), so clip: true fits it; the rest are unchecked"
+  - "label_key manual_gt-tissue-semantic and segmentation_type semantic, as the match agent drafted: manual polygons of tumour and six tissue classes, one class id per pixel"
+  - "0 is 'no polygon', which on this image is almost only white slide background (96% of tissue pixels are annotated)"

@@ -1,0 +1,11 @@
+name: tiff-pyramid-tiles
+spec_version: 1
+summary: One page (pyramid level) of a tiled, compressed TIFF at a plain URL, such as a whole-slide image, read by range requests for only the tiles (or strips) a region overlaps and decoded one by one (JPEG with shared JPEGTables, YCbCr to RGB, or any codec tifffile decodes); never a whole page. An RGB page is cyx, a grey page yx. One file per array, a plain url or match `index` of a `<dir>/::<glob>` glob, because slides differ in shape.
+formats: [tiff]
+containers: [http]
+params:
+  level: {type: int, required: false, doc: "0-based index of the TIFF page to read, in file order. In a pyramidal TIFF page 0 is full resolution and the following pages are its reduced copies (harness describe lists them); the binding's voxel size has to be scaled to the level. Default 0; reason required in binding"}
+  index: {type: int, required: false, doc: "0-based position, among the sorted files the urls stand for, of the one file this array reads. Needed when a glob matches more than one file; a changed listing moves it, so one plain url per array is the safer binding; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad3510-colorectal-cancer-he-wsi]
+supersedes: null
