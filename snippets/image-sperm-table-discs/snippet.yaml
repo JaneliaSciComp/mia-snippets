@@ -1,0 +1,10 @@
+name: image-sperm-table-discs
+spec_version: 1
+summary: One PNG or JPEG image at a plain URL as stored (yx, or cyx when it has samples), or, with the image's url beside it, the headerless ';'-separated sperm table that annotates it (one row per sperm, tail x; tail y; head x; head y; minor-axis length; maximum halo thickness, in image pixels) painted on the image's grid as one disc per row centred on the head point, yx uint16 instance ids (the row's number in the file).
+formats: [png, jpeg, csv]
+containers: [http, s3]
+params:
+  draw: {type: str, required: false, doc: "label form only, and required for it: urls are the table and the image it annotates (two urls, any order, told apart by their leading bytes). 'head': each row is a disc centred on its head point whose diameter is the row's minor-axis length; 'halo': the disc's radius is half the minor axis plus the row's maximum halo thickness (head and halo together, an upper bound). Absent: urls is one image, read as it is. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [mendeley-p3ntt2z294-sperm-scd-brightfield]
+supersedes: null
