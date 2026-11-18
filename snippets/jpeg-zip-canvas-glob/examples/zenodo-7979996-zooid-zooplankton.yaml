@@ -1,0 +1,36 @@
+record: zenodo-7979996-zooid-zooplankton
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: df753c332aa31824bceaea522d6576614eccc6a0
+raw:
+  # raw 0: Amphipods, 270 crops, 133x97 to 1831x3137
+  - snippet: jpeg-zip-canvas-glob
+    urls: ["https://zenodo.org/records/7979996/files/manuallyVerified_ExtractedImages.zip"]
+    params: {glob: "manuallyVerified_ExtractedImages/Amphipods/*.jpg", canvas: [2147, 3137]}
+  # raw 1: Copepods, 458 crops, 73x165 to 1942x3377
+  - snippet: jpeg-zip-canvas-glob
+    urls: ["https://zenodo.org/records/7979996/files/manuallyVerified_ExtractedImages.zip"]
+    params: {glob: "manuallyVerified_ExtractedImages/Copepods/*.jpg", canvas: [2159, 3797]}
+  # raw 2: FishLarvae, 621 crops, 69x59 to 2090x3670
+  - snippet: jpeg-zip-canvas-glob
+    urls: ["https://zenodo.org/records/7979996/files/manuallyVerified_ExtractedImages.zip"]
+    params: {glob: "manuallyVerified_ExtractedImages/FishLarvae/*.jpg", canvas: [2159, 3690]}
+  # raw 3: Ostracods, 391 crops, 221x231 to 2159x1742
+  - snippet: jpeg-zip-canvas-glob
+    urls: ["https://zenodo.org/records/7979996/files/manuallyVerified_ExtractedImages.zip"]
+    params: {glob: "manuallyVerified_ExtractedImages/Ostracods/*.jpg", canvas: [2159, 1767]}
+  # raw 4: Quetognaths, 358 crops, 554x244 to 2110x3503
+  - snippet: jpeg-zip-canvas-glob
+    urls: ["https://zenodo.org/records/7979996/files/manuallyVerified_ExtractedImages.zip"]
+    params: {glob: "manuallyVerified_ExtractedImages/Quetognaths/*.jpg", canvas: [2159, 3839]}
+labels: []
+reasons:
+  - "jpeg-zip-canvas-glob instead of the draft's jpeg-zip-glob: the record's download_url is a zip of JPEG crops, each cut to its organism, so nearly every file has its own height and width (record shape_varies; 69x59 to 2090x3670 over the 2,098 files), and jpeg-zip-glob, image-tiles-glob and image-targz-glob require every file of an array to have the first file's shape (ValueError at the middle plane of each folder, as the match agent reports). This snippet puts each file on a z plane of one canvas"
+  - "the planes are padded: each file's pixels are unchanged in the centre of a plane of params.canvas and the rest of the plane is 0. The fill is not data, and crops drawn on these planes show an organism, or part of one, with black around it. In this dataset the files are themselves masked to 0 outside the organism's outline (every file has 0 pixels; 41% of all file pixels are exactly 0), so the fill continues the files' own background rather than framing them. 62% (Quetognaths) to 89% (Ostracods) of an array is fill; in a simulation on 40 planes per folder, 21% to 36% of the 256x256 boxes drawn at random passed the harness's content filter, and harness crop made 4 of 4 crops from zenodo.org (19 boxes rejected for content) and 40 of 40 from a local copy of the zip (63 rejected). A human should decide whether crops of this kind are wanted; nothing is cropped or resampled, and one array per file (2,098 binding entries, each opened at every job) is the only reading without fill"
+  - "five raws, one per taxon folder (Amphipods, Copepods, FishLarvae, Ostracods, Quetognaths), globs anchored at the folder, so the class given by the folder stays separable: 270 + 458 + 621 + 391 + 358 = 2,098 files, every .jpg member of the zip once (the record's n_items says 2,093; the zip's directory lists 2,098). Each raw is a z stack of independent crops in member-name order (as strings; the folders also hold files not named Snap_<n>, e.g. 'Amfipodo 10_extractedImage0.jpg'), not a 3D volume (record dimensionality 2D)"
+  - "urls: the zip itself, with the folder pattern in params.glob (as in the draft), not a `<zip>::<glob>` url: harness fetch and stage fetch every binding url, and the zip is one 514.5 MB download in pieces, where a member glob would be 2,098 requests to zenodo.org (x-ratelimit-limit 133 a minute, and each range request took about 16 s to answer while this binding was written)"
+  - "canvas [2147, 3137], [2159, 3797], [2159, 3690], [2159, 1767] and [2159, 3839]: the largest height and the largest width among each folder's files, measured by downloading the zip and decoding all 2,098 members (the largest height and the largest width are not always those of one file). The canvases stay within the 2160x3840 photographs the crops were extracted from. All 2,098 planes were then read through the snippet and compared with that separate decoding: each holds its file at rows (H - h) // 2, columns (W - w) // 2 and 0 elsewhere"
+  - "no samples param: all 2,098 files decode as 8-bit grey (one component), as the record says"
+  - "no labels bound: the record's annotations are classification only (class = folder name), no masks; the binding format has no per-image class label"
+  - "voxel size: none; the snippet reports None (a JPEG carries no pixel size) and the record's voxel_size_nm is null"
+  - "not bound: originalImages.zip (record technical.arrays[1], the 2160x3840 RGB photographs the crops were cut from, with 3 TIFFs and 2 MP4s; 1.7 GB). They show the same specimens as the crops, unmasked, and were not tested by the match agent or here; the record gives them one shape (2160x3840x3, shape_varies not stated), which would be jpeg-zip-glob's case, not this snippet's"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"

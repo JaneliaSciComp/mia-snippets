@@ -1,0 +1,40 @@
+record: figshare-c-5486799-p-hem-hemosiderophage-cytology-wsi
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ndownloader.figshare.com/files/28882299"]
+    params: {}
+labels:
+  - snippet: csv-box-rows-tiff-grid
+    urls: &urls
+      - "https://zenodo.org/api/records/5722932/files/ChristianMarzahl/EIPH_WSI-v1.0.0.zip/content::ChristianMarzahl-EIPH_WSI-15f7b0d/SDATA/Statistics/SDATA_Final_Annotations.csv"
+      - "https://ndownloader.figshare.com/files/28882299"
+    params: &rows
+      image_name: "10835_19 humane BAL Berliner Blau.svs"
+      name_column: image_name
+      boxes_column: vector
+      delimiter: ";"
+      count: 4553
+      boxes: instance
+    pairs_with: 0
+    label_key: proofread-alveolar_macrophage-instance
+    segmentation_type: instance
+  - snippet: csv-box-rows-tiff-grid
+    urls: *urls
+    params: {<<: *rows, boxes: semantic, class_column: grade, classes: [0, 1, 2, 3, 4]}
+    pairs_with: 0
+    label_key: proofread-alveolar_macrophage-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw (unchanged from the draft): the only slide URL the record names is technical.sample.urls[0] (10835_19 humane BAL Berliner Blau.svs); the other 73 slides have no URL in the record, and the download_url is a collection landing page, not a directory. wsi-czi-svs-rgb reads the full-resolution page of the tiled 8-bit RGB Aperio SVS as cyx (3, 28047, 26999) uint8 (record: svs, yxs 28047x26999x3, JPEG 2000 tiles). The file does state a pixel size, 'MPP = 0.2533' (253.3 nm; the record's notes say it has no MPP field and give 250 nm from the paper), which raw and labels both report"
+  - "labels with csv-box-rows-tiff-grid instead of the draft's png-csv-boxes-table, which takes one plain-url table of one row per image with {top, left, height, width} lists and PNG grids (its error: 'the urls must be the one table file (no glob or zip member)'). This table is a deflated zip member (46,299,866 bytes, 11,748,168 fetched) with one row per box for all 74 slides, a corner dict per row, and the grid is an SVS"
+  - "label urls: the table (record technical.sample.urls[1]), then the paired raw's url, of which the snippet reads only the first page's header for the grid: yx (28047, 26999), the raw's y and x"
+  - "image_name '10835_19 humane BAL Berliner Blau.svs' with name_column image_name: the open question of the match report is settled by the table itself. Its image_name values follow the Figshare file names: the 74 distinct names are 55 <n>_EIPH_*, 12 human and 7 cat slides, as the record's layout counts them, and the record's name for file 28882299 (technical.sample.description) is one of them, with 4,553 rows (the report saw only the first rows, which are a cat slide's). images_meta_data.xlsx was not needed. Checked on the pixels, since slides of one size cannot be told apart by the grid: laid over a 1536x1536 window of the slide the boxes frame the macrophages one by one; over 80 sampled boxes the mean of 255 - min(R, G, B) inside is 59.1 with this name's rows, against 41.2 with the rows of '10835_19 humane BAL Turnbull Blau.svs' (the same sample's other stain) and 37.7 with those of '10672_19 humane BAL Berliner Blau.svs'"
+  - "boxes_column vector, delimiter ';': the header is unique_identifier;species;image_name;image_type;grade;vector;data_set_name;version (harness describe, as in the draft; 297,383 rows of 8 cells), and vector is a Python-literal dict {'x1', 'x2', 'y1', 'y2'} in base-level pixels (record alignment_notes, alignment same-grid). The snippet fills the pixels [y1, y2) x [x1, x2), x right and y down. All 4,553 boxes of this slide are whole numbers inside the page (x 1664..24640 of 26999, y 3733..25727 of 28047), 102 to 291 pixels on a side. The frame was checked against the raw: 60 sampled boxes hold a mean stain of 58.1, the same boxes with x and y exchanged 34.0, flipped in y 41.5"
+  - "count 4553 on both labels: this slide's rows in the table (also the 'Density' total images_meta_data.csv in the same zip gives for it), so a changed table fails at open instead of renumbering the instance ids"
+  - "label 0, boxes instance: each box filled with its 1-based number among this slide's rows in table order (uint32, ids 1..4553). label_key proofread-alveolar_macrophage-instance is the draft's: annotations.source proofread; the boxes mark alveolar macrophages (record description)"
+  - "label 1, boxes semantic with class_column grade and classes [0, 1, 2, 3, 4]: the hemosiderin grade of each cell, the record's five classes in the record's order. Ids are position from 1 because 0 is background, so the mask holds grade + 1: 1 = grade 0, 2 = grade 1, 3 = grade 2, 4 = grade 3, 5 = grade 4, NOT the record's class ids 0..4. This slide has 29, 2751, 1720, 53 and 0 boxes of grades 0 to 4. label_key proofread-alveolar_macrophage-semantic follows the draft's; segmentation_type semantic. A reviewer should confirm the key and that the shift by one is acceptable"
+  - "NEEDS A HUMAN DECISION, boxes as labels: the record's encoding is boxes-table, which has no segmentation_type of its own. As in the catalog's other box bindings (png-csv-boxes-table, via-csv-boxes-png-grid), the planes are filled rectangles, not cell outlines: a consumer must not take them for pixel-accurate masks. The boxes cover about 13% of the slide and overlap where cells cluster: where two overlap the smaller one is on top, 1,550 of the 4,553 boxes are partly covered by a neighbour and none is wholly hidden. The annotation is also not exhaustive: unboxed macrophages lie between the boxed ones (the table's version is 'Density', 4,553 cells of the 33,795 the same zip's images_meta_data.csv counts for this slide by inference), so background 0 means 'no box', not 'no macrophage'"
+  - "other slides: each binds the same way (its Figshare file url as raw and as second label url, its image_name, its count), once the record names its url. 61 rows of the table, in 19 other slides, hold a truncated pandas printout instead of a box dict; the snippet raises on those slides rather than drop the boxes. This slide has no such row"
+  - "label dtypes uint32 and uint8; the record's label dtype is 'unknown' because boxes have none, which smoke reports as a warning"

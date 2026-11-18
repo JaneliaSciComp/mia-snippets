@@ -1,0 +1,15 @@
+name: tiff-tiles-canvas-glob
+spec_version: 1
+summary: Single-page TIFF tiles of differing height and width (YX, or grey stored as RGB) from an HTTP directory or zip members chosen by glob (or plain URLs), one file per z plane on a canvas the binding gives - each file's pixels unchanged in the centre of its plane, 0 around them, a file larger than the canvas raises. `pair` keeps the files that have a same-named file in a partner folder (crops/ and masks/), `skip` leaves files out (0-byte files), `count` pins the number of planes, and `dtype` returns whole-number float masks as unsigned integer ids.
+formats: [tiff]
+containers: [http, zip]
+params:
+  canvas: {type: list, required: true, doc: "[height, width] of every plane, at least the largest height and the largest width among the array's files (measure them; e.g. `harness describe` per file). A file sits unchanged in the centre of its plane, at row (height - h) // 2 and column (width - w) // 2, and the rest of the plane is 0. A file larger than the canvas raises at read, naming the file; nothing is cropped. A raw and its labels take the same canvas; reason required in binding"}
+  pair: {type: list, required: false, doc: "[this, other]: two parts of the url, e.g. ['/crops/', '/masks/'] for the array bound to crops/ and ['/masks/', '/crops/'] for the one bound to masks/. `this` must occur once in every url; the url with `other` in its place is the partner (glob). A file is kept only when the partner's files hold the same url with `other` in place of `this`, so both arrays hold the same file names in the same order. Give it on both arrays; reason required in binding"}
+  skip: {type: list, required: false, doc: "file names (the part after the last /) left out of the array, e.g. a 0-byte file and, on the other array, the file that pairs with it. Each must be the name of one file of this array or, with `pair`, of its partner folder. Give a raw and its labels the same list; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of planes the array must have after `skip` and `pair`. Open fails on another number, so a changed listing is noticed instead of shifting z; reason required in binding"}
+  samples: {type: str, required: false, doc: "'grey': the files' samples are identical copies (a grey image stored as RGB), so sample 0 is returned; differing samples raise, and a file without a sample axis passes through. Without it a file with samples raises (the array has no c axis); reason required in binding"}
+  dtype: {type: str, required: false, doc: "'uint8', 'uint16' or 'uint32': the files hold whole, non-negative numbers in another dtype (label ids in a float32 mask) and are returned in this one. A file with a value that is not whole, is negative or non-finite, or does not fit raises; no value is changed. Without it the array has the files' own dtype; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad3729-lewy-brain-mito-tem]
+supersedes: null

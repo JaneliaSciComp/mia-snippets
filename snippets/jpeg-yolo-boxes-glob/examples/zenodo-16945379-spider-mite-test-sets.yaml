@@ -1,0 +1,202 @@
+record: zenodo-16945379-spider-mite-test-sets
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 1482c48ea38bc9d9c7c808040a8561945ae273dc
+raw:
+  # raw 0: v209_five_class, the 239 images of 5502 x 8254
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/images/*.jpg"
+    params: {skip: &other_shapes [
+        "4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3",
+        "4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb",
+        "4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571"]}
+  # raw 1: v209_five_class, the 2 images of 5500 x 8254
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/images/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.jpg"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/images/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.jpg"
+    params: {}
+  # raw 2: v209_five_class, the 1 image of 5500 x 8252
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/images/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.jpg"
+    params: {}
+  # raw 3: v210_three_class, the 239 images of 5502 x 8254
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/images/*.jpg"
+    params: {skip: *other_shapes}
+  # raw 4: v210_three_class, the 2 images of 5500 x 8254
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/images/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.jpg"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/images/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.jpg"
+    params: {}
+  # raw 5: v210_three_class, the 1 image of 5500 x 8252
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/images/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.jpg"
+    params: {}
+  # raw 6: v211_four_class, the 239 images of 5502 x 8254
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/images/*.jpg"
+    params: {skip: *other_shapes}
+  # raw 7: v211_four_class, the 2 images of 5500 x 8254
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/images/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.jpg"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/images/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.jpg"
+    params: {}
+  # raw 8: v211_four_class, the 1 image of 5500 x 8252
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/images/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.jpg"
+    params: {}
+labels:
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/*.txt"
+    params: {skip: *other_shapes, boxes: instance, classes: &five [Adult_female, Adult_male, Dead_mite, Immature, Viable_egg]}
+    pairs_with: 0
+    label_key: manual_gt-spider_mite_five_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/*.txt"
+    params: {skip: *other_shapes, boxes: semantic, classes: *five}
+    pairs_with: 0
+    label_key: manual_gt-spider_mite_five_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.txt"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.txt"
+    params: {boxes: instance, classes: *five}
+    pairs_with: 1
+    label_key: manual_gt-spider_mite_five_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.txt"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.txt"
+    params: {boxes: semantic, classes: *five}
+    pairs_with: 1
+    label_key: manual_gt-spider_mite_five_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.txt"
+    params: {boxes: instance, classes: *five}
+    pairs_with: 2
+    label_key: manual_gt-spider_mite_five_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v209_five_class/labels/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.txt"
+    params: {boxes: semantic, classes: *five}
+    pairs_with: 2
+    label_key: manual_gt-spider_mite_five_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/*.txt"
+    params: {skip: *other_shapes, boxes: instance, classes: &three [Adult_female, Immature, Viable_egg]}
+    pairs_with: 3
+    label_key: manual_gt-spider_mite_three_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/*.txt"
+    params: {skip: *other_shapes, boxes: semantic, classes: *three}
+    pairs_with: 3
+    label_key: manual_gt-spider_mite_three_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.txt"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.txt"
+    params: {boxes: instance, classes: *three}
+    pairs_with: 4
+    label_key: manual_gt-spider_mite_three_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.txt"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.txt"
+    params: {boxes: semantic, classes: *three}
+    pairs_with: 4
+    label_key: manual_gt-spider_mite_three_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.txt"
+    params: {boxes: instance, classes: *three}
+    pairs_with: 5
+    label_key: manual_gt-spider_mite_three_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v210_three_class/labels/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.txt"
+    params: {boxes: semantic, classes: *three}
+    pairs_with: 5
+    label_key: manual_gt-spider_mite_three_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/*.txt"
+    params: {skip: *other_shapes, boxes: instance, classes: &four [Adult_female, Adult_male, Immature, Viable_egg]}
+    pairs_with: 6
+    label_key: manual_gt-spider_mite_four_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/*.txt"
+    params: {skip: *other_shapes, boxes: semantic, classes: *four}
+    pairs_with: 6
+    label_key: manual_gt-spider_mite_four_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.txt"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.txt"
+    params: {boxes: instance, classes: *four}
+    pairs_with: 7
+    label_key: manual_gt-spider_mite_four_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/4-29-2025_4dpi_002-19037M_jpg.rf.458b85aea37c929d549544032853fec3.txt"
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/4-4-2025_5dpi_236-Cascade_jpg.rf.ae1c2bf617ea928f3e41b3e40cf9bfeb.txt"
+    params: {boxes: semantic, classes: *four}
+    pairs_with: 7
+    label_key: manual_gt-spider_mite_four_class-semantic
+    segmentation_type: semantic
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.txt"
+    params: {boxes: instance, classes: *four}
+    pairs_with: 8
+    label_key: manual_gt-spider_mite_four_class-instance
+    segmentation_type: instance
+  - snippet: jpeg-yolo-boxes-glob
+    urls:
+      - "https://zenodo.org/api/records/16945379/files/Test%20Sets.zip/content::Test Sets/v211_four_class/labels/4-1-2025_2dpi_236-Cascade_jpg.rf.7b18af064275e1d23f06d6e26d1ce571.txt"
+    params: {boxes: semantic, classes: *four}
+    pairs_with: 8
+    label_key: manual_gt-spider_mite_four_class-semantic
+    segmentation_type: semantic
+reasons:
+  - "jpeg-yolo-boxes-glob for every array, instead of the draft's jpeg-zip-glob raws and no labels: the labels are YOLO box tables (labels/<stem>.txt, rows 'class x_center y_center width height' as fractions of the image), which no catalog snippet read; this snippet reads the JPEG members as images and paints each table's boxes on the grid of the JPEG it annotates (images/<stem>.jpg, from that JPEG's header). The raws go through it too, so image and table files are expanded and ordered by the same code"
+  - "urls are member globs of the record's one zip (data.download_url), '<zip>::Test Sets/<version>/images/*.jpg' and '.../labels/*.txt', in place of the draft's params.glob (this snippet takes the glob in the url, as the harness's own list / fetch do). The listing shows exactly 242 .jpg under each images/ and 242 .txt under each labels/ (no macOS sidecars, no other file; 1455 files in all, every member deflated)"
+  - "three raws per version folder instead of the draft's one, because the images are not one shape: the record says 5502 x 8254 with shape_varies null from one sample, but the headers of all 242 JPEGs of v209_five_class were read while testing (start-of-frame segment of each member) and 239 are 5502 x 8254 x 3, two are 5500 x 8254 x 3 and one is 5500 x 8252 x 3 (all 8-bit baseline, none with an Exif orientation). An array has one shape, so each folder is: its glob with params.skip = the three odd stems (239 planes), the two 5500 x 8254 files as plain member urls (2 planes), the one 5500 x 8252 file (1 plane). The snippet checks every file it reads against its array's shape and raises on another, so a wrong list cannot give a wrong plane. The record should say shape_varies true"
+  - "the same skip list (YAML anchor other_shapes) and the same two / one file names serve all three folders: by the zip's directory v210_three_class/images holds the same 242 members as v209_five_class/images (name, CRC-32 and size equal), and v211_four_class/images too except three files that carry another Roboflow hash in their name (275-tomato-2-, 3-4_raspberry, 4-4-2025_5dpi_288-Yeoman; the same name before '.rf.'), whose headers were read on real data: 5502 x 8254. Smoke opened all nine raws with the shapes above"
+  - "nine raws in all, keeping the draft's one group per class-configuration folder (v209_five_class raws 0-2, v210_three_class 3-5, v211_four_class 6-8), 242 images each (the record's n_items); each raw is a z stack of independent 2D RGB fields in stem order, not a volume (record dimensionality 2D), the three samples kept as c 0..2 = R, G, B (record axes yxs, uint8)"
+  - "NEEDS A HUMAN DECISION, the same pixels three times: the three folders hold the same 242 images (byte-identical members, see above) and differ only in their tables, so crops drawn across raws 0-8 can show one field up to three times, once per class set. Bound as the draft has it so that every published table is readable. If one copy is wanted, keep raws 0-2 and labels 0-5 (v209_five_class, whose five classes are the finest set: comparing the tables row by row, v210 is v209 without the Adult_male and Dead_mite rows, coordinates unchanged, and v211 is v209 without the Dead_mite rows except in the three renamed images, whose tables were redone with 53, 25 and 33 boxes against 54, 23 and 34) and drop the rest; the other entries do not change"
+  - "label urls '.../labels/*.txt' with the skip of the raw they pair with (or the same two / one stems as plain urls): one table per image, labels/<stem>.txt for images/<stem>.jpg in the same version folder (record alignment_notes). The snippet sorts both globs by stem and the same stems are left out, so z index k of a label is the table of z index k of its raw; while testing, the file lists of every raw and its labels were compared and are the same stems in the same order (239, 2 and 1 per folder). Each label plane's grid is its own JPEG's, read from that JPEG's header"
+  - "boxes: all 726 tables were read while testing and every one of their rows has exactly five fields (no polygon rows): 4449 boxes in v209 (class ids 0-4: 196, 71, 80, 693, 3409), 4298 in v210 (0-2: 196, 693, 3409), 4369 in v211 (0-3: 196, 71, 695, 3407). Every plane of all 18 label arrays was painted through the snippet: no box is empty or reaches outside its image, boxes are 19-606 px wide and 20-572 px high and cover 0.8 % of the pixels. Two tables in v210 and two in v211 are empty files (the only box of their image in v209 is a Dead_mite, which those folders leave out); they are all-background planes. A box edge is x_center +- width/2 times the image width (y likewise); 63 % of the edges are whole pixels up to float noise and are taken as such, a fractional edge is moved outwards to the pixel edge"
+  - "classes from each folder's data.yaml `names`, in YOLO class id order (they agree with the record's classes and alignment_notes): five = Adult_female, Adult_male, Dead_mite, Immature, Viable_egg; three = Adult_female, Immature, Viable_egg; four = Adult_female, Adult_male, Immature, Viable_egg. Semantic ids are the YOLO class id + 1 because 0 is background, so id 2 is Adult_male in the five- and four-class labels but Immature in the three-class one"
+  - "NEEDS A HUMAN DECISION, boxes as two labels per raw: the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. As in the catalog's other box bindings (tiff-jpeg-voc-zip-glob, jpeg-xml-boxes-numbers): boxes instance (each box filled with its row number in its file, segmentation_type instance) tells the boxes apart, boxes semantic (each box filled with its class id + 1, segmentation_type semantic) carries the life stage. Both are filled rectangles, not outlines of mites or eggs: a consumer must not take them for pixel-accurate masks. Boxes overlap in 260 / 238 / 250 pairs (v209 / v210 / v211; eggs lie in clusters); the smaller box is on top and no box is hidden completely"
+  - "label_key manual_gt-spider_mite_<five|three|four>_class-instance / -semantic: the class word names the class set because the same semantic id means another class per folder (above), so the three sets must not share a key. Source manual_gt is an assumption a human should confirm: these are the test-set annotations of a Roboflow project (data.yaml: gent-lab/tssm-detection-v2) against which the models are scored, but neither the record nor the Zenodo description says who drew them"
+  - "voxel size: the snippet reports None (a JPEG carries no pixel size, a YOLO table none); the record's 1200 nm x/y comes from the paper"
+  - "smoke warns that the labels' dtype uint16 is not the record's float64: the record describes the table (rows of numbers), the snippet returns the boxes painted as ids"

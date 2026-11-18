@@ -1,0 +1,377 @@
+record: s-biad3742-lattice-a-lung-mif
+record_commit: 9fa0b1b286a46aa3b28a8eef1e86f75eab101c87
+snippets_commit: db126cbac2759c1c1ff1a605229c7523bd800546
+raw:
+- snippet: tiff-channels-glob
+  urls:
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0001_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0001_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0002_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0002_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0002_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0003_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0003_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0003_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0004_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0004_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0004_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0005_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0005_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0005_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0006_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0006_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0006_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0007_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0007_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0007_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0008_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0008_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0008_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0009_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0009_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0009_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0010_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0010_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0012_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0012_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0013_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0013_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0014_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0014_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0014_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0016_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0016_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0016_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0017_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0017_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0018_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0018_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0018_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0019_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0019_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0020_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0020_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0020_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0021_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0021_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0021_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0022_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0022_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0022_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0023_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0023_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0024_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0024_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0024_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0025_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0025_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0026_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0026_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0027_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0027_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0027_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0029_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0029_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0030_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0030_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0030_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0031_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0031_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0031_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0032_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0032_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0032_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0034_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0034_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0034_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0037_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0037_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0037_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0039_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0039_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0039_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0040_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0040_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0040_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0041_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0041_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0041_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0042_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0042_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0042_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0043_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0043_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0043_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0044_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0044_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0044_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0045_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0045_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0045_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0047_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0047_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0047_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0048_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0048_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0048_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0049_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0049_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0049_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0051_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0051_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0051_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0052_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0052_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0052_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0053_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0053_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0054_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0054_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0055_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0055_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0055_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0056_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0056_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0056_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0060_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0060_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0060_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0062_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0062_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0062_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0063_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0063_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0063_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0064_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0064_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0064_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0065_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0065_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0065_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0066_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0066_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0067_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0067_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0067_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0068_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0068_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0069_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0069_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0069_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0070_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0070_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0071_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0071_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0071_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0072_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0072_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0072_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0073_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0073_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0073_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0074_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0074_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0074_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0075_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0075_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0078_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0078_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0078_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0079_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0079_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0079_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0080_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0080_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0080_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0081_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0081_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0081_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0082_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0082_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0082_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0084_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0084_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0085_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0085_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0085_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0086_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0086_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0086_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0088_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0088_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0088_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0091_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0091_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0092_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0092_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0092_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0094_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0094_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0094_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0095_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0095_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0096_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0096_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0096_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0097_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0097_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0100_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0100_C2_HALLMARKS.tif
+  params: {}
+- snippet: tiff-channels-glob
+  urls:
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0015_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0015_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0015_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0028_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0028_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0033_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0033_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0033_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0035_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0035_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0046_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0046_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0057_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0057_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0057_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0058_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0058_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0059_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0059_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0059_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0061_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0061_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0076_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0076_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0076_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0077_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0077_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0083_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0083_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0083_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0089_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0089_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0090_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0090_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0090_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0093_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0093_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0093_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0098_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0098_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0099_C2_HALLMARKS.tif
+  params: {}
+- snippet: tiff-channels-glob
+  urls:
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0011_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0011_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0011_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0036_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0036_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0036_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0038_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0038_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0038_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0050_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0050_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0050_C3_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0087_C1_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0087_C2_HALLMARKS.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/01_Hallmarks/P_0087_C3_HALLMARKS.tif
+  params: {}
+- snippet: tiff-channels-glob
+  urls:
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0001_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0018_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0036_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0052_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0088_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0104_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0121_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0137_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0172_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0189_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0208_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0242_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0259_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0293_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0308_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0324_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0377_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0394_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0410_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0427_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0445_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0463_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0481_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0496_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0529_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0547_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0565_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0583_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0600_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0616_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0632_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0650_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0666_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0683_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0700_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0719_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0739_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0756_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0772_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0790_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0808_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0825_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0842_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0874_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0892_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0909_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0925_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0941_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0961_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0977_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0994_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_1010_C2_IO.tif
+  params: {}
+- snippet: tiff-channels-glob
+  urls:
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0072_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0225_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0275_C1_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0512_C2_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0859_C2_IO.tif
+  params: {}
+- snippet: tiff-channels-glob
+  urls:
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0153_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0343_C3_IO.tif
+  - https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/742/S-BIAD3742/Files/04_Immuno-oncology/P_0359_C3_IO.tif
+  params: {}
+labels: []
+reasons:
+- 'Partial binding: 329 of the 5,388 files (269 of 2,731 hallmarks, 60 of 2,657 immuno-oncology), every file whose header
+  was read while the snippet was written. The files of a panel cannot be bound by one glob because they are not one shape
+  (next reason), and grouping the rest needs each remaining file''s header (about 1 MiB per file through io, about 5 GB for
+  the set), which was not read.'
+- 'Six raw arrays, one per panel and yx shape: the record assumed every core is 2408x2408 (4 files probed), but the cores
+  were cut out at several field sizes. Hallmarks P_0001_C1 to P_0100_C2 (all 269 files in name order): 213 files (10, 2408,
+  2408), 41 files (10, 2892, 2896), 15 files (10, 3612, 3616). Immuno-oncology, every 45th file in name order (60 files):
+  52 files (8, 2408, 2408), 5 files (8, 2892, 2896), 3 files (8, 3012, 3016). The sizes are scattered through the patients
+  (e.g. P_0001_C1 2408, P_0035_C2 2892, P_0116_C1 3612), so no glob tells them apart and each array lists its files as plain
+  urls. tiff-channels-glob checks every file against its array''s first when it is read, so a file listed under the wrong
+  shape raises instead of being read.'
+- 'tiff-channels-glob instead of the draft''s tiff-zip-member-2: it stacks many files as zcyx (z is the file, a stack of independent
+  2D cores, not depth; record dimensionality 2D) and reads only the 512x512 LZW tiles a crop touches, about 1 MiB of header
+  plus 1 to 4 tiles per crop instead of a whole 12 MiB page.'
+- 'Axes cyx per file from tifffile series[0] (QPTIFF ''Baseline'', CYX, float32), which matches the record''s arrays; the
+  301x301 RGB thumbnail and the 2x-reduced pages are other series or levels and are not read. No params: the snippet has none.'
+- 'Channel order is the files'' page order, the same in all 329 bound files (read from each page''s XML <Name>, compared ignoring
+  case and punctuation; the hallmarks files spell the names two ways, e.g. ''pdl1 (Opal 480)'' in 121 files and ''PDL-1 (Opal
+  480)'' in 148). Hallmarks c 0-9: PD-L1 (Opal 480), N-cadherin (520), Ki67 (780), pan-cytokeratin (620), CA9 (690), vWF (570),
+  DAPI, GLB1 (540), cleaved caspase 3 (650), autofluorescence. Immuno-oncology c 0-7: DAPI, Ki67 (650), CD8 (520), CD4 (570),
+  SMA (540), pan-cytokeratin (620), CD68 (690), autofluorescence.'
+- 'Voxel size is reported by the snippet from the QPTIFF resolution tags (pixels per cm): 497.17 nm in the hallmarks files
+  and 497.05 nm in the immuno-oncology files, the record''s 497 nm; the same in every bound file of a panel.'
+- 'No labels: the record has no annotations (self-supervised set; only a per-patient survival CSV).'

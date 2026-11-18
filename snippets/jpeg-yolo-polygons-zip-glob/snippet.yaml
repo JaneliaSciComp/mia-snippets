@@ -1,0 +1,13 @@
+name: jpeg-yolo-polygons-zip-glob
+spec_version: 1
+summary: A YOLO segmentation set in a zip (plain URL or a zip nested in another), its JPEG images chosen by glob and stacked along z with RGB samples as c, or the polygons of each image's labels/<stem>.txt rasterised on that image's grid as instance or class ids; `shape` keeps the images of one shape when a set mixes shapes.
+formats: [jpeg, other]
+containers: [zip, http]
+params:
+  glob: {type: str, required: true, doc: "fnmatch pattern over the image member names of each zip the urls name (`*` also crosses `/`), e.g. 'set/train/images/*.jpg'; every match is one z plane, sorted by name. The same glob is given for the images and for their labels, so the two arrays hold the same planes in the same order"}
+  shape: {type: list, required: false, doc: "[Y, X] in pixels: keep only the matched images of this shape, for a set whose images differ in shape (an array has one shape). Every matched image's JPEG header is read at open. Without it every image must have the first one's shape, checked at read. Reason required in binding"}
+  polygons: {type: str, required: false, doc: "read the labels instead of the images: for each image <dir>/images/<stem>.jpg, the polygons of <dir>/labels/<stem>.txt (one per line: class id, then x y pairs as fractions of the image width and height) filled on the image's grid. 'instance' fills each polygon with its 1-based line number in its file; 'semantic' fills it with its class id + 1. 0 is background, and an empty or missing .txt is an all-background plane; where polygons overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: int, required: false, doc: "with `polygons` only, and required for it: the number of classes (data.yaml's nc). A line whose class id is not an integer in 0..classes-1 raises, in both modes"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-15570004-bluvision-haustoria-gus-yolo]
+supersedes: null

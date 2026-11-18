@@ -1,0 +1,14 @@
+name: geojson-polygons-tiff-grid
+spec_version: 1
+summary: The Polygon and MultiPolygon features of one GeoJSON file (a QuPath export; pixel coordinates) filled onto the pixel grid of the TIFF they were drawn on, as yx uint32 instance ids (a feature's position in the file) or a uint8 binary mask. urls are the GeoJSON and its TIFF; only the TIFF's first page header is read (shape, pixel size). Params pick the polygons (geometry or nucleusGeometry) and keep or drop features by classification.
+formats: [json, other]
+containers: [http, s3]
+params:
+  member: {type: str, required: false, doc: "the key of each feature that holds the polygon to fill. Absent: geometry, the GeoJSON standard (a QuPath cell's outline). nucleusGeometry: the nucleus outline QuPath stores beside a cell's. A feature without that key is left out. Reason required in binding"}
+  binary: {type: bool, required: false, doc: "true: a uint8 mask, 1 where any kept feature covers the pixel (for a region annotation such as a tumour area). Absent or false: uint32 instance ids, a feature's 1-based position in the file. Reason required in binding"}
+  keep_classes: {type: list, required: false, doc: "only features whose QuPath classification name (properties.classification.name) is in this list are filled; null in the list stands for features with no classification. Reason required in binding"}
+  drop_classes: {type: list, required: false, doc: "features whose classification name is in this list are left out; null stands for features with no classification. Reason required in binding"}
+  empty_ok: {type: bool, required: false, doc: "true: a GeoJSON file of 0 bytes is read as a label with nothing in it. Absent or false: such a file is an error, because an empty file does not say that the image holds no object. Reason required in binding"}
+requires: [numpy, tifffile]
+tested_on: [s-biad3612-hnscc-codex-tma-cells]
+supersedes: null

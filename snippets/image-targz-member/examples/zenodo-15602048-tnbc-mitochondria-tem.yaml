@@ -1,0 +1,31 @@
+record: zenodo-15602048-tnbc-mitochondria-tem
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-targz-member
+    urls: ["https://zenodo.org/records/15602048/files/tem-seg-data_slide_images.tar.gz"]
+    params: {member: "data/DRP1-KO/tra_val/slide_images/rwt_2_HM_1.tif"}
+  - snippet: image-targz-member
+    urls: ["https://zenodo.org/records/15602048/files/tem-seg-data_slide_images.tar.gz"]
+    params: {member: "data/DRP1-KO/tra_val/slide_images/rwt_3_LM_1.tif"}
+labels:
+  - snippet: image-targz-member
+    urls: ["https://zenodo.org/records/15602048/files/tem-seg-data_mitochondria_masks.tar.gz"]
+    params: {member: "data/DRP1-KO/tra_val/mitochondria/masks/rwt_2_HM_1.png"}
+    pairs_with: 0
+    label_key: manual_gt-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: image-targz-member
+    urls: ["https://zenodo.org/records/15602048/files/tem-seg-data_mitochondria_masks.tar.gz"]
+    params: {member: "data/DRP1-KO/tra_val/mitochondria/masks/rwt_3_LM_1.png"}
+    pairs_with: 1
+    label_key: manual_gt-mitochondria-semantic
+    segmentation_type: binary
+reasons:
+  - "image-targz-member: both data files are tar.gz archives (TIFF micrographs, PNG masks); a tar.gz has no index, so a member is read by inflating the archive's gzip stream from its start. Each url is the archive's own and the member is named by params.member, because io reads `<url>::<member>` as a zip member"
+  - "members rwt_2_HM_1: the record's technical.sample.urls, the first micrograph of the image archive and its same-named PNG mask (data/<group>/<split>/slide_images/<name>.tif pairs with data/<group>/<split>/mitochondria/masks/<name>.png, record alignment_notes)"
+  - "members rwt_3_LM_1: the image archive's second member and its same-named mask (LM in its name where the first has HM; both 2048x2048 uint8). One array is one image, so each pair is its own raw and label entry"
+  - "only the first two micrographs are bound: they lie in the first 7 MiB of the 2.3 GB image archive, and each later member costs every compressed byte before it. zenodo.org answered 429 Too Many Requests after about 113 MB of range requests in 22 s while the archive was listed, so members deep in it are out of reach of one job"
+  - "label_key manual_gt-mitochondria-semantic: annotations.source manual, masks mark mitochondria (record description, folder name), encoding binary"
+  - "segmentation_type binary: record says mask values {0,1}; the masks are palette PNGs and the snippet returns their palette indices, not the palette's colours"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"

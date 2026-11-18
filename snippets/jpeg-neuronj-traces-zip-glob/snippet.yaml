@@ -1,0 +1,11 @@
+name: jpeg-neuronj-traces-zip-glob
+spec_version: 1
+summary: The JPEG images of a zip that have NeuronJ tracing exports beside them (<image>.N<k>.txt, x<TAB>y per row), chosen by member glob, one image per z plane; or, with traces instance, those tracings drawn as one pixel wide polylines on the image grid, each with its number k.
+formats: [jpeg, csv, other]
+containers: [zip]
+params:
+  traces: {type: str, required: false, doc: "'instance': the array is the tracings, not the images: every <image>.N<k>.txt of an image is drawn on that image's grid as a one pixel wide polyline with the value k (uint16, 0 background, a later k on top where two cross). Without it the array is the images. Same urls as the raw it pairs with; reason required in binding"}
+  samples: {type: str, required: false, doc: "images only. 'grey': every RGB image's samples are identical copies (a grey image saved as RGB), so sample 0 is returned and the array has no c axis; differing samples raise. Without it an RGB image is read as c (zcyx); reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-6824724-rat-hippocampal-neurons-neuronj-traces]
+supersedes: null
