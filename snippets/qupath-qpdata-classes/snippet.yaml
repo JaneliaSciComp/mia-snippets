@@ -1,0 +1,10 @@
+name: qupath-qpdata-classes
+spec_version: 1
+summary: The annotation objects of one QuPath image data file (data.qpdata, a Java serialization stream, from a zip member or a plain URL) whose classes the binding lists, filled onto the image's full-resolution pixel grid as a yx uint8 map of class ids (1 = the first listed class, 0 = no listed annotation); polygon and geometry (WKB polygon, multipolygon) ROIs, parsed without Java or QuPath.
+formats: [other]
+containers: [zip, http]
+params:
+  classes: {type: str, required: true, doc: "QuPath class names to rasterize, separated by commas, in id order: annotations of the first name are id 1, of the second id 2, and so on (at most 255). Names are matched exactly as QuPath shows them (e.g. 'Positive', 'Ignore*', 'Tumor: Positive' for a derived class); where annotations of two listed classes overlap, the pixel holds the class listed later. Annotations of unlisted classes and unclassified ones are left out. Reason required in binding: which classes, and why in that order"}
+requires: [numpy]
+tested_on: [zenodo-23535439-hamster-lung-sars-cov-2-ihc-wsi]
+supersedes: null

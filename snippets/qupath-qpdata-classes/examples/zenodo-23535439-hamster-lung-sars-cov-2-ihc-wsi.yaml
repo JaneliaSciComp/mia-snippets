@@ -1,0 +1,25 @@
+record: zenodo-23535439-hamster-lung-sars-cov-2-ihc-wsi
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 1482c48ea38bc9d9c7c808040a8561945ae273dc
+raw:
+  - snippet: tiff-zip-member-2
+    urls:
+      - "https://zenodo.org/api/records/23535439/files/115-23-47.svs/content"
+    params: {}
+labels:
+  - snippet: qupath-qpdata-classes
+    urls:
+      - "https://zenodo.org/api/records/23535439/files/Data.zip/content::43/data.qpdata"
+    params: {classes: "Positive,Negative"}
+    pairs_with: 0
+    label_key: manual_gt-sars_cov_2_ihc-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw (from the draft, unchanged): 115-23-47.svs is the only slide URL the record gives (technical.sample.urls); it is a BigTIFF whose series[0] is the Aperio level 0, which tiff-zip-member-2 presents as yxc 19867x9566x3 uint8 with no params"
+  - "label with qupath-qpdata-classes instead of the draft's empty labels: the record's label array is Data.zip/*/data.qpdata, QuPath's Java-serialized object hierarchy, which no catalog snippet read. This snippet parses the stream itself and fills the annotation polygons onto the grid the file states for its image (server metadata 115-23-47.svs, 9566x19867, 0.262238 um), so the label is yx 19867x9566 and pairs with raw 0"
+  - "pairing 43/data.qpdata with 115-23-47.svs: the record's sample pair; the file's own server JSON names 115-23-47.svs, which the snippet exposes as image_name"
+  - "classes: 'Positive,Negative', so 1 = Positive (24 annotations: DAB-stained, i.e. SARS-CoV-2 nucleoprotein positive, cells) and 2 = Negative (2 annotations: tissue without DAB, hematoxylin only); 0 = not annotated. These are the two tissue classes of the QuPath pixel classifier the dataset trains, in the record's class order. Checked on the slide: the mean RGB inside the Positive polygons is 110/31/22 (brown), against 205/179/150 with the polygons moved 40 px in x or y; inside Negative it is 225/226/244 (pale blue)"
+  - "Ignore* and Region* are not in classes. QuPath treats classes ending in * as ignored classes. Ignore* (6 annotations, all inside the Region* outline) marks unstained white space here (mean RGB 252/252/251), the class the classifier is told to ignore; it can be added as id 3 with classes: 'Positive,Negative,Ignore*' if a human wants it. Region* (1 annotation, 49% of the slide) is the outline of the tissue the classifier was measured in, not a stain class; bound, it would also make every tissue pixel count as annotated and draw the aimed crops away from the small Positive and Negative annotations"
+  - "label_key manual_gt-sars_cov_2_ihc-semantic and segmentation_type semantic: the annotations are hand-drawn QuPath training regions for the IHC stain (positive / negative), the ids are classes, and several annotations share an id"
+  - "coverage is sparse: 26 small polygons (31 to 10641 px each, 29289 px together) on a 190-megapixel slide; they are training samples for a pixel classifier, not a full segmentation, so 0 means 'not annotated', not 'negative' or 'background'"
+  - "only entry 43 is bound: the record gives the URL of one slide. The other 41 .qpdata files in Data.zip open with the same snippet (all 42 were parsed while testing) and pair with the slide named in their server JSON, but those slides' URLs are not in the record and nothing of them was read here. Six of them (entries 5, 17, 18, 19, 21 and 24) hold only Region* annotations, so they have neither Positive nor Negative annotations, which the snippet refuses at open"
