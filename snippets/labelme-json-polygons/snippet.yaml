@@ -1,0 +1,11 @@
+name: labelme-json-polygons
+spec_version: 1
+summary: LabelMe JSON annotation files (one per image), their polygons filled on the imageHeight x imageWidth grid as instance or class ids with smaller polygons on top, from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane.
+formats: [json, other]
+containers: [zip, http]
+params:
+  ids: {type: str, required: false, doc: "how the polygons are painted on the yx grid. 'instance' (the default) fills each polygon with its 1-based number in the file's shapes list; 'semantic' fills it with the 1-based index of its label in `classes`. 0 is background; where polygons overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "the shape labels the files use, in class id order (semantic id = position, from 1); required for ids semantic. When given, a shape whose label is not listed raises, in both modes. From the record's classes; reason required in binding"}
+requires: [numpy]
+tested_on: [zenodo-15311335-salix-glauca-annual-ring-sections]
+supersedes: null
