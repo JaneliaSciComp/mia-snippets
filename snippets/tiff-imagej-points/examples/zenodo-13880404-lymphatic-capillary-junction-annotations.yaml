@@ -1,0 +1,37 @@
+record: zenodo-13880404-lymphatic-capillary-junction-annotations
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-imagej-points
+    urls: ["https://zenodo.org/records/13880404/files/DATASET_A_junctional%20classification%20of%20dermal%20lymphatic%20capillaries.zip::junctional classification of dermal lymphatic capillaries/25w/animal 1/image 4/C1-MAX_20231020 25w wt animal 1.lif - Image 4.tif"]
+    params: {}
+  - snippet: tiff-imagej-points
+    urls: ["https://zenodo.org/records/13880404/files/DATASET_A_junctional%20classification%20of%20dermal%20lymphatic%20capillaries.zip::junctional classification of dermal lymphatic capillaries/25w/animal 1/image 4/C2-MAX_20231020 25w wt animal 1.lif - Image 4.tif"]
+    params: {}
+labels:
+  - snippet: tiff-imagej-points
+    urls:
+      - "https://zenodo.org/records/13880404/files/DATASET_A_junctional%20classification%20of%20dermal%20lymphatic%20capillaries.zip::junctional classification of dermal lymphatic capillaries/25w/animal 1/image 4/1258-1491.roi"
+      - "https://zenodo.org/records/13880404/files/DATASET_A_junctional%20classification%20of%20dermal%20lymphatic%20capillaries.zip::junctional classification of dermal lymphatic capillaries/25w/animal 1/image 4/C1-MAX_20231020 25w wt animal 1.lif - Image 4.tif"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-junction-points
+    segmentation_type: instance
+  - snippet: tiff-imagej-points
+    urls:
+      - "https://zenodo.org/records/13880404/files/DATASET_A_junctional%20classification%20of%20dermal%20lymphatic%20capillaries.zip::junctional classification of dermal lymphatic capillaries/25w/animal 1/image 4/1258-1491.roi"
+      - "https://zenodo.org/records/13880404/files/DATASET_A_junctional%20classification%20of%20dermal%20lymphatic%20capillaries.zip::junctional classification of dermal lymphatic capillaries/25w/animal 1/image 4/C2-MAX_20231020 25w wt animal 1.lif - Image 4.tif"
+    params: {}
+    pairs_with: 1
+    label_key: manual_gt-junction-points
+    segmentation_type: instance
+reasons:
+  - "urls: only the record's technical.sample folder, 25w/animal 1/image 4. The other 56 folders with .roi files have the same kind of content by the record and the listing but were not read here, so they are not claimed. Each needs its own raw and label entries: image shapes differ per folder (2048 or 1024 px), so they cannot be one stacked array"
+  - "raw 0 and raw 1 with tiff-imagej-points, no params: the folder's C1 and C2 single-channel MAX projections, each yx 2048x2048 uint8, voxel size 60.23 nm from the ImageJ header (the record's voxel_size_nm is null because it varies per image). They are two raws, not one cyx array, because the dataset stores the two channels as two files. The record does not say which of C1 and C2 is LYVE1 and which VE-cadherin. Both are inverted displays (white background, dark signal), as the record says"
+  - "raw 1 is 'C2-MAX_... Image 4.tif', not the record's sample 'C2-MAX_... Image 4-1.tif': the '-1' file is a 3-sample RGB copy by the record, and the plain file is the one-sample channel on the same 2048x2048 grid"
+  - "labels are the folder's one .roi, 1258-1491.roi, bound once to each raw; each label's urls name the .roi and its raw's TIFF again, because an .roi holds coordinates only and the snippet reads the TIFF's header for the grid's shape and voxel size (no TIFF pixel is read for the label)"
+  - "which image the ROI was drawn on, which the record leaves open: the C1 and C2 files bound here are both 2048x2048 at 60.23 nm (the RGB variants are 2048x2048x3 by the record; they were not opened), so the points are taken as pixels of that shared grid, x right and y down. Checked on both: the points sit on darker (inverted: stained) pixels than their surroundings, 5x5 mean 231 on C1 against 241 to 248 when moved 40 px in any direction and 251 with x and y exchanged (image mean 249), and 238 on C2 against 241 to 245 and 246 (image mean 245); on an overlay of C1 all 19 lie inside the vessel, on or next to its dark lines"
+  - "ids default (point): the 19 points are numbered 1..19 in the file's order. The match agent asked for the per-point counters to be decoded in case they hold the junction class (button / curvilinear / double / LYVE1-negative curvilinear): they are decoded, and every point of this file, and of the 52 other .roi files of the zip that were parsed, has counter 0. The class is not in the ROI files; it would have to come from the record's xlsx, which this snippet does not read"
+  - "radius default (0): each junction is marked as the one pixel its point lies in (floor of the sub-pixel coordinate, x.5 for most points). A point has no extent, so nothing wider is claimed; a binding that wants a visible marker sets radius, and a human should decide whether one-pixel marks are what consumers of this label want"
+  - "label_key manual_gt-junction-points and segmentation_type instance, as the match agent drafted: one manually placed point per junction, each with its own id. Coverage is sparse (19 pixels of a 2048x2048 image): 0 means 'no point here', not 'no junction'"
+  - "the folder's two RGB merges ('MAX_... (RGB).tif', '(RGB)-1.tif') and the RGB copy of C2 are left unbound: they repeat the two channels as display images"

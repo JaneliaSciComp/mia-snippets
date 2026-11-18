@@ -1,0 +1,11 @@
+name: tiff-imagej-points
+spec_version: 1
+summary: One single-plane TIFF image (a zip member or a plain URL; deflated members are fetched whole) as yx, or cyx when it has RGB samples or channels; or, with ImageJ point / multi-point .roi urls beside the TIFF, the ROI points marked on that image's grid as yx uint16, each point with its 1-based number or with its multi-point counter + 1.
+formats: [tiff, other]
+containers: [zip, http]
+params:
+  ids: {type: str, required: false, doc: "label form only. 'point' (default): each point is marked with its 1-based number, counted through the .roi files in sorted url order and each file's own point order (instance ids); 'counter': each point is marked with 1 + the index of the ImageJ multi-point counter it was clicked with, for a ROI whose counters stand for classes (semantic ids). Reason required in binding when set"}
+  radius: {type: int, required: false, doc: "label form only. 0 (default): a point marks the one pixel it lies in; r from 1 to 64: it marks the disc of pixels whose centres are within r pixels of that pixel's centre, clipped at the image edge. A disc is a marker of where the point is, not the extent of what was annotated. Reason required in binding when set"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-13880404-lymphatic-capillary-junction-annotations]
+supersedes: null
