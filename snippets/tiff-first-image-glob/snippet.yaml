@@ -1,0 +1,10 @@
+name: tiff-first-image-glob
+spec_version: 1
+summary: The first image (series 0) of each TIFF file from an HTTP directory or zip members chosen by glob (or plain URLs), one file per z plane (zyx; zcyx for an image with samples). For files that carry a preview after the image, such as a Keyence BZ-X export with its thumbnail page; a later series is left unread only when it is smaller than the image in y and x. Many `<dir>/::<glob>` urls, one per folder, are concatenated in binding order.
+formats: [tiff]
+containers: [http, zip]
+params:
+  count: {type: int, required: false, doc: "the number of files (z planes) the urls must stand for, from a complete listing. Open fails on another number, so a directory index that came back short, or a changed listing, is noticed instead of shifting z. Without it the count is whatever the globs match; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad1851-antibiotic-moa-brightfield]
+supersedes: null
