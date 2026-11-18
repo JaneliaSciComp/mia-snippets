@@ -61,8 +61,13 @@ Data serves every file under an opaque id, so the binding writes each pair out.
 - An image whose txt is missing altogether (unlabelled, as opposed to an empty txt) cannot be bound as a plane;
   leave that image out of the raw this label pairs with.
 - One URL per file in the binding: thousands of pairs make a long binding.
-- Tested on plain HTTPS URLs (one of them behind a redirect). Zip members, `NeedsFetch`, several planes, the
-  refusals and a header beyond 64 KiB were exercised on synthetic files only.
+- Tested on plain HTTPS URLs. Zip members, `NeedsFetch`, several planes, the refusals and a header beyond
+  64 KiB were exercised on synthetic files only.
+- A server that answers an error page without an error status hands the snippet that page as the label file.
+  A page that is not YOLO rows is refused (`line 1 has 2 fields, not the 5 ...`); an empty answer would pass
+  as a txt without boxes. The cure is in the binding: name the file where it is stored, not a redirecting
+  download link that can fail that way (Mendeley Data's `public-files/.../file_downloaded` did, once, with
+  `{"err":"Unhandled error"}`).
 
 ## Example
 
@@ -71,6 +76,7 @@ diatom slide (Mendeley Data 457x9c7rp3, *Eucampia antarctica* in Southern Ocean 
 one row of class 0. The raw is read by `image-tiles-glob` (`cyx`, 3x2400x2400); the label is `yx` 2400x2400 with
 one box of id 1 over y 236..380, x 1985..2123 (144x138 px), and in the harness's overlay of two crops the
 box encloses the diatom valve on all four sides. The record names only this pair (the other 4,201 tiles have
-no per-file URL in it), so the binding has one plane. The example binding's `snippets_commit` is the commit
+no per-file URL in it), so the binding has one plane. Both files are bound by the S3 object their Mendeley
+download links redirect to. The example binding's `snippets_commit` is the commit
 before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names
 a commit that contains the snippet.
