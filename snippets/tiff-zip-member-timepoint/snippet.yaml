@@ -1,0 +1,12 @@
+name: tiff-zip-member-timepoint
+spec_version: 1
+summary: One TIFF from a zip member or a plain URL, at one index of its time axis (t), so a time-lapse file (an ImageJ hyperstack with frames, an OME-TIFF with SizeT) whose tifffile axes are TCYX is presented as cyx and a TZCYX one as zcyx; optionally one channel of it (`channel`). Deflated members are fetched whole. Axes, voxel size and access as tiff-zip-member-2, which refuses a T axis.
+formats: [tiff, ome-tiff]
+containers: [zip, http]
+params:
+  t: {type: int, required: false, doc: "0-based index on the file's time axis (tifffile T, or the t of params.axes) of the one timepoint to present; the array then has no time axis. Required when the time axis is longer than 1 (open raises, naming the range); must be left out when the file has no time axis longer than 1. A label gets the same t as the raw it pairs with; reason required in binding"}
+  axes: {type: str, required: false, doc: "override when the TIFF's own axes are wrong: one tczyx letter per axis of tifffile's series[0] after size-1 axes (other than y/x) are dropped, including the t that `t` fixes and a c that `channel` collapses; reason required in binding"}
+  channel: {type: int, required: false, doc: "0-based index on the file's channel axis (tifffile C or S) of the one channel to present; the array then has no c axis. Without it a channelled file keeps its c axis; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-8235843-paviaatn-hacat-4ch]
+supersedes: null
