@@ -1,0 +1,25 @@
+record: figshare-24548953-caishi-cervical-ais-he
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+  # raw 0: Abnormal.zip, cervical adenocarcinoma in situ: 1,231 images (1,195 JPEG, 36 BMP)
+  - snippet: jpeg-bmp-tiles-glob
+    urls: ["https://ndownloader.figshare.com/files/44565632::Abnormal/Abnormal-[0-9][0-9][0-9][0-9].png"]
+    params: {}
+  # raw 1: Normal.zip, normal cervical glands: 1,011 images (710 JPEG, 301 BMP)
+  - snippet: jpeg-bmp-tiles-glob
+    urls: ["https://ndownloader.figshare.com/files/44565725::Normal/Normal-[0-9][0-9][0-9][0-9].png"]
+    params: {}
+labels: []
+reasons:
+  - "jpeg-bmp-tiles-glob instead of the draft's image-tiles-glob: the members are all named .png, none is a PNG, and each zip mixes JPEG with uncompressed 24-bit BMP under one numbering (record technical.arrays), so no glob binds the JPEGs alone; image-tiles-glob and jpeg-zip-glob raise on the first BMP (Abnormal-0001, 'not a PNG, JPEG or TIFF file: header=b\"BM6...\"') and no other snippet decodes BMP. This snippet tells the two apart by magic bytes and returns both as R, G, B"
+  - "urls are member globs of the two zips (the draft's): the record's download_url is the figshare article page, the files are Abnormal.zip (ndownloader.figshare.com/files/44565632) and Normal.zip (.../44565725), which answer range requests. The globs match every member: 1,231 and 1,011, the record's n_items 2,242. Each expands sorted by name, so z is the image number minus 1; a stack of independent 3840x2160 photomicrographs (record dimensionality 2D), not a volume"
+  - "one raw per zip, so the image-level class stays separable: raw 0 = Abnormal (adenocarcinoma in situ), raw 1 = Normal (normal glands); the folder is the class (record alignment_notes)"
+  - "axes zcyx, (1231, 3, 2160, 3840) and (1011, 3, 2160, 3840) uint8: the record's yxs (2160, 3840, 3) with the samples as c = R, G, B and one file per z. No params: the snippet declares none"
+  - "every file has one shape, which the snippet requires: the image header of all 2,242 members was read (the first 48 KB of each deflated member, by range request, inflated). Abnormal.zip: 1,195 JPEG and 36 BMP; Normal.zip: 710 JPEG and 301 BMP; 337 BMP in all, as the record says, and they are exactly the members of 24,883,294 bytes. Every JPEG is baseline, 8-bit, 3 components, 3840x2160 (4:2:0 chroma subsampling in 1,878, none in 27 of Normal.zip); every BMP has a 40-byte BITMAPINFOHEADER, 3840x2160 with positive height (bottom-up), 24 bits, compression 0, pixel data at byte 54"
+  - "BMP decoding checked on Abnormal-0001 and Normal-0009: the snippet's planes equal imagecodecs.bmp_decode of the same bytes, and min/max/mean of Abnormal-0001 are the record's (0, 255, 154.0), as are Normal-0001's for JPEG (17, 244, 176.7). Sample order checked by eye on Normal-0009: stroma pink, nuclei purple, erythrocytes red, as H&E should be (swapped they would be blue). The BMPs carry 40 zero bytes after the pixel data, past the header's own file size; they are ignored"
+  - "the array mixes lossless and lossy planes: 337 of the 2,242 are BMP (stored pixels) and the rest JPEG (compression noise, chroma mostly subsampled). Nothing in the array marks which is which; the member's size (24,883,294 bytes for a BMP) or first bytes do. The BMPs are not a separate class or a duplicate set: they share the numbering of the JPEGs, in runs (Abnormal 0001, 0578-0586, 0768-0793; Normal 0009-0213, 0309-0326, 0511, 0826-0898, 0961-0964), so leaving them out would need a glob per run of numbers and would drop 30% of Normal"
+  - "no labels: the record's annotations are image-level classes only (the folder, and data.xlsx, which is not bound); no pixel label array exists and the binding format has no per-image class"
+  - "voxel size: none. The snippet reports None; the record's voxel_size_nm is null (JPEG/BMP headers give 0 dpi; the paper gives magnification 100 and no um/pixel)"
+  - "cost: every member is deflated, so a plane is fetched whole: 1.6 to 4.5 MB for a JPEG, 11 to 20 MB for a BMP (584.9 MB of Abnormal.zip and 5.19 GB of Normal.zip are BMP members). harness smoke read 22 MB and harness crop --n 4 read 25 MB"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"
