@@ -1,0 +1,44 @@
+record: zenodo-7484518-malaria-thick-smear-parasites
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: png-csv-boxes-table
+    urls: [https://zenodo.org/api/records/7484518/files/data_base_malaria.csv/content]
+    params: &table
+      image_url: "https://zenodo.org/api/records/7484518/files/{name}/content"
+      name_column: External_ID
+      delimiter: ";"
+      count: 1000
+labels:
+  - snippet: png-csv-boxes-table
+    urls: [https://zenodo.org/api/records/7484518/files/data_base_malaria.csv/content]
+    params: {<<: *table, boxes_column: locationleukocyte, boxes: instance}
+    pairs_with: 0
+    label_key: manual_gt-leukocyte-instance
+    segmentation_type: instance
+  - snippet: png-csv-boxes-table
+    urls: [https://zenodo.org/api/records/7484518/files/data_base_malaria.csv/content]
+    params: {<<: *table, boxes_column: locationParasite, boxes: instance, classes: [t, e, g]}
+    pairs_with: 0
+    label_key: manual_gt-parasite-instance
+    segmentation_type: instance
+  - snippet: png-csv-boxes-table
+    urls: [https://zenodo.org/api/records/7484518/files/data_base_malaria.csv/content]
+    params: {<<: *table, boxes_column: locationParasite, boxes: semantic, classes: [t, e, g]}
+    pairs_with: 0
+    label_key: manual_gt-parasite-semantic
+    segmentation_type: semantic
+reasons:
+  - "png-csv-boxes-table for raw and labels instead of the draft's image-tiles-glob and jpeg-xml-boxes-numbers: the labels are one ;-separated table, data_base_malaria.csv, with one row per image and Python-literal box lists in two columns (record encoding boxes-table), which no XML box snippet reads (the draft's smoke error: 'is not XML'); and https://zenodo.org/api/records/7484518/files/ has no directory index (harness list: 404), so the PNGs cannot be globbed. This snippet takes the file names from the table and reads images and boxes row by row"
+  - "the url of all four arrays is the table, and image_url https://zenodo.org/api/records/7484518/files/{name}/content is the record's direct-file form (record notes: 'each file at https://zenodo.org/api/records/7484518/files/<name>/content'; the record's sample url c3_1.png is the first row's). name_column External_ID: the column that holds the PNG file name (record alignment_notes: 'keyed by External_ID = PNG file name'; 1,000 distinct names, all <stem>.png)"
+  - "delimiter ';': the table is ;-separated (record layout: '1,000 rows, ; separated'; the header line read while testing has 10 ;-separated names)"
+  - "count 1000 on every array: the table has 1,000 rows (record n_items 1000 and label shape [1000, 10]), so a changed table fails at open instead of shifting z"
+  - "raw is zcyx (1000, 3, 2056, 2452) uint8: one 8-bit RGB PNG per row (record axes yxs, shape [2056, 2452, 3]), the samples kept as c 0..2 = R, G, B (brightfield colour of a Romanowsky stain); z is the table's row order, a stack of independent 2D fields (record dimensionality 2D), not a volume. The headers of all 1,000 PNGs the table names were read while testing (the first 33 bytes of each, by range request): every one is 2452x2056, 8 bit, colour type 2 (RGB), so the array has one shape (record shape_varies false). The snippet checks each file it reads against the first and raises on another shape"
+  - "only the 1,000 PNGs with a row are bound: 80 of the 1,080 PNGs have no row in the table (record alignment_notes), so they have no annotation, and without a directory index their names are not listed anywhere the reader can get them"
+  - "labels pair with raw 0 row for row: the three label arrays are bound with the same table url, image_url, name_column, delimiter and count as the raw (one YAML anchor, table), so plane k of each is row k of the same table, and each label plane's grid is the header of the PNG that row names. Box cells are {top, left, height, width} in pixels of that image (record alignment_notes, alignment same-grid), painted over [top, top+height) x [left, left+width). Checked while testing: all 18,900 boxes lie inside 2056x2452, and on c3_1.png each of the 23 leukocyte boxes holds pixels darker than the image's 1st percentile (green sample: mean 87 inside the boxes, 166 over the image), while the same boxes with top and left exchanged do not (mean 159)"
+  - "label 0, boxes_column locationleukocyte, boxes instance, no classes: the leukocyte boxes have no 'type' key (record class 'leukocyte (locationleukocyte column)'), so there is one class and nothing to list. 12,712 boxes in 988 rows (the record's count); the other 12 rows hold a lone 0,0,0,0 entry, which the snippet reads as 'no leukocyte' (all background), as it does the parasite column's N entry"
+  - "labels 1 and 2, boxes_column locationParasite, classes [t, e, g]: every 'type' string of the column was read while testing: t 5,927, e 111, g 147, plus 'g ' twice and ' t' once, which the snippet strips to g and t, 6,188 parasite boxes in all (the record's count; in every row the number of boxes equals numberTrophozoite + numberSchizont + numberGametocyte), and N 298 times, always as the lone 0,0,0,0 placeholder of an image without parasites (record class N: 'no parasite (placeholder box 0,0,0,0)'), which paints nothing and is therefore not a class. Order as the record lists them, so semantic ids are 1 t trophozoite, 2 e schizont, 3 g gametocyte; 0 is background. That e means schizont is the record's inference from the counts in Database.pdf"
+  - "NEEDS A HUMAN DECISION, boxes as labels: the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. As in the catalog's other box bindings (tiff-jpeg-voc-zip-glob, jpeg-xml-boxes-numbers): boxes instance (each box filled with its number in its cell, segmentation_type instance) tells the boxes apart, boxes semantic (each box filled with its class id, segmentation_type semantic) carries the parasite stage. All are filled rectangles, not cell outlines: a consumer must not take them for pixel-accurate masks. Where boxes overlap the smaller one is on top; 19 of the 18,900 boxes lie wholly under smaller ones and leave no pixel in the instance planes"
+  - "label_key manual_gt-parasite-semantic from the draft; manual_gt-parasite-instance and manual_gt-leukocyte-instance follow it: source manual (boxes drawn by annotators, Database.pdf per the record), class words parasite and leukocyte from the record's classes. The leukocyte column is bound once, as instance: with a single class its semantic form would be the same boxes filled with 1. A human should confirm the class words"
+  - "backgroundquality (g/b) is not bound: it is one class per image (record alignment_notes), not a pixel label; the count columns repeat what the boxes say"
+  - "no voxel size bound: none in the PNG header (no pHYs), the table or the record (voxel_size_nm null)"
