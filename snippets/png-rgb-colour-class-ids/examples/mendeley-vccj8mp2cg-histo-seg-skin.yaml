@@ -1,0 +1,33 @@
+record: mendeley-vccj8mp2cg-histo-seg-skin
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: df753c332aa31824bceaea522d6576614eccc6a0
+raw:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/363d9504-c132-4c23-9c22-c3ff1aa85b73"
+    params: {}
+labels:
+  - snippet: png-rgb-colour-class-ids
+    urls:
+      - "https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/8d1b6679-cad4-4fe0-85bb-a23706705082"
+    params:
+      colours:
+        - [0, 0, 0]          # id 0
+        - [0, 0, 128]        # id 1
+        - [0, 156, 255]      # id 2
+        - [96, 96, 96]       # id 3
+        - [112, 48, 160]     # id 4
+        - [127, 96, 255]     # id 5
+        - [127, 255, 255]    # id 6
+        - [224, 224, 224]    # id 7
+    pairs_with: 0
+    label_key: manual_gt-skin_tissue-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw stays on image-tiles-glob (from the draft): it reads the RGB PNG (named .jpg; harness describe: png, 14903x2909, 8-bit rgb) as cyx (3, 2909, 14903); the URL is the record's technical.sample S3 object for Images/MD22-04169(B1-4).jpg"
+  - "label on png-rgb-colour-class-ids instead of the draft's image-tiles-glob: Masks/MD22-04169(B1-4).png is an 8-bit RGB colour-coded mask (harness describe: png rgb 14903x2909; record encoding rgb-colors), and image-tiles-glob returns its R, G, B samples as a c axis, so a label crop would be one colour sample; this snippet returns one yx plane (2909, 14903) of uint8 class ids on the raw's grid"
+  - "colours: the record gives no colour-to-class table, so the table is the 8 distinct colours counted in this mask (all 43,352,827 pixels; no other colour, so no anti-aliased edges): [0,0,0] 71.06%, [0,0,128] 12.71%, [112,48,160] 7.00%, [224,224,224] 4.37%, [0,156,255] 3.79%, [96,96,96] 1.06%, [127,96,255] 0.011%, [127,255,255] 0.0003%"
+  - "id order: [0,0,0] is id 0 because it covers the slide area outside the tissue (71% of the mask; the raw is mostly white background, mean 230); ids 1..7 are the other colours sorted by (r, g, b). The order carries no meaning: the record does not say which class each colour is (classes: null), so the ids are consistent labels whose class names are unknown until the dataset's legend is documented"
+  - "the record says 12 classes and this mask holds 8 colours; the other 37 masks have no URL on the record and were not read. Binding them needs their colours appended to this table (the snippet raises on a colour it does not list and names it), which keeps ids 0..7 as they are"
+  - "one pair only: the record's technical.sample gives URLs for MD22-04169(B1-4) alone, and shapes vary between slides (shape_varies), so each further pair would be its own raw and label entry"
+  - "label_key manual_gt-skin_tissue-semantic (from the draft): annotations.source manual -> manual_gt; skin_tissue is a draft slug for the record's classes (skin layers, skin tissues, skin cancers, background); semantic because each colour is a tissue class, not an object"
