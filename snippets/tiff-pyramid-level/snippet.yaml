@@ -1,0 +1,11 @@
+name: tiff-pyramid-level
+spec_version: 1
+summary: One page (pyramid level) of a tiled, multi-page TIFF or BigTIFF at a plain URL, such as a whole-slide image or its mask pyramid; `level` names the page, and a read fetches and decodes only the tiles that overlap the region, never a whole page. `class_id` presents a class-id mask as the {0,1} mask of one class. Voxel size from the page's own X/YResolution and ResolutionUnit.
+formats: [tiff]
+containers: [http]
+params:
+  level: {type: int, required: false, doc: "0-based index of the page (IFD) to present, in file order; in a pyramid written level by level, page 0 is the full resolution and each further page a smaller copy. Default 0. Pair a label with a raw by naming the level of each that has the same y/x shape; reason required in binding"}
+  class_id: {type: int, required: false, doc: "for a class-id mask (one integer sample per pixel): present uint8 1 where the page equals this id and 0 elsewhere, tiles the file does not store included. Without it the page's values are returned as stored. What the id means comes from the record or from looking at the data, not from the file; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-3375528-tissue-segmentation-wsi-sample]
+supersedes: null
