@@ -1,0 +1,53 @@
+record: figshare-22679839-smartmalarianet-thin-smear-detection
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+- snippet: jpeg-yolo-boxes-2
+  urls:
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/images/*/20*_S*.jpg
+  params: {count: 68}
+- snippet: jpeg-yolo-boxes-2
+  urls:
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/images/*/IMG_20200310_*.jpg
+  params: {count: 27}
+- snippet: jpeg-yolo-boxes-2
+  urls:
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/images/*/IMG_20200413_*.jpg
+  params: {count: 55}
+labels:
+- snippet: jpeg-yolo-boxes-2
+  urls:
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/images/*/20*_S*.jpg
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/labels/*/20*_S*.txt
+  params: {boxes: instance, classes: [cell], overhang: 1, count: 68}
+  pairs_with: 0
+  label_key: manual_gt-cell-instance
+  segmentation_type: instance
+- snippet: jpeg-yolo-boxes-2
+  urls:
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/images/*/IMG_20200310_*.jpg
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/labels/*/IMG_20200310_*.txt
+  params: {boxes: instance, classes: [cell], overhang: 1, count: 27}
+  pairs_with: 1
+  label_key: manual_gt-cell-instance
+  segmentation_type: instance
+- snippet: jpeg-yolo-boxes-2
+  urls:
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/images/*/IMG_20200413_*.jpg
+  - https://ndownloader.figshare.com/files/40259878::data/step_1/VOC/labels/*/IMG_20200413_*.txt
+  params: {boxes: instance, classes: [cell], drawn_on: displayed, overhang: 1, count: 55}
+  pairs_with: 2
+  label_key: manual_gt-cell-instance
+  segmentation_type: instance
+reasons:
+- "Step 1 only: the record's step 1 raw and label arrays (data/step_1/VOC/images|labels/{train,val,test}); step 3 patches have no label array and vary in shape, step 2 .npy is not described as arrays in the record"
+- "jpeg-yolo-boxes-2 for raws and labels, instead of the draft's jpeg-yolo-boxes: that snippet fails on 87 of the 150 label planes (the issue's report), for three reasons this one was written to read. (1) Four files named .jpg are PNGs (test/20200103_S226, test/20200105_S312, train/20200103_S225, train/20200103_S229: 8-bit RGBA 2736x3648, alpha 255 everywhere, checked on all four); a file is read as what its first bytes say and the opaque alpha is left out, so they are planes of raw 0 like the 64 JPEGs around them. (2) The 27 IMG_20200310 JPEGs carry Exif orientation 0, which Exif does not define; it is read as no orientation, so their boxes are on the stored grid (drawn on test/IMG_20200310_115816: they surround the cells). (3) overhang, below. jpeg-yolo-boxes-glob does not fit: with the split folder between labels/ and the file it looks for the image beside the table (the issue's KeyError)"
+- "Three raws by file name prefix because one array has one shape, as in the draft: 20*_S*.jpg (68 images, stored 2736 rows x 3648 columns, no Exif orientation), IMG_20200310_*.jpg (27, 2736 x 3648, orientation 0), IMG_20200413_*.jpg (55, stored 3648 rows x 2736 columns, orientation 6). The headers of all 150 images were read while testing; these are the only shapes and orientations. The three globs cross the split folders, so each array holds train, val and test images in member name order (test, train, val)"
+- "count 68, 27 and 55 on each raw and its label: the files the three globs match in the zip's directory, 150 in all, the record's 121/14/15; a changed listing fails at open instead of shifting z"
+- "RGB samples kept as c 0..2 (R, G, B; zcyx, uint8, record axes yxs, channels 3): brightfield colour of a Giemsa-stained thin film. z is a stack of independent photographs (record dimensionality 2D), not depth; voxel size None (record voxel_size_nm null). The images are returned as stored, so raw 2 is 3648 x 2736 and a viewer that applies the orientation shows it turned"
+- "label urls: the raw's image glob, then the tables' glob of the same prefix under labels/. The snippet pairs each image with the .txt of the same file name stem and refuses to open unless every image has exactly one table and every table an image; the stems are unique across the three split folders and all 150 pair (record: same stem and split). The three labels_*.cache files do not end in .txt and are not matched"
+- "classes [cell]: the record's title calls the step 1 annotations cell boxes and its sample holds class 0 only; all 150 tables were read while testing: 35,489 rows of five fields (21,823 / 4,404 / 9,262 per array; 149-416, 75-289 and 116-205 per image), class 0 in every row, no empty table"
+- "overhang 1 on the three labels: the largest overhang in the files, measured on all 35,489 boxes. 179 boxes reach exactly 1 px past an edge and are clipped to the image: 1 in label 0 (train/20200103_S192 box 146, left edge), 3 in label 1 (train/IMG_20200310_114743 boxes 125 and 126, train/IMG_20200310_120051 box 73, top edge), 175 in 52 tables of label 2 (88 past the left and 87 past the top edge of the displayed picture). No box is further out and none is left without pixels. Always the left or top edge and always one pixel, which is what a conversion from pixel corners that takes 1 from each centre leaves; the boxes were not moved to undo it"
+- "drawn_on displayed on label 2 only (the issue's open decision, taken by looking; A HUMAN SHOULD CONFIRM on the test crops): the IMG_20200413 JPEGs are stored 2736 wide x 3648 high with Exif orientation 6, so a viewer shows them 3648 wide x 2736 high. The boxes of test/IMG_20200413_212946 were drawn both ways on the stored pixels: as fractions of the displayed picture, turned back, they are near-square frames each around one red cell; as fractions of the stored grid they are tall rectangles lying across cells and gaps. An overlay of the snippet's own raw and label planes of train/IMG_20200413_223311 shows the same fit. As displayed, the overhang is 1 px in every case; as stored it would be 2 px for 67 boxes (the numbers alone do not settle it, the pictures do). Labels 0 and 1 need no drawn_on: their images have no orientation or 0"
+- "boxes instance, label_key manual_gt-cell-instance, segmentation_type instance, NEEDS A HUMAN DECISION as in the catalog's other box bindings: the record's encoding is boxes-table, which has no segmentation_type. Each box is filled with its row number in its table (ids restart in every plane); with one class a semantic label would say no more than the instance label is nonzero, so there is one label per raw. The labels are filled rectangles, not cell outlines: boxes of neighbouring cells overlap, and where they do the smaller box is on top (every box keeps pixels of its own; harness describe on all 150 planes gave median_components 1.0 and max_components 3 in the centre window). Source manual_gt from the draft (annotations.source is manual)"
+- "The smoke warning that the label dtype uint16 is not the record's float64 is expected: the record describes the table's numbers, the array is its boxes painted as ids"
