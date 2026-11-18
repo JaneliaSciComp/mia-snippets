@@ -1,4 +1,4 @@
-# tiff-csv-contours
+# tiff-rows-csv-contours
 
 Reads one plain 2D **TIFF** at an HTTP(S) URL (S3 included) as `yx`, and, as its label form, a **CSV of contour
 vertices** drawn on that image, each contour filled onto the image's pixel grid as an instance id.

@@ -1,4 +1,4 @@
-name: tiff-csv-contours
+name: tiff-rows-csv-contours
 spec_version: 1
 summary: One single-plane, single-sample TIFF at a plain URL as yx (uncompressed pixel data read by byte range, only the rows asked for); or, with a contour .csv beside the TIFF (header row, then one row per vertex - contour id, x, y in pixels of that image), each contour's closed polygon filled onto the TIFF's grid as yx uint16 instance ids equal to the CSV's contour ids.
 formats: [tiff, csv, other]
