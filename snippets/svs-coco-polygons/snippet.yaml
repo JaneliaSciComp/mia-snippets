@@ -1,0 +1,10 @@
+name: svs-coco-polygons
+spec_version: 1
+summary: One Aperio SVS whole-slide image at a plain URL, its full-resolution level read tile by tile as yxc uint8; or, for a url that holds an MS COCO JSON (a zip member or a plain URL), the polygons of the one image named by `file_name`, rasterised per requested region on that image's width x height grid as a yx semantic mask of category ids (0 = no polygon; where polygons overlap the smallest is kept).
+formats: [svs, json]
+containers: [http, zip]
+params:
+  file_name: {type: str, required: false, doc: "COCO JSON only, and required for it: the images[].file_name of the slide this label is for (the paired raw's file name, e.g. Histiocytoma_02_1.svs). Exactly one images[] entry must have it. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [tcia-2m93-fx66-catch-canine-cutaneous-histology]
+supersedes: null
