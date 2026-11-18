@@ -20,14 +20,16 @@ X_OFFSET, Y_OFFSET = 65422, 65423       # NDPI tags: image centre from slide cen
 UNIT_NM = {2: 2.54e7, 3: 1e7}           # ResolutionUnit: inch, centimetre
 
 
-def _span(key: int | slice, n: int) -> tuple[int, int, int | np.ndarray]:
+def _span(key: int | slice, n: int) -> tuple[int, int, int | slice | np.ndarray]:
     """What `key` asks of an axis of length n: (lo, hi, index into [lo, hi)); an int index drops the axis."""
     if isinstance(key, slice):
         idx = np.arange(n)[key]
         if idx.size == 0:
             return 0, 0, idx
-        lo = int(idx.min())
-        return lo, int(idx.max()) + 1, idx - lo
+        lo, hi = int(idx.min()), int(idx.max()) + 1
+        if key.step in (None, 1):       # the usual window: all of [lo, hi) in order, so no copy to reorder it
+            return lo, hi, slice(None)
+        return lo, hi, idx - lo
     k = int(key) + (n if key < 0 else 0)
     if not 0 <= k < n:
         raise IndexError(f"index {key} is outside an axis of length {n}")
@@ -67,7 +69,7 @@ class _Ndpi:
         ny, nx, nc = self.shape
         y0, y1, yi = _span(region.get("y", slice(None)), ny)
         x0, x1, xi = _span(region.get("x", slice(None)), nx)
-        c0, _, ci = _span(region.get("c", slice(None)), nc)
+        c0, c1, ci = _span(region.get("c", slice(None)), nc)
         out = np.zeros((y1 - y0, x1 - x0, nc), self.dtype)
         page, fh = self._page, self._tif.filehandle
         th, tw = page.tilelength, page.tilewidth
@@ -96,7 +98,7 @@ class _Ndpi:
                 ty, tx = row * th, col * tw
                 a0, a1, b0, b1 = max(y0, ty), min(y1, ty + th), max(x0, tx), min(x1, tx + tw)
                 out[a0 - y0:a1 - y0, b0 - x0:b1 - x0] = tile[a0 - ty:a1 - ty, b0 - tx:b1 - tx]
-        return np.array(out[..., ci + c0][:, xi][yi])        # last axis first: an int index drops its axis
+        return out[..., c0:c1][..., ci][:, xi][yi]       # last axis first: an int index drops its axis
 
 
 class _Outline:
@@ -111,10 +113,12 @@ class _Outline:
         edge = np.repeat(np.arange(len(xs)), n)
         rows = r0[edge] + np.arange(n.sum()) - np.repeat(np.cumsum(n) - n, n)
         cross = xa[edge] + (xb[edge] - xa[edge]) * (rows + 0.5 - ya[edge]) / (yb[edge] - ya[edge])
-        order = np.argsort(rows, kind="stable")
-        self.rows = rows[order]
-        self.cols = np.ceil(cross - 0.5).astype(np.int64)[order]        # first pixel whose centre is right of it
+        cols = np.ceil(cross - 0.5).astype(np.int64)            # first pixel whose centre is right of the crossing
+        order = np.lexsort((cols, rows))
+        self.rows, self.cols = rows[order], cols[order]
         self.turn = np.where(yb[edge] > ya[edge], 1, -1).astype(np.int32)[order]
+        inside = np.cumsum(self.turn)[:-1] != 0         # a row's turns sum to 0, so this never spans two rows
+        self.area = int(np.diff(self.cols)[inside].sum())       # pixels it fills
         self.box = (int(np.floor(ys.min())), int(np.ceil(ys.max())), int(np.floor(xs.min())), int(np.ceil(xs.max())))
 
     def fill(self, out: np.ndarray, y0: int, x0: int, value: int) -> None:
@@ -132,7 +136,8 @@ class _Outline:
 
 class _Regions:
     """The closed freehand regions of an NDPA on its NDPI's level-0 grid: a pixel holds the 1-based position, in
-    `classes`, of the title of the region that encloses its centre; 0 where none does."""
+    `classes`, of the title of the region that encloses its centre (the smallest such region, where one is drawn
+    inside another); 0 where none does."""
 
     def __init__(self, io: IO, url: str, grid: _Ndpi, classes: list[str]):
         if grid.voxel_size_nm is None or len(grid.voxel_size_nm) != 2 or None in grid.centre_nm:
@@ -165,19 +170,20 @@ class _Regions:
                 raise ValueError(f"{where}: its title is not in params.classes {self._classes}")
             if unit != "nanometers":
                 raise ValueError(f"{where}: coordformat {unit!r}; only 'nanometers' is read")
-            points = [] if ann is None else ann.findall("pointlist/point")
-            if ann is None or ann.get("type") != "freehand" or (ann.findtext("closed") or "").strip() != "1" \
-                    or len(points) < 3:
-                kind = None if ann is None else (ann.get("type"), ann.findtext("closed"), len(points))
-                raise ValueError(f"{where}: annotation (type, closed, points) = {kind}; only a closed freehand "
-                                 "outline of 3 or more points is filled")
+            if ann is None or ann.get("type") != "freehand" or (ann.findtext("closed") or "").strip() != "1":
+                kind = None if ann is None else (ann.get("type"), ann.findtext("closed"))
+                raise ValueError(f"{where}: annotation (type, closed) = {kind}; only a closed freehand outline "
+                                 "is filled")
+            points = ann.findall("pointlist/point")
+            if len(points) < 3:         # a click or a stroke that was never drawn round anything: no area
+                continue
             xy = np.array([[float(p.findtext("x")), float(p.findtext("y"))] for p in points])
             found.append((self._classes.index(title) + 1,
                           _Outline((xy[:, 0] - cx) / sx + nx / 2, (xy[:, 1] - cy) / sy + ny / 2)))
-        if not any(o.box[0] < ny and o.box[1] > 0 and o.box[2] < nx and o.box[3] > 0 for _, o in found):
+        if found and not any(o.box[0] < ny and o.box[1] > 0 and o.box[2] < nx and o.box[3] > 0 for _, o in found):
             raise ValueError(f"{name}: none of its {len(found)} regions touches the image ({ny}x{nx} pixels "
                              f"centred {cy}, {cx} nm from the slide centre); is it this slide's annotation?")
-        return sorted(found, key=lambda f: f[0])        # stable: class order, then file order
+        return sorted(found, key=lambda f: -f[1].area)  # stable: largest first, then file order
 
     def read(self, region: dict[str, int | slice]) -> np.ndarray:
         if self._outlines is None:
@@ -186,9 +192,9 @@ class _Regions:
         y0, y1, yi = _span(region.get("y", slice(None)), ny)
         x0, x1, xi = _span(region.get("x", slice(None)), nx)
         out = np.zeros((y1 - y0, x1 - x0), self.dtype)
-        for value, outline in self._outlines if out.size else ():      # a later class is painted over an earlier
+        for value, outline in self._outlines if out.size else ():      # a smaller region is painted over a larger
             outline.fill(out, y0, x0, value)
-        return np.array(out[yi][..., xi])
+        return out[yi][..., xi]
 
 
 def _open(io: IO, url: str) -> tuple[BinaryIO, bool]:

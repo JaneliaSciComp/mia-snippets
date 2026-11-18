@@ -30,18 +30,25 @@ NDPI's first page: a pixel holds the class id of the region whose outline enclos
   gives the centre of its image in the same frame (`XOffsetFromSlideCentre`, `YOffsetFromSlideCentre`, tags 65422
   and 65423) and its pixel size, so `x_px = (x_nm - XOffset) / x_pixel_nm + width / 2`, and the same in y. That
   is why the label needs both urls. Only the NDPI's header is read for it, no pixel.
-- **Fill.** Nonzero winding rule: a loop the pen made twice is still inside. Regions are painted in the order of
-  `classes`, and within a class in file order, so where regions of two classes overlap the class later in the list
-  is kept.
-- `access` is `plane`: the whole NDPA (4 MB for S32, about 22 MB for S1) is read on the first read, whatever the
-  region. Outlines are
-  kept as their crossings with the pixel rows, and only the window asked for is filled.
+- **Fill.** Nonzero winding rule: a loop the pen made twice is still inside. Regions are painted from the one
+  that fills the most pixels to the one that fills the fewest (equal ones in file order), so a region drawn inside
+  another is kept, whatever the two classes are: the stroma outlined inside a lesion, and equally the lesions
+  outlined inside one loose stroma outline (S32 and S1 of the tested record). Where two regions only partly
+  overlap, the shared part goes to the smaller one. The order of `classes` decides ids, not what is kept.
+- An outline of fewer than 3 points (a click; S1 has one, of 1 point) encloses nothing and fills nothing.
+- `access` is `plane`: the whole NDPA (4 MB for S32, 22.6 MB for S1) is read and parsed on the first read,
+  whatever the region (about 15 s for S1's). Outlines are kept as their crossings with the pixel rows, and only
+  the window asked for is filled. A reader that asks for the whole plane gets it: 1.1 GB for S1 (30976x36864).
 
 ## Limits
 
 - One slide per binding entry: slides differ in shape, so there is no glob form.
-- Only closed freehand outlines (`type="freehand"`, `<closed>1`, 3 or more points) in nanometres are filled. Any
-  other annotation (circle, pointer, ruler, pin, an open line) is an error naming it, not skipped.
+- Only closed freehand outlines (`type="freehand"`, `<closed>1`) in nanometres are filled. Any other annotation
+  (circle, pointer, ruler, pin, an open line) is an error naming it, not skipped. An NDPA with no region at all
+  is an all-zero label.
+- The error for an unreadable annotation comes at the first read of the label, not at open, and `harness smoke`
+  reads only the labels of the first raw: read every label of a binding once (`harness describe --binding`)
+  before trusting it.
 - Only JPEG RGB NDPIs whose first page has restart markers and is the largest level. Fluorescence NDPIS sets and
   multi-focal-plane NDPIs were not tested.
 - The label says what was outlined, not what was not: 0 is "not annotated". Freehand outlines are drawn loosely,
