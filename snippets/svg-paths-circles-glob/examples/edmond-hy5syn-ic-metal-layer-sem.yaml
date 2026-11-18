@@ -1,0 +1,29 @@
+record: edmond-hy5syn-ic-metal-layer-sem
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://edmond.mpg.de/api/access/datafile/223856::dataset/sems/m2/sem*.png"]
+    params: {}
+labels:
+  - snippet: svg-paths-circles-glob
+    urls: ["https://edmond.mpg.de/api/access/datafile/223856::dataset/labels/m2/label*.svg"]
+    params: {classes: [path], origin: centre}
+    pairs_with: 0
+    label_key: proofread-track-semantic
+    segmentation_type: binary
+  - snippet: svg-paths-circles-glob
+    urls: ["https://edmond.mpg.de/api/access/datafile/223856::dataset/labels/m2/label*.svg"]
+    params: {classes: [circle], origin: centre}
+    pairs_with: 0
+    label_key: proofread-via-semantic
+    segmentation_type: binary
+reasons:
+  - "raw (the draft's, unchanged): the 321 metal-2 SEM tiles (dataset/sems/m2/sem*.png, 3536x4096 uint8 grey per record technical.arrays) bound as one zip-member glob with image-tiles-glob, one tile per z plane; m2 is the labelled set. The z axis is a stack of independent 2D tiles in name order, not a volume (record dimensionality 2D; the dataset README says the tiles are published in random order). The 327 metal-1 tiles (dataset/sems/m1/) have no labels and are not bound"
+  - "labels with svg-paths-circles-glob (new): the labels are SVG vector files, which no catalog snippet read. The glob dataset/labels/m2/label*.svg sorted by name gives label0000..label0320, and the raw's glob gives sem0000..sem0320: the zip's directory holds the same 321 four-digit numbers under both (compared on the listing), so z index k of each label is the annotation of z index k of the raw (record alignment_notes: labelNNNN.svg pairs with semNNNN.png). Each SVG's own grid is width 4096, height 3536, viewBox 0 0 4096 3536 in all 321 files, the PNG's 3536x4096"
+  - "NEEDS A HUMAN DECISION, two labels on the raw, one {0,1} mask per class (classes [path] -> proofread-track-semantic, classes [circle] -> proofread-via-semantic, both segmentation_type binary) rather than one two-class plane: the record gives path = track, circle = via, and the vias lie on the tracks (in the three tiles compared with their image, 99.7-99.9% of the via pixels are also track pixels), so one class-id map would need a paint order and would lose the track under every via; the catalog's other overlapping-class bindings (trakem2-arealist-mask, imod-model-mask) bind one binary mask per class the same way. The single plane the match report describes (0 background, 1 track, 2 via painted over tracks) is params {classes: [path, circle], origin: centre} with segmentation_type semantic; it was read on all 321 files too and holds exactly the ids 0, 1, 2. A reviewer who prefers it has to choose its class slug"
+  - "label_key source proofread: the dataset README says the labels were made with automatic techniques (thresholding, edge detection, size, position and complexity filtering) and then manually validated and corrected. Class names track and via from the record's classes. Tracks are not separated as instances: the README says tracks spanning several images may be missing from some tiles' files and via labels may contain duplicates, so background means not labelled rather than no metal, and the circles are not bound as via instances"
+  - "origin centre (coordinates are pixel indices): in all 321 files the path coordinates are whole numbers whose largest x is 4095 and largest y 3535 (30,885 vertices at x = 4095 and 8,058 at y = 3535, none at 4096 or 3536) and the circle centres reach cx 4095 and cy 3535, which is width-1 / height-1, the range of pixel indices and not of SVG user units. Against the image (tiles 0000, 0160, 0320: the mask shift that best matches the bright metal) the track mask sits within 0.15 px with centre and 0.4-0.7 px off with corner; the via discs sit 0.2-0.3 px off either way (to opposite sides), so the vias do not tell the two apart and follow the tracks. Tracks are brighter than background in those tiles (mean 100-114 inside the mask against 47 outside) and vias brighter still (211-231), so path = track and circle = via are on the right structures"
+  - "fills are closed shapes: a pixel is track when its index lies inside a path's outline or on it, and via when it lies within r of a circle's centre. This is this snippet's rule, not the authors' rasteriser (libs/labels.py in their repository was not read: github.com is not a host this job may reach), so masks drawn by their code may differ by a pixel along outlines. One path of the 229,709 has two vertices left of the grid (x down to -4) and discs at the tile border reach past it; shapes are cut at the grid"
+  - "smoke warns 'dtype uint8 is not the record's [unknown]' for both labels: the record gives the SVG label no dtype (vector data); the snippet's masks are uint8"
+  - "voxel size: neither snippet reports one (PNG and SVG carry none); the record's 14.65 nm per pixel comes from the dataset README"
