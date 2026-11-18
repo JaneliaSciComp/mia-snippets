@@ -1,0 +1,13 @@
+name: jpeg-yolo-boxes
+spec_version: 1
+summary: A set of 8-bit JPEG images (RGB samples kept as c), or of the YOLO box tables that belong to them (one .txt per image, rows `class x_center y_center width height` as fractions of the image) rasterised on the grid of the JPEG with the same file name stem, from zip members or an HTTP directory chosen by glob (or plain URLs), one image per z plane. An image and its table may be in different zips (a dataset published in zip parts); a label array's urls are its raw's image urls plus the tables' urls, so its planes follow the raw's order. An empty table is an all-background plane. Images are returned as stored; `drawn_on` says whether boxes of a JPEG with an Exif orientation are fractions of the displayed or the stored picture.
+formats: [jpeg, other]
+containers: [zip, http]
+params:
+  boxes: {type: str, required: false, doc: "label arrays only, and required for them: how the boxes are painted on the yx grid. 'instance' fills each box with its 1-based row number in its table; 'semantic' fills it with its class id + 1. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "label arrays only, and required for them: the class names in class id order, the first is id 0 (semantic value = id + 1 = position in this list, from 1). A row whose class id is past the list raises, in both modes. Reason required in binding"}
+  drawn_on: {type: str, required: false, doc: "label arrays only: what the box fractions are fractions of when a JPEG has an Exif orientation other than 1. 'displayed': the picture as a viewer shows it, orientation applied (what a browser-based annotation tool shows); the boxes are turned back onto the stored pixels, which is what the image array returns. 'stored': the stored pixel grid. Without it a table with boxes whose JPEG is turned raises. Reason required in binding"}
+  count: {type: int, required: false, doc: "the number of images (z planes) the array must have, from a complete listing. Open fails on another number, so a changed listing is noticed instead of shifting z; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-19692572-malaria-thin-smear-yolov8]
+supersedes: null

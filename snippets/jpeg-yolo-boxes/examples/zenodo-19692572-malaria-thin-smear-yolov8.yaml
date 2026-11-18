@@ -1,0 +1,58 @@
+record: zenodo-19692572-malaria-thin-smear-yolov8
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: c21e8d4c672d093165cde5fcfabba89c8197342c
+raw:
+- snippet: jpeg-yolo-boxes
+  urls:
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-001.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-002.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-003.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-004.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-005.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-006.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  params: {count: 4496}
+labels:
+- snippet: jpeg-yolo-boxes
+  urls:
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-001.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-002.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-003.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-004.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-005.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-006.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-001.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-002.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-003.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-004.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-005.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  params: {boxes: instance, drawn_on: displayed, count: 4496, classes: [falciparum, malariae, non_infected_eritrosit, non_infected_leukosit, ovale, vivax]}
+  pairs_with: 0
+  label_key: manual_gt-cell-instance
+  segmentation_type: instance
+- snippet: jpeg-yolo-boxes
+  urls:
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-001.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-002.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-003.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-004.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-005.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-006.zip/content::malaria_parasit_dataset_yolo_with_image/images/*.JPG
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-001.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-002.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-003.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-004.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  - https://zenodo.org/api/records/19692572/files/malaria_parasit_dataset_yolo_with_image-20260422T021511Z-3-005.zip/content::malaria_parasit_dataset_yolo_with_image/labels/*.txt
+  params: {boxes: semantic, drawn_on: displayed, count: 4496, classes: [falciparum, malariae, non_infected_eritrosit, non_infected_leukosit, ovale, vivax]}
+  pairs_with: 0
+  label_key: manual_gt-cell-semantic
+  segmentation_type: semantic
+reasons:
+- "jpeg-yolo-boxes for the raw and the labels, instead of the draft's jpeg-zip-glob: the labels are YOLO box tables (record arrays[1], encoding boxes-table), which no other snippet reads, and a label plane has to be the table of the image at the same z. One snippet lists the images for both arrays, so the label's z order is the raw's by construction"
+- "raw urls: one member glob per zip part, <part>::malaria_parasit_dataset_yolo_with_image/images/*.JPG, parts -001 to -006 in order (the draft's six zip urls with its params.glob moved into the url, which is how this snippet and the harness's own fetch take a glob). z is binding order, then member name within a part: the draft's order. The glob is anchored at the image folder named in the record's layout, so labels/*.txt, classes.txt, notes.json and the notebook are left out. Six urls because the record's layout names the parts ...-3-00[1-6].zip with images in all six (675, 791, 918, 977, 913 and 222 in the directories read while testing)"
+- "count 4496 on the raw and both labels: the record's n_items and the six directories' count of images/*.JPG; a changed listing fails at open instead of shifting z"
+- "RGB samples kept as c 0..2 (R, G, B; zcyx, uint8, record axes yxs, channels 3): brightfield colour of a Giemsa-stained thin film. z is a stack of independent photographs (record dimensionality 2D), not depth; voxel size None (record voxel_size_nm null)"
+- "label urls: the six image globs of the raw, in the raw's order, then the label globs <part>::malaria_parasit_dataset_yolo_with_image/labels/*.txt of parts -001 to -005 (part -006 holds no labels; 500, 2731, 597, 651 and 17 tables in the directories). The snippet pairs each image with the .txt of the same file name stem wherever it is, and refuses to open unless every image has exactly one table and every table an image: all 4,496 stems pair (record alignment_notes), 1,445 of them inside one part. Plane k of a label is therefore the table of image k of the raw, whatever part the table is in"
+- "classes [falciparum, malariae, non_infected_eritrosit, non_infected_leukosit, ovale, vivax]: class ids 0..5 in the order of the record's classes, which is the order of classes.txt and of notes.json in part -001 (both read while testing). Semantic values are id + 1: 1 falciparum, 2 malariae, 3 non_infected_eritrosit, 4 non_infected_leukosit, 5 ovale, 6 vivax; 0 is background. All 4,496 tables were read while testing: 45,366 boxes, ids 0..5 only (falciparum 2,335, malariae 1,053, non_infected_eritrosit 38,155, non_infected_leukosit 2,030, ovale 457, vivax 1,336), 1 to 166 boxes per image, no empty table, every row five fields, every box inside its image"
+- "drawn_on displayed, NEEDS A HUMAN CHECK beyond the images looked at: the JPEGs are phone photographs stored 3024x4032 with Exif Orientation 6 (found in each of the 8 images whose header was read while testing, of 4,496; the record does not mention it), so a viewer shows them turned to 3024 wide x 4032 high. The box fractions are of that displayed picture (the tables come from Label Studio, a browser tool; the sample's fractions are whole numbers of 1/600 in x and 1/800 in y, a portrait frame): drawn as displayed and turned back onto the stored pixels the boxes surround the cells in the two images looked at (planes 3084, the record sample, and 3400), drawn as fractions of the stored grid (the sample) they lie on background. The raw is returned as stored (3024x4032, the record's shape), not turned, and the snippet turns the boxes onto it, per image by that image's own orientation tag. An image whose tag is absent or 1 would get its boxes unturned"
+- "NEEDS A HUMAN DECISION, boxes as two labels: the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. As in the catalog's other box bindings (tiff-jpeg-voc-zip-glob, jpeg-xml-boxes-numbers): boxes instance (each box filled with its row number in its table, ids restart in every plane, segmentation_type instance) tells the boxes apart, boxes semantic (each box filled with class id + 1, segmentation_type semantic) carries the class. Both are filled rectangles, not cell outlines: a consumer must not take them for pixel-accurate masks. Boxes of neighbouring cells overlap often in a thin film; where they do the smaller box is on top, so the instance label loses part of the larger box. Many images are boxed sparsely (5 boxes among hundreds of cells in one image looked at), so background means not boxed, not free of cells"
+- "NEEDS A HUMAN DECISION, label_key manual_gt-cell-instance / manual_gt-cell-semantic: the issue leaves the key's class word for a person. The six classes are blood cells of a thin film: erythrocytes carrying one of four Plasmodium species, non-infected erythrocytes and non-infected leukocytes, so the class word chosen is cell, as tiff-jpeg-voc-zip-glob's binding has it for boxed cells. Source manual_gt because the tables are a Label Studio export (notes.json: contributor Label Studio); the record does not say whether the boxes were drawn by hand or pre-annotated by a model and corrected, which a human should confirm"
