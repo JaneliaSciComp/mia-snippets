@@ -494,3 +494,37 @@ def test_a_small_zip_member_is_one_request_header_and_data_together(server, make
         gets = len(server.gets())
         assert io.fetch(f"{z}::{name}").read_bytes() == data
         assert len(server.gets()) - gets == requests, name
+
+
+def test_a_host_that_refuses_head_is_asked_for_its_first_byte(server, make_io):
+    """figshare and Dataverse redirect a download to storage whose URL is signed for GET alone: a HEAD there is
+    answered 403, a GET is served. Seventeen datasets stopped on that 403 before a byte was read. The size and
+    the validators come from a one-byte ranged GET, and reads and whole-file fetches go on as for any host."""
+    server.files["/store/d.bin"] = DATA
+    server.redirects["/files/1"] = "/store/d.bin"
+    server.refuse_head = 403
+    io = make_io()
+    url = server.url("/files/1")
+    with io.open(url) as fh:
+        fh.seek(BLOCK + 5)
+        assert fh.read(100) == DATA[BLOCK + 5:BLOCK + 105]
+    assert io.validators[url]["size"] == len(DATA) and io.validators[url]["etag"]
+    assert server.requests[:4] == [("HEAD", "/files/1"), ("HEAD", "/store/d.bin"), ("GET", "/files/1"),
+                                   ("GET", "/store/d.bin")]
+    assert io.bytes_fetched == BLOCK   # the first byte asked for the size is not read, so it is not charged
+    assert io.fetch(server.url("/store/d.bin")).read_bytes() == DATA
+
+
+def test_a_host_that_refuses_head_and_ignores_range_still_says_its_size(server, make_io):
+    server.files["/d.bin"] = DATA
+    server.refuse_head, server.ignore_range = 405, True
+    io = make_io()
+    assert io._size(server.url("/d.bin")) == len(DATA) and io.bytes_fetched == 0
+
+
+def test_a_host_that_refuses_the_get_too_is_an_error(server, make_io):
+    server.files["/d.bin"] = DATA
+    server.refuse_head = server.refuse_get = 403
+    with pytest.raises(httpx.HTTPStatusError) as refused:
+        make_io().open(server.url("/d.bin"))
+    assert refused.value.response.status_code == 403 and server.gets() == ["/d.bin"]

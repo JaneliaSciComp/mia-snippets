@@ -26,6 +26,7 @@ BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB bloc
 PIECE = 8 * BLOCK        # anything longer (a run of missing blocks, a file, a zip member) is asked for in pieces
 PARALLEL = 4             # requests a job has in flight at once: a slow host limits each connection, not the client
 MAX_REDIRECTS = 10
+HEAD_REFUSED = (403, 405)   # what a host answers a HEAD it does not take, though it serves the file to a GET
 GLOB_CHARS = "*?["
 RETRY_WAIT = (1.0, 4.0, 16.0)   # seconds before each further attempt of a request a server dropped
 RATE_RESERVE = 8         # requests left in a host's rate limit window at which a job waits for the window's reset
@@ -242,28 +243,35 @@ class IO:
                 time.sleep(pause)
 
     def _head(self, url: str) -> dict:
-        """The URL's validators: a HEAD request when the host is allowed (so a changed upstream file is noticed),
+        """The URL's validators: asked of the host when it is allowed (so a changed upstream file is noticed),
         recorded in files.json for later; otherwise files.json, which is how an offline job (no hosts: a dataset a
         human dropped, or a re-stage from the cache) and every `manual://` URL resolve."""
-        # ponytail: HEAD only; if a host refuses HEAD, take size/validators from a ranged GET's Content-Range
         if url not in self.validators:
             if self._offline(url) and (known := self.cache.manifest_get(url)) is not None:
                 self.validators[url] = known
             elif url.startswith("manual://"):
                 raise FileNotFoundError(f"{url}: not in the raw cache's files.json; a human has to drop this file "
                                         "(buffers spec §3)")
-            else:   # a HEAD; for a host that is not allowed, _send raises HostNotAllowed
+            else:   # for a host that is not allowed, _send raises HostNotAllowed
                 self.validators[url] = self._retry(lambda: self._head_once(url))
                 if self.cache.writable:
                     self.cache.manifest_put(url, self.validators[url], "download")
         return self.validators[url]
 
     def _head_once(self, url: str) -> dict:
+        """The validators from a HEAD request. A host that refuses HEAD (403 from storage whose redirect is signed
+        for GET alone, as figshare's and Dataverse's are; 405) is asked for its first byte instead: the
+        Content-Range of that answer gives the size, and its body is not read."""
         with self._slots, closing(self._send("HEAD", url)) as r:
+            if r.status_code not in HEAD_REFUSED:
+                r.raise_for_status()
+                return _validators(r, r.headers.get("content-length"))
+        with self._slots, closing(self._send("GET", url, {"Range": "bytes=0-0"})) as r:
             r.raise_for_status()
-            size = r.headers.get("content-length")
-            return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
-                    "size": int(size) if size is not None else None}
+            if r.status_code == 206:
+                total = re.fullmatch(r"bytes \d+-\d+/(\d+)", r.headers.get("content-range", ""))
+                return _validators(r, total[1] if total else None)
+            return _validators(r, r.headers.get("content-length"))   # Range ignored: the whole file's length
 
     def _size(self, url: str) -> int:
         size = self._head(url)["size"]
@@ -442,6 +450,12 @@ class _RangeFile(io.RawIOBase):
         data = self.read(len(m))
         m[:len(data)] = data
         return len(data)
+
+
+def _validators(r: httpx.Response, size: str | None) -> dict:
+    """What identifies the file behind an answer: its ETag, its Last-Modified and its size in bytes."""
+    return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
+            "size": int(size) if size is not None else None}
 
 
 def _until(value: str | None) -> float:
