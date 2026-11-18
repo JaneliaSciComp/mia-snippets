@@ -1,0 +1,11 @@
+name: png-tint-overlay-mask-glob
+spec_version: 1
+summary: Binary masks (uint8 0/1) from tint overlays - 8-bit RGB PNGs showing a grey image with its annotated pixels tinted in one colour - from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane (zyx). A pixel is 1 where its samples are not all equal; a file whose tinted pixels carry more than 8 different (G - R, B - R) shifts (one per depth of overlapping shapes is expected) or shifts of two colours raises. A glob's overlays are ordered by the name of the image each was drawn on (`<stem><suffix>.png` -> `<stem>.<image_ext>`, which must be in the same listing), so the array pairs plane for plane with the raw bound by the image glob even where the two name lists sort differently.
+formats: [png]
+containers: [zip, http]
+params:
+  suffix: {type: str, required: false, doc: "the text between an image's stem and its overlay's extension: the overlay of `<stem>.<image_ext>` is `<stem><suffix>.png`. Default `_label`. Every file must end with it; reason required in binding when set"}
+  image_ext: {type: str, required: false, doc: "the extension, without the dot, of the image an overlay was drawn on. Default `jpg`. It names the files the overlays are ordered by and that must exist beside them; the images themselves are not read. Reason required in binding when set"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-7025602-nanowire-tem-morphology]
+supersedes: null
