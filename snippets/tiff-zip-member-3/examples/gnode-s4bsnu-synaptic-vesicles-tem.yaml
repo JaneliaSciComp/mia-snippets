@@ -1,0 +1,465 @@
+record: gnode-s4bsnu-synaptic-vesicles-tem
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: c82d18353c717b75870f096f9adff75dab83e6b6
+raw:
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_01.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_02.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_03.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_04.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_05.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_06.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_07.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_08.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_09.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_10.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_11.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_12.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_13.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_14.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_15.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_16.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_17.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_18.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_19.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_20.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_21.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_22.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_23.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_24.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_25.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_26.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_27.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_28.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_29.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_30.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_31.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_32.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_33.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_34.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_35.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_36.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_37.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_38.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_39.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_40.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_41.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_42.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_43.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_44.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_45.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_46.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_47.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_48.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_49.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_50.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_51.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_52.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_53.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_54.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_55.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_56.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_57.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_58.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_59.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_60.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_61.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_62.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_63.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_64.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_65.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_66.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_67.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_68.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_69.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_70.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_71.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_72.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_73.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_74.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_75.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_76.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_77.TIF
+  params: {}
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_78.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_79.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_80.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_81.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_82.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_83.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_84.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_85.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_86.TIF
+  params:
+    y_last: 2047
+- snippet: tiff-zip-member-3
+  urls:
+  - https://doi.gin.g-node.org/10.12751/g-node.s4bsnu/10.12751_g-node.s4bsnu.zip::images/images/image_87.TIF
+  params:
+    y_last: 2047
+labels: []
+reasons:
+- 'tiff-zip-member-3, one raw entry per image (87, images/images/image_01..87.TIF from harness list of
+  the record''s download_url): the images are independent 2D micrographs whose shape varies (record shape_varies:
+  78 are 2048x2048 as bound here, 9 are 1336x2004) and whose pixel size differs per image (record notes),
+  so they are not stacked along z; one entry per file adds no fill and keeps each file''s own calibration'
+- 'y_last 2047 on 78 entries (every file whose page has more than 2048 rows): rows 2048 and below are
+  an instrument data bar, not specimen. All 87 pages were read whole. The 53 OME-TIFF files (49 with a
+  2087x2048 page, 4 with 2093x2048: image_84..87) declare SizeY 2048 in their OME-XML, and below it hold
+  a row of constant 0 and then a white table (Operator, Image, Date, Specimen, Magn, HV) with a scale
+  bar. The 25 files with a 2115x2048 page (23 ImageJ, 2 plain TIFF: image_42 and image_78; no OME size)
+  hold rows 2048-2062 of constant 0, a white scale bar with its label on black in rows 2063-2100, and
+  rows 2101-2114 of constant 0. In all 78, row 2047 is specimen and row 2048 is the first constant row
+  of the page. tiff-zip-member-2 read the whole page, so a crop near the bottom showed that bar: the uniform
+  black band with a sharp edge that the reviewer doubted is the black bar of a 2115-row file. The 9 files
+  with a 1336x2004 page (image_66..73 and image_77, ImageJ) have no constant row and specimen to the last
+  row, so they take no params'
+- 'no other params: axes yx and dtype uint8 are the files'' own (harness describe first_page axes YX uint8,
+  uncompressed, matches record technical.arrays[0])'
+- 'not removed: the 53 OME-TIFF files also carry a small scale-bar box drawn inside the 2048x2048 image
+  itself (bottom right, measured as about rows 2021-2043, columns 1928-2043 in the 49 files with a 2087-row
+  page and rows 2001-2043, columns 1878-2043 in image_84..87). It lies within the image the OME-XML declares,
+  so it is presented as stored; cutting it off would also cut 27 or 47 rows of specimen across the full
+  width'
+- 'labels: none. The record says the 87 full images carry no vesicle labels; the only annotation is classification
+  by folder (vesicles/ vs no_vesicles/) of the patches, which is not a mask or points array a binding
+  can pair with a raw'
+- 'not bound: images/patches.zip (record technical.arrays[1], 47,185 92x92 RGB JPEG classification patches
+  in a nested zip). They are resized cut-outs of image_01..50, which are bound here in full, and their
+  class exists only as a folder name'
+- 'voxel size: record voxel_size_nm is null because it differs per image; nothing is overridden, each
+  array reports what its own file states: 2.2739 nm (49 OME files), 1.5594 nm (image_84..87), 1.3061 nm
+  (the 9 1336x2004 ImageJ files), 0.7092 nm (image_79 and image_81, ImageJ unit nm), and none for the
+  other 23 2115-row files (21 ImageJ files that state 10 pixels per cm, a placeholder, and 2 plain TIFFs);
+  the record says the per-image values are in metadata.xlsx'
