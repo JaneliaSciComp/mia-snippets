@@ -1,0 +1,12 @@
+name: trakem2-arealist-mask
+spec_version: 1
+summary: TrakEM2 projects (.xml.gz or .xml; zip members, plain URLs or a glob), one single-layer, single-image project per z plane; the t2_area_list objects whose titles match `titles` are filled into a yx uint8 {0,1} mask on the pixel grid of the project's image patch (area-list transform, then the inverse of the patch's). Image urls of the same names may be listed too; they only fix the plane order.
+formats: [other]
+containers: [zip, http]
+params:
+  titles: {type: list, required: true, doc: "fnmatch patterns for the area lists this mask holds, compared with each object's title without case and with runs of blanks as one (an untitled object, 'area_list', goes by the type of its project-tree node instead). The mask is 1 where any matching object is. Reason required in binding"}
+  others: {type: list, required: false, doc: "patterns, as in `titles`, for every area list that is NOT in this mask. An object that matches neither list raises, as does one that matches both, so no object is dropped unseen; absent means every object must match `titles`"}
+  image_suffix: {type: str, required: false, doc: "when image urls are listed for the plane order: what an image's name carries after the project's name and before the extension, e.g. '_RGB' for S10V1_RGB.tif beside S10V1.xml.gz. Default ''"}
+requires: [numpy]
+tested_on: [zenodo-18669865-mouse-bbb-capillary-tem-trakem2]
+supersedes: null

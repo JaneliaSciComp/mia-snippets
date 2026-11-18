@@ -1,0 +1,11 @@
+name: csv-points-mrc-grid
+spec_version: 1
+summary: "A CSV table of particle centres (one row per particle, X-Coordinate and Y-Coordinate columns in micrograph pixels, as the CryoVirusDB / CryoPPP particle_coordinates files have) as a zyx (1, ny, nx) uint16 label on the grid of the single-section MRC micrograph it was picked on: 0 background, the particle's 1-based row number at its centre pixel, or in a disc of `radius` pixels around it. Two urls: the table, then the micrograph, of which only the header is read. `y_axis` says whether the table's Y counts rows up from the last stored row or down from the first."
+formats: [csv, other]
+containers: [http, s3]
+params:
+  y_axis: {type: str, required: true, doc: "'up' or 'down': which way the table's Y-Coordinate runs against the rows of the MRC as stored (as mrc-http-3 returns them). 'down': row = Y. 'up': row = ny - 1 - Y, Y counted from the last stored row, which is how cryo-EM picking programs that put the origin at the bottom left write it. The table does not say; decide it by laying the centres over the micrograph (particles under them one way, none the other). Reason required in binding"}
+  radius: {type: int, required: false, doc: "pixels, 0..2048, default 0: each particle marks its centre pixel only. N > 0: every pixel within N pixels of a centre pixel gets that particle's id, a pixel in reach of several going to the nearest centre (lowest id on a tie). It is the size of the mark, chosen by the binding, not the particle's extent: the table's Diameter column is not read. Reason required in binding"}
+requires: [numpy]
+tested_on: [zenodo-10397742-cryovirusdb-virus-particles]
+supersedes: null

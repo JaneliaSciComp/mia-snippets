@@ -1,0 +1,146 @@
+record: zenodo-10449449-liposome-cryoem-vesicle-contours
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00002_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00007_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00009_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00010_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00012_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00014_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00015_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00017_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00021_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00039_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00043_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+  - snippet: tiff-rows-csv-contours
+    urls: ["https://zenodo.org/records/10449449/files/S3_00049_driftcorr_phaseflip_hp.tiff"]
+    params: {}
+labels:
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00002_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00002_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 0
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00007_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00007_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 1
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00009_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00009_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 2
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00010_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00010_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 3
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00012_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00012_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 4
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00014_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00014_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 5
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00015_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00015_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 6
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00017_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00017_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 7
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00021_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00021_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 8
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00039_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00039_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 9
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00043_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00043_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 10
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+  - snippet: tiff-rows-csv-contours
+    urls:
+      - "https://zenodo.org/records/10449449/files/S3_00049_driftcorr_phaseflip_hp-memnet-contours.csv"
+      - "https://zenodo.org/records/10449449/files/S3_00049_driftcorr_phaseflip_hp.tiff"
+    params: {y_up: true}
+    pairs_with: 11
+    label_key: auto_pred-vesicle-instance
+    segmentation_type: instance
+reasons:
+  - "all 12 micrograph/contour pairs are bound, not only the S3_00007 pair the draft had: record.yaml names one pair's urls, but its layout says 12 x S3_<NNNNN>_driftcorr_phaseflip_hp.tiff with one -memnet-contours.csv each, and the Zenodo record's own file list (https://zenodo.org/api/records/10449449, the granted host) gives the 12 numbers: 00002 00007 00009 00010 00012 00014 00015 00017 00021 00039 00043 00049. Every pair was opened and read (smoke), and every CSV was checked as below"
+  - "raw with tiff-rows-csv-contours, no params: each TIFF is one plain page, yx 3838x3710 float32, uncompressed (record technical.arrays and harness describe agree), which the snippet reads by byte range, only the rows a crop needs. The files state no pixel size, so voxel_size_nm is None; the record's 0.273 nm is from the Zenodo description (2.73 A/pixel)"
+  - "label urls are the contour CSV and its micrograph again (pairing rule <stem>.tiff <-> <stem>-memnet-contours.csv): the CSV holds vertices only, so the snippet reads the TIFF's header for the 3838x3710 grid the polygons are filled onto; no TIFF pixel is read for the label"
+  - "y_up: true, which the record gets wrong (it says y = row): the CSV's y is counted upward from the bottom of the image. Checked on all 12 pairs by the mean micrograph value (5 px box) along the contours: with y taken as the row it is -0.6 to +0.2, i.e. nothing; with row = 3837 - y it is -6.1 to -27.0 in every micrograph (the membrane is dark). On S3_00007 the radial profile across the mirrored contours shows the two dark leaflets of the bilayer 12 px (3.3 nm) apart, at 4 px inside and 8 px outside the contour, and nothing at 20 px or more; exchanging x and y, mirroring x, or moving the contours 60 px gives -0.3 to +0.5. Without y_up the label is the vesicles upside down, on a grid of the right shape"
+  - "the mirror is row = height - 1 - y. The check places the contours to about a pixel, not better (the contour runs between two leaflets 12 px apart), so row = height - y cannot be told from it; the difference is one row of pixels along each outline"
+  - "contours are filled, not drawn as lines: each contour_id is one closed, evenly sampled outline (29 to 62 vertices 17.3 to 18.3 px apart, the gap from the last vertex back to the first is the same 17.2 to 18.2 px) of one vesicle's membrane, and the label is the vesicle. All 336 contours lie wholly inside the image. One pair overlaps: in S3_00014 contour 7 lies almost wholly inside contour 6 (two outlines of one vesicle, or a vesicle inside another; the CSV does not say). The snippet keeps the contour enclosing the smaller area on top, so id 7 is the vesicle there and id 6 is left as a 453-pixel rim around it; for every other contour the labelled pixels equal the polygon area to within 1 %"
+  - "label_key auto_pred-vesicle-instance and segmentation_type instance, as the match agent intended: the contours are the output of the MEMNET program (TARDIS), class vesicle (record technical.arrays classes), one polygon per contour_id, filled with that id (ids 1..n in every file; 13 to 47 contours per micrograph, 336 in all)"
+  - "coverage: MEMNET outlined 13 to 47 vesicles per micrograph and missed or skipped others, so 0 means 'no contour', not 'no vesicle'"

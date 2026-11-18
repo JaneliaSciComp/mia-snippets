@@ -1,0 +1,10 @@
+name: tiff-tiled-geojson-polygons
+spec_version: 1
+summary: Page 0 (full resolution) of one tiled TIFF or BigTIFF at a plain URL, pyramidal or not, as cyx (RGB) or yx (grey), fetching and decoding only the tiles a region touches, each by one byte range (JPEG tiles included); or, with a GeoJSON url beside the TIFF, the file's Polygon/MultiPolygon features filled onto that page's grid as yx uint16 semantic ids from properties.data.id, coordinates being (x, -y) of page-0 pixels.
+formats: [tiff, json]
+containers: [http, s3]
+params:
+  skip_lines: {type: bool, required: false, doc: "label form only. true: Point and LineString features (and their Multi forms), which enclose no pixels, are left out of the label; absent or false: such a feature is an error. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [aws-dharani-fetal-brain-nissl-annotated-sections]
+supersedes: null

@@ -1,8 +1,13 @@
-"""The helices of one EMAN helix .box text file, filled as instance ids on the grid of the MRC stack they were boxed on.
+"""An EMAN helix .box file as instance ids on the grid of the MRC micrograph or movie stack it was boxed on.
 
-A helix .box file is a table, two rows per helix: `x y w h -1` (the box at the helix's start) and `x y w h -2` (the
-box at its end), with x, y the box corner in pixels of the micrograph. It states no image size, so the grid comes
-from the header of the paired MRC, which is the second url. No pixel of the MRC is read.
+The file is the text table EMAN1's boxer and EMAN2's e2helixboxer write for helices: two rows per helix,
+`x y width height -1` for its start and `x y width height -2` for its end, where (x, y) is the corner of a
+width x height square centred on that end of the helix axis. A helix becomes the rectangle EMAN draws for it: the
+band of that width along the axis between the two end points, filled with the helix's 1-based number in the file.
+
+A .box file has no image size, so the second url is the MRC the helices were boxed on; only its 1024-byte header
+is read, for the shape (and voxel size) mrc-http-3 gives that file. The picks are 2D: every z plane of the label
+(every frame of a movie stack) is the same plane.
 """
 import math
 import struct
@@ -13,134 +18,132 @@ from mia_harness.api import IO, Array, NeedsFetch, Source
 
 SPEC_VERSION = 1
 
-START, END = -1, -2          # the fifth column: the box at a helix's start point, the box at its end point
-MAX_BOX_BYTES = 1 << 20      # a helix .box is a few hundred bytes; anything this large is not one
+START, END = -1, -2                                 # fifth column: this row is the start / the end of a helix
+ROWS = 256                                          # rows rasterised at a time, to bound the temporaries
+Helix = tuple[float, float, float, float, float]    # x0, y0, x1, y1 of the axis end points and the width, pixels
 
-Helix = tuple[float, float, float, float, float]      # start x, start y, end x, end y, width; pixels of the grid
+
+def _text(io: IO, url: str) -> str:
+    try:
+        with io.open(url) as f:
+            data = f.read()
+    except NeedsFetch:          # a deflated zip member, or a server without Range: stage the whole (small) file
+        data = io.fetch(url).read_bytes()
+    try:
+        return data.decode("ascii")
+    except UnicodeDecodeError as e:
+        raise ValueError(f"{url} is not an EMAN .box text file: {e}") from None
 
 
-def _grid(header: bytes, url: str) -> tuple[int, int, int]:
-    """(nz, ny, nx) from an MRC header; the planes are xy sections stored row by row (mapc/mapr/maps 1 2 3)."""
-    if len(header) < 1024:
-        raise ValueError(f"{url}: {len(header)} bytes, too short for an MRC header")
-    order = ">" if header[212] == 0x11 else "<"                    # MACHST: 0x44 little, 0x11 big
-    nx, ny, nz = struct.unpack_from(order + "3i", header, 0)
-    maps = struct.unpack_from(order + "3i", header, 64)
-    if min(nx, ny, nz) < 1:
-        raise ValueError(f"{url}: bad MRC header: n = {nx, ny, nz}")
+def parse_helices(text: str, name: str = ".box") -> list[Helix]:
+    """The helices of an EMAN helix .box table, in file order. Blank lines are skipped; anything else that is
+    not a start row followed by an end row of the same square box is refused."""
+    helices: list[Helix] = []
+    start: tuple[float, float, float] | None = None
+    for n, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            continue
+        where = f"{name} line {n}"
+        fields = line.split()
+        try:
+            if len(fields) != 5:
+                raise ValueError
+            x, y, w, h = (float(v) for v in fields[:4])
+            flag = int(fields[4])
+        except ValueError:
+            raise ValueError(f"{where}: expected 'x y width height flag', got {line.strip()[:80]!r}") from None
+        if not all(math.isfinite(v) for v in (x, y, w, h)) or w <= 0:
+            raise ValueError(f"{where}: bad box {line.strip()[:80]!r}")
+        if w != h:
+            raise ValueError(f"{where}: box is {w:g} x {h:g}; a helix box is square (its side is the helix width)")
+        if flag not in (START, END):
+            raise ValueError(f"{where}: flag {flag} is not {START} (helix start) or {END} (helix end); this "
+                             f"snippet reads helix box files only, not particle boxes")
+        if (flag == START) != (start is None):
+            raise ValueError(f"{where}: a helix {'start' if flag == START else 'end'} row where "
+                             f"{'an end' if flag == START else 'a start'} row was expected")
+        centre = (x + w / 2, y + w / 2)                 # EMAN writes the corner: end point - width / 2
+        if start is None:
+            start = (*centre, w)
+        else:
+            if start[2] != w:
+                raise ValueError(f"{where}: end box width {w:g} differs from its start's {start[2]:g}")
+            helices.append((start[0], start[1], *centre, w))
+            start = None
+    if start is not None:
+        raise ValueError(f"{name}: the last helix has a start row and no end row")
+    return helices
+
+
+def _grid(io: IO, url: str) -> tuple[tuple[int, int, int], dict[str, float] | None]:
+    """(nz, ny, nx) and the voxel size of an MRC file, from its header, as mrc-http-3 reports them."""
+    with io.open(url) as f:
+        h = f.read(1024)
+    if len(h) < 1024:
+        raise ValueError(f"{url} is {len(h)} bytes, too short for an MRC header")
+    order = ">" if h[212] == 0x11 else "<"                     # MACHST: 0x44 little, 0x11 big
+    nx, ny, nz = struct.unpack_from(order + "3i", h, 0)
+    mx, my, mz, *cell = struct.unpack_from(order + "3i3f", h, 28)
+    maps = struct.unpack_from(order + "3i", h, 64)
+    if min(nx, ny, nz) < 1 or max(nx, ny, nz) > 1 << 24:
+        raise ValueError(f"{url}: bad MRC header, n = {nx, ny, nz}")
     if maps != (1, 2, 3):
         raise ValueError(f"{url}: unsupported axis order mapc/mapr/maps = {maps}, only 1 2 3")
-    return nz, ny, nx
+    n = [m if m > 0 else k for m, k in zip((mx, my, mz), (nx, ny, nz))]
+    voxel = {a: c / k / 10 for a, c, k in zip("xyz", cell, n)} if all(c > 0 for c in cell) else None
+    return (nz, ny, nx), voxel
 
 
-def _helices(data: bytes, url: str, ny: int, nx: int) -> list[Helix]:
-    """The file's helices in file order. Refuses anything that is not start/end pairs of square boxes on the grid."""
-    try:
-        text = data.decode("ascii")
-    except UnicodeDecodeError:
-        raise ValueError(f"{url}: not an EMAN .box text file: starts {data[:16]!r}") from None
-    rows: list[tuple[int, tuple[int, ...]]] = []
-    for n, line in enumerate(text.splitlines(), 1):
-        fields = line.split()
-        if not fields:
+def rasterise(helices: list[Helix], ny: int, nx: int) -> np.ndarray:
+    """A (ny, nx) uint16 plane: 0, or the 1-based number of the last helix whose band covers the pixel's centre.
+    Pixel (row, col) covers [col, col + 1) x [row, row + 1) in box coordinates; parts off the grid are dropped."""
+    plane = np.zeros((ny, nx), np.uint16)
+    for number, (x0, y0, x1, y1, w) in enumerate(helices, 1):
+        r = w / 2
+        cols = slice(max(math.floor(min(x0, x1) - r), 0), min(math.ceil(max(x0, x1) + r), nx))
+        top, bottom = max(math.floor(min(y0, y1) - r), 0), min(math.ceil(max(y0, y1) + r), ny)
+        if cols.start >= cols.stop:
             continue
-        try:
-            row = tuple(int(f) for f in fields)
-        except ValueError:
-            raise ValueError(f"{url} line {n}: not integers: {line[:80]!r}") from None
-        if len(row) != 5:
-            raise ValueError(f"{url} line {n}: {len(row)} columns, a helix box row has 5 (x y w h flag): {line[:80]!r}")
-        rows.append((n, row))
-    if len(rows) % 2:
-        raise ValueError(f"{url}: {len(rows)} rows, a helix is a start row and an end row")
-    out: list[Helix] = []
-    for (n, (x1, y1, w1, h1, f1)), (_, (x2, y2, w2, h2, f2)) in zip(rows[::2], rows[1::2]):
-        if (f1, f2) != (START, END):
-            raise ValueError(f"{url} line {n}: flags {f1}, {f2}: a helix is a row flagged {START} then one flagged "
-                             f"{END} (a file of particle boxes is not a helix file)")
-        if not w1 == h1 == w2 == h2 or w1 < 1:
-            raise ValueError(f"{url} line {n}: boxes {w1}x{h1} and {w2}x{h2}: the two boxes of a helix are equal "
-                             f"squares, whose edge is the helix width")
-        ax, ay, bx, by = x1 + w1 / 2, y1 + w1 / 2, x2 + w1 / 2, y2 + w1 / 2       # box centres: the axis ends
-        if (ax, ay) == (bx, by):
-            raise ValueError(f"{url} line {n}: the helix starts and ends at the same point {ax, ay}")
-        if not (0 <= ax <= nx and 0 <= bx <= nx and 0 <= ay <= ny and 0 <= by <= ny):
-            raise ValueError(f"{url} line {n}: helix from {ax, ay} to {bx, by} leaves the {nx} x {ny} grid of the "
-                             f"MRC: the .box file was not made on this image")
-        out.append((ax, ay, bx, by, float(w1)))
-    if len(out) > 65535:
-        raise ValueError(f"{url}: {len(out)} helices do not fit uint16 ids")
-    return out
-
-
-def _span(r: range) -> tuple[int, int]:
-    """[lo, hi) covering the indices of a non-empty range of either direction."""
-    return min(r[0], r[-1]), max(r[0], r[-1]) + 1
+        dx = np.arange(cols.start, cols.stop) + 0.5 - x0
+        length = math.hypot(x1 - x0, y1 - y0)
+        for lo in range(top, bottom, ROWS):
+            rows = slice(lo, min(lo + ROWS, bottom))
+            dy = (np.arange(rows.start, rows.stop) + 0.5 - y0)[:, None]
+            if length == 0:                                 # start = end: the box itself
+                inside = (np.abs(dx) <= r) & (np.abs(dy) <= r)
+            else:
+                ux, uy = (x1 - x0) / length, (y1 - y0) / length
+                along, across = dx * ux + dy * uy, dy * ux - dx * uy
+                inside = (along >= 0) & (along <= length) & (np.abs(across) <= r)
+            plane[rows, cols][inside] = number
+    return plane
 
 
 class _HelixBoxes:
-    axes: str = "zyx"
-    access: str = "file"          # the whole table is in memory after open; a read costs no bytes
+    axes, access = "zyx", "file"
     dtype: np.dtype = np.dtype("uint16")
-    voxel_size_nm: dict[str, float] | None = None       # a .box file states no pixel size
 
-    def __init__(self, shape: tuple[int, int, int], helices: list[Helix]) -> None:
-        self.shape: tuple[int, ...] = shape
-        self.helices: list[Helix] = helices             # id k + 1 is helices[k]
-
-    def _fill(self, lo: int, hi: int, left: int, right: int) -> np.ndarray:
-        """Rows lo..hi, columns left..right: pixel (column i, row j) is helix k's when the point (i, j) is in the
-        rectangle around k's axis, as long as the axis and as wide as the box. A later helix overwrites an earlier."""
-        out = np.zeros((hi - lo, right - left), self.dtype)
-        for k, (ax, ay, bx, by, width) in enumerate(self.helices, 1):
-            half, length = width / 2, math.hypot(bx - ax, by - ay)
-            ux, uy = (bx - ax) / length, (by - ay) / length
-            # the rectangle's bounding box, cut to the block
-            ex, ey = abs(uy) * half, abs(ux) * half
-            x0, x1 = max(left, math.floor(min(ax, bx) - ex)), min(right, math.ceil(max(ax, bx) + ex) + 1)
-            y0, y1 = max(lo, math.floor(min(ay, by) - ey)), min(hi, math.ceil(max(ay, by) + ey) + 1)
-            if x0 >= x1 or y0 >= y1:
-                continue
-            dx, dy = np.arange(x0, x1) - ax, (np.arange(y0, y1) - ay)[:, None]
-            along, across = dx * ux + dy * uy, dy * ux - dx * uy
-            out[y0 - lo:y1 - lo, x0 - left:x1 - left][(along >= 0) & (along <= length) & (np.abs(across) <= half)] = k
-        return out
+    def __init__(self, helices: list[Helix], shape: tuple[int, int, int], voxel: dict[str, float] | None) -> None:
+        self.helices, self.shape, self.voxel_size_nm = helices, shape, voxel
+        self._plane: np.ndarray | None = None
 
     def read(self, region: dict[str, int | slice]) -> np.ndarray:
-        nz, ny, nx = self.shape
+        if self._plane is None:                             # computed once; later reads slice it
+            self._plane = rasterise(self.helices, *self.shape[1:])
         z, y, x = (region.get(a, slice(None)) for a in "zyx")
-        if not isinstance(z, int):                      # every frame of the stack carries the same plane
-            plane = self.read({"z": 0, "y": y, "x": x})
-            return np.repeat(plane[None], len(range(nz)[z]), axis=0)
-        range(nz)[z]                                    # IndexError for a frame the stack does not have
-        rows, cols = range(ny)[y], range(nx)[x]
-        if isinstance(rows, int):
-            return self.read({"z": z, "y": slice(rows, rows + 1), "x": x})[0]
-        if isinstance(cols, int):
-            return self.read({"z": z, "y": y, "x": slice(cols, cols + 1)})[:, 0]
-        if not rows or not cols:
-            return np.zeros((len(rows), len(cols)), self.dtype)
-        (lo, hi), (left, right) = _span(rows), _span(cols)
-        return self._fill(lo, hi, left, right)[np.asarray(rows) - lo][:, np.asarray(cols) - left]
+        planes = range(self.shape[0])[z]                    # IndexError for a z off the stack
+        out = np.array(self._plane[y, x])
+        return out if isinstance(planes, int) else np.repeat(out[None], len(planes), axis=0)
 
 
 def open_array(src: Source, io: IO) -> Array:
     boxes = [u for u in src.urls if u.lower().endswith(".box")]
-    stacks = [u for u in src.urls if u not in boxes]
-    if len(boxes) != 1 or len(stacks) != 1:
-        raise ValueError(f"eman-helix-box-mrc takes two urls, one .box file and the MRC it was boxed on, got "
-                         f"{list(src.urls)}")
-    nz, ny, nx = _grid(io.open(stacks[0]).read(1024), stacks[0])
-    try:
-        fh = io.open(boxes[0])
-        size = fh.seek(0, 2)
-        if size > MAX_BOX_BYTES:
-            raise ValueError(f"{boxes[0]}: {size} bytes is too large for a helix .box file")
-        fh.seek(0)
-        data = fh.read()
-    except NeedsFetch:
-        path = io.fetch(boxes[0])
-        if path.stat().st_size > MAX_BOX_BYTES:
-            raise ValueError(f"{boxes[0]}: {path.stat().st_size} bytes is too large for a helix .box file") from None
-        data = path.read_bytes()
-    return _HelixBoxes((nz, ny, nx), _helices(data, boxes[0], ny, nx))
+    grids = [u for u in src.urls if not u.lower().endswith(".box")]
+    if len(boxes) != 1 or len(grids) != 1:
+        raise ValueError(f"eman-helix-box-mrc takes two urls, one .box file and the MRC it was boxed on; got "
+                         f"{len(boxes)} .box and {len(grids)} other")
+    shape, voxel = _grid(io, grids[0])
+    helices = parse_helices(_text(io, boxes[0]), boxes[0].rsplit("/", 1)[-1])
+    if len(helices) > np.iinfo(np.uint16).max:
+        raise ValueError(f"{len(helices)} helices do not fit uint16 ids")
+    return _HelixBoxes(helices, shape, voxel)

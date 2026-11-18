@@ -1,0 +1,11 @@
+name: png-yolo-zip-glob
+spec_version: 1
+summary: A set of 2D PNG images (8/16-bit, RGB samples kept as c) or of YOLO box annotation text files (class, x_center, y_center, width, height as fractions) rasterised on the grid of the same-stem PNG beside each, from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane.
+formats: [png, other]
+containers: [zip, http]
+params:
+  boxes: {type: str, required: false, doc: "YOLO text files only, and required for them: how the boxes are painted on the yx grid of the PNG beside each file. 'instance' fills each box with its 1-based row number in the file; 'semantic' fills it with its class id + 1. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "YOLO text files only, and required for them: the class names in YOLO id order (id 0 first), so semantic id = position from 1. A row whose class id has no name raises, in both modes. From the record's classes (the dataset's YOLO names); reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-11126980-tricellular-liver-spheroids-yolo]
+supersedes: null

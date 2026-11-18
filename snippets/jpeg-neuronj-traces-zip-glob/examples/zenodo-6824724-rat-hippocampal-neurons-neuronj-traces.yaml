@@ -1,0 +1,30 @@
+record: zenodo-6824724-rat-hippocampal-neurons-neuronj-traces
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: jpeg-neuronj-traces-zip-glob
+    urls: &images
+      - "https://zenodo.org/api/records/6824724/files/unprocessed.zip/content::unprocessed/*-div005/C/D/*_[0-9][0-9][0-9][0-9].jpg"
+      - "https://zenodo.org/api/records/6824724/files/unprocessed.zip/content::unprocessed/*-div020/*_[0-9][0-9][0-9][0-9].jpg"
+      - "https://zenodo.org/api/records/6824724/files/unprocessed.zip/content::unprocessed/*-div030/C/B/4/*_[0-9][0-9][0-9][0-9].jpg"
+      - "https://zenodo.org/api/records/6824724/files/unprocessed.zip/content::unprocessed/*-div030/C/D/*_[0-9][0-9][0-9][0-9].jpg"
+      - "https://zenodo.org/api/records/6824724/files/unprocessed.zip/content::unprocessed/*-div060/*_[0-9][0-9][0-9][0-9].jpg"
+    params: {samples: grey}
+labels:
+  - snippet: jpeg-neuronj-traces-zip-glob
+    urls: *images
+    params: {traces: instance}
+    pairs_with: 0
+    label_key: manual_gt-neurite-points
+    segmentation_type: instance
+reasons:
+  - "jpeg-neuronj-traces-zip-glob for raw and label instead of the draft's image-tiles-glob with no label: the traces are NeuronJ exports (<image>.N<k>.txt, x<TAB>y per row, record technical.arrays[1], encoding points-table) that no catalog snippet reads. This snippet takes the image urls for both arrays and keeps only the images that have trace files, so raw plane k and label plane k are the same image by construction (the label urls are the raw's, as a YAML alias)"
+  - "the globs match 215 .jpg members; 147 have <image>.N<k>.txt files and are the array (147, 3024, 3226), the other 68 (div060 38, div020 16, div030 13, div005 1) are untraced and left out of both arrays, as the issue allows: an untraced image is not known to hold no neurites, so it gets no empty label plane. They stay readable with image-tiles-glob but cannot be picked by glob"
+  - "globs end in _[0-9][0-9][0-9][0-9].jpg so the 76 <image>_tracing.jpg renders beside the raw images are left out (draft)"
+  - "only the folders div005/C/D, div020, div030/C/B/4, div030/C/D and div060 are bound, fewer than the draft: every traced .jpg/.JPG member the draft's globs matched was read while testing (193 files), and 46 of them are not raw images, although the draft passed smoke (it reads one plane). 36 are small colour renders of about 758 x 808 whose grid the coordinates leave (all 35 .JPG of div010 and the .jpg of div010/C/D/2); 10 are not JPEG at all: 2 PNG files (the .jpg of div010/C/B/2 and C/B/4) and 8 more that are NeuronJ NDF text wherever the error was looked at (div010/C/D/4, both of div015, div030/C/B/2, div040), like the div005/C/B one the record notes. Those folders hold no traced 3024 x 3226 JPEG, so div010, div015 and div040 have no plane here. In the bound folders all 147 traced images are 3024 x 3226 RGB JPEG"
+  - "samples: grey because the record says bright-field grey stored as RGB, channels 1; all 147 images were decoded while testing and their three samples are identical, and the snippet raises if they differ"
+  - "traces: instance: each tracing N<k> is drawn as a one pixel wide polyline with the value k, so neurites stay apart (all 2688 tracing files over the 147 images were parsed and drawn while testing; every vertex lies inside 3024 x 3226, largest x 2994 and y 2928; vertices are at most 10 pixels apart, 5 in nearly all). x is the column and y the row: the image is on average 2.9 grey levels brighter on the drawn pixels than 40 pixels to their left and right (median 3.5), and 0.05 when x and y are swapped; the as-read difference is the larger in 142 of 147 images"
+  - "NEEDS A HUMAN DECISION, label_key manual_gt-neurite-points with segmentation_type instance: the key is the one the match agent derived by the key rule from the record's encoding points-table, which has no segmentation_type of its own; instance is chosen because the ids are NeuronJ's tracing numbers (they restart in every image). The planes are centre lines of the traced neurites only, not masks of their width, and neurites nobody traced are background"
+  - "label source manual_gt: the paths were traced in NeuronJ by a person (semi-automatic: the tracer clicks, NeuronJ follows the ridge between clicks), as the match agent's report says"
+  - "the tracing type (Primary/Secondary..., <image>_tracings.csv) is not bound: the snippet does not read it, and 1 of the 147 images has no csv"
+  - "voxel size stays unknown: the record found none and neither JPEG nor NeuronJ export states one"

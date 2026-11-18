@@ -1,0 +1,26 @@
+record: edinburgh-ehistology-kaufman-atlas-mouse-embryo
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-points-table
+    urls: ["https://datashare.ed.ac.uk/server/api/core/bitstreams/665d8d59-dc53-46dc-ad1d-90e54aea5c1a/content"]
+    params: {}
+labels:
+  - snippet: image-points-table
+    urls:
+      - "https://datashare.ed.ac.uk/server/api/core/bitstreams/e5cfd6cf-35fc-41e4-b883-b4b0d431cb87/content"
+      - "https://datashare.ed.ac.uk/server/api/core/bitstreams/665d8d59-dc53-46dc-ad1d-90e54aea5c1a/content"
+    params: {scale: 2, count: 41}
+    pairs_with: 0
+    label_key: manual_gt-anatomical_structure-points
+    segmentation_type: instance
+reasons:
+  - "image-points-table instead of the draft's image-tiles-glob, for raw and label: no catalog snippet reads a points table, and this one takes the label's grid from the header of the image it is bound with"
+  - "urls are https://datashare.ed.ac.uk/server/api/core/bitstreams/<uuid>/content, not the record's /bitstreams/<uuid>/download, for the same two bitstreams (uuids unchanged, same host). A GET of /download redirects to /content, but a HEAD of /download is answered by the site's HTML page (200, text/html, Content-Length 4264) for every bitstream, so the harness takes each file to be 4264 bytes and reads only that much: the 177,022,928-byte JPEG decodes to grey below its first rows without an error (the draft's raw 'passing' smoke with 4264 bytes fetched was this) and the 5,056-byte terms.txt is cut inside its 36th of 41 rows. /content answers HEAD with the true Content-Length, ETag and Accept-Ranges. The record's sample urls should be changed to /content"
+  - "raw is image.jpg of Plate 38b image b (record technical.sample, the only item whose urls the record names): baseline JPEG, 30091 x 48605, 3 components, 8 bit, read as cyx (3, 48605, 30091) uint8, c = R, G, B (H&E colour kept; record axes yxs). The file was decoded whole while testing; it needs about 4.4 GB of memory"
+  - "label urls are the same item's terms.txt and, for the grid, its image.jpg again: the pairing rule is that both are bitstreams of one DataShare item (record alignment_notes). The snippet tells the two apart by their first bytes, so their order does not matter"
+  - "scale 2, NOT the record's reading that X, Y are pixels of image.jpg: the 41 flags span X 2216..14069 and Y 2856..23365, a quarter of the 30091 x 48605 image, while the 15.5 mm embryo (details.txt) fills its 16.5 mm height. Drawn on the decoded image while testing, the flags at X, Y lie on empty background left of the embryo; at 2X, 2Y they lie on the structures they name (hindlimb digit 1 and digit 5 on the tips of the first and last toe, olfactory lobe, nasal cavity, anal canal, spinal cord lumen in the tail). So the table is on a grid of half the image's resolution and each flag is painted as the 2 x 2 image pixels its table pixel covers. The factor was checked by eye on this one item only; another item needs its own check, and the record's alignment_notes should say the coordinates are half-resolution"
+  - "count 41: terms.txt has 41 rows (38 MK numbers, 83..120; 87, 118 and 120 have two flags each). With it a table cut short, as through the /download url, fails at open"
+  - "label ids are the MK # column, the annotation number printed on the atlas plate (the issue's suggestion): the EMAPA terms are an open vocabulary without a class list, and terms.txt maps each MK # to its EMAPA id and name. The two flags of one MK # share its id. NEEDS A HUMAN DECISION: segmentation_type instance (as in the draft) because the ids are per-image numbers, not classes shared between images; an id is a structure of this plate, whose flags are separate points, not one connected object"
+  - "label_key manual_gt-anatomical_structure-points as in the draft: annotations placed by hand, on anatomical structures (EMAPA terms), encoding points-table. Each flag is 2 x 2 pixels in a 48605 x 30091 plane, so most crops hold no flag and a crop aimed at one shows it as a 2 x 2 mark; the flag marks a point inside a structure, not its outline"
+  - "no voxel size bound: the JPEG's JFIF density is 1:1 without a unit; the record's 340 nm is from the paper"

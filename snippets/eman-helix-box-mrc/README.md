@@ -1,65 +1,69 @@
 # eman-helix-box-mrc
 
-Reads one EMAN helix `.box` text file as a label on the grid of the MRC stack its helices were boxed on: a `zyx`
-uint16 array of instance ids, 0 for background and `k` for the `k`-th helix of the file (1-based, file order).
-A `.box` file holds coordinates, not pixels, so `read` computes its planes, the same way for every read.
+Rasterises one EMAN helix `.box` file onto the grid of the MRC micrograph or movie stack it was boxed on and
+returns it as a `zyx` uint16 label: 0, or the number of the helix that covers the pixel. A `.box` file holds
+coordinates, not pixels, so `read` computes its plane (once, from the table alone) instead of fetching it.
 
-- **Urls.** Exactly two, in any order: the `.box` file (told by its extension) and the MRC it pairs with. The
-  `.box` text states no image size, so the grid is the MRC's header dims. Only the first 1024 bytes of the MRC
-  are read (through `io`, so that is one 1 MiB block); the `.box` file is read whole at open.
-- **The text.** Rows of five whitespace-separated integers `x y w h flag`, two rows per helix: flag `-1` (the
-  box at the helix's start point) then flag `-2` (the box at its end point). `x, y` is the corner of a `w` x `h`
-  box. This is what EMAN1 `boxer` and EMAN2 `e2helixboxer` write for helices: each end point `(px, py)` as the
-  square box `px - w/2, py - w/2, w, w`. Blank lines are skipped. Anything else is refused with the line number:
-  another column count, non-integers, flags that are not `-1` then `-2` (a file of particle boxes), an odd row
-  count, boxes that are not equal squares, a helix whose two ends are the same point.
-- **A helix.** The rectangle whose axis runs from the centre of the start box `(x + w/2, y + w/2)` to the centre
-  of the end box and whose width is the box edge `w`. Pixel (column `i`, row `j`) gets the helix's id when the
-  point `(i, j)` lies in that rectangle (edges included). The rectangle ends at the two centres; it is not
-  extended by half a box beyond them. Where helices cross, the later one in the file is on top. A helix whose
-  end point lies outside the MRC's grid is refused: the file was made on another image.
-- **Rows.** `x` is the column and `y` the row in the MRC's stored order (row 0 is the first row in the file),
-  the order `mrc-http-3` returns, which is how EMAN indexes an image. No flip. Checked on EMPIAR-10022, see below.
-- **Frames.** `shape` is the MRC's `(nz, ny, nx)` and every z plane is the same raster. The MRC here is a movie
-  stack of dose-fractionated frames of one micrograph, and the helices were boxed once on that micrograph, so
-  the annotation of every frame is the same. That makes the label match a raw that reads the frames as z (smoke
-  compares every axis but c). The snippet does not look at what the MRC's z is: bound to a tomogram or a stack
-  of different micrographs it would repeat the plane just the same, which would be wrong. Bind it only to a
-  stack whose planes are frames of the micrograph the `.box` belongs to.
-- **Access.** `file`. After open nothing more is fetched; a read rasterizes only the rows and columns asked for.
-- **Voxel size.** Always `None`; a `.box` file states none.
+## What it reads
+
+- **The table.** Text, one row per line, five whitespace-separated numbers `x y width height flag`. A helix is
+  two consecutive rows: flag `-1` for its start and `-2` for its end. This is what EMAN1's `boxer` (helix mode)
+  and EMAN2's `e2helixboxer` ("EMAN1 box" coordinates) write: for a helix axis from `(x1, y1)` to `(x2, y2)`
+  with box width `w` the rows are `x1 - w/2, y1 - w/2, w, w, -1` and `x2 - w/2, y2 - w/2, w, w, -2`. So `(x, y)`
+  is the corner of a `w x w` square centred on one end of the axis, and the end point is `(x + w/2, y + w/2)`.
+  A corner can lie off the image (`y = -3`) while its end point is on it.
+- **The label.** Each helix is the rectangle EMAN draws for it: the band of width `w` along the axis, from the
+  start point to the end point and no further. A pixel belongs to it when its centre is in the band; pixel
+  `(row, col)` covers `[col, col + 1) x [row, row + 1)` in box coordinates. Its value is the helix's 1-based
+  number in the file (first pair of rows = 1). Parts of a band off the grid are dropped. A helix whose start
+  and end are the same point is the `w x w` box itself. A file with no rows is an all-zero label.
+- **Coordinates.** `x` is the column and `y` the row of the MRC as stored (row 0 = the first row in the file),
+  which is how `mrc-http-3` returns it, so nothing is flipped. EMAN displays that row at the bottom; that is
+  display only. Checked on one EMPIAR-10020 stack: the contrast is weak, but in 7 of 7 places measured the
+  image is darker on a helix axis than beside it (see the example binding's reasons).
+- **The grid.** A `.box` file states no image size, so the binding gives two urls: the `.box` file and the MRC
+  it was boxed on (any order; the one ending in `.box` is the table). Only the MRC's 1024-byte header is read:
+  `shape` is `(nz, ny, nx)` and `voxel_size_nm` is cell / `m`, exactly what `mrc-http-3` reports for that file
+  (same byte-order rule, `mapc/mapr/maps = 1 2 3` only). Bind the label to that same MRC as its raw.
+- **z.** The picks are 2D. Every z plane of the label is the same plane, so one set of picks applies to every
+  plane of the MRC: every frame of a dose-fractionated movie stack, which `mrc-http-3` opens as `zyx` with the
+  frames along z. For a single micrograph `nz` is 1.
+- **Access.** `file`. `open_array` reads the MRC header and the whole `.box` file (a few hundred bytes); the
+  first `read` rasterises the plane and keeps it, later reads cost no bytes.
 
 ## Params
 
 None.
 
+## Binding it
+
+One label per `.box` file, `urls: [<name>.box, <name>_stack.mrc]`, `pairs_with` the raw that reads the same
+MRC, `segmentation_type: instance`. The label key's class is what the helices are (the file does not say).
+
 ## Known limits
 
-- The label is the picker's box, not the outline of the filament. On EMPIAR-10022 every box is 260 px wide
-  (27.6 nm at the record's 0.1062 nm/px) around a TMV rod of 18 nm, so about a third of each rectangle's width
-  is background, and the rod may sit a few pixels off the axis. A consumer must not take the rectangles for
-  pixel-accurate masks.
-- A helix is one straight segment. A filament boxed as several segments is several ids.
-- Beam-induced drift between the frames of a movie (a few pixels) is ignored: one raster for all frames.
-- Instance ids only. A binary mask is `!= 0`; the file names no class, so there is no semantic form.
-- Ids are the helix's number in its own file; they are not unique across files.
-- Only the helix form of `.box`. Particle box files (no `-1`/`-2` flags), EMAN2 `.json` box databases, RELION
-  `.star` and other coordinate tables are refused or unread.
-- MRC axis order `mapc/mapr/maps` 1 2 3 only, no check of the MRC beyond its header dims.
+- **Boxes, not outlines.** The band is as wide as the boxer's box, which is chosen larger than the filament
+  (EMPIAR-10020: 260 px = 29.3 nm boxes around an 18 nm virus), and it ends where the user clicked. It is a
+  filled, rotated bounding box of a helix segment, not a pixel-accurate mask.
+- **Overlaps.** Where two bands overlap, the later helix in the file is on top; the earlier one keeps its
+  other pixels. No helix is hidden completely in the 14 EMPIAR-10020 files.
+- **Not every filament is boxed.** 0 means "not boxed", not "background": the user boxed the straight,
+  isolated stretches they wanted to process.
+- **One plane for all frames.** Drift between the frames of a movie is not modelled: the picks were made on
+  one image of the micrograph (the frame sum, presumably) and are repeated unchanged on every frame.
+  Beam-induced motion is a few pixels at most, far below the box width.
+- **Helix files only.** Any flag other than `-1` / `-2` (particle boxes), a start without an end, a box that is
+  not square, or a start and end of different widths is refused with the line number. EMAN2's own helix
+  formats (`x1 y1 x2 y2 width` rows, the `e2helixboxer` database) and SPIDER/RELION `.star` coordinates are
+  not read.
+- **The MRC must be the one that was boxed.** A `.box` file from a binned or cropped copy has other
+  coordinates and would be placed wrongly without an error (the file has nothing to check against).
+- At most 65535 helices per file (uint16 ids).
 
 ## Example
 
-`examples/empiar-10022-tmv-falcon2-embl-helix-boxes.yaml`: one 7 x 4096 x 4096 float32 movie stack read by
-`mrc-http-3` and its `.box` file (9 helices). What was checked while testing:
+`examples/empiar-10020-tmv-k2-lmb-helix-boxes.yaml`: 14 K2 movie stacks of tobacco mosaic virus
+(22 x 3750 x 3645, float32, read by `mrc-http-3`) and their 14 helix box files, one label per stack.
 
-- All 109 `.box` files of the dataset open through the snippet against the header of their `<stem>_stack.mrc`
-  with no refusal: 928 helices, every box 260 x 260, every stack header 7 x 4096 x 4096. So the format
-  rules above hold for the whole dataset.
-- Row order, on pixels: on frame 3 of the sample stack, rows 512..2560, the mean intensity inside each helix's
-  rod (within 70 px of the axis) minus that of its flanks (110..250 px from the axis) is negative for all 7
-  helices that cross those rows (-0.7 to -3.2 counts on a mean of 398: the rod is darker than the ice beside it)
-  when `y` is read as the stored row. With `y` flipped, `x` flipped, both, or `x` and `y` swapped, the same
-  measure has mixed signs. The server was too slow to read whole stacks, so this is one frame of one micrograph.
-
-The example binding's `snippets_commit` is the commit before this snippet's own (a binding can't name the commit
-that adds it); a binding written by the worker names a commit that contains the snippet.
+The example binding's `snippets_commit` is the commit before this snippet's own (a binding can't name the
+commit that adds it); a binding written by the worker names a commit that contains the snippet.

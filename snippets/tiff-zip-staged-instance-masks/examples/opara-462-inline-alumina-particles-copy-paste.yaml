@@ -1,0 +1,355 @@
+record: opara-462-inline-alumina-particles-copy-paste
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/0.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/1.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/2.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/3.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/4.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/5.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/6.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/7.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/8.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/9.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/10.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/11.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/13.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/14.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/15.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/16.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/17.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/18.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/19.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/20.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/21.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/images/22.tif"]
+    params: {}
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/image_database/objects/particle_99.tif"]
+    params: {}
+labels:
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/0/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/0/0.npy", class_id: 1}
+    pairs_with: 0
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/0/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/0/0.npy", class_id: 2}
+    pairs_with: 0
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/1/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/1/1.npy", class_id: 1}
+    pairs_with: 1
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/1/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/1/1.npy", class_id: 2}
+    pairs_with: 1
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/2/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/2/2.npy", class_id: 1}
+    pairs_with: 2
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/2/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/2/2.npy", class_id: 2}
+    pairs_with: 2
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/3/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/3/3.npy", class_id: 1}
+    pairs_with: 3
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/3/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/3/3.npy", class_id: 2}
+    pairs_with: 3
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/4/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/4/4.npy", class_id: 1}
+    pairs_with: 4
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/4/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/4/4.npy", class_id: 2}
+    pairs_with: 4
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/5/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/5/5.npy", class_id: 1}
+    pairs_with: 5
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/5/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/5/5.npy", class_id: 2}
+    pairs_with: 5
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/6/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/6/6.npy", class_id: 1}
+    pairs_with: 6
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/6/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/6/6.npy", class_id: 2}
+    pairs_with: 6
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/7/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/7/7.npy", class_id: 1}
+    pairs_with: 7
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/7/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/7/7.npy", class_id: 2}
+    pairs_with: 7
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/8/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/8/8.npy", class_id: 1}
+    pairs_with: 8
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/8/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/8/8.npy", class_id: 2}
+    pairs_with: 8
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/9/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/9/9.npy", class_id: 1}
+    pairs_with: 9
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/9/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/9/9.npy", class_id: 2}
+    pairs_with: 9
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/10/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/10/10.npy", class_id: 1}
+    pairs_with: 10
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/10/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/10/10.npy", class_id: 2}
+    pairs_with: 10
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/11/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/11/11.npy", class_id: 1}
+    pairs_with: 11
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/11/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/11/11.npy", class_id: 2}
+    pairs_with: 11
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/13/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/13/13.npy", class_id: 1}
+    pairs_with: 12
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/13/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/13/13.npy", class_id: 2}
+    pairs_with: 12
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/14/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/14/14.npy", class_id: 1}
+    pairs_with: 13
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/14/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/14/14.npy", class_id: 2}
+    pairs_with: 13
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/15/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/15/15.npy", class_id: 1}
+    pairs_with: 14
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/15/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/15/15.npy", class_id: 2}
+    pairs_with: 14
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/16/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/16/16.npy", class_id: 1}
+    pairs_with: 15
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/16/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/16/16.npy", class_id: 2}
+    pairs_with: 15
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/17/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/17/17.npy", class_id: 1}
+    pairs_with: 16
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/17/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/17/17.npy", class_id: 2}
+    pairs_with: 16
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/18/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/18/18.npy", class_id: 1}
+    pairs_with: 17
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/18/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/18/18.npy", class_id: 2}
+    pairs_with: 17
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/19/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/19/19.npy", class_id: 1}
+    pairs_with: 18
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/19/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/19/19.npy", class_id: 2}
+    pairs_with: 18
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/20/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/20/20.npy", class_id: 1}
+    pairs_with: 19
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/20/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/20/20.npy", class_id: 2}
+    pairs_with: 19
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/21/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/21/21.npy", class_id: 1}
+    pairs_with: 20
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/21/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/21/21.npy", class_id: 2}
+    pairs_with: 20
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/22/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/22/22.npy", class_id: 1}
+    pairs_with: 21
+    label_key: auto_pred-particle-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/22/*.tif"]
+    params: {instances: true, classes: "Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/synthetic_images/masks/22/22.npy", class_id: 2}
+    pairs_with: 21
+    label_key: auto_pred-bubble-instance
+    segmentation_type: instance
+  - snippet: tiff-zip-staged-instance-masks
+    urls: ["https://opara.zih.tu-dresden.de/server/api/core/bitstreams/5fe125d8-74e5-4640-874f-8a6eb5a64aaf/content::Python Code and Image Data/synthetic_data_generation/CopyPasteDataGenerator/image_database/masks/particle_99.tif"]
+    params: {}
+    pairs_with: 22
+    label_key: auto_pred-particle-semantic
+    segmentation_type: binary
+reasons:
+  - "snippet tiff-zip-staged-instance-masks for every array instead of the draft's tiff-zip-member-2: the bitstream's HEAD has no Content-Length, so io.open, io.fetch and io.list of a <zip>::<member> url all raise NeedsFetch (the issue's report). This snippet stages the whole zip once with io.fetch(<zip url>) (661,181,494 bytes, counted against the job's cap; a cache hit afterwards) and reads the members from the local file"
+  - "raw 0-21: the 22 synthetic images synthetic_images/images/<N>.tif, N = 0-11 and 13-22 (there is no 12 in the zip), each a 2056 x 2464 uint8 yx plane as the record says; one raw per image because each image has its own set of masks"
+  - "labels of raw 0-21: urls is the glob synthetic_images/masks/<N>/*.tif, which the snippet expands against the staged zip (the harness's io.expand cannot list this zip); the record pairs images/<N>.tif with every .tif in masks/<N>/ on the same grid. instances: true because each file is the 0/1 mask of one pasted object (3 to 103 per image); they are merged into one uint16 instance-id plane, id = mask file number + 1"
+  - "classes masks/<N>/<N>.npy with class_id 1 (particle) and 2 (bubble), one label per class: the .npy is a uint8 vector with one entry per mask file, values 1 and 2, and config_file.json class_colors says particle = 1, bubble = 2. The record had not opened the .npy; that entry k belongs to mask k.tif was checked on images 0 and 13, where the class-2 masks are the discs (they fill 0.76-0.79 of their bounding box, a disc fills 0.785) and the class-1 masks are irregular. One plane per class also keeps both objects where a particle and a bubble mask overlap"
+  - "masks overlap in 12 of the 22 images (5 to 6365 pixels per image, never more than two masks deep, in every class combination); the snippet gives such a pixel to the higher-numbered mask. The files do not say which object is in front, so this is a convention, not a measurement"
+  - "the instance planes are uint16 (the snippet's fixed dtype for merged ids), not the uint8 the record lists for the single mask files; smoke warns about it for each of the 44 instance labels"
+  - "label_key auto_pred-particle-instance and auto_pred-bubble-instance, segmentation_type instance: the masks are generated by the copy-paste generator from watershed-derived object masks (automatic), one id per object"
+  - "raw 22 and its label: the draft's pair image_database/objects/particle_99.tif with image_database/masks/particle_99.tif (same file name, 113 x 113 uint8 in both, record alignment_notes), read as plain single members (no params). label_key auto_pred-particle-semantic, segmentation_type binary as in the draft: marker-controlled watershed mask stored 0/255, class particle from the file name prefix"
+  - "the other 655 image_database object/mask pairs are not bound: each is one small crop (113 x 113 to 427 x 427) that needs its own raw and label entry, and the synthetic images are pastes of these same objects"
+  - "voxel size: none from the files (the TIFFs carry no pixel size); the record's 231.4 nm is stated only for the real test images"

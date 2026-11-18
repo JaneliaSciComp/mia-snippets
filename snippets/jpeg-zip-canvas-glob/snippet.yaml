@@ -1,0 +1,12 @@
+name: jpeg-zip-canvas-glob
+spec_version: 1
+summary: JPEG images of differing height and width chosen by glob from the members of a zip (a plain URL, or a zip nested in another zip), one image per z plane on a canvas the binding gives - each image's pixels unchanged in the centre of its plane, 0 around them, an image larger than the canvas raises. A colour JPEG's samples (RGB) are the c axis, all of them or the ones `samples` names.
+formats: [jpeg]
+containers: [zip, http]
+params:
+  glob: {type: str, required: true, doc: "fnmatch pattern over the member names of each zip the urls name (`*` also crosses `/`), e.g. 'crops/Copepods/*.jpg'; every match is one z plane, sorted by name. Anchor it at the folder: a bare '*.jpg' also matches macOS sidecars such as '__MACOSX/crops/._a.jpg', which are not JPEGs and raise at read"}
+  canvas: {type: list, required: true, doc: "[height, width] of every plane, at least the largest height and the largest width among the array's images (measure them: decode every image once, or `harness describe` per file). An image sits unchanged in the centre of its plane, at row (height - h) // 2 and column (width - w) // 2, and the rest of the plane is 0. An image larger than the canvas raises at read, naming the file; nothing is cropped; reason required in binding"}
+  samples: {type: str, required: false, doc: "which samples of a colour JPEG to expose, as distinct letters of 'rgb' in the order they become the c axis, e.g. 'rg' when two channels were saved as red and green and blue is empty; one letter gives a single plane with no c axis. Default: all three as c. Not allowed for a grey JPEG; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-7979996-zooid-zooplankton]
+supersedes: null

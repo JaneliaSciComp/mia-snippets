@@ -1,0 +1,44 @@
+record: zenodo-8235843-paviaatn-hacat-4ch
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: c21e8d4c672d093165cde5fcfabba89c8197342c
+raw:
+- snippet: tiff-zip-member-timepoint
+  urls:
+  - https://zenodo.org/records/8235843/files/PaviaATN.zip::PaviaATN/OptiMEM100x014.tif
+  params:
+    t: 0
+- snippet: tiff-zip-member-timepoint
+  urls:
+  - https://zenodo.org/records/8235843/files/PaviaATN.zip::PaviaATN/OptiMEM100x014.tif
+  params:
+    t: 30
+- snippet: tiff-zip-member-timepoint
+  urls:
+  - https://zenodo.org/records/8235843/files/PaviaATN.zip::PaviaATN/OptiMEM100x014.tif
+  params:
+    t: 60
+labels: []
+reasons:
+- 'tiff-zip-member-timepoint: the record''s only array is one multi-page ImageJ hyperstack
+  (PaviaATN/OptiMEM100x014.tif, a deflated member of PaviaATN.zip) whose tifffile
+  axes are TCYX (61, 4, 2720, 2720). An Array has no time axis, so the reader presents
+  one time frame as cyx 4 x 2720 x 2720 uint16. tiff-zip-member-2 refuses the T axis,
+  and its override axes: zcyx would call the 61 frames z planes, which nothing in
+  the file or the record supports (ImageJ frames=61, finterval 119.99 s; record dimensionality
+  2D, axes tcyx)'
+- 't: 0, 30 and 60, the same member bound three times: the first, middle and last
+  of the file''s 61 frames (0-based; 120 s apart, so 0, 60 and 120 min into the recording).
+  One timepoint per bound array, and crops are drawn across the bound arrays; the
+  frames show one field of view of living cells, so neighbouring frames are nearly
+  the same image and three spread over the two hours differ most. Any t in 0..60 reads
+  the same way'
+- 'no channel param: all four channels are raw and are kept as the c axis, in file
+  order nuclei, nuclei, actin, tubulin (record alignment_notes, from the dataset''s
+  README)'
+- 'no axes param: the file''s own ImageJ metadata (images=244 channels=4 frames=61
+  hyperstack=true) gives TCYX, matching the record''s tcyx (61, 4, 2720, 2720)'
+- 'voxel size y 65, x 65 nm is read from the file (ImageJ unit micron, X/YResolution
+  15.384615 px/um) and matches the record''s imaging.voxel_size_nm; no z: the frames
+  are 2D'
+- 'no labels: the record lists one array, role raw, and its notes say "No labels (decomposition
+  targets only)"; the four fluorescence channels are all raw'

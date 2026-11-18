@@ -1,0 +1,35 @@
+record: figshare-27247629-plant-bf-virtual-staining
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+- snippet: tiff-zip-member-4
+  urls:
+  - https://ndownloader.figshare.com/files/49845744
+  params: {}
+- snippet: tiff-zip-member-4
+  urls:
+  - https://ndownloader.figshare.com/files/49845732
+  params: {}
+- snippet: tiff-zip-member-4
+  urls:
+  - https://ndownloader.figshare.com/files/49845963
+  params: {}
+labels: []
+reasons:
+- 'Three plain-URL ImageJ hyperstack TIFFs (record technical.inspected_urls and layout: 49845744 =
+  HIgakiLab_BY-HR_PlasMemG_4vs.tif, 49845732 = HIgakiLab_BY-2_BCECF_4vs.tif, 49845963 = HIgakiLab_Edensa_4vs.tif),
+  one raw entry each.'
+- 'tiff-zip-member-4, not tiff-zip-member-3: 49845744 is 4,857,006,691 B, over what a classic TIFF can address,
+  so ImageJ wrote one IFD and the 579 planes (193 slices x 3 channels, 2048x2048 big-endian uint16, uncompressed)
+  one after another from byte 2659; 2659 + 579 x 8,388,608 is the file''s size. tiff-zip-member-3 reads plane k as
+  page k and fails with an IndexError on every plane but the first. tiff-zip-member-4 reads plane k = z*3 + c at
+  2659 + k x 8,388,608. The other two files have one IFD per plane (350 and 238 pages) and are read page by page,
+  as tiff-zip-member-3 reads them; they use the same snippet because it supersedes tiff-zip-member-3.'
+- 'No params: the files'' own ImageJ metadata (channels, slices) gives axes zcyx and shapes 193x3, 175x2 and
+  119x2 by 2048x2048, uint16, as record technical.arrays states, so no axes override; the c axis is kept because
+  bright-field and fluorescence are channels of the same file. z indexes independent frames, not a focal series
+  (record alignment_notes).'
+- 'No labels: the fluorescence channels are virtual-staining targets stored in the raw stacks, and record
+  technical.notes lists all three files as raw arrays; the record names no masks.'
+- 'voxel_size_nm is None for all three: 49845744 and 49845963 carry no calibration and 49845732 states 1 pixel
+  per cm, an ImageJ default the snippet does not take as a voxel size (record voxel_size_nm null).'

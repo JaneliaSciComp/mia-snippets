@@ -1,0 +1,10 @@
+name: png-rgb-colour-class-ids
+spec_version: 1
+summary: One colour-coded mask PNG per file (8-bit RGB, one colour per class) from plain URLs, zip members or files chosen by glob, stacked along z (zyx, yx for one file); each pixel's colour becomes its class id, the colour's position in the binding's colours table, as uint8. A colour the table does not list raises.
+formats: [png]
+containers: [zip, http]
+params:
+  colours: {type: list, required: true, doc: "the colour table: a list of [r, g, b] colours (integers 0..255, at most 256, none twice); a pixel of colours[k] is read as class id k, so the first colour is id 0 (the background or unannotated colour, which the harness treats as unlabelled). Every colour in the files must be listed: a pixel of any other colour raises at read and the error names the colours. Take the colours from the files and say in the binding's reasons where the order and the meaning of each id come from"}
+requires: [numpy, imagecodecs]
+tested_on: [mendeley-vccj8mp2cg-histo-seg-skin]
+supersedes: null
