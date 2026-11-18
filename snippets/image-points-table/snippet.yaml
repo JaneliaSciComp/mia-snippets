@@ -1,0 +1,11 @@
+name: image-points-table
+spec_version: 1
+summary: One image (8-bit JPEG, or a single-page YX / YXS TIFF) at a plain URL, read as yx or cyx; or, bound with that image's url beside it, the tab-separated points table of an eHistology (Kaufman Atlas) item (terms.txt, columns Plate, Image, MK #, EMAP:ID, X, Y, ...; one row per flag) painted on the image's grid as yx uint16, each flag's pixels holding its MK # annotation number, 0 elsewhere.
+formats: [jpeg, tiff, other]
+containers: [http]
+params:
+  scale: {type: int, required: false, doc: "points table only: the number of image pixels per table pixel along y and x (1 when absent). A flag at table X, Y is the scale x scale image pixels from x = X * scale, y = Y * scale. A flag outside the image fails the open. Must be checked against the image; reason required in binding"}
+  count: {type: int, required: false, doc: "points table only: the number of rows (flags) the table must have. Open fails on another number, so a table that changed or was cut short is noticed; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [edinburgh-ehistology-kaufman-atlas-mouse-embryo]
+supersedes: null
