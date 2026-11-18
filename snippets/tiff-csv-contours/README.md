@@ -38,11 +38,26 @@ its pixels are never read for the label.
   label. A contour too small to enclose a pixel contributes nothing.
 - **Access `plane`.** The CSV is read whole on the first `read` and kept as one mask per contour.
 
+## A host that is slow or failing
+
+Every step that makes requests (the TIFF's header at open, the rows of a read, the CSV on a label's first read) is
+tried again after 10, 30 and 90 s when the harness's client gives up on it in transit: a timeout, a dropped or
+cut connection, a 5xx or 429 answer. The client itself asks four times over about 20 s, with 60 s for each
+answer; a host can be out for longer, and a crop job opens every array of a binding before it makes its first
+crop, so a single such request ends the job with no crops (that happened on Zenodo: see "Tested on"). Blocks
+fetched before the failure stay in the job's block cache and are not asked for again, and a failed request is
+not charged to the byte cap. Any other error (a 404, a host that is not allowed, the byte cap, a file that is
+not a TIFF) is raised at once, and a host that stays down fails with the client's own error after the last wait.
+
+A binding of n pairs costs 3 requests per TIFF at open (HEAD, the block with the header, the block with the IFD
+when that is at the file's end), 2 per CSV on its first read, and one per read of up to 8 MiB of rows.
+
 ## Known limits
 
 - Tested on real data: little-endian uncompressed float32 strips, and `y_up: true` contours that neither touch
   the image border nor nest deeply. Big-endian, multi-strip, compressed and tiled TIFFs, the staged (`file`) path,
-  ImageJ voxel sizes, `y_up: false`, clipping, nesting and every refusal were run on synthetic input only.
+  ImageJ voxel sizes, `y_up: false`, clipping, nesting, every refusal and the waits (below) were run on synthetic
+  input only.
 - One CSV per label. Holes are not modelled: a contour inside another is a second instance, not a hole.
 - The fill is of pixel positions strictly by geometry; a program that rasterizes outlines differently (e.g. by
   drawing the outline, then filling) differs along the outline's pixels.
@@ -65,3 +80,12 @@ The check places the contours to about a pixel: row = height - y cannot be told 
 
 One pair of contours overlaps (S3_00014, ids 6 and 7: 7 lies almost wholly inside 6), which leaves id 6 as a
 453-pixel rim; for every other contour the labelled pixels equal the polygon area to within 1 %.
+
+Zenodo, slow and failing: the first crop job on this binding ended with `ReadTimeout` while it opened the fifth
+TIFF, after 14 requests, with no crops. When the retries were added (2026-11-18) its answers took 0.4 to 33 s to
+start and about one request in six failed (504 after 60 s, 500, 502), HEAD, whole and ranged requests alike.
+With the retries, smoke of all 12 pairs passed in 21 min, and a 6-crop job made 6 crops in 16 min, all of which
+verify; in that job six requests failed on their first try and the client's own second try got each one, so the
+snippet's waits did not come into it. They were run against a local server only: 503s and timeouts that outlast
+the client's four tries are waited out and the read then equals the file; a host that stays down fails with the
+client's error after the 90 s wait; a 404, a non-TIFF and the byte cap are raised with no wait.

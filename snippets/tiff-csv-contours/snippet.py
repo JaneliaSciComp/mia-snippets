@@ -4,12 +4,19 @@ grid as instance ids (yx uint16, id = the CSV's contour id). `y_up` is for a CSV
 image's bottom row.
 
 The CSV states no image size, so the label form reads the TIFF's header for the grid (never its pixels). An
-uncompressed TIFF is read by byte range, only the rows a read asks for. See README.md."""
+uncompressed TIFF is read by byte range, only the rows a read asks for.
+
+Every step that makes requests (reading a TIFF's header, its rows, the CSV) is tried again, after waits of
+WAITS seconds, when the harness's client gives up on it in transit (a timeout, a dropped connection, a 5xx or
+429 answer): a host can be out for longer than the client's own tries last, and a crop job opens every array of
+a binding before it makes its first crop, so one such request would otherwise end the job with nothing. What
+was fetched before the failure is in the job's block cache and is not asked for again. See README.md."""
 import csv
 import math
 import re
+import time
 from pathlib import Path
-from typing import BinaryIO
+from typing import BinaryIO, Callable, TypeVar
 
 import numpy as np
 import tifffile
@@ -22,6 +29,29 @@ NM = {"nm": 1.0, "nanometer": 1.0, "um": 1e3, "µm": 1e3, "μm": 1e3, "\\u00B5m"
       "micron": 1e3, "micrometer": 1e3, "mm": 1e6}                                          # ImageJ's escaped form
 PIXEL_UNITS = ("pix", "px", "pixel", "pixels")
 COLUMN = re.compile(r"\s*([xy])\s*(?:[\[(]\s*([^\])]*?)\s*[\])])?\s*", re.I)       # "x", "x [pix]", "Y (px)"
+WAITS = (10.0, 30.0, 90.0)      # seconds before each further try of a step whose requests failed in transit
+T = TypeVar("T")
+
+
+def _transient(e: Exception) -> bool:
+    """A failure worth asking again for: the HTTP client's transport errors (timeouts, a connection dropped or
+    cut inside a body) and 5xx/429 answers. Told by class name, since a snippet may not import the client."""
+    names = {c.__name__ for c in type(e).__mro__}
+    status = getattr(getattr(e, "response", None), "status_code", None)
+    return "TransportError" in names or ("HTTPStatusError" in names and isinstance(status, int)
+                                         and (status >= 500 or status == 429))
+
+
+def _retry(step: Callable[[], T]) -> T:
+    """`step()`, and again after each of WAITS while it fails in transit; any other error is raised at once."""
+    for wait in (*WAITS, None):
+        try:
+            return step()
+        except Exception as e:      # BudgetExceeded, HostNotAllowed, NeedsFetch, ValueError: not transient
+            if wait is None or not _transient(e):
+                raise
+            time.sleep(wait)
+    raise AssertionError("unreachable")
 
 
 def _span(key: int | slice, n: int) -> tuple[int, int, int | np.ndarray]:
@@ -69,16 +99,24 @@ class _Tiff:
         y0, y1, yi = _span(region.get("y", slice(None)), ny)
         x0, x1, xi = _span(region.get("x", slice(None)), nx)
         if self._start is None:
-            rows = self.tif.asarray(series=0).reshape(self.shape)[y0:y1]
+            rows = _retry(lambda: self.tif.asarray(series=0)).reshape(self.shape)[y0:y1]
         else:
             stored = self.dtype.newbyteorder(self.tif.byteorder)
             fh, n = self.tif.filehandle, (y1 - y0) * nx * stored.itemsize
-            fh.seek(self._start + y0 * nx * stored.itemsize)
-            data = fh.read(n)
+            at = self._start + y0 * nx * stored.itemsize
+            data = _retry(lambda: (fh.seek(at), fh.read(n))[1])
             if len(data) != n:
                 raise ValueError(f"TIFF rows {y0}..{y1} read back short ({len(data)} of {n} bytes)")
             rows = np.frombuffer(data, stored).reshape(y1 - y0, nx).astype(self.dtype, copy=False)
         return np.array(rows[:, x0:x1][yi][..., xi])
+
+
+def _open_tiff(io: IO, url: str) -> _Tiff:
+    """The TIFF at url, its header read: by byte range, or staged whole from a server without Range."""
+    try:
+        return _retry(lambda: _Tiff(io.open(url), True, url))
+    except NeedsFetch:
+        return _retry(lambda: _Tiff(io.fetch(url), False, url))
 
 
 def _magic(source: BinaryIO | Path) -> bytes:
@@ -191,11 +229,15 @@ class _Contours:
 
     def _load(self) -> list[tuple[int, int, int, np.ndarray]]:
         name = self._url.rsplit("/", 1)[-1]
-        try:
+
+        def ranged() -> bytes:
             with self._io.open(self._url) as fh:
-                raw = fh.read()
+                return fh.read()
+
+        try:
+            raw = _retry(ranged)
         except NeedsFetch:
-            raw = self._io.fetch(self._url).read_bytes()
+            raw = _retry(lambda: self._io.fetch(self._url).read_bytes())
         try:
             text = raw.decode("utf-8-sig")
         except UnicodeDecodeError:
@@ -239,13 +281,9 @@ def open_array(src: Source, io: IO) -> Array:
     if len(rest) != 1 or len(csvs) > 1:
         raise ValueError(f"urls must name one TIFF (raw) or one TIFF and its one contour .csv (label), got "
                          f"{len(rest)} urls that are not .csv and {len(csvs)} that are")
-    try:
-        source, ranged = io.open(rest[0]), True
-    except NeedsFetch:          # a server without Range: stage the whole file
-        source, ranged = io.fetch(rest[0]), False
-    grid = _Tiff(source, ranged, rest[0])
+    if not csvs and "y_up" in src.params:
+        raise ValueError("params.y_up is for the label form (urls with a .csv); got one TIFF only")
+    grid = _open_tiff(io, rest[0])
     if not csvs:
-        if "y_up" in src.params:
-            raise ValueError("params.y_up is for the label form (urls with a .csv); got one TIFF only")
         return grid
     return _Contours(io, csvs[0], grid, y_up)
