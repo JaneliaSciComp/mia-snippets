@@ -1,0 +1,56 @@
+record: s-biad3729-lewy-brain-mito-tem
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: d4b3c16d7dc9e7d6fd3a8e9394acf28e9644012d
+raw:
+  # raw 0: ENT-DLB/Folder_0038, 27 crops, 21x22 to 355x389
+  - snippet: tiff-tiles-canvas-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/729/S-BIAD3729/Files/Shafiei_Mito-Segmentation/ENT-DLB/Folder_0038/crops/::*.tif"
+    params: {canvas: [355, 389], pair: ["/crops/", "/masks/"], count: 27, samples: grey}
+  # raw 1: ENT-DLB/Folder_0045, 180 of 182 crops (masks 16 and 64 are 0-byte files), 21x21 to 345x409
+  - snippet: tiff-tiles-canvas-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/729/S-BIAD3729/Files/Shafiei_Mito-Segmentation/ENT-DLB/Folder_0045/crops/::*.tif"
+    params: {canvas: [345, 409], pair: ["/crops/", "/masks/"], skip: ["16.tif", "64.tif"], count: 180, samples: grey}
+  # raw 2: ENT-DLB/Folder_0046, 72 of 75 crops (crops 52 and 72 are 0-byte files; the masks/ index does not
+  # list 19.tif), 167x197 to 817x686
+  - snippet: tiff-tiles-canvas-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/729/S-BIAD3729/Files/Shafiei_Mito-Segmentation/ENT-DLB/Folder_0046/crops/::*.tif"
+    params: {canvas: [817, 686], pair: ["/crops/", "/masks/"], skip: ["52.tif", "72.tif"], count: 73, samples: grey}
+labels:
+  - snippet: tiff-tiles-canvas-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/729/S-BIAD3729/Files/Shafiei_Mito-Segmentation/ENT-DLB/Folder_0038/masks/::*.tif"
+    params: {canvas: [355, 389], pair: ["/masks/", "/crops/"], count: 27, dtype: uint16}
+    pairs_with: 0
+    label_key: proofread-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: tiff-tiles-canvas-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/729/S-BIAD3729/Files/Shafiei_Mito-Segmentation/ENT-DLB/Folder_0045/masks/::*.tif"
+    params: {canvas: [345, 409], pair: ["/masks/", "/crops/"], skip: ["16.tif", "64.tif"], count: 180, dtype: uint16}
+    pairs_with: 1
+    label_key: proofread-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: tiff-tiles-canvas-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/729/S-BIAD3729/Files/Shafiei_Mito-Segmentation/ENT-DLB/Folder_0046/masks/::*.tif"
+    params: {canvas: [817, 686], pair: ["/masks/", "/crops/"], skip: ["52.tif", "72.tif"], count: 73, dtype: uint16}
+    pairs_with: 2
+    label_key: proofread-mitochondria-semantic
+    segmentation_type: binary
+reasons:
+  - "tiff-tiles-canvas-glob instead of the draft's tiff-zip-glob-rgb: every crop and mask has its own height and width (record shape_varies; in Folder_0038 from 21x22 to 355x389), and tiff-zip-glob-rgb and image-tiles-glob require every file of an array to have the first file's shape (ValueError at crops/20.tif and masks/10.tif, as the match agent reports). This snippet puts each file on a z plane of one canvas"
+  - "the planes are padded: each file's pixels are unchanged in the centre of a plane of params.canvas and the rest of the plane is 0, in raw and label alike. The 0 fill is not data (black in the raw, background in the label), and crops drawn on these planes show a tile with black around it. A human should decide whether crops of this kind are wanted; nothing is cropped or resampled, and one array per file (33,690 binding entries) is the only reading without fill"
+  - "urls: one glob per folder over the HTTP directory index of ftp.ebi.ac.uk (record sample.urls; data.download_url is the Files/ folder); '*.tif' leaves out masks/roundness_results.txt. Three of the 129 Folder_NNNN are bound, one raw and one label array each: ENT-DLB/Folder_0038 (the draft's), Folder_0045 and Folder_0046, 280 crop/mask pairs. The other folders are not bound because a canvas has to be measured from the TIFF headers of every file, which was done for these three only"
+  - "canvas [355, 389], [345, 409] and [817, 686]: the largest height and the largest width among each folder's crops, measured by reading every file of the three folders (27, 182 and 75 pairs; each mask has exactly its crop's height and width). The label takes its raw's canvas, so each mask lies on its crop"
+  - "pair ['/crops/', '/masks/'] on raw and ['/masks/', '/crops/'] on labels: crops/N.tif pairs with masks/N.tif of the same Folder by file name (record alignment_notes), and the snippet keeps the names that both listings hold, in name order, so z index k of a label is the mask of z index k of its raw. Checked on the data: all 280 bound masks have their crop's shape, and in the crop previews the mask outline follows the mitochondrion's membrane"
+  - "skip: 0-byte files (size 0 in the directory index; the record notes 13 of them) and their partners. Folder_0045: masks/16.tif and masks/64.tif are empty, so crops 16 and 64 are left out too; Folder_0046: crops/52.tif and crops/72.tif are empty, so masks 52 and 72 are left out too"
+  - "count 27, 180 (182 - 2) and 73 (75 - 2): the number of pairs per folder after skip. The ftp.ebi.ac.uk index is not always complete (the Folder_0046 masks/ index listed 74 of its 75 files for some minutes while this binding was written); count fails the open on a short listing instead of letting z shift"
+  - "samples grey on raw: record says the 3 RGB samples of the crops are identical (grey stored as RGB); checked on all 284 crops of the three folders (YXS uint8, LZW, samples equal), and the snippet raises on a file whose samples differ"
+  - "dtype uint16 on labels: the masks are float32 (record) holding 0 and whole-number ids (1 to 255 in these folders, 10207 in the record's sample); the snippet returns them as uint16 and raises on a value that is not a whole number in range. harness stage refuses a float label array. smoke therefore warns that uint16 is not the record's float32"
+  - "label_key proofread-mitochondria-semantic and segmentation_type binary (from the draft): annotations.source proofread, class mitochondrion. Most masks are 0 and one whole-number id, but 41 of the 282 non-empty masks of the three folders hold two or three ids (e.g. 54, 55, 56 in Folder_0046/masks/40.tif), so the record's 'single foreground value' does not hold for every file and the values look like instance ids of a larger label image. The draft's reading is kept: every nonzero pixel is taken as mitochondrion, which is what binary encodes (nonzero -> 1); the array keeps the ids, so a later binding can read them as instances if a human finds that they are"
+  - "voxel size: none; the TIFF headers carry no calibration and the record's voxel_size_nm is null"
+  - "not bound: Shafiei_Raw-TEM-Micrographs/ (full micrographs without masks, 4 MB to 3.9 GB per file, record technical.arrays[2])"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"
