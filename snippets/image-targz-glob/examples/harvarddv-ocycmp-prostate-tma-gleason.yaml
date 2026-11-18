@@ -1,0 +1,25 @@
+record: harvarddv-ocycmp-prostate-tma-gleason
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: a0f162e6c6dd3f8d2a49af1502803e3fd3d110d7
+raw:
+  - snippet: image-targz-glob
+    urls: ["https://dataverse.harvard.edu/api/access/datafiles/3201626"]
+    params: {members: "ZT80_38_A/ZT80_38_A_*.jpg"}
+labels:
+  - snippet: image-targz-glob
+    urls: ["https://dataverse.harvard.edu/api/access/datafiles/3201654"]
+    params: {members: "Gleason_masks_test_pathologist1/mask1_ZT80_38_A_*.png", palette: index}
+    pairs_with: 0
+    label_key: manual_gt-gleason_grade-semantic
+    segmentation_type: semantic
+reasons:
+  - "image-targz-glob: the record's files are gzip tars of one image per member (technical.layout: 15 tar.gz; spots as RGB JPEG, masks as PNG); the catalog's glob snippets list zip members or HTTP directory indexes only, and czi-targz-member reads CZI. This snippet stages the archive, lists the tar and reads the members a glob picks, one per z plane; z is a stack of independent 2D spots (record dimensionality 2D), not a volume"
+  - "urls are Dataverse bundle URLs (/api/access/datafiles/<id>), not the record's datafile URLs (/api/access/datafile/<id>): a datafile URL redirects to an S3 URL presigned for GET only, which answers the harness's HEAD request with 403 Forbidden, so io can neither open nor fetch it (the match agent's smoke error). The bundle URL of the same datafile id redirects to rserve.dataverse.harvard.edu, which answers HEAD and GET, and sends a zip holding the tar.gz (and a MANIFEST.TXT); the snippet reads the tar.gz inside it. The job needs the hosts dataverse.harvard.edu and rserve.dataverse.harvard.edu"
+  - "datafile 3201626 is ZT80_38_A.tar.gz (245,828,355 bytes) and 3201654 is Gleason_masks_test_pathologist1.tar.gz (6,281,146 bytes): the record's technical.sample, test TMA 80 part A with the pathologist-1 masks. The other 13 archives bind the same way and are left out of this example"
+  - "members ZT80_38_A/ZT80_38_A_*.jpg: all 74 regular members of the image tar (RGB JPEG 3100x3100, read as zcyx 74x3x3100x3100 uint8; every one was decoded, values 3..255). members Gleason_masks_test_pathologist1/mask1_ZT80_38_A_*.png: the 74 part-A masks of the 245 in the mask tar (86 are part B, 85 part C); the glob also keeps out the tar's two macOS AppleDouble members (._mask1_ZT80_38_A_3_13.png, ._mask1_ZT80_38_B_1_11.png), which are not images"
+  - "pairing: both globs are sorted by member name and the names differ only in the directory, the mask1_ prefix and the extension, so z index k of the label is the mask of z index k of the raw; checked on the two listings, mask1_<spot>.png for each of the 74 <spot>.jpg in the same order. Every mask is 3100x3100 like its image, and on three spots the annotated regions lie on the tissue they outline"
+  - "palette index on the label: the masks are 4-bit palette PNGs (colour type 3; palette 0 green, 1 blue, 2 yellow, 3 red, 4 white), not grey PNGs as the record's 'L' suggests; the stored indices are the record's class ids 0..4, which a decoder would replace by the palette colours. Read as indices the 74 masks hold only 0, 1, 2, 3, 4. No palette param on raw: JPEG has none"
+  - "label_key manual_gt-gleason_grade-semantic (from the draft): annotations by a pathologist (manual), encoding semantic-ids, classes 0 benign, 1 Gleason 3, 2 Gleason 4, 3 Gleason 5, 4 unlabelled (record technical.arrays). segmentation_type semantic: the ids are classes, not instances"
+  - "the ids are as stored, so unlabelled is 4 and benign is 0: the harness, which takes nonzero as annotated, counts every crop as labelled (45.5% of the mask pixels are 4) and a benign-only crop as unlabelled (1.6% are 0, in 2 of the 74 masks). The snippet does not renumber ids, so the ids stay those of the record's classes"
+  - "no voxel size from the files (JPEG/PNG); the record's 230 nm in x and y stands"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"
