@@ -1,0 +1,41 @@
+record: figshare-34065699-atrial-fibrillation-histology-czi
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ndownloader.figshare.com/files/69638460"]
+    params: {scene: 0}
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ndownloader.figshare.com/files/69638460"]
+    params: {scene: 1}
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ndownloader.figshare.com/files/69638460"]
+    params: {scene: 2}
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ndownloader.figshare.com/files/69638433"]
+    params: {scene: 0}
+  - snippet: wsi-czi-svs-rgb
+    urls: ["https://ndownloader.figshare.com/files/69638433"]
+    params: {scene: 1}
+labels:
+  - snippet: czi-zen-bezier-instances
+    urls: ["https://ndownloader.figshare.com/files/69638460"]
+    params: {scene: 0}
+    pairs_with: 0
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: czi-zen-bezier-instances
+    urls: ["https://ndownloader.figshare.com/files/69638433"]
+    params: {scene: 0}
+    pairs_with: 3
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+reasons:
+  - "raw with wsi-czi-svs-rgb, as the draft has it: Axio Scan brightfield CZIs of Bgr24 tiles with JPEG XR compression. The files hold 3 and 2 scenes (scan regions), the snippet refuses a multi-scene file without params.scene, and each scene is bound as its own raw array: cyx 3x16320x21765, 3x17391x21759, 3x16314x23198 (files/69638460, 24H28_s1.2.czi) and 3x54098x56315, 3x54133x59235 (files/69638433). The record's 18484x135520 is the bounding box of all three scenes of the first file"
+  - "only the two per-file urls the record names are bound (the draft's choice): the other 37 CZIs have no per-file url in the record, and data.download_url is figshare's whole-article zip"
+  - "labels with czi-zen-bezier-instances, the snippet written for this record: the annotations are ZEN graphics in each CZI's own XML metadata, so a label's url is its raw's url. Each Bezier element (a closed outline one annotator drew around one cell, stored with its Area) is filled as one id, its 1-based position among the file's Bezier elements: ids 1..6 in files/69638460 and 1..18 in files/69638433. Line elements (distance measurements, 4 and 9) and the ScaleBar are left out; the files hold no other kind"
+  - "scene 0 for both labels, the scene of the raw each pairs with: graphics are in pixels of the bounding box of all scenes, and the snippet moves them by the scene's corner in it (y - 2164 in files/69638460, y - 5400 in files/69638433; x unchanged) onto the canvas wsi-czi-svs-rgb gives that scene. All outlines of both files lie on scene 0; the snippet refuses the other scenes ('none of the file's 6 Bezier outlines lies on scene 1'), so raws 1, 2 and 4 have no label and their crops show unannotated tissue"
+  - "frame check, in the snippet README: ZEN stored 'Intensity Mean Value' and 'Area' with every outline. The mean of the raw's three samples inside each filled outline, read through the two snippets as bound here, is within 1.7 (first file) and 0.4 (second) of ZEN's value in rms over the outlines, against 34 to 52 and 16 to 20 with the label moved 60 pixels; the filled area is within 0.4% of ZEN's"
+  - "label_key manual_gt-cell-instance, as the draft: hand-drawn outlines, the record's class 'cell boundary', one id per cell, so segmentation_type instance. The label is a few cells in a whole scan: 0 means 'not outlined', not 'no cell', and almost all tissue is 0"
+  - "access: the first label reports plane (its scene is 355 Mpx, a 0.7 GB plane), so the harness can find the six outlined cells; the second reports chunk because its scene is 3.0 Gpx (6 GB as a plane), so its crops hold an outline only by chance"
+  - "voxel size 219.894 nm in y and x from each file's Scaling, the record's value; label dtype uint16 (the record has none for vector annotations)"

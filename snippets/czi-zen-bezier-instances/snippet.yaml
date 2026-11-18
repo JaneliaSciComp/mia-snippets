@@ -1,0 +1,10 @@
+name: czi-zen-bezier-instances
+spec_version: 1
+summary: Label form only. The closed outlines a Zeiss CZI carries in its own XML metadata (ZEN graphics, the Bezier elements of Metadata/Layers/Layer/Elements, e.g. hand-drawn cell outlines on an Axio Scan slide), filled as yx uint16 instance ids on the grid of one scene of that CZI's mosaic (the bounding box of the scene's full-resolution tiles, the canvas wsi-czi-svs-rgb gives the same scene). Line and ScaleBar elements are left out. Reads the file header, subblock directory and XML by byte range with its own ZISRAW parser, never a tile.
+formats: [czi]
+containers: [http, s3]
+params:
+  scene: {type: int, required: false, doc: "The scene (S index of the subblock directory) whose grid the outlines are drawn on, the same value as the paired raw's; a file with several scenes is an error without it, and the error lists them. A scene that none of the file's outlines touches is an error that says how many lie on each scene. Reason required in binding"}
+requires: [numpy]
+tested_on: [figshare-34065699-atrial-fibrillation-histology-czi]
+supersedes: null
