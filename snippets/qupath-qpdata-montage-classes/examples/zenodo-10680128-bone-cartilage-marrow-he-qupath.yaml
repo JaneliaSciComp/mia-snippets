@@ -1,0 +1,44 @@
+record: zenodo-10680128-bone-cartilage-marrow-he-qupath
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/records/10680128/files/images%20for%20training.zip::imagesZenodo/651 P0 2+1 12W in vivo xxx.tif"]
+    params: {}
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/records/10680128/files/images%20for%20training.zip::imagesZenodo/655 P0 2+1 12W in vivo 1.tif"]
+    params: {}
+  - snippet: tiff-zip-member-2
+    urls: ["https://zenodo.org/records/10680128/files/images%20for%20training.zip::imagesZenodo/662 SVF 3w1HT 12w in vivo 2 HE.tif"]
+    params: {}
+labels:
+  - snippet: qupath-qpdata-montage-classes
+    urls: ["https://zenodo.org/records/10680128/files/QuPath_Engineered%20phalangeal%20grafts%20for%20children%20with%20symbrachydactyly.%20A%20proof%20of%20concept.zip::QuPath_zenodo/data/115/data.qpdata"]
+    params: {image: "651 P0 2+1 12W in vivo xxx.tif", classes: [Bone, Cartilage, Fibrotic tissue, BM]}
+    pairs_with: 0
+    label_key: auto_pred-bone_cartilage_fibrotic_tissue_bm-semantic
+    segmentation_type: semantic
+  - snippet: qupath-qpdata-montage-classes
+    urls: ["https://zenodo.org/records/10680128/files/QuPath_Engineered%20phalangeal%20grafts%20for%20children%20with%20symbrachydactyly.%20A%20proof%20of%20concept.zip::QuPath_zenodo/data/115/data.qpdata"]
+    params: {image: "655 P0 2+1 12W in vivo 1.tif", classes: [Bone, Cartilage, Fibrotic tissue, BM]}
+    pairs_with: 1
+    label_key: auto_pred-bone_cartilage_fibrotic_tissue_bm-semantic
+    segmentation_type: semantic
+  - snippet: qupath-qpdata-montage-classes
+    urls: ["https://zenodo.org/records/10680128/files/QuPath_Engineered%20phalangeal%20grafts%20for%20children%20with%20symbrachydactyly.%20A%20proof%20of%20concept.zip::QuPath_zenodo/data/115/data.qpdata"]
+    params: {image: "662 SVF 3w1HT 12w in vivo 2 HE.tif", classes: [Bone, Cartilage, Fibrotic tissue, BM]}
+    pairs_with: 2
+    label_key: auto_pred-bone_cartilage_fibrotic_tissue_bm-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw: one array per slide with tiff-zip-member-2 and no params, as in the draft: slide shapes vary (5275 x 4577 to 15429 x 17867 px over the 12 slides), so the TIFFs cannot be stacked, and the RGB samples are real colour, kept as c"
+  - "3 of the 12 slides are bound (the draft bound all 12): '651 P0 2+1 12W in vivo xxx', '655 P0 2+1 12W in vivo 1' and '662 SVF 3w1HT 12w in vivo 2 HE', the three smallest (61, 32 and 49 MB deflated; 6618 x 5644, 4577 x 5275 and 5287 x 5650 px). Every slide is a deflated zip member, so tiff-zip-member-2 fetches it whole when the array is opened, and the harness asks for it in 8 MiB range requests: 205 requests for the 1.72 GB of all 12, before the first crop. Zenodo allows a client address 133 requests in any 60 s (x-ratelimit-limit: 133, counted together with whatever else that address sends) and answers 429 beyond it, which the harness takes as final: the crop job on the 12-slide binding ended that way after 275 MB, and two fetches of the 12 slides made for this binding ended the same way after 275 and 596 MB (65 and 80 requests). These three slides need about 30 requests, labels included. The other nine read the same way (a raw entry per slide and a label whose 'image' is its file name); all 12 can be bound once a 429 is waited out instead of ending the job, which is the harness's to do, not a snippet's"
+  - "labels: the draft bound none because no snippet read data.qpdata. qupath-qpdata-montage-classes walks the Java object stream by its grammar (nothing is deserialized) and fills the classified ROIs as class ids"
+  - "label urls: entry 115 of the QuPath project, for every slide bound. It is the only entry that holds all four tissue classes: 2 annotations (Bone/Cartilage, Fibrotic/BM) with 4 detections under them (Bone, Cartilage, Fibrotic tissue, BM), each one multipolygon over the whole montage. By the project's scripts (3_runSecondClassificcation.groovy) these are the output of the two pixel classifiers inside the first-level regions, not hand-drawn outlines (my reading: the detections are whole-montage multipolygons with 8 px steps)"
+  - "image: entry 115 is a montage (65502 x 6656 px) of one cropped rectangle from each of the 12 slides, pixel for pixel. Its image description names each slide file and the rectangle's offset on it, e.g. '633 SVF 3+1 12w in vivo 2.tif' (898, 568, 5905, 5692). 'image' is the slide file name, the same name as the TIFF in the image zip; the snippet moves the ROIs by that offset onto the full slide grid, whose size the description also gives and smoke checks against the TIFF"
+  - "classes [Bone, Cartilage, Fibrotic tissue, BM] -> ids 1, 2, 3, 4. The record lists the classes without ids, so the ids are this binding's choice. The two first-level classes Bone/Cartilage and Fibrotic/BM are left out: they are the parents the four are split from"
+  - "0 is 'not classified', and the slide outside its montage rectangle is 0 everywhere. A class is filled on 35, 33 and 45 percent of the three slides' pixels (in binding order, percent of the slide: Bone 0.7, 4.8, 7.9; Cartilage 5.1, 3.1, 7.4; Fibrotic tissue 23.2, 21.5, 13.7; BM 5.9, 3.3, 16.2), so many crops carry little or no label"
+  - "checked without the slides: over the 12 rectangles the filled pixels per class are Bone 31,777,553, Cartilage 91,424,970, Fibrotic tissue 89,750,646, BM 31,650,493, against the areas QuPath stored with the ROIs, 31,870,941, 92,159,670, 89,750,887 and 31,851,566 (0.0 to 0.8 percent less). Not checked against the pixels of the slides by eye"
+  - "label_key auto_pred-bone_cartilage_fibrotic_tissue_bm-semantic and segmentation_type semantic are mine (the draft had no label): classifier output, four tissue classes, class ids"
+  - "voxel size: the label reports what the project says about each slide (363.788 or 366.748 nm); the record leaves it null because the slides carry two calibrations"
+  - "not bound: entries 111 (Bone 12, Cartilage 5 polygons) and 112 (BM 7, Fibrotic tissue 4) are the hand-drawn training regions of the two classifiers, on the same montage. The snippet reads them the same way (classes [Bone, Cartilage] and [BM, Fibrotic tissue]) but they cover about 1 percent of the montage and miss several slides. Entry 109 holds the two first-level classes as 296 polygons; entry 94 is an older montage of mostly other slides; the 12 per-slide entries hold one 'training' rectangle each"

@@ -1,0 +1,11 @@
+name: qupath-qpdata-montage-classes
+spec_version: 1
+summary: The classified objects (annotations and detections with polygon, rectangle or geometry ROIs) of one QuPath image entry's data.qpdata, a zip member or a plain URL, filled as class ids (yx uint8) onto the pixel grid of one slide the entry shows; for a QuPath montage ("sparse" image of cropped slides) the crop offsets in the file map the ROIs back onto the slide. The Java object stream is walked by its grammar, never deserialized.
+formats: [other]
+containers: [zip, http]
+params:
+  image: {type: str, required: true, doc: "file name of the slide whose grid the classes are filled onto, as the entry's image description names it (last part of the slide's uri, percent-decoded), e.g. '633 SVF 3+1 12w in vivo 2.tif'. The array has that slide's full size; pixels outside the part(s) the entry shows are 0"}
+  classes: {type: list, required: true, doc: "QuPath class names to fill, as QuPath shows them ('Parent: Child' for a derived class). The id of a class is its 1-based position in this list; objects of any other class, or of none, are left out. Where objects of two listed classes overlap, the class listed later wins. A name no object in the file has is an error"}
+requires: [numpy]
+tested_on: [zenodo-10680128-bone-cartilage-marrow-he-qupath]
+supersedes: null
