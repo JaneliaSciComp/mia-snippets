@@ -1,0 +1,19 @@
+record: edinburgh-datashare-8803-dna-replication-edu-dapi-dl
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-targz-members
+    urls: ["https://datashare.ed.ac.uk/server/api/core/bitstreams/30e47df4-11da-4111-8464-ee718cec9fe2/content"]
+    params: {member: "n00_001/n00_001_E6--W00054--P00037--Z00000--T00000--DAPI.tif", channels: [DAPI, CY5]}
+  - snippet: tiff-targz-members
+    urls: ["https://datashare.ed.ac.uk/server/api/core/bitstreams/30e47df4-11da-4111-8464-ee718cec9fe2/content"]
+    params: {member: "n00_001/n00_001_E6--W00054--P00073--Z00000--T00000--DAPI.tif", channels: [DAPI, CY5]}
+labels: []
+reasons:
+  - "tiff-targz-members: the record's data are tar.gz archives of single-page 2048x2048 uint16 TIFFs, one per field and channel (technical.arrays); a tar.gz has no index, so a member is read by inflating the archive's gzip stream from its start"
+  - "url: mESC_annotated.tar.gz (741,863,099 bytes), the record's technical.sample and the only archive whose bitstream url the record names; the archive is not fetched whole"
+  - "channels [DAPI, CY5]: each field is two files that differ only in the last token of the name (alignment_notes: channels of a field pair by the name stem), DAPI the DNA stain and CY5 the EdU label (labels_stains); both are the record's raw, so each array is cyx 2x2048x2048 with c 0 = DAPI and c 1 = CY5, where the record's yx is one file"
+  - "members W00054 P00037 and P00073: the members are stored in no order (a field's two files lie far apart), so the fields are named, not left to the default, which would take the archive's first DAPI file (P00164) and inflate the archive until its CY5 file turns up. These are the first two fields whose both files lie near the archive's start: members 9 and 12 (P00037) and 10 and 13 (P00073) of the archive's regular files, so the two arrays cost the archive's first 72 MiB (75,497,472 bytes in the smoke run), each member 8,389,307 bytes"
+  - "no labels bound: the record's annotations are per-nucleus S-phase classifications (858 nuclei, 5 classes) whose storage was not seen, not a segmentation mask"
+  - "the arrays report no voxel size: the TIFFs' OME-XML is BinaryOnly and points to a companion metadata.ome.xml, so the files do not state it; the record's 162.5 nm is from the paper"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"
