@@ -1,0 +1,11 @@
+name: png-instance-masks-glob
+spec_version: 1
+summary: "One binary PNG per object, <stem><mask><k>.<ext>, beside the image it annotates, <stem><image>, in an HTTP directory or a zip, chosen by glob (or plain URLs); the masks of each image are merged into one instance-id plane (pixel = k where mask k is non-zero, the highest k where masks overlap, uint16) and the images are stacked along z (zyx). The urls name the masks and the images: the images are not read, they give the planes and their order (as image-tiles-glob stacks the same image urls), an image without a mask file is an all-zero plane, and masks of images not among the urls are left out, so a set split into several arrays (one per image size) shares one mask glob. A mask is told to be a PNG by its first bytes, not its extension; an RGB or RGBA mask is read when its colour samples are equal and its alpha opaque."
+formats: [png]
+containers: [http, zip]
+params:
+  mask: {type: str, required: true, doc: "the text between an image's stem and a mask's number: mask k of the image `<stem><image>` is `<stem><mask><k>.<ext>` (k decimal, >= 1, any extension), e.g. `_Mit` for CN_001_Mit01.png. Every url that is not an image must be named so. Reason required in binding"}
+  image: {type: str, required: true, doc: "the end of an image's file name after the stem it shares with its masks, extension included, e.g. `_Original.png` for CN_001_Original.png. The files so named among the urls are the planes, in the order their urls expand in; they are not read. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [s-biad4140-chikv-mitochondria-tem]
+supersedes: null
