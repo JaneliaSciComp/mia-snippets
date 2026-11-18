@@ -1,0 +1,31 @@
+record: mendeley-457x9c7rp3-fossil-diatom-eucampia
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: a0f162e6c6dd3f8d2a49af1502803e3fd3d110d7
+raw:
+  # the record's sample tile, Tile images/CD/JARE59-CD-150micoL1_0002_0003_0010.jpg
+  - snippet: jpeg-yolo-boxes-glob-2
+    urls:
+      - &tile "https://data.mendeley.com/public-files/datasets/457x9c7rp3/files/bb8931ec-2940-4ab3-b71d-4ba30c74127c/file_downloaded"
+    params: {}
+labels:
+  # its table, YOLO annotations/CD/JARE59-CD-150micoL1_0002_0003_0010.txt
+  - snippet: jpeg-yolo-boxes-glob-2
+    urls:
+      - "https://data.mendeley.com/public-files/datasets/457x9c7rp3/files/6e173ae8-99b3-469b-8159-4e05c102ea7e/file_downloaded"
+    params:
+      boxes: instance
+      classes: [Eucampia antarctica]
+      images: [*tile]
+    pairs_with: 0
+    label_key: manual_gt-eucampia_antarctica-instance
+    segmentation_type: instance
+reasons:
+  - "jpeg-yolo-boxes-glob-2 for both arrays, instead of the draft's image-tiles-glob raw and its placeholder jpeg-xml-boxes-numbers label: the label is a YOLO box table (rows 'class x_center y_center width height' as fractions of the tile; harness describe in the issue: text '0 0.055884 0.089157 0.051541 0.053387'), which jpeg-xml-boxes-numbers and tiff-jpeg-voc-zip-glob refuse as not XML. jpeg-yolo-boxes-glob (merged after the draft was written) reads YOLO tables but finds a table's JPEG by the table's name (labels/<stem>.txt -> images/<stem>.jpg, or <stem>.jpg beside it), and a Mendeley Data file URL is .../files/<file id>/file_downloaded with no name in it. This snippet is that one plus params.images, which names each table's JPEG. The raw goes through it too, so that both arrays are zyx-shaped the same way (raw zcyx [1, 3, 2400, 2400], label zyx [1, 2400, 2400]); image-tiles-glob gives a single file no z"
+  - "raw url is the record's technical.sample.urls[0], the tile JARE59-CD-150micoL1_0002_0003_0010.jpg: by the issue's describe a JPEG of 2400 x 2400, 8 bit, 3 components, as the record says (axes yxs, uint8). Read as stored, the three samples kept as c 0..2 = R, G, B; no params"
+  - "label url is technical.sample.urls[1], the YOLO txt of that tile. params.images is the raw's url (YAML anchor tile): the record's sample description names the two files as 'Tile JARE59-CD-150micoL1_0002_0003_0010.jpg and its YOLO txt', and its alignment_notes say Tile images/<core>/<stem>.jpg pairs with YOLO annotations/<core>/<stem>.txt. The URLs themselves cannot show it (two unrelated file ids), so this pairing rests on the record"
+  - "only this one tile is bound, as in the draft: the record gives file URLs for the sample tile and its txt only, and its download_url is a landing page, not a directory index a glob could list. NEEDS A HUMAN DECISION: to bind the other 4,102 tiles and 4,003 tables the record (or the binding's author) has to list their file URLs with their names, e.g. from the Mendeley public API's files and folders endpoints the record's notes mention; they are then bound as raw urls [tile URLs], label urls [txt URLs] and images [the same tile URLs], both in one order (by core folder and stem). Core St12B has 433 tables for 532 tiles: a tile without a table gets no label plane from this snippet, so such tiles are either left out of the raw or bound as another raw without labels, depending on whether a missing table means 'no diatom' or 'not annotated', which the record does not say"
+  - "classes [Eucampia antarctica]: the record's one class, id 0. boxes instance: each box is filled with its 1-based row number in the table (the sample table has one row, so one box of id 1; from the row, x 72..196 and y 149..279 px of the 2400 x 2400 tile, about 124 x 130 px, edges moved outwards to whole pixels). The box is a filled rectangle around the valve, not its outline: a consumer must not take it for a pixel-accurate mask"
+  - "NEEDS A HUMAN DECISION, label_key manual_gt-eucampia_antarctica-instance and segmentation_type instance are the draft's: the record's encoding boxes-table has no kind in the label-key rule and no segmentation_type, and instance (one id per box, one box per valve or countable fragment) follows the catalog's other box bindings (jpeg-xml-boxes-numbers, tiff-jpeg-voc-zip-glob, jpeg-yolo-boxes-glob). manual_gt is the draft's reading of the record's annotations source. No second, semantic label as those bindings have: with one class it would be the same boxes filled with 1"
+  - "voxel size: the snippet reports None (a JPEG density is a print size and a YOLO table has none); the record's 230 nm x/y comes from the paper"
+  - "smoke will warn that the label's dtype uint16 is not the record's float32: the record describes the table (rows of numbers), the snippet returns the boxes painted as ids"
+  - "NOT YET READ ON THE REAL FILES by the job that wrote this binding: data.mendeley.com answers each file URL with a redirect to prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com, a host that job was not granted (harness smoke: host_not_allowed). Shape, bit depth and the table's row are the record's and the issue's describe output; smoke and a 4-crop run passed on a local replica of the pair (a 2400 x 2400 RGB JPEG and the same row behind the same kind of redirect). A job that reads these URLs needs both hosts"

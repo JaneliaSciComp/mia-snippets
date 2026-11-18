@@ -1,0 +1,14 @@
+name: jpeg-yolo-boxes-glob-2
+spec_version: 1
+summary: A set of 8-bit JPEG images (RGB samples kept as c), or of the YOLO box tables that annotate them (.txt, one row per box - class id, x_center, y_center, width, height as fractions of the image) rasterised on the grid of the JPEG each table belongs to, from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane. As jpeg-yolo-boxes-glob (the JPEG found by the table's name, labels/<stem>.txt -> images/<stem>.jpg or the JPEG beside it; `skip` to bind a set of several image shapes as one array per shape), plus `images` - the binding lists each table's JPEG, for files whose URLs carry no name to pair by (a repository's opaque file ids, e.g. Mendeley Data).
+formats: [jpeg, other]
+containers: [zip, http]
+params:
+  boxes: {type: str, required: false, doc: "set it when the urls are YOLO .txt box tables (without it they are JPEG images): how the rows are painted on the yx grid. 'instance' fills each box with its 1-based row number in the file; 'semantic' fills it with its YOLO class id + 1. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "box tables only, and required for them: the class names in YOLO class id order (the dataset's data.yaml `names`), so semantic id = position from 1 = class id + 1. A row whose class id has no name raises, in both modes; reason required in binding"}
+  images: {type: list, required: false, doc: "box tables only: the urls (files or globs, as the binding's urls) of the JPEGs the tables annotate, one per table in the tables' order, when a table's url does not lead to its JPEG by name (opaque file ids). They must stand for as many files as the urls do; table k is painted on the grid of JPEG k. Give the paired raw the same urls in the same order. Not together with image_ext. Reason required in binding: it must say where the pairing comes from"}
+  image_ext: {type: str, required: false, doc: "box tables only, without `images`: the extension, without the dot, of the JPEG a table annotates (`labels/<stem>.txt` is read on the grid of `images/<stem>.<image_ext>`, a table in a folder not named `labels` on that of `<stem>.<image_ext>` beside it). Default jpg"}
+  skip: {type: list, required: false, doc: "file stems (file name without its extension) left out of the files the urls stand for; the array holds every other file. Every stem must be exactly one file's. For the files of another image shape, bound as another array; give an image array and its box table array the same list. With `images`, the JPEG of a table left out is left out with it. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [mendeley-457x9c7rp3-fossil-diatom-eucampia]
+supersedes: jpeg-yolo-boxes-glob
