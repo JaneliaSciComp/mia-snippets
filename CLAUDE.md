@@ -4,7 +4,10 @@ Read `SPEC.md` first, then `README.md`. The issue body carries the record, the m
 fails, and a draft binding. Then:
 
 1. Add exactly one new directory `snippets/<name>/` with `snippet.py`, `snippet.yaml`, `README.md` and
-   `examples/<record-id>.yaml`. Never change anything else; CI rejects it.
+   `examples/<record-id>.yaml`. Never change anything else; CI rejects it. Name it `<what-it-reads>-i<N>`, N
+   being the number of the issue you are implementing (`tiff-zip-member-i90` for issue 90, SPEC §1). Never
+   count up from an existing name (`tiff-zip-member-3`): another pull request may be adding that one. The
+   mia-data worker fails a head whose snippet is named otherwise.
 2. `snippet.py`: `from mia_harness.api import IO, Array, Source`, `SPEC_VERSION = 1`, and a fully type-hinted
    `def open_array(src: Source, io: IO) -> Array`. All bytes come through `io`. Only `requires` from
    `harness/allowlist.txt`; if you need another dependency, say so in the issue and stop.
