@@ -1,0 +1,9 @@
+name: orbit-db-polygon-labels
+spec_version: 1
+summary: The polygon annotations Orbit Image Analysis keeps for one slide in its SQLite database (orbit.db; RAW_ANNOTATION blobs of Java-serialized PolygonExt, walked by a stream parser that builds no objects), filled onto the slide TIFF's full-resolution grid as yx uint16 instance ids. urls are the database and the slide's TIFF; points are rescaled from the zoom each outline was drawn at; ROI, exclusion and inclusion areas are left out.
+formats: [other, tiff]
+containers: [zip, http]
+params: {}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-5030552-orbit-kidney-glomeruli-wsi]
+supersedes: null
