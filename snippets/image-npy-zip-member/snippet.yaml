@@ -1,0 +1,10 @@
+name: image-npy-zip-member
+spec_version: 1
+summary: One 2D image per array from one file, a PNG or single-page TIFF (grey or colour; colour samples are c, or one plane with samples grey when they are identical copies) or a 2-D NumPy .npy array (numeric dtype, read without pickle), told apart by magic bytes, not by name; a zip member or a plain URL. For sets whose files differ in shape, bound one file per entry.
+formats: [png, tiff, other]
+containers: [zip, http]
+params:
+  samples: {type: str, required: false, doc: "PNG and TIFF only. 'grey': the file's samples are identical copies (a mask or grey image saved as RGB), so sample 0 is returned and the array is yx; differing samples raise at read, and a file without a sample axis passes through. Without it a file with samples is cyx. Refused for a .npy file; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-17726414-root-lat-pearl-millet-sorghum]
+supersedes: null

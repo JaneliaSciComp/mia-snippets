@@ -1,0 +1,69 @@
+record: zenodo-17726414-root-lat-pearl-millet-sorghum
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/binary/images/0.png"]
+    params: {}
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/binary/images/1.png"]
+    params: {}
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/binary/images/100.png"]
+    params: {}
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/multiclass/images/0.png"]
+    params: {}
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/multiclass/images/1.png"]
+    params: {}
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/multiclass/images/90.png"]
+    params: {}
+labels:
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/binary/masks/0.png"]
+    params: {samples: grey}
+    pairs_with: 0
+    label_key: proofread-root_tissue-semantic
+    segmentation_type: binary
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/binary/masks/1.png"]
+    params: {samples: grey}
+    pairs_with: 1
+    label_key: proofread-root_tissue-semantic
+    segmentation_type: binary
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/binary/masks/100.png"]
+    params: {samples: grey}
+    pairs_with: 2
+    label_key: proofread-root_tissue-semantic
+    segmentation_type: binary
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/multiclass/masks/0.npy"]
+    params: {}
+    pairs_with: 3
+    label_key: proofread-tissue-semantic
+    segmentation_type: semantic
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/multiclass/masks/1.npy"]
+    params: {}
+    pairs_with: 4
+    label_key: proofread-tissue-semantic
+    segmentation_type: semantic
+  - snippet: image-npy-zip-member
+    urls: ["https://zenodo.org/records/17726414/files/plant_data.zip::plant_data/multiclass/masks/90.npy"]
+    params: {}
+    pairs_with: 5
+    label_key: proofread-tissue-semantic
+    segmentation_type: semantic
+reasons:
+  - "image-npy-zip-member instead of the draft's image-tiles-glob: the class maps are NumPy .npy members, which image-tiles-glob refuses (not a PNG, JPEG or TIFF file: header=b'\\x93NUMPY\\x01\\x00'), and this snippet reads one file per array, which is what files of differing shape need"
+  - "one file per raw and per label entry, not a glob: image sizes differ from file to file (record shape_varies; the six bound images are 2074x2089, 1714x2054, 1923x2038, 3000x3753, 969x1714 and 3000x4096) and an array has one shape"
+  - "pairing is by file name through pairs_with: binary/images/<n>.png with binary/masks/<n>.png, multiclass/images/<n>.png with multiclass/masks/<n>.npy (record alignment_notes; each bound label opened with its image's y and x). Not by sorted position: binary/masks holds 18 masks that have no image of the same name"
+  - "six pairs of the 302, not all: every array is opened before anything is read and each open downloads a deflated member in two requests; 604 arrays would be about 1,200 requests and the whole 2.1 GB per job, out of the 133 requests per window that Zenodo's headers state for one client address, which jobs share (it answered 429 to two of four smoke runs and to the first crop job of these 12 arrays; the snippet now waits a 429 out and asks again). Binary 0, 1 and 100 and multiclass 0, 1 (pearl millet) and 90 (sorghum: listed in test_sorghum.txt) were chosen to cover both sets and both species; the other pairs bind the same way"
+  - "multiclass/images/90.png is a TIFF under a .png name (magic II*, LZW RGB 3000x4096 by harness describe); the snippet goes by the file's first bytes, so it needs no param, and reads it as cyx like the PNGs"
+  - "no params on raw: the images are colour (three samples that differ), read as cyx uint8, matching the record's yxs RGB uint8"
+  - "samples: grey on the binary masks: the record says the mask is grey stored as RGB with 3 identical samples; the snippet checks that at read and returns sample 0 as yx. The three bound masks hold only 0 and 255 (harness describe), so segmentation_type binary"
+  - "label_key proofread-root_tissue-semantic (from the draft): annotations.source proofread, class 'root tissue' (id 255) from the record, encoding binary"
+  - "label_key proofread-tissue-semantic and segmentation_type semantic for the .npy class maps (record encoding semantic-ids, ids 0..8). The class slug 'tissue' is the draft's: the record names 9 tissue classes but not which id is which, so the ids cannot be named here. multiclass/masks/90.npy is uint8, not the int64 the record sampled from 0.npy; the values are read as stored either way"
