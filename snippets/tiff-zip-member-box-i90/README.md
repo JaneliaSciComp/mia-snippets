@@ -1,4 +1,4 @@
-# tiff-zip-member-5
+# tiff-zip-member-box-i90
 
 Reads one TIFF (multi-page or single page) with `tifffile`, from a zip member (`<zip url>::<member>`) or a
 plain URL. Exactly one URL per array. Supersedes `tiff-zip-member`. It keeps every param of

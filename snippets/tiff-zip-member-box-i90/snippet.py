@@ -129,7 +129,7 @@ def _int(params: dict, name: str) -> int | None:
 
 def open_array(src: Source, io: IO) -> Array:
     if len(src.urls) != 1:
-        raise ValueError(f"tiff-zip-member-5 reads one file, got {len(src.urls)} urls")
+        raise ValueError(f"tiff-zip-member-box-i90 reads one file, got {len(src.urls)} urls")
     channel = _int(src.params, "channel")
     box = {a: (_int(src.params, f"{a}_first"), _int(src.params, f"{a}_last")) for a in "zyx"}
     try:

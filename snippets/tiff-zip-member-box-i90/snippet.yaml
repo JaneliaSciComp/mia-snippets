@@ -1,4 +1,4 @@
-name: tiff-zip-member-5
+name: tiff-zip-member-box-i90
 spec_version: 1
 summary: One TIFF from a zip member or a plain URL; deflated members are fetched whole. As tiff-zip-member (and tiff-zip-member-2, whose `channel`, `z_first`, `z_last` it keeps), plus `y_first`/`y_last` and `x_first`/`x_last` to present only a box of the file, for a volume whose manual segmentation covers a few objects and is empty elsewhere, bound with the same box for raw and label, one binding entry per annotated box.
 formats: [tiff, ome-tiff]
