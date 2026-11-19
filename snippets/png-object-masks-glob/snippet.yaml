@@ -1,0 +1,10 @@
+name: png-object-masks-glob
+spec_version: 1
+summary: One PNG per object (one cell drawn on black, each file the size of the whole image; 8/16-bit grey or RGB) from zip members or an HTTP directory chosen by glob (or plain URLs), merged into one yx plane of ids; one id per file in url order (instance), or with ids url the position of the binding url a file came from (class per folder); the later file keeps a pixel two files share.
+formats: [png]
+containers: [zip, http]
+params:
+  ids: {type: str, required: false, doc: "'file' (default): file k of the expanded urls, counted from 1, is drawn with id k (instance ids). 'url': a file is drawn with the 1-based position of the binding url (glob) it came from, so one glob per class folder gives class ids in binding order; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-8315423-cellular-autophagy-s2-cells]
+supersedes: null
