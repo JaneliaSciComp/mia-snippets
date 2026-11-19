@@ -1,0 +1,391 @@
+record: figshare-25604421-ntera2-cells-bf-segmentation
+record_commit: ea7edee63dcb04779726488746408ea22df7b2a6
+snippets_commit: 5d475e3918b7fe833723c852ed17af2b9444b46b
+raw:
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150722657.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150725435.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150728426.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150731664.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150735462.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150740589.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150748462.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150754265.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150758193.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150930122.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150932918.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150938477.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150941958.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151240846.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151244332.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151247326.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151252440.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151302570.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151309954.MP.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151316697.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151322041.MP.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151409063.MP.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113630125.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113658626.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113706497.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113709209.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113712315.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113714847.MP.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113717826.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113722066.MP.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113724563.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113727341.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113735200.tif"]
+    params: {}
+  - snippet: tiff-zip-member-4
+    urls: ["https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113737616.tif"]
+    params: {}
+labels:
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150722657_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150722657.tif"
+    params: {open_outlines: close}
+    pairs_with: 0
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150725435_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150725435.tif"
+    params: {open_outlines: close}
+    pairs_with: 1
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150728426_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150728426.tif"
+    params: {open_outlines: close}
+    pairs_with: 2
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150731664_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150731664.tif"
+    params: {open_outlines: close}
+    pairs_with: 3
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150735462_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150735462.tif"
+    params: {open_outlines: close}
+    pairs_with: 4
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150740589_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150740589.tif"
+    params: {open_outlines: close}
+    pairs_with: 5
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150748462_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150748462.tif"
+    params: {open_outlines: close}
+    pairs_with: 6
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150754265_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150754265.tif"
+    params: {open_outlines: close}
+    pairs_with: 7
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150758193_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150758193.tif"
+    params: {open_outlines: close}
+    pairs_with: 8
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150930122_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150930122.tif"
+    params: {open_outlines: close}
+    pairs_with: 9
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150932918_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150932918.tif"
+    params: {open_outlines: close}
+    pairs_with: 10
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150938477_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150938477.tif"
+    params: {open_outlines: close}
+    pairs_with: 11
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_150941958_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_150941958.tif"
+    params: {open_outlines: close}
+    pairs_with: 12
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151240846_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151240846.tif"
+    params: {open_outlines: close}
+    pairs_with: 13
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151244332_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151244332.tif"
+    params: {open_outlines: close}
+    pairs_with: 14
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151247326_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151247326.tif"
+    params: {open_outlines: close}
+    pairs_with: 15
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151252440_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151252440.tif"
+    params: {open_outlines: close}
+    pairs_with: 16
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151302570_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151302570.tif"
+    params: {open_outlines: close}
+    pairs_with: 17
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151309954_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151309954.MP.tif"
+    params: {open_outlines: close}
+    pairs_with: 18
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151316697_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151316697.tif"
+    params: {open_outlines: close}
+    pairs_with: 19
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151322041_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151322041.MP.tif"
+    params: {open_outlines: close}
+    pairs_with: 20
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220927_151409063_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220927_151409063.MP.tif"
+    params: {open_outlines: close}
+    pairs_with: 21
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113630125_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113630125.tif"
+    params: {open_outlines: close}
+    pairs_with: 22
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113658626_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113658626.tif"
+    params: {open_outlines: close}
+    pairs_with: 23
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113706497_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113706497.tif"
+    params: {open_outlines: close}
+    pairs_with: 24
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113709209_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113709209.tif"
+    params: {open_outlines: close}
+    pairs_with: 25
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113712315_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113712315.tif"
+    params: {open_outlines: close}
+    pairs_with: 26
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113714847_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113714847.MP.tif"
+    params: {open_outlines: close}
+    pairs_with: 27
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113717286_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113717826.tif"
+    params: {open_outlines: close}
+    pairs_with: 28
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113722066_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113722066.MP.tif"
+    params: {open_outlines: close}
+    pairs_with: 29
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113724563_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113724563.tif"
+    params: {open_outlines: close}
+    pairs_with: 30
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113727341_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113727341.tif"
+    params: {open_outlines: close}
+    pairs_with: 31
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113735200_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113735200.tif"
+    params: {open_outlines: close}
+    pairs_with: 32
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+  - snippet: roi-json-outlines-tiff-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/45654207::roi_jsons_combined/PXL_20220930_113737616_ROI.json"
+      - "https://ndownloader.figshare.com/files/45654198::training_dataset/PXL_20220930_113737616.tif"
+    params: {open_outlines: close}
+    pairs_with: 33
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+reasons:
+  - "raw: 34 of the 36 training TIFFs of training_dataset.zip (files/45654198), one array each because their sizes differ (record shape_varies; the 36 are 2826 to 3040 rows by 2759 to 2953 columns), with tiff-zip-member-4 and no params as in the match agent's draft: each opens as yx float32, so no axis override. Every member is deflated, so each is fetched whole (10 to 13 MB)"
+  - "two training images of the draft are left out, with their labels, for a human to decide: PXL_20220927_150744847.tif holds garbage in rows 622 to 625 (794 NaN and 3,562 values outside 0 to 255, up to 3.4e38 in magnitude, across the full width) and PXL_20220927_151312486.MP.tif in rows 296 to 298 (29 NaN, 2,977 such values); the rest of both images is finite, 0 to 255, and the members pass the zip's CRC, so the files were published this way. A crop that covers those rows would be stretched to their 1e38 values. Their ROI JSONs read like the others (102 and 63 outlines, on the cells of their images), so both pairs can be bound as the others are if those rows are acceptable"
+  - "test_dataset.zip (69 TIFFs) is not bound: the record says test images have no ROIs"
+  - "labels with roi-json-outlines-tiff-grid: each roi_jsons_combined/<stem>_ROI.json of Training_ROIs_json.zip (files/45654207) is a bare JSON list of {type, points [[x, y], ...]} with no image size, so each label's urls are the JSON and its TIFF again; the snippet takes the grid from the TIFF's first page header (the member the raw has already fetched, so it comes from the cache) and decodes none of its pixels. Each entry is filled with its 1-based position in the list as a uint16 instance id, 0 background"
+  - "open_outlines close, on every label: the 34 files hold 2,487 entries, 1,223 polygon, 429 freehand and 835 polyline (the record's sample file has freehand only; 19 of the 34 files have polylines and 7 have nothing else). The record does not say what a polyline is here, and the snippet refuses an open type without this param. Measured over all 36 files (937 polylines): each one ends where it starts, the gap between its first and last point being 0 px for 293, 1 px in the median, at most 5 px for 865 and 68 px at most, against a median outline diagonal of 252 px (gap over diagonal 0.004 in the median, 0.25 at most); their median enclosed area is 6,514 px against 5,532 px for the polygons. Overlaid on the images, a file of 135 polylines (PXL_20220927_150722657) outlines 135 cells. So they are cell outlines traced with ImageJ's segmented-line tool back to their start, and are closed with a straight segment and filled like the polygons; skipping them would leave a third of the cells unlabelled"
+  - "pairing by file name: training_dataset/<stem>.tif with roi_jsons_combined/<stem>_ROI.json, ignoring the .MP of the 5 bound TIFFs named <stem>.MP.tif (record alignment_notes). Every url is written out, since the snippet does not compare names"
+  - "one pair does not match by name and is to be confirmed by a human: label 28 reads PXL_20220930_113717286_ROI.json on PXL_20220930_113717826.tif. They are the only JSON and the only TIFF left over once the other 35 are paired, and the names differ by two exchanged digits (826, 286). Measured: with every one of the 36 JSONs scored against every one of the 36 images (mean gradient magnitude inside the filled outlines over that outside, on 4x binned images), each JSON scores highest on the image it is bound to, 2.01 to 2.91 against at most 1.58 on any other; this JSON scores 2.04 on PXL_20220930_113717826.tif and at most 1.20 on the other 35. Overlaid, its 34 outlines follow the cells of that image"
+  - "coordinate frame: points are [x, y] in pixels of the paired image, as the record says (same-grid), an integer being a pixel corner as in ImageJ. Over the 36 pairs the outlines span x 0..2939 and y -8..2988 and never pass their own image's right or bottom edge (three files reach 1, 2 and 8 px above the top edge, which is clipped). Same score as above on five pairs, as read against moved: 2.04 to 2.64 as read, 1.94 to 2.49 moved 8 px, 1.73 to 2.16 moved 20 px, 0.97 to 1.30 flipped in y or x, 1.07 to 1.42 with x and y exchanged"
+  - "overlap: where two outlines overlap the smaller one is kept (the snippet's rule); the overlap is 0.0 to 1.3 % of the labelled area per file, slivers between neighbouring cells, and every entry of every file keeps pixels of its own"
+  - "label_key manual_gt-cell-instance, segmentation_type instance: annotations.source manual, class cell (record classes), one outline per cell"
+  - "label dtype uint16 is the snippet's own; the record has none for polygons (dtype unknown), so smoke warns about it once per label"
