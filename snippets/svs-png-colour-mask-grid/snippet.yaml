@@ -1,0 +1,11 @@
+name: svs-png-colour-mask-grid
+spec_version: 1
+summary: One Aperio SVS whole-slide image at a plain URL, its full-resolution page read tile by tile by byte range as cyx uint8 (c = red, green, blue); or, with colours and label_factor, that slide's downsampled colour-coded annotation PNG (8-bit RGB, one colour per class; a zip member or a plain URL) as yx uint8 class ids on the slide's grid, each mask pixel repeated label_factor x label_factor and never interpolated. A mask pixel of an unlisted colour (a mixture at an interpolated region border) takes the id of the neighbouring pixel whose colour is nearest to it.
+formats: [svs, tiff, png]
+containers: [http, zip]
+params:
+  colours: {type: list, required: false, doc: "label form only, and required for it: the colour table, a list of [r, g, b] colours (integers 0..255, at most 256, none twice); a mask pixel of colours[k] is read as class id k, so the first colour is id 0 (the background or unannotated colour, which the harness treats as unlabelled). Every class colour of the mask must be listed: a 3x3 block of one unlisted colour raises and names it. Single pixels of other colours are taken as border mixtures and get a neighbour's id. Say in the binding's reasons where the colours, their order and the meaning of each id come from"}
+  label_factor: {type: int, required: false, doc: "label form only, and required for it: urls are the mask PNG and the SVS it belongs to (two urls, any order), and the mask's height and width must be the slide's divided by this integer, rounded down or up. The array has the slide's yx shape; slide pixel (y, x) takes mask pixel (y // k, x // k). Absent (with colours absent): urls is one SVS, read as it is. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [figshare-28919840-hiesd-gastric-esd-wsi]
+supersedes: null
