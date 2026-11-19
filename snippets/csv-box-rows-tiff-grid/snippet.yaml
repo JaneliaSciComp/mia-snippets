@@ -1,0 +1,17 @@
+name: csv-box-rows-tiff-grid
+spec_version: 1
+summary: The boxes one image has in a CSV table of one row per box (a table over many images, e.g. an EXACT / SlideRunner annotation export; a zip member or a plain URL), rasterised on the pixel grid of that image's TIFF, such as an Aperio SVS whole-slide image, of which only the first page's header is read. Two urls, the table and then the slide. `image_name` picks the rows whose `name_column` is this slide; `boxes_column` holds a Python-literal dict {x1, x2, y1, y2} of corners in full-resolution pixels. yx, each box filled with its 1-based number among the slide's rows (instance, uint32) or with the class id of another column's value (semantic, uint8); 0 is background, and where boxes overlap the smaller one is on top.
+formats: [csv, svs]
+containers: [zip, http]
+params:
+  image_name: {type: str, required: true, doc: "the value of `name_column` in the rows of the slide at the second url, exactly as the table writes it (e.g. '10835_19 humane BAL Berliner Blau.svs'). No row with it is an error. Reason required in binding"}
+  name_column: {type: str, required: true, doc: "the header of the column holding each row's image name. Reason required in binding"}
+  boxes_column: {type: str, required: true, doc: "the header of the column holding each row's box, a Python-literal dict {'x1': .., 'x2': .., 'y1': .., 'y2': ..}: the pixels [y1, y2) x [x1, x2) of the slide's first page, x right and y down. Reason required in binding"}
+  boxes: {type: str, required: true, doc: "'instance' fills each box with its 1-based number among the image's rows, in table order; 'semantic' fills it with the 1-based position of its `class_column` value in `classes`. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  class_column: {type: str, required: false, doc: "with boxes: semantic only, and required for it: the header of the column holding each row's class (e.g. grade). Reason required in binding"}
+  classes: {type: list, required: false, doc: "with boxes: semantic only, and required for it: every value `class_column` takes, as the table writes it (strings or whole numbers), in class id order (semantic id = position, from 1, because 0 is background). A row whose value is not listed raises. From the record's classes; reason required in binding"}
+  delimiter: {type: str, required: false, doc: "the table's one-character cell delimiter. Default ','; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of rows the image must have in the table. Open fails on another number, so a changed table is noticed instead of renumbering the instance ids; reason required in binding"}
+requires: [numpy, tifffile]
+tested_on: [figshare-c-5486799-p-hem-hemosiderophage-cytology-wsi]
+supersedes: null

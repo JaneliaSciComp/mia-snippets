@@ -1,0 +1,24 @@
+record: dataverse-o2wvwa-tanzania-malaria-blood-smears
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+  # raw 0: Image01.jpg to Image1059.jpg, 1,059 JPEG files of 2160x3840
+  - snippet: jpeg-png-zip-rgb-glob
+    urls: ["https://dataverse.harvard.edu/api/access/datafile/10577427"]
+    params: {glob: "Thick_Infected/*.jpg", numbers: ["1-1059"], count: 1059}
+  # raw 1: Image1060.jpg to Image1139.jpg, 80 PNG files (RGBA, alpha 255 everywhere) of 922x1640
+  - snippet: jpeg-png-zip-rgb-glob
+    urls: ["https://dataverse.harvard.edu/api/access/datafile/10577427"]
+    params: {glob: "Thick_Infected/*.jpg", numbers: ["1060-1139"], count: 80}
+labels: []
+reasons:
+  - "jpeg-png-zip-rgb-glob instead of the draft's jpeg-zip-glob: Thick_Infected.zip holds two kinds of file under the one name Image<N>.jpg. All 1,139 members were read from the downloaded zip (835,517,428 B, etag e340d14bf1411dfc61f8701c45146397-13): Image01.jpg to Image1059.jpg are baseline JPEG, 8 bit, 3 components, 2160x3840; Image1060.jpg to Image1139.jpg are PNG, 8 bit RGBA, 922x1640. jpeg-zip-glob and jpeg-zip-canvas-glob raise on the PNGs ('is not a JPEG'), and image-tiles-glob needs one shape and exposes alpha as a 4th c plane. This snippet tells JPEG from PNG by each file's first bytes and exposes R, G, B as c for both"
+  - "two raws, one per image size, instead of one array on a canvas: an array has one shape, and the two sizes cannot share a pixel size (both are 16:9 frames, 3840 and 1640 pixels wide; the PNGs looked at are whole microscope fields like the JPEGs, darker, not crops of them), so they are kept apart and nothing is padded. A canvas of 2160x3840 would leave 82% of each PNG plane as 0 fill and put both kinds in one array. raw 0 is zcyx (1059, 3, 2160, 3840), raw 1 is zcyx (80, 3, 922, 1640); z is a stack of independent photographs in member-name order (as strings: Image100.jpg, Image1000.jpg, ..., Image1009.jpg, Image101.jpg), not depth (record dimensionality 2D)"
+  - "numbers ['1-1059'] and ['1060-1139']: the file numbers (the digits of Image<N>.jpg) of each size, from reading every member's header as above; in this zip the split is one clean run each, which the match agent could not know from 14 sampled members. The snippet checks it: a file of another size than its array's first file raises at read. All 1,139 planes were then read through the snippet and compared with a separate decoding of the downloaded zip (JPEG with imagecodecs, PNG with pypng): every plane equals its file's RGB samples, and every member of the zip is in exactly one raw"
+  - "count 1059 and 80: the number of files each raw must have (1,059 + 80 = 1,139, the zip's member count in the record), so a changed zip fails at open instead of shifting z"
+  - "glob 'Thick_Infected/*.jpg', anchored at the folder as in the draft: the zip's members are Thick_Infected/Image<N>.jpg (and the folder entry itself, which the snippet leaves out)"
+  - "alpha: the 80 PNGs are RGBA and their alpha is 255 at every pixel of every file, so dropping it loses nothing; the snippet raises on a PNG whose alpha is not fully opaque rather than drop it. dtype uint8 as the record says; values 0..243 over raw 0 and 0..184 over raw 1 (the record's 0..206 is one sampled file)"
+  - "urls: the zip itself with the folder pattern in params.glob (as in the draft), so harness fetch and stage fetch one zip, not 1,139 member urls. Only Thick_Infected.zip (datafile/10577427) is bound: it is the only data file url in record.yaml (technical.sample.urls). The Dataverse API (api/datasets/:persistentId/?persistentId=doi:10.7910/DVN/O2WVWA) lists the other three as datafile/10577428 (Thick_Uninfected.zip), 10577431 (Thin_Infected.zip) and 10577429 (Thin_Uninfected.zip); they are left for a binding made after the record carries those urls. Their headers were read too and this snippet reads them the same way: JPEG 2160x3840 and PNG 922x1640 in each, and in Thin_Uninfected.zip also 5 JPEG of 922x1640, 7 PNG of 1230x1640 (the only members named .png) and 1 PNG of 1080x1920, every PNG alpha 255 throughout"
+  - "no labels: the record's annotations are image-level infected/uninfected classes given by the folder name, with no masks, boxes or points to bind"
+  - "voxel size: none; the snippet reports None (the JPEGs carry a JFIF density of 96 dpi, a print size, and the PNGs no pHYs chunk) and the record's voxel_size_nm is null"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"

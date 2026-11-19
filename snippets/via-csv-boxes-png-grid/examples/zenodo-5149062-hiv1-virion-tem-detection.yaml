@@ -1,0 +1,25 @@
+record: zenodo-5149062-hiv1-virion-tem-detection
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://zenodo.org/records/5149062/files/HIV-1_rcnn_dataset_full.zip::rcnn_dataset_full/*/*/*.png"]
+    params: {samples: grey}
+labels:
+  - snippet: via-csv-boxes-png-grid
+    urls: ["https://zenodo.org/records/5149062/files/HIV-1_rcnn_dataset_full.zip::rcnn_dataset_full/*/*/region_data_*.csv"]
+    params: {boxes: semantic, classes: [mature, immature, eccentric], class_key: particle_class, overhang: 3}
+    pairs_with: 0
+    label_key: manual_gt-virion-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw: the 59 detection micrographs (46 train + 13 val) as one glob over the rcnn zip, per record technical.arrays[0].path_pattern; one PNG per z plane (unchanged from the draft)"
+  - "samples: grey because the record says TEM micrographs (channels: 1) stored as RGB PNG (harness describe: 4000x2620, 8-bit, mode rgb); the snippet raises if the samples differ, and smoke read it as (59, 2620, 4000)"
+  - "labels: via-csv-boxes-png-grid instead of the draft's tiff-jpeg-voc-zip-glob, which reads VOC XML only; the labels are the per-micrograph VIA region_data CSVs beside each PNG (record technical.arrays[1], encoding boxes-table)"
+  - "label urls 'rcnn_dataset_full/*/*/region_data_*.csv': 59 members, one per <split>/<id>/ folder. The glob needs three folder levels, so the 54 copies in annotated_dataset_csvs/ are not matched, and the LibreOffice lock file ends in '#'. Each folder holds one PNG and one CSV and both globs sort by member name, so the folder decides the order: the 59 folders of the two sorted listings were compared while testing and are identical, and z index k of the label is the CSV in the folder of the raw's PNG k"
+  - "the grid is the PNG in the CSV's folder (the snippet's rule), not the file the filename column names: that column says <id>-copy.png in 23 files, a path to the CSV itself in 26 and <id>-counting.png in 10; no such file exists in the zip"
+  - "boxes: semantic with classes [mature, immature, eccentric] in the record's order, so ids are 1 mature, 2 immature, 3 eccentric (0 background); the 59 CSVs hold 3,534 boxes: 1,868 mature, 400 immature, 1,266 eccentric, and no other class"
+  - "class_key: particle_class is the region attribute that holds the class in every row (record alignment_notes)"
+  - "overhang: 3 because 8 boxes in 6 train CSVs (0134001, 0134002, 0134006, 0134007 x2, 0134008, 7828001 x2) start at y = -3, three pixels above the image; they are clipped at the top edge. No other box of the 3,534 leaves the 4000x2620 image"
+  - "label_key manual_gt-virion-semantic: annotations.source manual; the boxes mark HIV-1 virions; class-id boxes fold to semantic (the draft's choice). The planes are filled rectangles, not virion outlines, and where boxes overlap the smaller one is on top. NEEDS A HUMAN DECISION as for the earlier box snippets: boxes-table has no segmentation_type of its own; boxes: instance (one id per box) is available from the same snippet if wanted"
+  - "the backbone classification TIFF crops are not bound: shape varies per file and they carry no pixel labels (class = folder name)"

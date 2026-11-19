@@ -1,0 +1,11 @@
+name: tiff-coco-polygons
+spec_version: 1
+summary: One plain 2D TIFF (grey or RGB; of a pyramid, the full-resolution page) at a plain URL or in a zip; or, with params.image, the polygon annotations of that image in an MS COCO JSON file filled onto the image's width x height grid as yx semantic class ids (the polygon's category_id, 0 elsewhere; of overlapping polygons the smaller is on top).
+formats: [tiff, json]
+containers: [http, zip]
+params:
+  image: {type: str, required: false, doc: "COCO form, which it selects: the images[].file_name whose annotations form the array (a COCO file holds many images). The url is then the COCO JSON, not the image. Absent: the url is read as a TIFF. Reason required in binding"}
+  clip: {type: bool, required: false, doc: "COCO form only. true: polygons that leave the image's width x height grid are cut at its border; absent or false: such a polygon is an error, because it can mean the polygons were drawn on another frame. Set it only after checking the polygons against the image; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-7418555-multiscanner-canine-scc-histology]
+supersedes: null

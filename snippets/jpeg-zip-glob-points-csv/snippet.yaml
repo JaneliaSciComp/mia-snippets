@@ -1,0 +1,15 @@
+name: jpeg-zip-glob-points-csv
+spec_version: 1
+summary: JPEG images chosen by glob from the members of a zip, stacked along z (RGB samples as c), or the point annotations of those images from a CSV table in the same zip (columns imageName, objectType, xCoord, yCoord), rasterised on the same z stack as discs filled with a per-image point number or a class id.
+formats: [jpeg, csv]
+containers: [zip, http]
+params:
+  glob: {type: str, required: true, doc: "fnmatch pattern over the member names of each zip the urls name (`*` also crosses `/`), e.g. 'nov2021/nov2021_images/*.jpg'; every match is one z plane, sorted by member name. Anchor it at the image folder. A label array takes the same glob as the raw it pairs with, so both have the same planes"}
+  table: {type: str, required: false, doc: "makes the array the point labels instead of the images: fnmatch pattern that matches exactly one member of each zip, the CSV with a header naming the columns imageName, objectType, xCoord, yCoord and one row per point, e.g. 'nov2021/nov2021_docs/*_annotations_*.csv'. A row belongs to the plane of the image whose file name is its imageName; reason required in binding"}
+  label: {type: str, required: false, doc: "with `table` only, and required then: 'instance' fills each point's disc with the point's 1-based number among the kept rows of its image, in table order (ids restart in every plane); 'semantic' fills it with the 1-based index of its objectType in `classes`. 0 is background; reason required in binding"}
+  classes: {type: list, required: false, doc: "with `table` only, and required then: the objectType values that are painted, in class id order (semantic id = position, from 1). A row whose objectType is in neither `classes` nor `skip` raises. From the record's classes; reason required in binding"}
+  skip: {type: list, required: false, doc: "with `table` only: objectType values whose rows are left out (not painted, not numbered), e.g. ['doubtful'] for a label of the certain objects only. Default: none; reason required in binding"}
+  radius: {type: int, required: false, doc: "with `table` only, and required then: the radius in pixels (0 to 255) of the disc painted around each point, the pixels whose centre is at most `radius` from (yCoord, xCoord); 0 paints the one named pixel. A marker size, not an object size: choose it smaller than the annotated object. Where discs overlap, a pixel takes the nearest point; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-13368072-schistoscope-haematobium-eggs]
+supersedes: null

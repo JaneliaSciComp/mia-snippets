@@ -1,0 +1,10 @@
+name: tiff-csv-contours
+spec_version: 1
+summary: One single-page, one-sample-per-pixel TIFF at a plain URL as yx; or, with a contour CSV beside it (header "contour_id","x [pix]","y [pix]", one row per polygon vertex), the CSV's closed polygons filled (even-odd) onto that TIFF's pixel grid as yx uint16 instance ids equal to the contour_id.
+formats: [tiff, csv]
+containers: [http, s3]
+params:
+  origin: {type: str, required: false, doc: "label form only, and required there: the image corner the CSV's y is measured from. 'top-left': y is the row index, counted down from the top row; 'bottom-left': y is counted up from the bottom row, so a vertex lies on row (height - 1 - y). x is the column index in both. The table does not say which, so check it on the image (do the outlines lie on the objects?) and give the evidence as the binding's reason"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-10449491-liposome-cryoem-vesicle-contours-chol]
+supersedes: null

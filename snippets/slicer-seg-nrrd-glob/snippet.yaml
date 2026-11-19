@@ -1,0 +1,10 @@
+name: slicer-seg-nrrd-glob
+spec_version: 1
+summary: One 3D Slicer segmentation (.seg.nrrd, raw or gzip NRRD labelmap of one plane) per file from zip members or an HTTP directory chosen by glob (or plain URLs), stacked along z; each file's stored label values are renamed through its own header's segment names to the class ids the binding lists.
+formats: [other]
+containers: [zip, http]
+params:
+  segments: {type: list, required: true, doc: "every segment name (Segment<N>_Name) the files use, in class id order: the id returned is the entry's position, from 1, whatever label value a file stores for that name; 0 (no segment) stays 0. An entry may be a list of names that share one id. A plane with pixels of a segment that is not listed raises; a segment no pixel has needs no entry. From the record's classes and the files' headers; reason required in binding"}
+requires: [numpy]
+tested_on: [zenodo-18390286-muscle-glycogen-tem]
+supersedes: null

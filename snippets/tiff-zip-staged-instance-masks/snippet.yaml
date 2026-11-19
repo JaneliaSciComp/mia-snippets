@@ -1,0 +1,12 @@
+name: tiff-zip-staged-instance-masks
+spec_version: 1
+summary: 2-D grey TIFF members of a zip that is staged whole with io.fetch(<zip url>) and read locally, for a server that sends no Content-Length (where io.open, io.fetch and io.list of a zip member all raise NeedsFetch). One member as it is; or, with `instances`, every one-object binary mask member the urls name (globs allowed) merged into one uint16 instance-id plane, optionally only the objects of one class listed in a .npy member.
+formats: [tiff]
+containers: [zip]
+params:
+  instances: {type: bool, required: false, doc: "true: each member the urls name is the binary mask of one object on the same yx grid; the array is one uint16 plane whose pixel value is the 1-based position of the mask's member in natural name order (0.tif -> 1, 1.tif -> 2, ..., 10.tif -> 11), 0 where no mask is set. A pixel set in several masks gets the highest of their ids. Without it the urls must name exactly one member, returned as stored; reason required in binding"}
+  classes: {type: str, required: false, doc: "with instances: the zip member name (not a url, no glob) of a 1-D integer .npy holding one class id per mask, in the masks' natural name order. Needs class_id; reason required in binding"}
+  class_id: {type: int, required: false, doc: "with classes: keep only the masks whose entry in the .npy equals this id; the kept objects keep the ids they have without the filter. The id's meaning comes from the record, not the file; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [opara-462-inline-alumina-particles-copy-paste]
+supersedes: null

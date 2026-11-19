@@ -1,0 +1,13 @@
+name: via-json-polygons
+spec_version: 1
+summary: VGG Image Annotator (VIA) region JSON (a mapping or a list of entries, or a VIA project; one or several files, merged by file name) as uint16 instance labels. Each entry's polygon regions are rasterised (pixel centres, even-odd) on the grid of the JPEG it names, read from that JPEG's header, one JPEG per z plane in the order of the image listing, so the array pairs with a raw bound to the same images. Images without an entry raise, are left out or become background planes, as `missing` says.
+formats: [json, other]
+containers: [zip, http]
+params:
+  images: {type: str, required: false, doc: "glob of the annotated JPEGs, relative to the folder of the JSON files, with `..` steps allowed inside a zip (e.g. '../*.jpg' for JSON files kept in a subfolder of the image folder). The planes are the files it matches, sorted by name. Default '*.jpg', the VIA layout of a JSON beside its images; reason required in binding"}
+  missing: {type: str, required: false, doc: "what an image the glob matches but no entry names becomes. 'error' (default): open fails and says how many there are. 'skip': it is left out, so the array holds the annotated images only and its raw must be bound to exactly those files, in name order. 'background': an all-zero plane, which states that the image shows no object; reason required in binding"}
+  duplicates: {type: str, required: false, doc: "which entry counts when one file name has entries with different regions (in one file or across files). 'error' (default): open fails and names the image and the files. 'first' / 'last': the first or last entry in reading order, which is url order (a glob's files sorted by name), then entry order within a file. Entries with equal regions are one entry in every mode; reason required in binding"}
+  count: {type: int, required: false, doc: "the number of planes the array must have. Open fails on another number, so a changed listing or JSON is noticed instead of shifting z against the raw; reason required in binding"}
+requires: [numpy]
+tested_on: [zenodo-7555467-spheroscan-collagen-spheroids-bf]
+supersedes: null

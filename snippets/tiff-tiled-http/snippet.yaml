@@ -1,0 +1,9 @@
+name: tiff-tiled-http
+spec_version: 1
+summary: One tiled TIFF or OME-TIFF (a whole-slide image; BigTIFF or classic, any compression tifffile decodes, JPEG/YCbCr included) at a plain URL, read tile by tile over range requests. Level 0 of series 0; a read fetches and decodes only the tiles that overlap the region, never the page. An RGB sample axis is the leading c of cyx. Requests that fail in transit or with 404/429/5xx are tried again.
+formats: [ome-tiff, tiff]
+containers: [http, s3]
+params: {}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-7637988-orion-crc-he-highplex-if]
+supersedes: null

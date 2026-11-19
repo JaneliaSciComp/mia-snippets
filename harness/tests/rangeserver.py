@@ -18,6 +18,8 @@ class RangeServer:
         self.files: dict[str, bytes] = {}        # path -> body
         self.redirects: dict[str, str] = {}      # path -> Location (302)
         self.ignore_range = False                # answer 200 with the whole body
+        self.refuse_head = 0                     # answer a HEAD for a file with this status (403: signed for GET)
+        self.refuse_get = 0                      # ... and a GET for one with this
         self.range_shift = 0                     # answer a Range request this many bytes later than asked
         self.gzip = False                        # serve a gzip variant (own ETag) to clients that accept it
         self.fail = 0                            # answer this many more requests badly, as `fail_mode` says
@@ -89,6 +91,11 @@ class _Handler(BaseHTTPRequestHandler):
         data = s.files.get(self.path)
         if data is None:
             self.send_response(404)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if refused := s.refuse_head if self.command == "HEAD" else s.refuse_get:
+            self.send_response(refused)
             self.send_header("Content-Length", "0")
             self.end_headers()
             return

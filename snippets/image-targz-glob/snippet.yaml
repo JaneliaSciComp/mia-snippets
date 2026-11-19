@@ -1,11 +1,12 @@
 name: image-targz-glob
 spec_version: 1
-summary: One image per member (PNG or JPEG, told apart by magic bytes) from the members of tar.gz archives chosen by glob, stacked along z; a colour member's samples are a c axis (zcyx), and with the param `palette` set to `index` a palette PNG is its stored indices (an indexed class or instance mask). Each url is a tar.gz, or a zip wrapping tar.gz files as Dataverse's bundle download sends it, staged whole.
+summary: One image per member (PNG or JPEG, told apart by magic bytes) of a tar.gz archive, the members chosen by a glob over their names and stacked along z, ordered by name or by a key taken from the name so two archives pair; a colour member's samples are a c axis (zcyx). The gzip stream is inflated once by range reads, to the last member wanted, never fetched whole.
 formats: [png, jpeg]
-containers: [http, s3, zip]
+containers: [http, s3]
 params:
-  members: {type: str, required: true, doc: "glob over the tar member names (fnmatch syntax, case-sensitive; `*` also crosses `/`), e.g. ZT80_38_A/ZT80_38_A_*.jpg; applied to every url's archives. The matches of one url are sorted by member name, the urls concatenated in binding order"}
-  palette: {type: str, required: false, doc: "'index': a palette (indexed-colour) PNG member is returned as its stored palette indices, uint8 with no c axis (the ids of a mask saved as an indexed PNG), never as the palette's colours. Without it a palette PNG raises; reason required in binding"}
+  members: {type: str, required: true, doc: "a glob over the full member names in the tar (fnmatch syntax, case-sensitive, * also crosses /), e.g. 01_source_imagery/non_aeg_raw_plag/Rumania/10/*.JPG; or one member's full name, which stops the scan at that member"}
+  count: {type: int, required: false, doc: "how many members the glob is to match: the scan stops at the count-th match in archive order instead of reading the archive to its end, and fewer matches raise. Members that match further in are not seen, so give the full number of a folder; reason required in binding"}
+  key: {type: str, required: false, doc: "a regular expression searched in each matched member name; the planes are ordered by its groups (the whole match when it has none) instead of by the full name. For two arrays whose names share only a part, e.g. ([^/]+)\\.JPG$ for the raw and ([^/]+)/clean_instance_labels_uint16\\.png$ for the label. A name it does not match, or two members with one key, raise; reason required in binding"}
 requires: [numpy, imagecodecs]
-tested_on: [harvarddv-ocycmp-prostate-tma-gleason]
+tested_on: [zenodo-22130319-plagioclase-cold-cl-ssl]
 supersedes: null

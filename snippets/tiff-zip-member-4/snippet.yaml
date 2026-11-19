@@ -1,0 +1,15 @@
+name: tiff-zip-member-4
+spec_version: 1
+summary: One TIFF from a zip member or a plain URL; deflated members are fetched whole. As tiff-zip-member-3 (`axes`, `channel`, `z_first`/`z_last`, `y_first`/`y_last`), and also reads a stack that has one IFD for all its planes, stored one after another behind it (an ImageJ hyperstack over 4 GB), plane by plane by byte offset.
+formats: [tiff, ome-tiff]
+containers: [zip, http]
+params:
+  axes: {type: str, required: false, doc: "override when the TIFF's own axes are wrong: one czyx letter per axis of tifffile's series[0] after size-1 axes (other than y/x) are dropped, including a c that `channel` collapses; reason required in binding"}
+  channel: {type: int, required: false, doc: "0-based index on the file's channel axis (tifffile C or S) of the one channel to present; the array then has no c axis. Without it a channelled file keeps its c axis; reason required in binding"}
+  z_first: {type: int, required: false, doc: "0-based index of the file's z plane that becomes plane 0 of the array; planes before it are left out. Without it the array starts at the file's first plane. Give a raw and its label the same z_first and z_last; reason required in binding"}
+  z_last: {type: int, required: false, doc: "0-based index of the file's z plane that becomes the array's last plane (included); planes after it are left out. Without it the array ends at the file's last plane; reason required in binding"}
+  y_first: {type: int, required: false, doc: "0-based index of the page's row that becomes row 0 of the array; rows above it are left out (a data bar above the image). Without it the array starts at the page's first row. Give a raw and its label the same y_first and y_last; reason required in binding"}
+  y_last: {type: int, required: false, doc: "0-based index of the page's row that becomes the array's last row (included); rows below it are left out (a data bar below the image). Without it the array ends at the page's last row; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [figshare-27247629-plant-bf-virtual-staining]
+supersedes: tiff-zip-member-3

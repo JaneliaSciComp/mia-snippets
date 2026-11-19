@@ -1,90 +1,76 @@
 # image-targz-glob
 
-Reads a set of one-image files, PNG or JPEG, that are members of gzip-compressed tar archives (`.tar.gz`), and
-presents it as one array: one member per z plane, or no z axis for a single member. It is `image-tiles-glob`
-for tar.gz archives, which the catalog's glob snippets (zip members, HTTP directory indexes) cannot list, plus
-the stored indices of palette PNGs.
+Reads the PNG and JPEG members of a gzip-compressed tar archive (`.tar.gz`) as one array: the members a glob
+over their names matches, one per z plane. It is `image-tiles-glob` for a container that has no index. A member
+with samples (RGB) is returned as a `c` axis, `zcyx`; the format is taken from each member's first bytes, not
+its name.
 
-- **URLs.** Each URL is the plain URL of an archive, with no `::`. The staged file's first bytes say what it is:
-  - a gzip stream: one tar.gz;
-  - a zip: every member named `*.tar.gz` or `*.tgz` is an archive, the other members (a `MANIFEST.TXT`) are
-    ignored. This is what Dataverse's bundle download `https://<host>/api/access/datafiles/<id>[,<id>...]`
-    sends: a zip, built on request, of the named datafiles.
-- **`members`** (required): a glob over the tar member names (`fnmatch` syntax: `*`, `?`, `[...]`,
-  case-sensitive; `*` also crosses `/`), applied to every URL. It is a param, not `<url>::<glob>`, because `io`
-  and the harness read `::` as a zip member. The regular files that match are sorted by member name within one
-  URL (pooled over the archives of a zip; a name found twice raises), and several URLs are concatenated in
-  binding order. Two arrays whose globs match the same base names (`ZT80_38_A/ZT80_38_A_*.jpg` and
-  `.../mask1_ZT80_38_A_*.png`) pair plane for plane. The snippet cannot check that across arrays, so the
-  binding's `reasons` must say why the names pair. Write the glob tightly: macOS tars carry `._<name>`
-  AppleDouble members beside the real files, and one that matches raises as "not a PNG or JPEG".
-- **Files.** By each member's first bytes, not its name: JPEG, or a PNG that is 8 or 16 bit grey or colour.
-  Every member of one array must give the same shape and dtype as the first; one that differs raises at `read`.
-- **`palette: index`** (optional): a palette (indexed-colour) PNG member, any bit depth, is returned as its
-  stored palette indices, `uint8` with no `c` axis: the ids of a mask saved as an indexed PNG. A decoder would
-  return the palette's colours instead, so the file is re-wrapped in memory as a greyscale PNG with the same
-  `IDAT` bytes (the method of `png-palette-index-glob`) and the decoder's stretch of 1/2/4-bit samples is undone
-  exactly. Without the param a palette PNG raises, so an indexed colour picture is never read as ids by
-  accident. Other members are not affected by it.
+- **URL.** Exactly one per array: the archive's plain URL. The members are named by a param, not by
+  `<url>::<glob>`, because `io` reads `::` as a zip member.
+- **`members`** (required): a glob over the full member names in the tar (`fnmatch` syntax, case-sensitive:
+  `*`, `?`, `[...]`; `*` also crosses `/`), e.g. `01_source_imagery/non_aeg_raw_plag/Rumania/10/*.JPG`. A name
+  without glob characters is one member, and the scan stops at it. Only regular files match.
+- **Reaching the members.** A tar.gz has no index and cannot be read by range. `open_array` opens the archive
+  with `io.open` and inflates the gzip stream from its first byte, once, to read the member names: that costs
+  every compressed byte up to the last member wanted, and nothing behind it. The scan asks `io` for 1 MiB,
+  then 2, 4, ... up to 32 MiB at a time (four range requests side by side), so the bytes are rounded up to the
+  end of the read the last member's header fell in. The archive is never fetched whole, unless the server has
+  no Range or Content-Length (`NeedsFetch`), where `io.fetch` stages it.
+- **`count`** (optional): how many members the glob is to match. The scan stops at the `count`-th match in
+  archive order; fewer matches raise. Without it the archive is inflated to its end, which for a multi-GB
+  archive is all of its bytes. A match further into the archive than the `count`-th is not seen, so `count`
+  is for a folder whose full number of files is known (tar stores a folder's files together); give that
+  number and the reason in the binding.
+- **Plane order and pairing.** The matched members are sorted by full name, whatever order the archive stores
+  them in. **`key`** (optional) is a regular expression searched in each matched name: the planes are then
+  sorted by its groups (the whole match when it has none). Use it when two arrays name the same tile
+  differently, e.g. a raw `.../<sample>/<tile>.JPG` and a label `.../<tile>/clean_instance_labels_uint16.png`
+  in another archive: `([^/]+)\.JPG$` and `([^/]+)/clean_instance_labels_uint16\.png$` give both the key
+  `<tile>`, so z index k of the label is the map of z index k of the raw when both arrays hold the same set of
+  tiles. A name `key` does not match, or two members with one key (or one name), raise. The snippet cannot
+  compare the sets of two arrays, only their number (the harness checks the shapes), so the binding's
+  `reasons` must say why the names pair and that the sets are the same.
+- **Files.** PNG (8 or 16 bit, grey or colour) or JPEG. Every member of one array must give the same shape
+  and dtype as the first; one that differs raises at `read`.
 - **Axes.** A member without samples is `zyx`. A member with samples is `zcyx`, `c` in the file's sample order
   (R, G, B). With one member the `z` axis is dropped (`yx`, `cyx`).
-- **Values** are the decoder's (`imagecodecs`), unchanged; palette indices as stored. Nothing is remapped: an
-  id map whose "unlabelled" id is not 0 is returned as it is (see the example).
-- **Reaching the members.** A tar.gz has no index and its members cannot be read by range, and a glob needs
-  every member name, so each URL is staged whole with `io.fetch` (counted against the job's cap once, then in
-  the dataset cache). `open_array` inflates each archive once to list it and decodes the first match (shape and
-  dtype). `read` inflates up to the member it needs and decodes it; the gzip stream is kept open, so members
-  read in archive order cost one pass, and a member that lies before the last one read starts the pass again.
-  The last decoded member is kept, so the three `c` planes of one image decode it once.
-- **Access.** `plane`. **dtype.** The file's. **Voxel size:** `None`; PNG/JPEG resolution fields describe print
-  size.
-
-## Why the bundle URL for Harvard Dataverse
-
-`io` asks every URL for its validators with a HEAD request before it reads a byte. A Dataverse datafile URL
-(`/api/access/datafile/<id>`) redirects to an S3 URL presigned for GET only, and S3 answers that HEAD with
-`403 Forbidden` (a ranged GET of the same URL answers 206), so `io.open` and `io.fetch` both fail on it and a
-snippet has no other way to bytes. The bundle URL `/api/access/datafiles/<id>` redirects to Dataverse's own
-zip service (`rserve.dataverse.harvard.edu` for Harvard), which answers HEAD and GET with 200. The job
-therefore needs **`dataverse.harvard.edu` and `rserve.dataverse.harvard.edu`** among its allowed hosts, and
-not the S3 host.
-
-The zip is streamed without `Content-Length`, `ETag` or `Last-Modified`, so:
-
-- it cannot be read by range or by zip member (`io.open` and `io.fetch` of `<url>::<member>` raise
-  `NeedsFetch`); the snippet stages the whole zip and opens the tar.gz inside it locally;
-- `io` records empty validators for it: a changed upstream file is not noticed, and the cache entry of a
-  download that was cut short without a transport error would be kept. Such a file fails loudly here (no zip
-  directory, or a CRC error of the zip member or the gzip stream), it is not read as data.
+- **Values** are the decoder's (`imagecodecs`), unchanged: a label PNG returns its stored ids. JPEG is lossy,
+  so a JPEG is fit for raw images, not for ids.
+- **Access.** `plane`: one member is one z plane, and any region of it costs the whole member. The scan keeps
+  no pixels. For each matched member it keeps a copy of the inflater's state at the 1 MiB step of the archive
+  the member starts in (about 39 kB per copy, shared by the members of one step). `read` re-enters the gzip
+  stream there, so a plane costs its own member and at most 1 MiB of compressed bytes before it, served from
+  `io`'s block cache: no network after the scan, except for the tail of the last member. `open_array` decodes
+  the first plane only (shape and dtype). The last decoded member is kept, so the three `c` planes of one tile
+  are decoded once.
+- **dtype.** The file's. **Voxel size:** `None`; PNG and JPEG resolution fields describe print size.
 
 ## Known limits
 
-- Bytes: every archive a URL stands for is fetched whole, even for one member (245 MB for the 74 images of
-  the example). Members deep in very large archives are what `czi-targz-member`'s range reads are for.
-- Time: reading planes out of archive order re-inflates from the archive's start. All 74 planes of the
-  example's 245 MB archive, in z order, took 38 s.
-- Each member is read whole into memory (3 x 3100 x 3100 `uint8` in the example); no pyramid levels.
-- A 1/2/4-bit grey PNG raises (the decoder rescales its samples to 0..255). TIFF members are not read.
-- Samples are exposed as stored: an RGBA file has 4 `c` planes. A crop holds one `c` plane.
-- Only gzip: a plain `.tar`, `.tar.bz2` or `.tar.xz` is refused by its first bytes. A zip is searched for
-  `.tar.gz`/`.tgz` members by name only; images stored directly in a zip belong to `image-tiles-glob`.
-- One open file handle per archive is held for the array's lifetime.
+- Bytes and time: the scan costs the archive's compressed bytes up to the last member wanted, on every job
+  (the block cache is per job). Members deep in a multi-GB archive can pass the job's byte cap
+  (`BudgetExceeded`); bind folders near the archive's start, with `count`.
+- Each array scans the archive itself. Two arrays on one archive share the bytes through `io`'s cache but each
+  inflates the stream again (about 5 s per GB of tar).
+- A palette PNG or a 1/2/4-bit grey PNG raises: the decoder would turn palette indices into colours and
+  rescale low bit depths to 0..255, so stored ids would be lost.
+- Samples are exposed as stored: an RGBA member has 4 `c` planes. There is no param to pick or drop a sample.
+- A crop holds one `c` plane (the harness samples a plane per crop), so a colour tile yields single-sample
+  crops.
+- Each member is read whole into memory, so this is for tiles, not for large images. Members of differing
+  shape (e.g. crops of varying size) cannot be one array.
+- Only `.tar.gz`; a plain `.tar`, `.tar.bz2` or `.tar.xz` is not read. One archive per array.
+- Trailing bytes behind the last gzip stream that are not another gzip stream raise.
 
 ## Example
 
-`examples/harvarddv-ocycmp-prostate-tma-gleason.yaml`: H&E prostate tissue-microarray spots with Gleason
-annotation masks (Harvard Dataverse doi:10.7910/DVN/OCYCMP), 15 tar.gz archives. The binding reads the 74 spot
-images of `ZT80_38_A.tar.gz` (RGB JPEG, `zcyx` 74 x 3 x 3100 x 3100 `uint8`) and their pathologist-1 masks from
-`Gleason_masks_test_pathologist1.tar.gz` (`zyx` 74 x 3100 x 3100 `uint8`). The masks are 4-bit palette PNGs
-whose indices are the class ids (palette: 0 green, 1 blue, 2 yellow, 3 red, 4 white), read with
-`palette: index`; over the 74 masks the ids are 0 benign 1.6%, 1 Gleason 3 23.7%, 2 Gleason 4 23.1%,
-3 Gleason 5 6.1%, 4 unlabelled 45.5% of the pixels.
-
-The ids are returned as stored, so **benign is 0 and unlabelled is 4**. The harness takes nonzero pixels as
-annotated: every crop of this binding counts as labelled, the unlabelled area included, and a crop of benign
-tissue alone counts as unlabelled. The snippet does not renumber ids; whether this dataset needs that is for
-the binding's reviewer.
-
-Smoke fetched 252,186,592 bytes (both bundles). The example binding's `snippets_commit` is the commit before
-this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a
-commit that contains the snippet.
+`examples/zenodo-22130319-plagioclase-cold-cl-ssl.yaml`: PlagNetPlus, cold-cathodoluminescence scan tiles of
+volcanic rock thin sections (JPEG, RGB `uint8`, 2076x3088) in `01_source_imagery.tar.gz` (3.9 GB) and one
+`uint16` instance map of plagioclase crystals per tile in `02_segmentation_resources.tar.gz` (1.1 GB). The
+binding reads the two samples at the start of the raw archive, `Rumania/10` (144 tiles) and `Rumania/5` (174
+tiles), as `zcyx` (144, 3, 2076, 3088) and (174, 3, 2076, 3088), with their label maps as `zyx`. Raw and label
+are paired by tile name with `key`; the pairing was checked on the data (same 318 tile names on both sides,
+label outlines on the crystals of the same-named tile). Smoke fetched 568,328,192 bytes: the first 447 MiB of
+the raw archive and the first 95 MiB of the label archive. The example binding's `snippets_commit` is the
+commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the
+worker names a commit that contains the snippet.

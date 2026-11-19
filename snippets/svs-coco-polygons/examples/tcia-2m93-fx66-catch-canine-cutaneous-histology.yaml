@@ -1,0 +1,24 @@
+record: tcia-2m93-fx66-catch-canine-cutaneous-histology
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: svs-coco-polygons
+    urls: ["https://pathdb.cancerimagingarchive.net/index.php/system/files/wsi/ross/CATCH/Histiocytoma/Histiocytoma_02_1.svs"]
+    params: {}
+labels:
+  - snippet: svs-coco-polygons
+    urls: ["https://www.cancerimagingarchive.net/wp-content/uploads/CATCH-json.zip::CATCH.json"]
+    params: {file_name: Histiocytoma_02_1.svs}
+    pairs_with: 0
+    label_key: manual_gt-tissue-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw with svs-coco-polygons instead of the draft's tiff-zip-member-2: that snippet decodes the whole 56848 x 50399 x 3 page (8.6 GB) for every read; this one decodes only the 240x240 JPEG 2000 tiles a region touches. Opened as yxc 56848 x 50399 x 3 uint8 (record: axes yxs, uint8, shape varies per slide), voxel size 253.3 nm from the file's 'MPP = 0.2533' (the record's value). A 1000x1100 region is identical to tifffile's own read of the same pixels"
+  - "the slide is still staged whole (648,905,665 bytes) and the raw reports access 'file': pathdb.cancerimagingarchive.net answers HEAD without Content-Length, so the harness's io.open raises NeedsFetch, although the server does answer range GETs (206, 'Content-Range: bytes 0-15/648905665'). The snippet asks io.open first, so it reads by range (access 'chunk', about 1 MiB per touched block) once the harness takes the size from a ranged GET; this needs a human change to harness/io.py"
+  - "raw url is the record's technical.sample slide; the other 349 slides are not listed in the record (listing_complete false). Each can be bound the same way: its .svs url as a raw and this same JSON url with file_name = that slide's name as its label"
+  - "label url is the COCO JSON inside CATCH-json.zip (a deflated member, 13.4 MB, fetched and parsed at open: the grid's shape is in it). file_name Histiocytoma_02_1.svs is the paired raw's file name: images[] has exactly one entry with it (id 342, width 50399, height 56848, the raw's x and y), and its 95 annotations are the label"
+  - "values are the JSON's category ids, the record's classes: 1 Bone, 2 Cartilage, 3 Dermis, 4 Epidermis, 5 Subcutis, 6 Inflamm/Necrosis, 7 Melanoma, 8 Plasmacytoma, 9 Mast Cell Tumor, 10 PNST, 11 SCC, 12 Trichoblastoma, 13 Histiocytoma; 0 = no polygon (unannotated, mostly slide background). This slide uses 3, 4, 5 and 13"
+  - "NEEDS A HUMAN LOOK, overlapping polygons: the polygons overlap (here a Histiocytoma outline of 742 Mpx and a Dermis outline of 589 Mpx share most of their bounding boxes) and the JSON states no drawing order. The snippet's rule: the smallest polygon is on top (painted largest area first), as for nested annotations. On this slide that gives exactly the mask that painting in annotations[] order gives (0 differing pixels at 1/16 scale), so the two readings cannot be told apart here; the other slides were not compared"
+  - "coordinate frame: segmentation vertices are taken as level-0 pixels, x right and y down from the image corner (record alignment_notes), a pixel being labelled when its centre lies inside. Checked at 1/16 scale against the slide's own 1/16 level: 99.1% of tissue pixels (min(RGB) < 200) are labelled and 0.8% of unlabelled pixels are tissue; with the mask flipped in y or mirrored in x the tissue share inside the label falls from 52.7% to 45.4% and 36.9%"
+  - "label_key manual_gt-tissue-semantic and segmentation_type semantic, the draft's: annotations.source manual -> manual_gt; 13 class ids in one mask -> semantic; the class slug 'tissue' is from the record's '13 histologic classes (six non-neoplastic tissue classes and seven tumor classes)'. A reviewer should confirm the slug"
+  - "label dtype uint8 (13 ids); the record's label dtype is 'unknown' because polygons have none, which smoke reports as a warning"

@@ -1,0 +1,11 @@
+name: svg-paths-circles-glob
+spec_version: 1
+summary: SVG label files of filled <path> polygons (absolute M/L/Z outlines) and <circle> discs, from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane sorted by name, rasterised as uint8 class ids on the file's own width x height pixel grid; `classes` names the element types to fill in id order ([path, circle] paints paths 1 and circles 2 on top, a single type is a {0,1} mask), `origin` says whether coordinates are pixel indices or SVG user units.
+formats: [other]
+containers: [zip, http]
+params:
+  classes: {type: list, required: true, doc: "the SVG element types to fill, out of path and circle, each once, in id order: the first is painted 1, the second 2 over it, 0 is background. [path, circle] is one two-class plane with circles on top; [path] or [circle] is a {0,1} mask of that type alone, the other type left out. Reason required in binding"}
+  origin: {type: str, required: true, doc: "where coordinate (0, 0) lies in the top-left pixel, which the file cannot say. 'centre': coordinates are pixel indices (x = column, y = row, as OpenCV contours give them), so a vertex (x, y) is pixel (row y, col x) and the largest coordinate on the grid is width-1 / height-1. 'corner': SVG user units as a renderer draws them, pixel (row, col) covering [col, col+1) x [row, row+1) and sampled at its centre (col+0.5, row+0.5). Either way a pixel is painted when its sample point lies inside or on the outline. Reason required in binding"}
+requires: [numpy]
+tested_on: [edmond-hy5syn-ic-metal-layer-sem]
+supersedes: null

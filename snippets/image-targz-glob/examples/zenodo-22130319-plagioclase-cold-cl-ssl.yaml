@@ -1,0 +1,48 @@
+record: zenodo-22130319-plagioclase-cold-cl-ssl
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 1482c48ea38bc9d9c7c808040a8561945ae273dc
+raw:
+  - snippet: image-targz-glob
+    urls: ["https://zenodo.org/records/22130319/files/01_source_imagery.tar.gz"]
+    params:
+      members: "01_source_imagery/non_aeg_raw_plag/Rumania/10/*.JPG"
+      count: 144
+      key: "([^/]+)\\.JPG$"
+  - snippet: image-targz-glob
+    urls: ["https://zenodo.org/records/22130319/files/01_source_imagery.tar.gz"]
+    params:
+      members: "01_source_imagery/non_aeg_raw_plag/Rumania/5/*.JPG"
+      count: 174
+      key: "([^/]+)\\.JPG$"
+labels:
+  - snippet: image-targz-glob
+    urls: ["https://zenodo.org/records/22130319/files/02_segmentation_resources.tar.gz"]
+    params:
+      members: "02_segmentation_resources/dataset_linkage/interim/non_aegina_clean_labels_v1/17__Rumania__10/Rumania/*/clean_instance_labels_uint16.png"
+      count: 144
+      key: "([^/]+)/clean_instance_labels_uint16\\.png$"
+    pairs_with: 0
+    label_key: auto_pred-plagioclase_crystal-instance
+    segmentation_type: instance
+  - snippet: image-targz-glob
+    urls: ["https://zenodo.org/records/22130319/files/02_segmentation_resources.tar.gz"]
+    params:
+      members: "02_segmentation_resources/dataset_linkage/interim/non_aegina_clean_labels_v1/19__Rumania__5/Rumania/*/clean_instance_labels_uint16.png"
+      count: 174
+      key: "([^/]+)/clean_instance_labels_uint16\\.png$"
+    pairs_with: 1
+    label_key: auto_pred-plagioclase_crystal-instance
+    segmentation_type: instance
+reasons:
+  - "image-targz-glob: the record's arrays are PNG and JPEG members of tar.gz archives (technical.arrays path_pattern); a tar.gz has no index, so image-tiles-glob (zip or HTTP directory) fails with BadZipFile and czi-targz-member decodes CZI only. The archive's plain URL is bound and the members are named by params.members, because io reads '::' as a zip member"
+  - "raw: the RGB JPEG cold-CL scan tiles of 01_source_imagery.tar.gz (record technical.arrays[0], 2076x3088x3 uint8); the colour samples are read as c, so each raw is zcyx. The glob ends in .JPG, case-sensitive, which leaves out each sample folder's whole-section mosaics (*_stitch.jpg, 80 MB for Rumania/10, and *_stitchSmall.jpg), its *_infobar_*.jpg and its .txt/.spj scan files"
+  - "two samples are bound, not the archive: Rumania/10 (144 tiles) and Rumania/5 (174 tiles) are the first two sample folders in the raw archive (members listed by streaming its first 640 MiB), so the scan stops after 447 MiB of its 3.9 GB. A member costs every compressed byte before it, on every job; the two archives whole are 5,029,288,864 bytes, more than the job's 5 GB cap, and the other 18 samples lie further in. 'Rumania' is the archive's folder name for the record's Caraci (Romania) location"
+  - "count 144 and 174: the number of .JPG tiles in each raw folder and of label maps in the matching label folder (both listed from the archives; the label counts also agree with the archive's own clean_label_map_inventory.tsv). count stops the scan at the folder's last file instead of inflating the archive to its end; tar stores each folder's files together, so no match lies behind it"
+  - "labels: the per-tile uint16 instance maps of 02_segmentation_resources.tar.gz (record technical.arrays[1], encoding instance-ids), folders 17__Rumania__10 and 19__Rumania__5 under dataset_linkage/interim/non_aegina_clean_labels_v1; both lie in the archive's first 95 MiB. pairs_with 0 is Rumania/10, pairs_with 1 is Rumania/5"
+  - "key: a raw tile is .../Rumania/<sample>/<tile>.JPG and its label map is .../<nn>__Rumania__<sample>/Rumania/<tile>/clean_instance_labels_uint16.png, stored in different orders in the two archives; key takes <tile> (e.g. 10_00003_00001) from both names and the planes are sorted by it, so z index k of a label is the map of z index k of its raw"
+  - "the pairing by tile name, which the record inferred from names only, was checked on the data: the raw and label folders hold exactly the same tile names (144 of 144 and 174 of 174, none only on one side), every tile and map is 2076x3088, and on four tiles decoded from both archives the label outlines lie on the crystals of the same-named raw tile (mean grey inside the labels over outside is 1.06 to 1.22 for a tile's own map and 0.95 to 1.03 for another tile's)"
+  - "label_key auto_pred-plagioclase_crystal-instance (from the draft): the maps are the output of the PlagNet segmentation model on the non-Aegina scans (the archive's README: 'non-Aegina production segmentation covered 20 sample tasks and 2,650 unique source scans', with the 'PlagNet model checkpoint for segmenting non-Aegina cold-CL scans'), so the source is automatic; one class, plagioclase crystal (record title and sample)"
+  - "segmentation_type instance: each map numbers the crystals of its tile 1..n with 0 as background (all 318 maps bound hold exactly the ids 1..n, n from 13 to 72), the record's encoding instance-ids"
+  - "not bound: the masked single-crystal crops of 03_unified_crystal_datasets.tar.gz (record technical.arrays[2]) vary in shape (57-286 px), so they are not one array, and they are cut from these tiles; the Aegina crops in extracted_plags/ are not in the raw archive's first 640 MiB, and the label maps cover the non-Aegina scans only"
+  - "voxel size: none; the JPEG and PNG headers, the Zenodo record and the READMEs give no pixel size (record voxel_size_nm null)"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"
