@@ -1,0 +1,61 @@
+record: zenodo-5734143-haemonchus-larvae-maskrcnn
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 76cd8a4feec3b10f1ac5d0bc35d56c6755abb61e
+raw:
+  - snippet: via-json-polygon-zip
+    urls:
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/train/annotation_file.json"
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/train/*.jpg"
+    params: {read: image, annotated_only: true}
+  - snippet: via-json-polygon-zip
+    urls:
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/val/annotation_file.json"
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/val/*.jpg"
+    params: {read: image, annotated_only: true}
+labels:
+  - snippet: via-json-polygon-zip
+    urls:
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/train/annotation_file.json"
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/train/*.jpg"
+    params: {read: instance, attribute: Hco_stage, classes: [egg, L2, L3], annotated_only: true}
+    pairs_with: 0
+    label_key: manual_gt-nematode-instance
+    segmentation_type: instance
+  - snippet: via-json-polygon-zip
+    urls:
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/train/annotation_file.json"
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/train/*.jpg"
+    params: {read: semantic, attribute: Hco_stage, classes: [egg, L2, L3], annotated_only: true}
+    pairs_with: 0
+    label_key: manual_gt-nematode-semantic
+    segmentation_type: semantic
+  - snippet: via-json-polygon-zip
+    urls:
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/val/annotation_file.json"
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/val/*.jpg"
+    params: {read: instance, attribute: Hco_stage, classes: [egg, L2, L3], annotated_only: true}
+    pairs_with: 1
+    label_key: manual_gt-nematode-instance
+    segmentation_type: instance
+  - snippet: via-json-polygon-zip
+    urls:
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/val/annotation_file.json"
+      - "https://zenodo.org/records/5734143/files/Image%20recognition%20based%20on%20deep%20learning%20in%20Haemonchus%20contortus%20motility%20assays.zip::*/Annotation Data/val/*.jpg"
+    params: {read: semantic, attribute: Hco_stage, classes: [egg, L2, L3], annotated_only: true}
+    pairs_with: 1
+    label_key: manual_gt-nematode-semantic
+    segmentation_type: semantic
+reasons:
+  - "two raws and four labels, all with via-json-polygon-zip: one array per split for the images (read image) and two per split for the polygons (read instance, read semantic). The earlier form of this binding (12 jpeg-zip-glob raws by file-name pattern and 24 labels) made about 80 requests to open its 36 arrays, and its crop job ended with Zenodo's 429 TOO MANY REQUESTS (the zip's HEAD answers x-ratelimit-limit 133 per minute, and the harness does not retry a 429). These 6 arrays open with 10 requests: one HEAD, the zip's directory, and the JSON and first image of each split, each fetched whole once (a 30-byte local-header read and the member)"
+  - "urls of every array: the split's annotation_file.json and all the .jpg members of its folder, as member globs of the record's one 22.7 GB zip (the leading * stands for the top folder, whose name ends in a space). The record's sample urls are members of this zip; io fetches only the members that are read, never the zip"
+  - "annotated_only true on raws and labels: the VIA files list all 135 train and 46 val images, but 66 train entries ('train (45)' to '(105)' and '(107)' to '(111)') and 20 val entries ('test (19)'-'(21)', '(25)'-'(41)') have regions: []. They are not empty fields: 'train (100).jpg' was decoded and viewed while testing and is full of eggs and larvae with no polygon. A label plane of zeros there would call animals background, so those 86 images are left out, and 69 train and 26 val images remain, every one with at least one polygon. They can be bound as label-less raws if a human wants them as raw data"
+  - "raw and label planes agree by construction: the three arrays of a split have the same urls and annotated_only, and the snippet makes the planes from them in one way (the images whose entry has regions, sorted by url), so plane k of a label is the annotation of plane k of its raw. Smoke shapes: raws (69, 3, 2160, 2560) and (26, 3, 2160, 2560), labels (69, 2160, 2560) and (26, 2160, 2560)"
+  - "read image: RGB samples kept as c (record: axes yxs, 2160x2560x3 uint8, channels 3), as jpeg-zip-glob would read them"
+  - "entries and files agree: each JSON's entry file names are exactly the jpg members of its folder (135 and 46), and every entry's VIA `size` equals its member's byte size, so the JSONs were made from these files"
+  - "val uses val/annotation_file.json (3,586 polygons), which the record names as the val annotation; val/test_annotation.json (3,594) and val/test_old.json (VIA project file, 3,217) are other versions of the same 46 images and are not bound"
+  - "attribute Hco_stage, classes [egg, L2, L3]: the only region attribute, and its only three values in both files (train egg 3,385 / L2 1,592 / L3 1,820; val egg 2,487 / L2 559 / L3 540), in the record's class order, so semantic ids are 1 egg, 2 L2 (the paper calls it L1), 3 L3; 0 is background"
+  - "two labels per raw, so that nothing in the file is lost: read instance (each polygon its own id, restarting per image; segmentation_type instance) tells touching animals apart, read semantic (class id; segmentation_type semantic) carries the stage. Where polygons overlap (larvae cross, eggs clump) the smaller one is on top. All 6,797 train polygons keep at least one pixel; 3 of the 3,586 val polygons (eggs: 'test (18).jpg' regions 72 and 86, 'test (22).jpg' region 309) are wholly covered by smaller polygons and leave no pixel"
+  - "coordinate frame: vertices are VIA image pixel coordinates (x right, y down, integers; x spans -2..2560 and y -2..2160, i.e. the image edges, cut at the grid). Checked on 'train (1).jpg' (25 polygons): mean grey inside the filled polygons is 123 against 143 outside, and 145 to 150 with the mask moved 40 px in any direction or 148 to 153 mirrored; an overlay shows the outlines on the animals"
+  - "NEEDS A HUMAN DECISION, label_key class slug: the polygons mark three life stages (egg, L2, L3) of one nematode rather than one listed class. Chosen here: manual_gt-nematode-instance and manual_gt-nematode-semantic (my choice of slug; the stage is in the semantic ids). manual_gt because the polygons were drawn by hand in VIA as Mask R-CNN training data"
+  - "annotated images may still be incompletely annotated (debris and some animals carry no polygon), so 0 means 'no polygon', not certainly background"
+  - "voxel size: none; neither the JPEGs nor the VIA files carry a pixel size and the record found none"
