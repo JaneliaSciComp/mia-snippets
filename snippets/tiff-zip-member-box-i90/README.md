@@ -29,6 +29,13 @@ annotated volume is a harness that places every crop on an annotation.
   and read page by page (`access: plane`): only the TIFF header, the IFDs tifffile needs and the requested
   pages are fetched, so planes outside the box are never read. A deflated member (or a server without Range /
   Content-Length) raises `NeedsFetch`; the snippet then stages the whole file with `io.fetch` (`access: file`).
+- **Rows of a page.** Of a page stored as it is (uncompressed whole-byte samples, one per pixel, no predictor,
+  its strips in file order with no gap, which is how ImageJ writes a stack) only the rows a read covers are
+  fetched, as one byte range, and the columns are cut from them. Any other page (LZW, deflate, tiled, RGB) is
+  decoded whole by tifffile and then cut, as in `tiff-zip-member`. The values are the same either way. It
+  matters on a slow or unsteady host: a plane of the example's box 302 rows high is 3 MiB of range requests
+  where the whole 1635-row float32 page is 13 MiB, and every request is one more chance of a dropped
+  connection.
 - **Axes.** tifffile's `series[0].axes`, mapped to `czyx`: `Z`/`Q`/`I` → `z`, `C`/`S` → `c`, `Y`, `X`.
   Size-1 axes other than y/x are dropped. The native order is kept (an RGB `YXS` file is `yxc`). Any other
   axis (`T`, …) or two letters mapping to the same axis fails with a message asking for `params.axes`. With
@@ -60,7 +67,8 @@ annotated volume is a harness that places every crop on an annotation.
 - One box per binding entry, measured on that file. Several annotated places are several raw/label pairs of
   entries on the same URLs; `io`'s cache holds a file's bytes after the first. Boxes may overlap, and the
   harness's overlap rule is per raw entry, so two crops from overlapping boxes can show the same voxels.
-- Each page is decoded whole, even for a small box or region (tiled TIFFs included).
+- A compressed, tiled or multi-sample page is decoded whole, even for a small box or region. Of an
+  uncompressed page the rows are cut in the file but not the columns: a read fetches full-width rows.
 - Only `series[0]`; other series and pyramid levels are ignored.
 - A generic multi-page TIFF (not ImageJ/OME/shaped) makes tifffile read every IFD at open; over HTTP that
   can cost one 1 MiB block per IFD when IFDs are spread through the file.

@@ -6,7 +6,11 @@ tiff-zip-member presents the whole file. A volume whose manual segmentation cove
 everywhere else, so crops drawn over the whole of it pair raw full of structures with an empty label. With the
 box the binding names the part of the file that forms the array, the same box for a raw and its label, which
 keeps them voxel for voxel on one grid. Without the y/x params this snippet reads exactly what tiff-zip-member-2
-reads, and without any of the box params and `channel` exactly what tiff-zip-member reads."""
+reads, and without any of the box params and `channel` exactly what tiff-zip-member reads.
+
+Of a page stored as it is (uncompressed, one sample per pixel, its rows one after another in the file) only the
+rows a read covers are fetched, not the page: a box 302 rows high of a 1635-row float32 page is 2.3 MB of its
+12.6 MB. Any other page is decoded whole, as before. The values are the same either way."""
 import numpy as np
 import tifffile
 
@@ -80,8 +84,45 @@ class _Tiff:
             idx[i] = full.get(a, slice(None))
         n = len(self._outer)
         keys = np.arange(int(np.prod(self._outer))).reshape(self._outer)[tuple(idx[:n])]
-        pages = [self.tif.asarray(key=int(k), series=0)[tuple(idx[n:])] for k in np.ravel(keys)]
+        pages = [self._page(int(k), tuple(idx[n:])) for k in np.ravel(keys)]
         return np.stack(pages).reshape(np.shape(keys) + pages[0].shape)
+
+    def _page(self, k: int, sel: tuple[int | slice, ...]) -> np.ndarray:
+        """`sel` of page k of the series: from the rows `sel` covers alone when the page's rows can be read
+        straight from the file (`_rows_at`), else from the whole page as tifffile decodes it."""
+        page = self.tif.series[0].pages[k]
+        at = None if page is None or len(sel) != 2 else _rows_at(page)
+        if at is None:
+            return self.tif.asarray(key=k, series=0)[sel]
+        height, width = page.shape
+        ys, xs = sel
+        rows = np.arange(height)[ys]            # the file rows asked for, in the order asked
+        if rows.size == 0:
+            return np.empty((0, width), self.dtype)[:, xs]
+        lo, hi = int(rows.min()), int(rows.max())
+        stored = np.dtype(self.dtype).newbyteorder(self.tif.byteorder)
+        fh = self.tif.filehandle
+        fh.seek(at + lo * width * stored.itemsize)
+        data = fh.read((hi - lo + 1) * width * stored.itemsize)
+        if len(data) != (hi - lo + 1) * width * stored.itemsize:
+            raise OSError(f"page {k}: rows {lo}..{hi} read back as {len(data)} bytes")
+        block = np.frombuffer(data, stored).reshape(hi - lo + 1, width).astype(self.dtype, copy=False)
+        return block[rows - lo][..., xs]
+
+
+def _rows_at(page: tifffile.TiffPage | tifffile.TiffFrame) -> int | None:
+    """The file offset of row 0 of a page whose rows lie in the file as they are, one after another: uncompressed
+    whole-byte samples, one per pixel, no predictor, strips (or full-width tiles) in order with no gap. None for
+    any other page."""
+    key = page.keyframe
+    if not key.is_final or key.dtype is None or len(key.shape) != 2:
+        return None
+    offsets, counts = page.dataoffsets, page.databytecounts
+    if not offsets or len(offsets) != len(counts) or sum(counts) != key.shape[0] * key.shape[1] * key.dtype.itemsize:
+        return None
+    if any(o + c != nxt for o, c, nxt in zip(offsets, counts, offsets[1:])):
+        return None
+    return int(offsets[0])
 
 
 def _shift(sel: int | slice, z0: int, n: int) -> int | slice:
