@@ -1,0 +1,125 @@
+record: empiar-12244-cryo-sem-mouse-cortex-axon-seg
+record_commit: f3de27f7d76f63f5965fad94e3f0069b28d71a9b
+snippets_commit: db126cbac2759c1c1ff1a605229c7523bd800546
+raw:
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
+  params:
+    z_first: 0
+    z_last: 28
+    y_first: 1164
+    y_last: 1634
+    x_first: 595
+    x_last: 1015
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
+  params:
+    z_first: 5
+    z_last: 65
+    y_first: 0
+    y_last: 301
+    x_first: 395
+    x_last: 891
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
+  params:
+    z_first: 0
+    z_last: 43
+    y_first: 0
+    y_last: 531
+    x_first: 934
+    x_last: 1546
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
+  params:
+    z_first: 40
+    z_last: 83
+    y_first: 742
+    y_last: 1508
+    x_first: 717
+    x_last: 1448
+labels:
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
+  params:
+    z_first: 0
+    z_last: 28
+    y_first: 1164
+    y_last: 1634
+    x_first: 595
+    x_last: 1015
+  pairs_with: 0
+  label_key: manual_gt-cell-labels
+  segmentation_type: instance
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
+  params:
+    z_first: 5
+    z_last: 65
+    y_first: 0
+    y_last: 301
+    x_first: 395
+    x_last: 891
+  pairs_with: 1
+  label_key: manual_gt-cell-labels
+  segmentation_type: instance
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
+  params:
+    z_first: 0
+    z_last: 43
+    y_first: 0
+    y_last: 531
+    x_first: 934
+    x_last: 1546
+  pairs_with: 2
+  label_key: manual_gt-cell-labels
+  segmentation_type: instance
+- snippet: tiff-zip-member-box-i90
+  urls:
+  - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
+  params:
+    z_first: 40
+    z_last: 83
+    y_first: 742
+    y_last: 1508
+    x_first: 717
+    x_last: 1448
+  pairs_with: 3
+  label_key: manual_gt-cell-labels
+  segmentation_type: instance
+reasons:
+- 'raw and label are each one multi-page TIFF at a plain URL (record technical.sample.urls), read with
+  tiff-zip-member-box-i90; no axes override: the file''s own axes (zyx) are used as the snippet reports them'
+- 'the reviewer rejected the crops of the whole 180x1635x1920 pair for their labels. The label stack is
+  read correctly and lies on the raw''s grid as it is (label outlines sit on the raw''s membranes on planes
+  0, 20, 35, 60, 70 and 83; flipped in y, x or z, or shifted by 3 planes, they do not), but it is a manual
+  segmentation of a few objects: 99.83% of its voxels are 0, planes 84-179 hold no label at all, and on
+  planes 0-83 the 23 ids lie in four separate places. Only 5.1% of the 256x256 positions of the whole
+  volume hold any annotation, so its crops paired raw full of unannotated axons with an empty label'
+- 'four raw entries, each a box of the one raw file, each paired with the same box of the label file:
+  the ids were grouped by overlapping bounding boxes (in z, y and x), which gives four groups, and a box
+  is a group''s z run (first to last annotated plane) and its bounding box in y and x widened by 128 px
+  (half a crop) on each side and cut at the image edge. File indices, 0-based, both ends included: ids
+  1-3 z 0-28 y 1164-1634 x 595-1015; ids 4-6 z 5-65 y 0-301 x 395-891; ids 7-13 z 0-43 y 0-531 x 934-1546;
+  ids 14-23 z 40-83 y 742-1508 x 717-1448. Every plane of every box holds an annotation, each box holds
+  only its own group''s ids, and 93%, 88%, 94% and 64% of the 256x256 positions in them hold one. Structures
+  inside a box that the annotators did not trace stay unlabelled: the boxes say where they worked, they
+  do not make the segmentation dense'
+- raw and label of a pair carry identical box params, so they stay voxel for voxel on one grid (the harness
+  compares their shapes, not their offsets)
+- label_key manual_gt-cell-labels is taken exactly from downloads.json labels, as a downloader already
+  converted the dataset under that name; the same key on all four label entries, each paired with its
+  own raw
+- 'segmentation_type instance, not the draft''s semantic: the record leaves the encoding unknown, and
+  measured on the file each of the 23 ids is one traced object, not a class: it occupies one compact place
+  (one of the four groups), 20 of the 23 on an unbroken run of planes, and outlines of one kind in different
+  places carry different ids (the dark sheath outlines traced as ids 7 and 21). The ids are Amira materials,
+  one per object; which object each is is not documented (record alignment_notes)'
