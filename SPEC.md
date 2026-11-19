@@ -20,9 +20,12 @@ mia-snippets/
     └── README.md              the sample it produces and its limits
 ```
 
-`<name>` is a lowercase slug that is never reused, e.g. `tiff-zip-member`, `mrc-http`, `tiff-slices-zip`,
-`hdf5-dataset`. A changed snippet is a new directory with a new name, such as `tiff-zip-member-2`, and its
-`snippet.yaml` sets `supersedes: tiff-zip-member`. Bindings keep pointing at the version they were tested with.
+`<name>` is a lowercase slug that is never reused. A snippet written for an issue is named
+`<what-it-reads>-i<N>`, N being the issue's number, e.g. `tiff-zip-member-i90`: an issue has one pull request,
+which adds one snippet, so no two pull requests add the same name. A name is an identity and nothing more.
+Nothing is read from its words or its number, and a snippet merged under another name (`tiff-zip-member`,
+`mrc-http-3`) keeps it. A changed snippet is a new directory with a new name, and its `snippet.yaml` sets
+`supersedes: <the one it replaces>`. Bindings keep pointing at the version they were tested with.
 
 ## 2 Interface
 

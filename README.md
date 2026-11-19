@@ -36,8 +36,9 @@ Rules a snippet lives by (SPEC §2, §3):
 - **Pure, independent reader.** No cropping, resampling or normalising. No imports of other snippets; shared
   code becomes a new snippet. Dependencies must be on `harness/allowlist.txt`; an agent that needs a new one
   reports it, and a human extends the harness environment.
-- **Immutable.** A fix is a new directory (`tiff-zip-member-2`) whose `snippet.yaml` sets `supersedes`. A
-  wrong snippet is listed in `WITHDRAWN.yaml` by a maintainer, never edited or deleted (SPEC §6).
+- **Immutable.** A fix is a new directory, named after its issue (`tiff-zip-member-i90`, SPEC §1), whose
+  `snippet.yaml` sets `supersedes`. A wrong snippet is listed in `WITHDRAWN.yaml` by a maintainer, never edited
+  or deleted (SPEC §6).
 
 A **binding** (SPEC §4) is the data that connects a dataset to snippets: which snippet reads which URLs with
 which params, how labels pair with raws, and a reason for every non-default choice. Agents write bindings;
