@@ -1,0 +1,10 @@
+name: image-targz-member
+spec_version: 1
+summary: One image (single-page TIFF, or PNG as its stored samples, so a palette or 1/2/4-bit mask PNG gives its ids) that is a member of a tar.gz archive, as yx or cyx; tar hard links and symlinks are followed; the gzip stream is inflated by range reads up to the member's end, never fetched whole.
+formats: [tiff, png]
+containers: [http, s3]
+params:
+  member: {type: str, required: false, doc: "the member's full name in the tar, e.g. data/DRP1-KO/tra_val/slide_images/rwt_2_HM_1.tif; default: the first regular member ending in .tif, .tiff or .png. Members further into the archive cost every compressed byte before them"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-15602048-tnbc-mitochondria-tem]
+supersedes: null

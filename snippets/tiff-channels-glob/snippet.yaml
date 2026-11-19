@@ -1,0 +1,9 @@
+name: tiff-channels-glob
+spec_version: 1
+summary: A set of multi-page channel TIFFs (e.g. PerkinElmer/Akoya QPTIFF component files), one file per z, chosen by `<dir url>/::<glob>` over an HTTP directory index, a zip member glob or plain URLs. Each file's tifffile series[0] (its full-resolution channel pages, CYX) is one cyx stack and the files are stacked as zcyx; thumbnails and reduced-resolution pages are not read. One array is files of one shape, so a set with several shapes is one array per shape, its files listed as plain URLs when no glob tells them apart. Every file is checked against the first (channel count, yx shape, dtype, pixel size) when it is read, and a tiled page is read by range, only the tiles a region touches.
+formats: [tiff]
+containers: [http, zip]
+params: {}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad3742-lattice-a-lung-mif]
+supersedes: null

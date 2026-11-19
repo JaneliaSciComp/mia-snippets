@@ -1,0 +1,39 @@
+record: figshare-28919840-hiesd-gastric-esd-wsi
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: e144ef33c2cc5c1c19ce6dc127893da46cbf73b2
+raw:
+  - snippet: svs-png-colour-mask-grid
+    urls: ["https://ndownloader.figshare.com/files/54167408"]
+    params: {}
+labels:
+  - snippet: svs-png-colour-mask-grid
+    urls:
+      - "https://ndownloader.figshare.com/files/54172424::ESD_40X_annotation_downsample64/e492f29a-a67b-4f16-8843-089487bf4bd9.png"
+      - "https://ndownloader.figshare.com/files/54167408"
+    params:
+      label_factor: 64
+      colours:
+        - [0, 0, 0]          # id 0: not annotated
+        - [139, 0, 0]        # id 1: #8B0000 Well-differentiated adenocarcinoma (tub1)
+        - [255, 0, 255]      # id 2: #FF00FF Moderately differentiated adenocarcinoma (tub2)
+        - [128, 0, 128]      # id 3: #800080 Papillary adenocarcinoma (pap)
+        - [75, 0, 130]       # id 4: #4B0082 Others
+        - [138, 43, 226]     # id 5: #8A2BE2 Normal Gland
+        - [0, 0, 255]        # id 6: #0000FF Chronic Gastritis
+        - [70, 130, 180]     # id 7: #4682B4 Chronic atrophic gastritis
+        - [0, 255, 0]        # id 8: #00FF00 lymphoid follicles
+        - [0, 128, 0]        # id 9: #008000 Complete intestinal metaplasia
+        - [255, 255, 0]      # id 10: #FFFF00 Incomplete intestinal metaplasia
+    pairs_with: 0
+    label_key: manual_gt-gastric_histotype-semantic
+    segmentation_type: semantic
+reasons:
+  - "urls: the one pair the record gives URLs for (technical.sample), slide e492f29a-a67b-4f16-8843-089487bf4bd9: the SVS is figshare file 54167408, its mask the member of the same UUID in ESD_40X_annotation_downsample64.zip (file 54172424); the record pairs <uuid>.png with <uuid>.svs. One slide is one array, since slide shapes differ; the other 103 slides have no URL on the record and were not bound"
+  - "raw with svs-png-colour-mask-grid instead of the draft's tiff-zip-member-2: page 0 of the Aperio SVS (BigTIFF, 256x256 YCbCr JPEG tiles) is read tile by tile by byte range as cyx 3x54271x81920 uint8, the record's yxs shape with the samples as c, so a patch costs the tiles it touches, not the 13 GB decoded page; voxel size 245.8 nm from the Aperio description (MPP = 0.245800), which the record's notes also quote"
+  - "the 403 the match agent met was the HEAD request (figshare's S3 redirect is signed for GET only); the harness now asks such a host for its first byte instead, so the snippet does nothing about the redirect and reads through io like any other"
+  - "label with svs-png-colour-mask-grid instead of the draft's image-tiles-glob, which would give the mask's R, G, B samples as a c axis at 847x1280; this snippet gives uint8 class ids on the raw's 54271x81920 grid. Label urls are the mask PNG and the raw SVS again: the snippet reads the SVS's first IFD for the grid and voxel size, no slide pixel"
+  - "label_factor 64: the mask is 847x1280 and the slide 54271x81920 (54271 // 64 = 847, 81920 / 64 = 1280; record alignment: scaled, 64x downsampled). Each mask pixel is repeated 64x64, never interpolated; the last 63 slide rows take the last mask row. Mask outlines drawn on a 1/16 overview of the slide follow the annotated mucosa with no flip or offset"
+  - "colours: black [0, 0, 0] is id 0 (not annotated, 97.7% of this mask), then the record's ten classes in the record's order, which it takes from Annotation_Category_Label_Description.txt: 1 tub1 #8B0000, 2 tub2 #FF00FF, 3 pap #800080, 4 Others #4B0082, 5 Normal Gland #8A2BE2, 6 Chronic Gastritis #0000FF, 7 Chronic atrophic gastritis #4682B4, 8 lymphoid follicles #00FF00, 9 Complete intestinal metaplasia #008000, 10 Incomplete intestinal metaplasia #FFFF00. Across all 104 masks of the zip these eleven are the only painted colours (every other colour is a border mixture), so one table serves every slide"
+  - "the mask is not exact colours: it was shrunk with interpolation and holds 904 colours, 8,384 pixels (0.77%) being mixtures at region borders. The snippet settles those from their neighbours (README), which gives ids 0, 6, 9, 10 only, the three classes this mask paints; mapping each pixel to the nearest table colour would add 520 pixels of id 4 (Others) and 23 of id 1 (tub1) along the borders of other classes"
+  - "label_key manual_gt-gastric_histotype-semantic and segmentation_type semantic are the draft's: annotations.source manual -> manual_gt; the ids are tissue classes (record encoding rgb-colors with a class map), not objects"
+  - "not bound: ESD_40X_Quality_Assessment_Mask (GrandQC quality classes, role other in the record, not probed by it) and the XML outlines in ESD_40X_annotation_downsample64_xml.zip, which the record does not describe as an array"

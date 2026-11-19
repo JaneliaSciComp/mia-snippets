@@ -1,0 +1,29 @@
+record: zenodo-7637988-orion-crc-he-highplex-if
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+- snippet: tiff-tiled-http
+  urls:
+  - https://lin-2023-orion-crc.s3.amazonaws.com/data/CRC02/18459_LSP10364_US_SCAN_OR_001__092347-registered.ome.tif
+  params: {}
+labels:
+- snippet: tiff-tiled-http
+  urls:
+  - https://lin-2023-orion-crc.s3.amazonaws.com/data/CRC02/P37_S30-CRC02-mask.ome.tif
+  params: {}
+  pairs_with: 0
+  label_key: auto_pred-cell-instance
+  segmentation_type: instance
+reasons:
+- 'tiff-tiled-http instead of tiff-zip-member-2: each file is one tiled BigTIFF page that is a whole slide (H&E
+  48460x58709x3 uint8, JPEG tiles; mask 48460x58709 int32, deflate tiles). tiff-zip-member-2 decodes the page
+  per read (8.5 GB / 11.4 GB decoded, about 659 MB fetched for one patch); this snippet fetches and decodes only
+  the tiles under the region and reports access chunk, so the harness asks for boxes, not planes.'
+- raw = CRC02 registered H&E and label = CRC02 cell mask, the record's technical.sample.urls; same 48460x58709
+  grid (harness describe of both files, and the shapes smoke reports).
+- 'raw axes cyx 3x48460x58709: the H&E is RGB stored as YCbCr JPEG tiles with 3 samples per pixel (YXS); the
+  snippet decodes them to RGB and presents the sample axis as the leading c, the record''s axes and shape.'
+- 'label_key auto_pred-cell-instance: annotations.source automatic; the mask''s OME channel is named ''cell''
+  (harness describe) and the record calls it the MCMICRO cell mask; encoding instance-ids.'
+- 'The 19-channel IF files (*-zlib.ome.tiff, 73 GB for CRC02) and the per-cell CSVs are left unbound: the
+  record gives no axes, shape or dtype for them.'

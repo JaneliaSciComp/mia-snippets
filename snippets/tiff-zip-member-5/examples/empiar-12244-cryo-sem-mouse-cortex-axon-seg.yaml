@@ -2,7 +2,7 @@ record: empiar-12244-cryo-sem-mouse-cortex-axon-seg
 record_commit: f3de27f7d76f63f5965fad94e3f0069b28d71a9b
 snippets_commit: db126cbac2759c1c1ff1a605229c7523bd800546
 raw:
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
   params:
@@ -12,7 +12,7 @@ raw:
     y_last: 1634
     x_first: 595
     x_last: 1015
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
   params:
@@ -22,7 +22,7 @@ raw:
     y_last: 301
     x_first: 395
     x_last: 891
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
   params:
@@ -32,7 +32,7 @@ raw:
     y_last: 531
     x_first: 934
     x_last: 1546
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg.tif
   params:
@@ -43,7 +43,7 @@ raw:
     x_first: 717
     x_last: 1448
 labels:
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
   params:
@@ -56,7 +56,7 @@ labels:
   pairs_with: 0
   label_key: manual_gt-cell-labels
   segmentation_type: instance
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
   params:
@@ -69,7 +69,7 @@ labels:
   pairs_with: 1
   label_key: manual_gt-cell-labels
   segmentation_type: instance
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
   params:
@@ -82,7 +82,7 @@ labels:
   pairs_with: 2
   label_key: manual_gt-cell-labels
   segmentation_type: instance
-- snippet: tiff-zip-member-3
+- snippet: tiff-zip-member-5
   urls:
   - https://ftp.ebi.ac.uk/empiar/world_availability/12244/data/118-day%20old%20mouse%20cortex/brain_for_seg_b_bck.labels.tif
   params:
@@ -97,7 +97,7 @@ labels:
   segmentation_type: instance
 reasons:
 - 'raw and label are each one multi-page TIFF at a plain URL (record technical.sample.urls), read with
-  tiff-zip-member-3; no axes override: the file''s own axes (zyx) are used as the snippet reports them'
+  tiff-zip-member-5; no axes override: the file''s own axes (zyx) are used as the snippet reports them'
 - 'the reviewer rejected the crops of the whole 180x1635x1920 pair for their labels. The label stack is
   read correctly and lies on the raw''s grid as it is (label outlines sit on the raw''s membranes on planes
   0, 20, 35, 60, 70 and 83; flipped in y, x or z, or shifted by 3 planes, they do not), but it is a manual

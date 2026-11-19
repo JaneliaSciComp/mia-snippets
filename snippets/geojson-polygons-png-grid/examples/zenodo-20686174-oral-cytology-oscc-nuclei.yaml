@@ -1,0 +1,24 @@
+record: zenodo-20686174-oral-cytology-oscc-nuclei
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://zenodo.org/records/20686174/files/oral-cytology-dataset.zip::patches/*.png"]
+    params: {}
+labels:
+  - snippet: geojson-polygons-png-grid
+    urls: ["https://zenodo.org/records/20686174/files/oral-cytology-dataset.zip::patch-geojsons/*.geojson"]
+    params: {image: "../patches/*.png"}
+    pairs_with: 0
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+reasons:
+  - "raw (unchanged from the draft): record technical.arrays says patches/*.png are 2048x2048x3 uint8 RGB PNG members of the zip; image-tiles-glob reads PNG zip members by glob, one file per z plane, samples as c, so raw is zcyx (739, 3, 2048, 2048), a stack of independent 2D patches, not a volume. No params: the samples are real colour (Papanicolaou / May-Gruenwald-Giemsa brightfield)"
+  - "labels: geojson-polygons-png-grid instead of the draft's image-tiles-glob, which stood there only to record the error (not a PNG, JPEG or TIFF file). No catalog snippet reads GeoJSON; this one rasterises each file's polygons, one file per z plane, zyx (739, 2048, 2048) uint16"
+  - "label urls patch-geojsons/*.geojson pair plane for plane with the raw's patches/*.png: the zip directory lists 739 members under each, with the same 739 stems, and the two globs sorted by name give the stems in the same order (checked on the listing while testing; record alignment_notes: patch-geojsons/<stem>.geojson pairs with patches/<stem>.png)"
+  - "params.image '../patches/*.png': the grid of plane k is read from the header of patches/<stem>.png, the image its GeoJSON annotates, so the label has the raw's 2048x2048 grid by the file and not by a number written in the binding; a PNG of another size raises at read. The members are deflated, so the header costs the whole PNG once, the cache entry the raw's read of that plane uses"
+  - "coordinates are patch pixels, x right and y down from the top-left corner, pixel (r, c) covering x in [c, c+1) and y in [r, r+1) (QuPath; record alignment_notes: vertices within the 2048 px patch): in the 16 GeoJSONs read while testing (211 features, all single-ring Polygons with objectType annotation) x spans 0..2048 and y 22..2047, so 2048 is the right edge and no offset applies. The snippet paints the pixels whose centres are inside an outline and raises on a vertex outside the image. Checked on 3 patches against the raw: mean intensity inside the painted nuclei 125 / 66 / 64 against 250 / 220 / 158 for the whole patch, and no darker than the patch (233..244 / 222..230 / 157..162) when the label is transposed or flipped"
+  - "no params.classes, so ids are instances: each polygon is one nucleus (9, 22 and 109 ids in the 3 patches painted, and 211 features in the 16 files read, equal to num-nuclei of metadata/patch_metadata.csv for those patches), painted with its 1-based number in its file; ids start again in every plane, each plane being its own image. Where two outlines overlap the smaller is on top"
+  - "label_key manual_gt-nucleus-instance and segmentation_type instance, as in the draft (annotations.source manual; one polygon per nucleus)"
+  - "NEEDS A HUMAN DECISION, the class is not bound: properties.classification.name is the cytological category I, II, III or IV (metadata/data_dictionary.csv: 'Cytological category observed for each nuclei in a patch'). patch_metadata.csv gives one category per patch (454 patches I, 76 II, 93 III, 116 IV) and in the 16 files read every nucleus carries its patch's category, so it reads as the slide's diagnosis stamped on each nucleus rather than a class told apart within an image. The draft binds the instances only and this binding keeps to it. A semantic label is one more entry with params {image: '../patches/*.png', classes: [I, II, III, IV]} (ids 1..4, segmentation_type semantic); that form was read on the same 3 patches (all category I: ids {0, 1}, same foreground as the instance plane), not on a patch of category II-IV"
+  - "no voxel size bound: none in the PNG headers or GeoJSON (record voxel_size_nm null)"

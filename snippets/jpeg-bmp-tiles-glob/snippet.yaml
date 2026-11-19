@@ -1,0 +1,9 @@
+name: jpeg-bmp-tiles-glob
+spec_version: 1
+summary: One image per file, JPEG or uncompressed 24-bit BMP told apart by magic bytes (not by name, so a set of mixed JPEG and BMP files all named .png reads as one array), from zip members or an HTTP directory chosen by glob (or plain URLs), stacked along z; a colour file's samples (R, G, B) are the c axis (zcyx).
+formats: [jpeg, other]
+containers: [zip, http]
+params: {}
+requires: [numpy, imagecodecs]
+tested_on: [figshare-24548953-caishi-cervical-ais-he]
+supersedes: null

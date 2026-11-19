@@ -1,0 +1,104 @@
+record: s-biad4140-chikv-mitochondria-tem
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 0df4c358c2b0b08f760f4e771c6653223604f981
+raw:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_0[0-2][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_03[1-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_040_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_05[1-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_0[6-9][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_1[0-9][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_0[0-6][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_07[!1]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_0[89][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_1[0-9][0-9]_Original.png"
+    params: {}
+  - snippet: image-tiles-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_030_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_04[1-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_050_Original.png"
+    params: {}
+  - snippet: image-tiles-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/WT_071_Original.png"
+    params: {}
+labels:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_0[0-2][0-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_03[1-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_040_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_05[1-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_0[6-9][0-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_1[0-9][0-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_0[0-6][0-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_07[!1]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_0[89][0-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_1[0-9][0-9]_FullMit.png"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: image-tiles-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_030_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_04[1-9]_FullMit.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_050_FullMit.png"
+    params: {}
+    pairs_with: 1
+    label_key: manual_gt-mitochondria-semantic
+    segmentation_type: binary
+  - snippet: png-instance-masks-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::*_Mit[0-9][0-9].*"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_0[0-2][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_03[1-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_040_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_05[1-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_0[6-9][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_1[0-9][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_0[0-6][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_07[!1]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_0[89][0-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::WT_1[0-9][0-9]_Original.png"
+    params: {mask: _Mit, image: _Original.png}
+    pairs_with: 0
+    label_key: manual_gt-mitochondria-instance
+    segmentation_type: instance
+  - snippet: png-instance-masks-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::*_Mit[0-9][0-9].*"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_030_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::CN_04[1-9]_Original.png"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/CN_050_Original.png"
+    params: {mask: _Mit, image: _Original.png}
+    pairs_with: 1
+    label_key: manual_gt-mitochondria-instance
+    segmentation_type: instance
+  - snippet: png-instance-masks-glob
+    urls:
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/::*_Mit[0-9][0-9].*"
+      - "https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/140/S-BIAD4140/Files/BaseDatosFinal_CN_WT/WT_071_Original.png"
+    params: {mask: _Mit, image: _Original.png}
+    pairs_with: 2
+    label_key: manual_gt-mitochondria-instance
+    segmentation_type: instance
+reasons:
+  - "raw: image-tiles-glob on the record's raw array (path_pattern BaseDatosFinal_CN_WT/*_Original.png, one 8-bit grey PNG per image), as in the draft, but as three arrays instead of the draft's one glob. image-tiles-glob needs every file of an array to have the first file's shape, and the PNG headers of all 282 *_Original.png (bytes 0-31 of each) say 271 are 2048x2048 and 11 are 2098x2098: CN_030 and CN_041 to CN_050. The record gives 2048x2048 for all, from one sample, and smoke reads plane 0 only, so the draft passed smoke and would have raised at the first 2098 plane a crop job drew. raw 0 is the 270 images of 2048x2048 without WT_071 (zyx), raw 1 the 11 of 2098x2098 (zyx), raw 2 WT_071 alone (yx; see the WT_071 reason)"
+  - "raw urls: the record's download_url is an HTTP directory, so each url is '<dir url>/::<glob>' or a plain file. raw 0 lists ten of them in name order that together match every *_Original.png except those twelve (CN_0[0-2][0-9], CN_03[1-9], CN_040, CN_05[1-9], CN_0[6-9][0-9], CN_1[0-9][0-9], WT_0[0-6][0-9], WT_07[!1], WT_0[89][0-9], WT_1[0-9][0-9]); raw 1 is CN_030, CN_04[1-9], CN_050. Checked against the directory listing: 270 + 11 + 1 = 282 files, each *_Original.png in exactly one array. z is a stack of independent 2D micrographs (record dimensionality 2D), not a volume"
+  - "*_OriginalG.png and *_Full.jpg have role 'other' in the record (undocumented RGB copy and a small JPEG) and are not bound"
+  - "labels 0 and 1, manual_gt-mitochondria-semantic (from the draft): *_FullMit.png, the record's whole-image (all-)mitochondria mask, read by image-tiles-glob with the raw's urls and _FullMit.png in place of _Original.png, so the files have the same stems in the same order as raw 0 and raw 1. Every *_FullMit.png has the size of its *_Original.png (headers of all 282). Values are 0 and 255: record encoding binary, segmentation_type binary"
+  - "WT_071 is its own raw (raw 2) and has no semantic label: WT_071_FullMit.png and WT_071_Mit01.png are the only two RGBA PNGs among the 1698 image and mask files (colour type 6 in the header; decoded, R = G = B in {0, 255} and alpha 255 everywhere). image-tiles-glob raises on a file whose shape differs from the first, reads this one alone as cyx with 4 samples (the alpha among them, which a stage would write as a 4-channel label), and its samples: grey refuses it because the alpha differs from the colour. png-instance-masks-glob reads such a file as the grey mask it is, so raw 2 carries the instance label only. Nothing annotated is lost: WT_071 has one mitochondrion and its _FullMit.png is byte for byte its _Mit01.png (24,129 bytes, cmp). A HUMAN MAY PREFER to drop WT_071 (delete raw 2 and label 4) so that every bound image has both label keys"
+  - "labels 2 to 4, manual_gt-mitochondria-instance: png-instance-masks-glob, because the record's second label array is one full-size binary mask per mitochondrion (*_Mit[0-9][0-9].png) and every other glob snippet makes one z plane per file (the match agent's error: label zyx [1131, 2048, 2048] against raw [282, 2048, 2048]). The snippet merges the masks of each image into one plane, pixel = the mask's number NN, 0 elsewhere, uint16"
+  - "params mask '_Mit' and image '_Original.png': a mask is <stem>_Mit<NN>.<ext> and belongs to the image <stem>_Original.png, <stem> being CN_NNN or WT_NNN (directory listing: 1134 mask files over 282 stems, every stem with an _Original.png)"
+  - "label urls: the mask glob *_Mit[0-9][0-9].* and then the urls of the raw the label pairs with, in the raw's order. The snippet makes one plane per image url in that order (as image-tiles-glob stacks them, checked: the label's image urls equal the raw's file urls, plane for plane, in all three arrays) and leaves out the masks of images that are not among its urls, so the same mask glob serves all three labels. The image files are not read for the label"
+  - "mask glob *_Mit[0-9][0-9].* and not the record's *_Mit[0-9][0-9].png: it matches 1134 files, the 1131 .png and WT_005_Mit01.jpg, _Mit02.jpg, _Mit03.jpg, which are the only masks of WT_005. The record calls those three lossy JPEGs; their first bytes are a PNG signature and they decode as 2048x2048 8-bit grey PNGs with values 0 and 255, and the snippet goes by the bytes, not the extension. *_FullMit.png is not matched (the glob needs '_Mit')"
+  - "no all-zero plane: every image has 1 to 14 mask files, numbered 01 to N without gaps (directory listing), so each plane's ids are 1..N"
+  - "checked on every plane (all 282 images, 1134 masks, read through the binding): the ids in the plane are exactly the numbers of the image's mask files, the plane equals a merge made apart from the snippet from the same files, every mask holds the values 0 and 255 only, and on the 281 planes that have a semantic label the non-zero pixels are exactly those of *_FullMit.png. Masks of one image overlap in 12 images (CN_012, CN_024, CN_039, CN_049, CN_054, CN_056, CN_059, CN_061, CN_073, WT_007, WT_012, WT_034), 24,305 pixels in all, 1 to 4,475 per image except CN_061 with 15,468 (0.4% of its pixels); there the snippet keeps the highest NN, and no mitochondrion is hidden by it"
+  - "segmentation_type instance: one id per mitochondrion mask file; ids are unique within a plane only (each image numbers its mitochondria from 1)"
+  - "label_key manual_gt-mitochondria-instance is the match agent's (issue: label_key manual_gt-mitochondria-instance, segmentation_type instance); the annotation source 'manual' is the draft's reading of the record, not checked again here. The record notes four damage-stage classes that are not in the file names (possibly in 'File List CHIKV.xlsx', not opened), so neither label carries a class"
+  - "smoke warns that labels 2 to 4 are uint16 where the record says uint8: the record describes the single 0/255 mask files, the snippet returns instance ids and always uses uint16"
+  - "voxel size: neither snippet reports one (PNG). The record's 2.24 nm is stated for the deposited 2048x2048 images (resized from 4096x4096); the 11 images of 2098x2098 are not mentioned by the record and their pixel size is NOT KNOWN from the files (2.19 nm if they show the same field of view, which is a guess). A human should decide whether raw 1 may take the record's voxel size"

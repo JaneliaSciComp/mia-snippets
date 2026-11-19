@@ -1,0 +1,10 @@
+name: nd2-http
+spec_version: 1
+summary: One Nikon ND2 file (NIS-Elements Ver3.0 container) at a plain URL, as cyx; the chunk map and attributes are parsed by the snippet and one uncompressed 8- or 16-bit frame is read by row range.
+formats: [nd2]
+containers: [http, s3]
+params:
+  frame: {type: int, required: false, doc: "index from 0 of the frame (ImageDataSeq chunk) to read when the file holds more than one (uiSequenceCount > 1); the snippet does not interpret the file's T, Z or XY loops, so the binding says which position the index is; reason required in binding"}
+requires: [numpy]   # no nd2 package (not on the allowlist): the container is parsed in snippet.py
+tested_on: [zenodo-18609221-mdck-4ch-edof-gt-patches]
+supersedes: null

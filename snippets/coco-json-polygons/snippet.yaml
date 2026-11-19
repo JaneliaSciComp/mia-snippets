@@ -1,0 +1,12 @@
+name: coco-json-polygons
+spec_version: 1
+summary: The polygon segmentations of COCO JSON files (e.g. Roboflow's _annotations.coco.json) as uint16 label planes, one annotated image per z plane. The urls are the images (plain urls, zip members or globs; the same urls as the raw they label, so the planes pair by construction and no directory listing is needed), and each image's polygons come from the COCO file beside it, rasterised (pixel centres, even-odd) on the height and width that file states for it. No image is read. Values are instance ids (the annotation's number within its image) or COCO category ids, of all categories or of the ones `categories` names. An image the file lists without annotations is a background plane.
+formats: [json, jpeg, png, tiff, other]
+containers: [zip, http]
+params:
+  annotations: {type: str, required: false, doc: "path of the COCO file, relative to the folder of each image, `..` steps allowed (e.g. '../annotations/instances_val.json'). Default '_annotations.coco.json', the Roboflow layout of one file beside the images of each split. Images of several folders each use their own folder's file; reason required in binding"}
+  categories: {type: list, required: false, doc: "the COCO category names whose annotations are read, e.g. [bacteria]; annotations of other categories are left out. Each name must be exactly one category of every COCO file used. Without it all categories are read. For one label array per class, bind the same urls once per category; reason required in binding"}
+  ids: {type: str, required: false, doc: "what a pixel holds. 'instance' (default): the 1-based number of its annotation among the image's annotations of the read categories, in file order, so ids restart in every plane. 'semantic': the annotation's COCO category_id as the file states it (it must be 1..65535, and every COCO file used must give the read categories the same ids). 0 is background; where annotations overlap, the one covering fewer pixels is on top. Reason required in binding"}
+requires: [numpy]
+tested_on: [hf-lynnmass-tilebac-flagella-bacteria]
+supersedes: null

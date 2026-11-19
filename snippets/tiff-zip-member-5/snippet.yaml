@@ -1,0 +1,17 @@
+name: tiff-zip-member-5
+spec_version: 1
+summary: One TIFF from a zip member or a plain URL; deflated members are fetched whole. As tiff-zip-member (and tiff-zip-member-2, whose `channel`, `z_first`, `z_last` it keeps), plus `y_first`/`y_last` and `x_first`/`x_last` to present only a box of the file, for a volume whose manual segmentation covers a few objects and is empty elsewhere, bound with the same box for raw and label, one binding entry per annotated box.
+formats: [tiff, ome-tiff]
+containers: [zip, http]
+params:
+  axes: {type: str, required: false, doc: "override when the TIFF's own axes are wrong: one czyx letter per axis of tifffile's series[0] after size-1 axes (other than y/x) are dropped, including a c that `channel` collapses; reason required in binding"}
+  channel: {type: int, required: false, doc: "0-based index on the file's channel axis (tifffile C or S) of the one channel to present; the array then has no c axis. Without it a channelled file keeps its c axis; reason required in binding"}
+  z_first: {type: int, required: false, doc: "0-based index of the file's z plane that becomes plane 0 of the array; planes before it are left out. Without it the array starts at the file's first plane. Give a raw and its label the same box; reason required in binding"}
+  z_last: {type: int, required: false, doc: "0-based index of the file's z plane that becomes the array's last plane (included); planes after it are left out. Without it the array ends at the file's last plane; reason required in binding"}
+  y_first: {type: int, required: false, doc: "0-based index of the file's row that becomes row 0 of the array; rows before it are left out. Without it the array starts at the file's first row. Give a raw and its label the same box; reason required in binding"}
+  y_last: {type: int, required: false, doc: "0-based index of the file's row that becomes the array's last row (included). Without it the array ends at the file's last row; reason required in binding"}
+  x_first: {type: int, required: false, doc: "0-based index of the file's column that becomes column 0 of the array; columns before it are left out. Without it the array starts at the file's first column. Give a raw and its label the same box; reason required in binding"}
+  x_last: {type: int, required: false, doc: "0-based index of the file's column that becomes the array's last column (included). Without it the array ends at the file's last column; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [empiar-12244-cryo-sem-mouse-cortex-axon-seg]
+supersedes: tiff-zip-member

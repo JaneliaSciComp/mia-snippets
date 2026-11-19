@@ -1,0 +1,13 @@
+name: tiff-pages-glob-txt-points
+spec_version: 1
+summary: A set of multi-page TIFFs whose pages are channels (tifffile 'shaped' series, axes QYX, one YX page per channel; or single-page YX files such as masks), one file per z, chosen by `<zip url>::<glob>` over a zip's members (or plain URLs) and stacked as zcyx, or as zyx with `channel` picking one page; or, with `points`, the headerless `a,b` text file each image has for one channel (one point per line) marked on that channel's grid as a zyx uint16 label, a point's 1-based line number at its pixel or in a disc of `radius` pixels (a points table, not masks). Deflated members are fetched whole.
+formats: [tiff, csv]
+containers: [zip, http]
+params:
+  channel: {type: int, required: false, doc: "0-based page of every file to read; the array is then [z]yx. Without it every page is a channel, [z]cyx (yx for single-page files). With `points` it is the channel the points belong to, the `{c}` of the template, and required when the files have several pages; reason required in binding"}
+  points: {type: str, required: false, doc: "makes the array the point label instead of the images: the member name of each image's text file in the image's zip, with {name} for the image's file name without its extension and {c} for `channel`, e.g. 'set/annotations/centrioles/{name}_C{c}.txt'. The urls are the same images as the raw the label pairs with, so both have the same planes. Every image must have its text file; reason required in binding"}
+  columns: {type: str, required: false, doc: "with `points` only, and required then: 'xy' when a line is `column,row` of the image (x first), 'yx' when it is `row,column`. The files do not say; decide it by laying the points over the image; reason required in binding"}
+  radius: {type: int, required: false, doc: "with `points` only: pixels (0 to 255, default 0) around each point's pixel that are marked too, a disc; where discs overlap a pixel takes the nearest point. A marker size, not an object size; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [figshare-21581358-cenfind-centriole-foci-widefield]
+supersedes: null

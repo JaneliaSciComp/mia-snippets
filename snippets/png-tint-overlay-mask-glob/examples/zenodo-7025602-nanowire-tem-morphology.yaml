@@ -1,0 +1,44 @@
+record: zenodo-7025602-nanowire-tem-morphology
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: a0f162e6c6dd3f8d2a49af1502803e3fd3d110d7
+raw:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://zenodo.org/records/7025602/files/dispersed.zip::dispersed/*.jpg"
+    params: {samples: grey}
+  - snippet: image-tiles-glob
+    urls:
+      - "https://zenodo.org/records/7025602/files/network.zip::network/*.jpg"
+    params: {samples: grey}
+  - snippet: image-tiles-glob
+    urls:
+      - "https://zenodo.org/records/7025602/files/bundle.zip::bundle/*.jpg"
+    params: {samples: grey}
+  - snippet: image-tiles-glob
+    urls:
+      - "https://zenodo.org/records/7025602/files/singular.zip::singular/*.jpg"
+    params: {samples: grey}
+labels:
+  - snippet: png-tint-overlay-mask-glob
+    urls:
+      - "https://zenodo.org/records/7025602/files/dispersed.zip::dispersed/*_label.png"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-nanowire-semantic
+    segmentation_type: binary
+  - snippet: png-tint-overlay-mask-glob
+    urls:
+      - "https://zenodo.org/records/7025602/files/network.zip::network/*_label.png"
+    params: {}
+    pairs_with: 1
+    label_key: manual_gt-nanowire-semantic
+    segmentation_type: binary
+reasons:
+  - "raw stays as the draft has it: image-tiles-glob, one array per morphology zip (dispersed, network, bundle, singular), each glob 100 JPEGs stacked as z, a stack of independent 2D images (record dimensionality 2D), not a volume; smoke gives zyx (100, 2048, 2048) for all four, the record's 2048 x 2048"
+  - "samples: grey on raw (from the draft): the record says channels 1 (TEM) while the JPEGs have 3 components; image-tiles-glob checks on every file it reads that the three samples are identical and returns one plane. All 400 JPEGs were read this way while testing and none was refused"
+  - "labels on png-tint-overlay-mask-glob instead of the draft's image-tiles-glob: the *_label.png files are 8-bit RGB overlays, the image with the nanowires blended 25% blue (record: R = G everywhere, B differs on 7.6% of pixels of the sampled file), not masks; image-tiles-glob returns the rendering as (100, 3, 2048, 2048) pixel values. This snippet returns uint8 1 where a pixel's samples differ and 0 elsewhere, zyx (100, 2048, 2048) on the raw's grid"
+  - "the rule was checked on all 200 overlays: R = G in every file; B - R is 0 or 64 in 198 files and 0, 64 or 112 in network/Grid B2_383 and Grid B2_459, where 112 (1,749 and 5,526 pixels) is the blue blended twice over two overlapping annotation shapes, still nanowire. No file carries another shift, so no pixel is tinted by anything but the annotation"
+  - "label urls are the globs dispersed/*_label.png and network/*_label.png with params {} (defaults suffix _label, image_ext jpg): '<name>_label.png' is the overlay of '<name>.jpg' in the same folder (record layout). The snippet orders a glob's overlays by the name of their JPEG, as the raw glob sorts the JPEGs, and requires each JPEG to be in the zip; sorted by their own names the dispersed overlays would be off at 67 of 100 positions ('Grid A8_2.jpg' sorts before 'Grid A8_23.jpg', 'Grid A8_23_label.png' before 'Grid A8_2_label.png'). Both zips hold exactly 100 JPEGs and 100 overlays with the same stems, so z index k of a label is the overlay of z index k of its raw; checked on the data too: the overlay's grey outside the mask correlates with the raw plane of the same index at 0.946 or more in all 200 planes"
+  - "the overlays are bound, not seg_mask_5_resolutions.zip::seg_mask_res<N>.npz (the record's label array): those 200 masks are resized to at most 1024 x 1024 and their order is not documented (record alignment_notes), and no catalog snippet reads npz. They were used as a check instead: every mask read here, reduced 2 x 2, matches a different one of the 200 masks of seg_mask_res1024.npz (intersection over union 0.980 to 0.999), in an order that is not the name order. One difference: about 2,000 pixels (0.05% of the plane) of Grid B2_383 are tinted in the overlay and 0 in the npz, an annotation shape the npz lacks"
+  - "bundle and singular have no overlays (record: dispersed and network only), so no label pairs with raw 2 and 3"
+  - "label_key manual_gt-nanowire-semantic and segmentation_type binary (from the draft): the match agent took source manual and class nanowire from the record's description (manual binary nanowire segmentation masks); one foreground class, nanowires not separated from one another. Smoke warns 'dtype uint8 is not the record's float64' for both labels: the record's label dtype is the npz's, and the values here are the same 0 and 1"

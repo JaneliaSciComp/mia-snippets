@@ -1,0 +1,12 @@
+name: mrc-unpadded-xy-points
+spec_version: 1
+summary: "A one-section MRC image (modes 1, 2, 6, 12) over range requests without the replicated-edge padding around it, or a headerless text table of X Y pixel coordinates, one point per line (e.g. picked particle centres, .coord), as a zyx uint32 instance label on that same image. One url (the MRC) is the raw; two urls, [points table, MRC], are the label, each point one pixel or a disc of `radius` pixels holding its 1-based row number. `rows` and `columns` say where the image is inside a padded file; reads check that what they leave out is copies of the image's edge."
+formats: [mrc, csv]
+containers: [http, s3]
+params:
+  rows: {type: list, required: false, doc: "[first, last]: the 0-based file rows of the image, inclusive, when the rows outside them are padding that repeats the image's first and last row. The array has last - first + 1 rows and starts at `first`. Give the raw and its label the same value. A read that touches the image's first or last row fails unless the file row beyond it is a bit-for-bit copy, so this cannot cut image away. Default: every row. Reason required in binding"}
+  columns: {type: list, required: false, doc: "[first, last]: the 0-based file columns of the image, inclusive, when the columns outside them are padding that repeats the image's first and last column; as `rows`. Every read fails unless, in the rows it reads, the columns left out are bit-for-bit copies of the image's edge column. Default: every column. Reason required in binding"}
+  radius: {type: int, required: false, doc: "points label only (two urls); pixels, >= 0; default 0: each point marks exactly its own pixel. With radius r every pixel whose centre is within r pixels of a point is marked (a disc 2r + 1 pixels across), and where discs overlap a pixel takes the nearest point. The table states no size, so a radius is the binding's choice of marker, not the object's extent. Reason required in binding"}
+requires: [numpy]
+tested_on: [empiar-10017-beta-galactosidase-particle-coordinates]
+supersedes: null

@@ -1,0 +1,25 @@
+record: mendeley-457x9c7rp3-fossil-diatom-eucampia-yolo
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/e999cbfd-a53e-4913-9cf1-8d493fbe62bd"]
+    params: {}
+labels:
+  - snippet: yolo-txt-boxes-image-url
+    urls: ["https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/9690f628-ad8d-4773-87e4-3d5d89e461b3"]
+    params:
+      images: ["https://prod-dcd-datasets-public-files-eu-west-1.s3.eu-west-1.amazonaws.com/e999cbfd-a53e-4913-9cf1-8d493fbe62bd"]
+      boxes: instance
+      classes: [0]
+    pairs_with: 0
+    label_key: manual_gt-eucampia_antarctica-instance
+    segmentation_type: instance
+reasons:
+  - "raw: the record's only tile URL (technical.sample.urls[0], JARE59-CD100microL-1-1_0002_0000_0005.jpg); harness describe says JPEG 2400x2400, 8-bit, 3 components, matching the record's yxs (2400,2400,3) uint8; image-tiles-glob reads the RGB samples as c with default params (cyx [3, 2400, 2400], no z for one file)"
+  - "label: the record's YOLO txt sample, one row '0 0.855797 0.128209 0.057566 0.060055'. yolo-txt-boxes-image-url instead of the draft's jpeg-xml-boxes-numbers, which parses XML only and was bound to record its error"
+  - "label url: the S3 object that the record's technical.sample.urls[1] (data.mendeley.com/public-files/datasets/457x9c7rp3/files/7f5cfced-515f-443e-8f03-bfffd375a523/file_downloaded) redirects to, not that URL itself. The Mendeley hop is not dependable: in crop job 155527667 it answered the 25 bytes '{\"err\":\"Unhandled error\"}' without an error status in place of the redirect, and they were read as the label file. The object is the same file (38 bytes, Content-Disposition filename JARE59-CD100microL-1-1_0002_0000_0005.txt) on the host and in the form of the record's own tile URL (technical.sample.urls[0])"
+  - "params.images = the raw's URL: YOLO rows are fractions of the image's width and height and the txt holds neither, so the snippet reads the 2400x2400 grid from the header of the tile the txt belongs to. The record's naming-conventions txt says an annotation file has the name of its tile; the file URLs are opaque ids, so the pair is written out here (the record's sample description names this tile and 'its YOLO txt', and the two objects' Content-Disposition filenames are JARE59-CD100microL-1-1_0002_0000_0005.jpg and .txt)"
+  - "boxes: instance, classes: [0]: one box per diatom, painted with its row number in the file; the files use the single class id 0 = Eucampia antarctica, and a row with another id raises. With one class a semantic array would only repeat the instance one as 0/1, so it is not bound"
+  - "label_key: annotations.source manual -> manual_gt; class 0 = Eucampia antarctica (annotations.format); the labels are filled detection boxes, not outlines of the valves, and whether that may be published as instance is the reviewer's call"
+  - "one tile and one txt only: the record gives no URL for the other 4,201 tiles and 4,102 txt files and the landing page cannot be listed, so the binding covers this pair until the record lists per-file URLs"

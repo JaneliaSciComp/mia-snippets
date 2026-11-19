@@ -1,0 +1,368 @@
+record: figshare-21581358-cenfind-centriole-foci-widefield
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 017676d952940c30f725c728bddcb70ec4e6aa7f
+raw:
+  - snippet: tiff-pages-glob-txt-points   # raw 0: RPE1wt_CEP63+CETN2+PCNT_1, channel 0
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 0}
+  - snippet: tiff-pages-glob-txt-points   # raw 1: RPE1wt_CEP63+CETN2+PCNT_1, channel 1
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 1}
+  - snippet: tiff-pages-glob-txt-points   # raw 2: RPE1wt_CEP63+CETN2+PCNT_1, channel 2
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_001_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_001_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_004_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_004_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_004_004_max.tif"
+    params: {channel: 2}
+  - snippet: tiff-pages-glob-txt-points   # raw 3: RPE1wt_CEP63+CETN2+PCNT_1, channel 3
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 3}
+  - snippet: tiff-pages-glob-txt-points   # raw 4: RPE1wt_CP110+GTU88+PCNT_2, channel 0
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/*_max.tif"
+    params: {channel: 0}
+  - snippet: tiff-pages-glob-txt-points   # raw 5: RPE1wt_CP110+GTU88+PCNT_2, channel 1
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/*_max.tif"
+    params: {channel: 1}
+  - snippet: tiff-pages-glob-txt-points   # raw 6: RPE1wt_CP110+GTU88+PCNT_2, channel 2
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_000_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_000_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_001_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_001_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_003_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_004_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_004_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_004_004_max.tif"
+    params: {channel: 2}
+  - snippet: tiff-pages-glob-txt-points   # raw 7: RPE1wt_CP110+GTU88+PCNT_2, channel 3
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/*_max.tif"
+    params: {channel: 3}
+  - snippet: tiff-pages-glob-txt-points   # raw 8: RPE1wt_CEP152+GTU88+PCNT_1, channel 0
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/*_max.tif"
+    params: {channel: 0}
+  - snippet: tiff-pages-glob-txt-points   # raw 9: RPE1wt_CEP152+GTU88+PCNT_1, channel 1
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/*_max.tif"
+    params: {channel: 1}
+  - snippet: tiff-pages-glob-txt-points   # raw 10: RPE1wt_CEP152+GTU88+PCNT_1, channel 2
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_004_max.tif"
+    params: {channel: 2}
+  - snippet: tiff-pages-glob-txt-points   # raw 11: RPE1wt_CEP152+GTU88+PCNT_1, channel 3
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/*_max.tif"
+    params: {channel: 3}
+  - snippet: tiff-pages-glob-txt-points   # raw 12: RPE1p53+Cnone_CEP63+CETN2+PCNT_1, channel 0
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 0}
+  - snippet: tiff-pages-glob-txt-points   # raw 13: RPE1p53+Cnone_CEP63+CETN2+PCNT_1, channel 1
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 1}
+  - snippet: tiff-pages-glob-txt-points   # raw 14: RPE1p53+Cnone_CEP63+CETN2+PCNT_1, channel 2
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_004_max.tif"
+    params: {channel: 2}
+  - snippet: tiff-pages-glob-txt-points   # raw 15: RPE1p53+Cnone_CEP63+CETN2+PCNT_1, channel 3
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 3}
+  - snippet: tiff-pages-glob-txt-points   # raw 16: U2OS_CEP63+SAS6+PCNT_1, channel 0
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/*_max.tif"
+    params: {channel: 0}
+  - snippet: tiff-pages-glob-txt-points   # raw 17: U2OS_CEP63+SAS6+PCNT_1, channel 1
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/*_max.tif"
+    params: {channel: 1}
+  - snippet: tiff-pages-glob-txt-points   # raw 18: U2OS_CEP63+SAS6+PCNT_1, channel 2
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_000_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_000_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_001_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_001_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_001_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_003_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_004_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_004_004_max.tif"
+    params: {channel: 2}
+  - snippet: tiff-pages-glob-txt-points   # raw 19: U2OS_CEP63+SAS6+PCNT_1, channel 3
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/*_max.tif"
+    params: {channel: 3}
+labels:
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/annotations/cells/*_max_C0.tif"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 1, points: "RPE1wt_CEP63+CETN2+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 1
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_000_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_001_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_001_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_004_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_004_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/RPE1wt_CEP63+CETN2+PCNT_1_004_004_max.tif"
+    params: {channel: 2, points: "RPE1wt_CEP63+CETN2+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 2
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 3, points: "RPE1wt_CEP63+CETN2+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 3
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/annotations/cells/*_max_C0.tif"
+    params: {}
+    pairs_with: 4
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/*_max.tif"
+    params: {channel: 1, points: "RPE1wt_CP110+GTU88+PCNT_2/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 5
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_000_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_000_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_001_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_001_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_003_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_004_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_004_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/RPE1wt_CP110+GTU88+PCNT_2_MMStack_4-Pos_004_004_max.tif"
+    params: {channel: 2, points: "RPE1wt_CP110+GTU88+PCNT_2/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 6
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CP110+GTU88+PCNT_2/projections/*_max.tif"
+    params: {channel: 3, points: "RPE1wt_CP110+GTU88+PCNT_2/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 7
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/annotations/cells/*_max_C0.tif"
+    params: {}
+    pairs_with: 8
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/*_max.tif"
+    params: {channel: 1, points: "RPE1wt_CEP152+GTU88+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 9
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_000_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_001_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_002_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/RPE1wt_CEP152+GTU88+PCNT_1_MMStack_1-Pos_003_004_max.tif"
+    params: {channel: 2, points: "RPE1wt_CEP152+GTU88+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 10
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1wt_CEP152+GTU88+PCNT_1/projections/*_max.tif"
+    params: {channel: 3, points: "RPE1wt_CEP152+GTU88+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 11
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/annotations/cells/*_max_C0.tif"
+    params: {}
+    pairs_with: 12
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 1, points: "RPE1p53+Cnone_CEP63+CETN2+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 13
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_000_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_001_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_003_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/RPE1p53+Cnone_CEP63+CETN2+PCNT_1_MMStack_6-Pos_004_004_max.tif"
+    params: {channel: 2, points: "RPE1p53+Cnone_CEP63+CETN2+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 14
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::RPE1p53+Cnone_CEP63+CETN2+PCNT_1/projections/*_max.tif"
+    params: {channel: 3, points: "RPE1p53+Cnone_CEP63+CETN2+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 15
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/annotations/cells/*_max_C0.tif"
+    params: {}
+    pairs_with: 16
+    label_key: manual_gt-nucleus-instance
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/*_max.tif"
+    params: {channel: 1, points: "U2OS_CEP63+SAS6+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 17
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_000_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_000_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_000_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_001_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_001_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_001_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_000_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_002_003_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_003_002_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_003_004_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_004_001_max.tif"
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/U2OS_CEP63+SAS6+PCNT_1_MMStack_5-Pos_004_004_max.tif"
+    params: {channel: 2, points: "U2OS_CEP63+SAS6+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 18
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+  - snippet: tiff-pages-glob-txt-points
+    urls:
+      - "https://ndownloader.figshare.com/files/38248110::U2OS_CEP63+SAS6+PCNT_1/projections/*_max.tif"
+    params: {channel: 3, points: "U2OS_CEP63+SAS6+PCNT_1/annotations/centrioles/{name}_C{c}.txt", columns: xy, radius: 2}
+    pairs_with: 19
+    label_key: manual_gt-centriole-points
+    segmentation_type: instance
+reasons:
+  - "tiff-pages-glob-txt-points for every array instead of the draft's tiff-zip-member-3: that snippet takes one file per array (124 raws), and no catalog snippet read the centriole point lists. This one stacks the fields of a folder along z (member-name order), reads the nucleus masks the same way, and marks the point lists on the same planes, so raws and labels come from one snippet and one file order. The z axis is a stack of independent 2D fields, not a volume (record dimensionality 2D)"
+  - "the files' pages are channels: tifffile gives the axes QYX ('shaped' series, description {shape: [4, 2048, 2048]}), a page axis the file does not name; record.yaml technical.arrays says the pages are channels, the DNA dye in channel 0 and the markers in channels 1-3 in folder-name order. Measured on the first field of each folder: page 0 shows nuclei (the nucleus masks cover its bright regions), pages 1-3 show foci under the points of their own text files"
+  - "one raw per folder and channel (20 raws, params.channel 0..3), not one cyx stack per folder as the issue proposed: the dataset names each annotation by the channel it belongs to (<field>_max_C0.tif masks channel 0, <field>_max_C<k>.txt lists the foci of channel k), and a label array is read for every plane of the raw it pairs with. Bound per channel, a crop of channel k carries exactly the annotation made on channel k, and a plane nobody annotated has no label array at all. A crop is one plane either way"
+  - "channel 2 raws and labels (raw 2, 6, 10, 14, 18) list 14 fields each as plain urls: only those fields have a <field>_max_C2.txt. A missing file is a field that was NOT annotated in that channel, not a field without foci (the issue assumed the latter): train.txt and test.txt of each folder name one channel per field, channel 2 has a text file exactly for the fields listed with channel 2 (and for RPE1wt_CEP63+CETN2+PCNT_1_000_003), while channels 1 and 3 have one for every field, with 8 to 80 points each. All 318 text files were read while testing. The snippet refuses a points array in which an image has no text file, so the 54 unannotated channel-2 planes are left unbound rather than given an empty label; the urls are in member-name order, which is the order the globs of the other arrays give"
+  - "RPE1wt_CEP63+CETN2+PCNT_1 has 5 pages per file (the record says 4), the other four folders 4; it has 24 fields (no 002_004), the others 25. Its page 4 is not bound: nothing annotates it, the folder name gives three markers and a DNA dye, and on field 000_000 it is nearly flat (p1 703, p99 889, max 1468)"
+  - "points 'RPE1.../annotations/centrioles/{name}_C{c}.txt' (one template per folder): {name} is the image's file name without .tif (<field>_max) and {c} the channel, which is the record's pairing rule <field>_max_C<k>.txt <-> channel k of <field>_max.tif"
+  - "columns xy: a line 'a,b' is column a, row b. The files do not say and the record left it open (paper: X-Y points). Measured on the first field of every folder, channels 1 and 3 (374 points): the brightest pixel within 2 pixels of (row b, column a) has a median of 1,897 to 17,419 against an image median of 150 to 390, while at (row a, column b) it is 164 to 541, the background. The brightest pixel within 6 pixels of a point is at a median offset of (0, 0), so the coordinates are used as 0-based pixel indices; over all 11,543 points the first column runs 1..2045 and the second 0..2047, inside the 2048x2048 grid"
+  - "radius 2: the files give one point per focus, not an outline, so each point is marked as a disc 5 pixels across. A focus is about 6 pixels wide at half maximum (median over the same 374 points), so the disc stays inside it and is visible in a 256-pixel crop. Foci come in pairs: the nearest neighbour of a point is at a median of 7.7 pixels, and 8% are closer than 5 pixels, where the two discs touch and a shared pixel goes to the nearer point"
+  - "label_key manual_gt-centriole-points with segmentation_type instance (15 labels): the record's encoding is points-table and the points were placed by hand (paper: X-Y points from Labelbox). The binding schema has no points type; instance keeps what the label holds, a distinct id per focus (its 1-based line in the text file, restarting in every plane), as csv-points-mrc-grid's binding does. The discs are markers of where a focus is, not masks of its extent. One key for all markers (CEP63, CETN2, CP110, CEP152, SAS6, GTU88, PCNT foci): the record has no classes, and the folder name says which marker a raw shows"
+  - "label_key manual_gt-nucleus-instance, segmentation_type instance, paired with the channel 0 raw of each folder only (5 labels): annotations/cells/<field>_max_C0.tif by the record's pairing rule, single-page YX uint16 on the same 2048x2048 grid, read as zyx in the same field order as the raw (both globs sort by <field>). harness describe --binding on 5 planes per folder: 2 to 19 ids per plane, 233 of the 240 ids one connected component (the other 7 are in pieces), which is what instance ids look like. The DNA channel is 2.1 to 16 times brighter inside a field's own mask than outside, and 0.5 to 1.2 times inside another field's mask, on the first and last field of every folder"
+  - "voxel size: the snippet reports None (the files' resolution tags are 1/1 with no unit); the record's 102.5 nm x/y is from the paper's Methods"
+  - "cost: the zip members are deflated, so a field is fetched whole (17 to 24 MB) for any region of it; the snippet reports access plane, one file per z"

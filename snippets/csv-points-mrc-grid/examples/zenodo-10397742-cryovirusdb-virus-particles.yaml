@@ -1,0 +1,257 @@
+record: zenodo-10397742-cryovirusdb-virus-particles
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675815_Data_10669764_10669765_20140411_224301_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675815_Data_10669794_10669795_20140411_224220_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675816_Data_10668884_10668885_20140411_224539_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675817_Data_10669794_10669795_20140411_225658_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675823_Data_10669794_10669795_20140411_230315_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675824_Data_10669764_10669765_20140411_230740_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675824_Data_10669794_10669795_20140411_230659_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675825_Data_10668884_10668885_20140411_231019_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675825_Data_10669794_10669795_20140411_231101_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675826_Data_10669794_10669795_20140411_231443_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675827_Data_10668884_10668885_20140411_231745_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675827_Data_10669764_10669765_20140411_231908_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675829_Data_10668884_10668885_20140411_232512_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675829_Data_10669764_10669765_20140411_232635_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675829_Data_10669794_10669795_20140411_232554_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675837_Data_10669764_10669765_20140411_234030_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675842_Data_10668884_10668885_20140411_234508_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675842_Data_10669764_10669765_20140411_234631_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675842_Data_10669794_10669795_20140411_234549_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10712676_Data_10669764_10669765_20140412_071106_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10712689_Data_10669764_10669765_20140412_074136_SumCorr.mrc"]
+    params: {}
+  - snippet: mrc-http-3
+    urls: ["https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_11690735_Data_10669764_10669765_20140412_080719_SumCorr.mrc"]
+    params: {}
+labels:
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675815_Data_10669764_10669765_20140411_224301_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675815_Data_10669764_10669765_20140411_224301_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 0
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675815_Data_10669794_10669795_20140411_224220_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675815_Data_10669794_10669795_20140411_224220_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 1
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675816_Data_10668884_10668885_20140411_224539_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675816_Data_10668884_10668885_20140411_224539_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 2
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675817_Data_10669794_10669795_20140411_225658_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675817_Data_10669794_10669795_20140411_225658_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 3
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675823_Data_10669794_10669795_20140411_230315_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675823_Data_10669794_10669795_20140411_230315_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 4
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675824_Data_10669764_10669765_20140411_230740_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675824_Data_10669764_10669765_20140411_230740_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 5
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675824_Data_10669794_10669795_20140411_230659_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675824_Data_10669794_10669795_20140411_230659_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 6
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675825_Data_10668884_10668885_20140411_231019_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675825_Data_10668884_10668885_20140411_231019_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 7
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675825_Data_10669794_10669795_20140411_231101_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675825_Data_10669794_10669795_20140411_231101_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 8
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675826_Data_10669794_10669795_20140411_231443_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675826_Data_10669794_10669795_20140411_231443_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 9
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675827_Data_10668884_10668885_20140411_231745_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675827_Data_10668884_10668885_20140411_231745_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 10
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675827_Data_10669764_10669765_20140411_231908_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675827_Data_10669764_10669765_20140411_231908_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 11
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675829_Data_10668884_10668885_20140411_232512_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675829_Data_10668884_10668885_20140411_232512_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 12
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675829_Data_10669764_10669765_20140411_232635_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675829_Data_10669764_10669765_20140411_232635_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 13
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675829_Data_10669794_10669795_20140411_232554_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675829_Data_10669794_10669795_20140411_232554_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 14
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675837_Data_10669764_10669765_20140411_234030_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675837_Data_10669764_10669765_20140411_234030_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 15
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675842_Data_10668884_10668885_20140411_234508_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675842_Data_10668884_10668885_20140411_234508_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 16
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675842_Data_10669764_10669765_20140411_234631_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675842_Data_10669764_10669765_20140411_234631_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 17
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10675842_Data_10669794_10669795_20140411_234549_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10675842_Data_10669794_10669795_20140411_234549_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 18
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10712676_Data_10669764_10669765_20140412_071106_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10712676_Data_10669764_10669765_20140412_071106_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 19
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_10712689_Data_10669764_10669765_20140412_074136_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_10712689_Data_10669764_10669765_20140412_074136_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 20
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+  - snippet: csv-points-mrc-grid
+    urls:
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/ground_truth/particle_coordinates/FoilHole_11690735_Data_10669764_10669765_20140412_080719_SumCorr.csv"
+      - "https://calla.rnet.missouri.edu/CryoVirusDB/sample_data/micrographs/FoilHole_11690735_Data_10669764_10669765_20140412_080719_SumCorr.mrc"
+    params: {y_axis: up}
+    pairs_with: 21
+    label_key: manual_gt-virus_particle-points
+    segmentation_type: instance
+reasons:
+  - "raw: the 22 MRC micrographs that harness list shows in sample_data/micrographs/ (EMPIAR-10033, each 4096x4096 float32, one section), one array per file because mrc-http-3 takes exactly one URL per array; unchanged from the draft. All other micrographs are only inside the per-EMPIAR tar.gz archives, which no catalog snippet reads"
+  - "labels with csv-points-mrc-grid: the record's label array is a points table, one CSV per micrograph in sample_data/ground_truth/particle_coordinates/ with the micrograph's stem (X-Coordinate, Y-Coordinate, Diameter, Angle-Psi, origin offsets, CTF columns; one row per particle). Each of the 22 micrographs has its CSV (16 to 134 rows, 1721 particles in all, whole-number coordinates), so there are 22 labels, label i paired with raw i by the shared file stem"
+  - "urls of each label: the CSV, then the micrograph of raw i. The snippet reads that micrograph's 1024-byte header for the grid (nx, ny, one section), so each label is zyx 1x4096x4096 like the array mrc-http-3 opens and every centre is checked to lie on it"
+  - "y_axis: up, against the record's plain 'X-/Y-Coordinate columns in micrograph pixels': the table's Y counts rows from the last stored row of the MRC (row = 4095 - Y), not from the first. Measured on two micrographs (..._224220 and ..._234508, 67 and 134 particles): the raw averaged around the centres read with y up is a dark particle of about 110 px radius inside a bright fringe; read with y down, or with x mirrored or x and y swapped, the average is flat (figures in the snippet's README). Whether the row is 4095 - Y or 4096 - Y cannot be told from particles this wide"
+  - "radius not set: each particle is its centre pixel, which is all the table states as a position. The Diameter column (350 in every row of the 22 files) is not the particle's width in pixels (the particles measure about 220-260 px across) and its unit is not given, so no disc of that size is drawn. A human who wants a visible mark instead of single pixels can set radius; it is a mark size, not an outline"
+  - "label_key manual_gt-virus_particle-points with segmentation_type instance: the record's encoding is points-table (kind points) and the dataset paper describes the picks as manually curated; the binding schema has no points type, and instance is the one that keeps what the label holds, a distinct id per particle (its 1-based row in the CSV, restarting in every file). Read as binary it would be 'a particle centre is here'"
+  - "coverage: the CSVs hold the selected particles only (sample_data/ground_truth/ also has an 'excluded' export and false_positives/, not bound), so background 0 means 'no selected particle centre', and all but one pixel of each particle is background"
+  - "the label dtype warning is expected: the record gives the CSV's dtype as 'unknown'; the rasterised ids are uint16"
+  - "voxel size: none. The MRC headers have cell size 0 and the table has no pixel size (the record says the same)"

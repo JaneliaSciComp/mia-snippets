@@ -1,0 +1,10 @@
+name: roi-json-outlines-tiff-grid
+spec_version: 1
+summary: The outlines of one ROI JSON file, a bare list of {"type", "points" [[x, y], ...]} entries in image pixels (ImageJ ROIs exported as JSON, with no image size or wrapper), filled onto the pixel grid of the TIFF they were drawn on as yx uint16 instance ids (an entry's 1-based position in the list, smaller outlines on top). urls are the JSON and its TIFF (zip members or plain URLs); only the TIFF's header is used, for the shape and pixel size. Closed types (polygon, freehand, traced) are filled; an open type (polyline, freeline) is an error unless open_outlines says to close and fill it or to skip it.
+formats: [json, other]
+containers: [zip, http]
+params:
+  open_outlines: {type: str, required: false, doc: "what to do with entries of an open type (polyline, freeline), which enclose nothing as they stand. Absent: such an entry is an error at open, which counts them. 'close': each is closed with a straight segment from its last point to its first and filled like a polygon (for cell outlines traced with a line tool back to their start). 'skip': they are left out and their ids stay unused. Reason required in binding"}
+requires: [numpy, tifffile]
+tested_on: [figshare-25604421-ntera2-cells-bf-segmentation]
+supersedes: null

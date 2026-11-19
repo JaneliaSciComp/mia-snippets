@@ -1,0 +1,12 @@
+name: jpeg-yolo-polygons-glob
+spec_version: 1
+summary: A set of 8-bit JPEG images (RGB samples kept as c), or of the YOLO segmentation label files written for them (.txt, one row `class x1 y1 x2 y2 ...` per object, vertices as fractions of the image) with every polygon filled on the grid of the JPEG of the same stem, from zip members chosen by glob, one file per z plane. Label planes follow the images in name order; an empty label file is an all-background plane.
+formats: [jpeg, other]
+containers: [zip]
+params:
+  polygons: {type: str, required: false, doc: "label files only, and what makes the array a label: how the polygons are painted on the yx grid. 'instance' fills each polygon with its 1-based row number in its file (ids restart in every file); 'semantic' fills it with its class id + 1. 0 is background; where polygons overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: int, required: false, doc: "label files only, and required for them: the number of classes (nc of the set's data yaml). A row whose class is not a whole number 0..classes-1 raises, in both modes. Reason required in binding"}
+  images: {type: str, required: false, doc: "label files only, and required for them: the fnmatch pattern over the members of the zip the urls name (`*` also crosses `/`) of the JPEGs the label files were written for, e.g. 'set/images/*.jpg': the member part of the url the image array is bound with. The planes are these images in name order, each with the label file of its stem; an image without a label file, or a label file without an image, raises. Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-19830051-pollenbb16-chilean-pollen]
+supersedes: null

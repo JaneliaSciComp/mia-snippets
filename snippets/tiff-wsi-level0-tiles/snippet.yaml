@@ -1,0 +1,9 @@
+name: tiff-wsi-level0-tiles
+spec_version: 1
+summary: The full-resolution level of one pyramidal whole-slide TIFF/BigTIFF at a plain URL (VENTANA DP 200 style; pages Label_Image, Probability_Image, then "level=0 ..." to "level=N ..."), as cyx with c the RGB samples, read tile by tile by byte range; open costs the page tags only, a region the tiles it touches. Tiles are placed on the TIFF tile grid; a slide with TileJointInfo (overlapping BIF tiles) is refused. Voxel size from the level-0 XResolution/YResolution.
+formats: [tiff]
+containers: [http]
+params: {}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad1527-afb-dx-tuberculosis-wsi]
+supersedes: null

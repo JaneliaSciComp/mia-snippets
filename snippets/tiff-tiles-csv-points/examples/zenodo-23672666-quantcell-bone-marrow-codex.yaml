@@ -1,0 +1,55 @@
+record: zenodo-23672666-quantcell-bone-marrow-codex
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: c21e8d4c672d093165cde5fcfabba89c8197342c
+raw:
+- snippet: tiff-tiles-csv-points
+  urls:
+  - https://zenodo.org/api/records/23672666/files/raw_image.zip/content::raw_image/QuantCell_bone_marrow_PhenoCycler.qptiff
+  params: {}
+labels:
+- snippet: tiff-tiles-csv-points
+  urls:
+  - https://zenodo.org/api/records/23672666/files/quantcell.zip/content::quantcell/codex_quantcell_QuantCellPaper.csv
+  - https://zenodo.org/api/records/23672666/files/raw_image.zip/content::raw_image/QuantCell_bone_marrow_PhenoCycler.qptiff
+  params:
+    class_column: cell_type
+    classes: [Arterial ECs, B Cells, Capillary ECs, CD4 T Cells, CD8 T Cells, cDC, CFU-E, CLP, CMP, Double Negative T Cells,
+      Other BM ECs, Erythroblasts, Erythrocytes, GMP, KLS, MEP, MkP, Monocytes, Neutrophils, Lepr+ Perivascular Cells,
+      Megakaryocytes, Other]
+  pairs_with: 0
+  label_key: auto_pred-cell-points
+  segmentation_type: semantic
+reasons:
+- >-
+  raw: the record's only image, the QPTIFF member of raw_image.zip, read with tiff-tiles-csv-points and no
+  params: tifffile's Baseline series, cyx 45x11147x30264 uint8 (the record's shape), 377.40 nm from the file's
+  XResolution (13566429/512 px per cm), which agrees with the record's 377.4. The member is deflated, so it is
+  fetched whole once (access file) and then read tile by tile; with the harness waiting on Zenodo's 429s the
+  fetch completed (smoke: 2,021,122,173 bytes with the table)
+- >-
+  label urls are the QuantCell table and the QPTIFF again: the table holds centroids only, so the snippet takes
+  the grid's shape and the pixel size from the image's header (a cache hit after the raw; no pixel is read)
+- >-
+  x_column and y_column are left at their defaults x and y, the table's centroid columns in micrometres on the
+  whole-slide image (record alignment_notes: pixel = um / 0.3774). Checked on all 245,719 rows: every point
+  lies inside the grid, and the mean DAPI (channel 0) intensity is 112.9 at the centroid pixels against 65.7 to
+  66.9 with the points moved 15 px in any direction, 26.6 and 27.3 with y or x mirrored and 14.3 over the whole
+  image
+- >-
+  class_column cell_type with classes: the label's value is the cell type QuantCell assigned, which is what
+  this record annotates. classes are the record's 22 names in the record's order, so id 1 is Arterial ECs and
+  id 22 is Other; every name occurs in the table and no other value does (the snippet refuses an unlisted one)
+- >-
+  segmentation_type semantic: a pixel holds a class id, not an object id. The label is a points table, not a
+  mask: one pixel per cell at its centroid (radius left at 0, since the record ships no outlines and a disk
+  would invent an extent), so 0 means no centroid here, not background
+- >-
+  label_key auto_pred-cell-points by the key rule as the match agent applied it (annotations.source automatic,
+  encoding points-table)
+- >-
+  the rule-based table (quantcell/codex_rule_based_QuantCellPaper.csv) is left unbound: it reads the same way
+  (same columns, same cells) but the key rule gives it the same label_key, and a binding cannot hold one key
+  twice for one raw. A human who names a second key can add it with the same params; it was not read here
+- >-
+  qupath_exports.zip (per-marker measurement CSVs) and quantcell/marker_combinations.json are not label arrays
+  and are left unbound

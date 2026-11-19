@@ -1,0 +1,10 @@
+name: png-instance-masks-zip
+spec_version: 1
+summary: One binary grey PNG per object, <image>_<k>.png, as zip members chosen by glob; the masks of each image are merged into one instance-id plane (pixel = k where mask k is non-zero, the highest k where masks overlap, uint16) and the images are stacked along z. With images true, the grey or RGB PNG images the masks belong to, one per plane, as stored (zyx or zcyx). The zip is opened once and read by range, one request per plane, and a 429 Too Many Requests answer is waited out and asked again.
+formats: [png]
+containers: [zip]
+params:
+  images: {type: bool, required: false, doc: "raw form. true: the urls are the images themselves, one 8 or 16-bit grey or RGB PNG per z plane sorted by member name, returned as stored (RGB as c); absent or false: the urls are <image>_<k> masks, merged per image (label form). Reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-10475962-in-cellulo-crystals-maskrcnn]
+supersedes: null

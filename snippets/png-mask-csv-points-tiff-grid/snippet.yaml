@@ -1,0 +1,10 @@
+name: png-mask-csv-points-tiff-grid
+spec_version: 1
+summary: One label file placed on the pixel grid of the single-page TIFF it annotates (two urls, the label and its TIFF; zip members or plain URLs), as yx with the TIFF's shape. A CSV points table with the columns x,y in the TIFF's pixels becomes a uint32 image in which the pixel holding a point is the point's 1-based row number and all others are 0. A greyscale PNG mask of bit depth 1 or 8 on a k times coarser grid (label_factor k) is read as its stored values (a 1-bit PNG as 0 and 1), TIFF pixel (y, x) taking PNG pixel (y // k, x // k).
+formats: [csv, png, other]
+containers: [zip, http]
+params:
+  label_factor: {type: int, required: false, doc: "PNG mask only, and required for it: how many TIFF pixels one PNG pixel covers on y and on x. The PNG's shape must be the TIFF's divided by this integer, rounded up, on both axes. The array has the TIFF's shape; each PNG pixel is repeated k x k, never interpolated; 1 is a mask already on the TIFF's grid. Refused for a CSV points table, which is in the TIFF's own pixels. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [zenodo-7419283-pnn-pv-mouse-brain-atlas]
+supersedes: null

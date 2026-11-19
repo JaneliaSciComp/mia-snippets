@@ -1,0 +1,12 @@
+name: yolo-polygons-glob
+spec_version: 1
+summary: A set of YOLO segmentation label files (one .txt per image, lines of `class x1 y1 x2 y2 ...` normalised to the image) from zip members or an HTTP directory chosen by glob (or plain URLs), each polygon filled with an instance or class id on the grid of its image (PNG, JPEG or TIFF header), one file per z plane; an empty file is a background plane.
+formats: [other]
+containers: [zip, http]
+params:
+  images: {type: list, required: true, doc: "the urls of the images the label files annotate, as the paired raw binds them (globs allowed, expanded and sorted like the label urls). Image k gives label file k its yx grid, from its header; the two lists must be equally long and pair by file name (without directories and extension), and every image must have the first image's size"}
+  fill: {type: str, required: true, doc: "'instance' fills each polygon with its 1-based line number in its file (ids restart in every plane); 'class' fills it with its YOLO class id + 1. 0 is background; where polygons overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: false, doc: "the class names in YOLO id order (id 0 first), from the dataset's own documentation; a polygon whose class id is not in the list raises, in both fill modes. Without it any class id is accepted. Reason required in binding"}
+requires: [numpy, tifffile]
+tested_on: [zenodo-21691676-dart-fiducial-markers-microfluidic]
+supersedes: null

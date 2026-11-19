@@ -1,0 +1,28 @@
+record: zenodo-21493260-histology-tissue-folds
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: jpeg-palette-png-glob
+    urls:
+      - "https://zenodo.org/records/21493260/files/images.zip::images/*/tissue_fold/*.jpg"
+    params: {}
+labels:
+  - snippet: jpeg-palette-png-glob
+    urls:
+      - "https://zenodo.org/records/21493260/files/masks.zip::masks/*_mask.png"
+    params:
+      palette: grey
+      pair_urls:
+        - "https://zenodo.org/records/21493260/files/images.zip::images/*/tissue_fold/*.jpg"
+      pair_suffix: _mask
+    pairs_with: 0
+    label_key: manual_gt-tissue_fold-semantic
+    segmentation_type: binary
+reasons:
+  - "jpeg-palette-png-glob for raw and label: the label masks are 8-bit palette PNGs (colour type 3), which image-tiles-glob and png-channels refuse (the issue's smoke errors); this snippet reads palette PNGs with a stated value per pixel and JPEGs, both by magic bytes from zip members chosen by glob"
+  - "raw: the images are colour JPEGs in images.zip (harness describe: jpeg, 3840x2160, 8 bit, 3 components), one 2D field per file (record dimensionality 2D), read as zcyx (1228, 3, 2160, 3840) with RGB as c; the stack along z is a set of independent images, not a volume; no params (palette is for PNG files)"
+  - "raw glob takes only images/<Tissue>/tissue_fold/*.jpg (1,228 files): the record says clean images have no masks, so only fold images pair with a label"
+  - "label glob masks/*_mask.png (1,228 files): record alignment_notes pair masks/<Tissue>/<stem>_mask.png with images/<Tissue>/tissue_fold/<stem>.jpg on the same 2160x3840 grid"
+  - "palette: grey on the label: every one of the 1,228 masks has the same 256-entry PLTE, (0, 0, 0) at indices 0..254 and (255, 255, 255) at index 255, and no tRNS chunk (read from all of masks.zip), so a pixel's grey value is 255 where the mask shows white (tissue fold, record class id 255) and 0 elsewhere, the record's values {0, 255}; grey rather than index because the record's values are the colours a viewer shows, and an index below 255 is black in this palette, i.e. background. All 1,228 masks store only indices 0 and 255 (decoded and checked; 2 of them hold only 0, an empty mask), so index would return the same values today"
+  - "pair_urls (the raw's glob) and pair_suffix _mask on the label: plane k of the label is the mask whose stem less '_mask' is the stem of raw file k, and open fails unless the 1,228 stems pair one to one, so the pairing does not rest on the two globs sorting alike with their different suffixes; on the zip directories as listed for this binding the two sorted expansions are also in the same order, name by name (the 1,228 stems are unique across the tissue folders)"
+  - "label_key manual_gt-tissue_fold-semantic (from the draft): annotations.source manual (README: masks drawn in QuPath), record class 'tissue fold' (id 255), encoding binary; segmentation_type binary"

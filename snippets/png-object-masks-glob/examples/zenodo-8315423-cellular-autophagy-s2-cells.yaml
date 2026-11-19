@@ -1,0 +1,25 @@
+record: zenodo-8315423-cellular-autophagy-s2-cells
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-zip-member-2
+    urls:
+      - https://zenodo.org/records/8315423/files/images.zip::images/Timepoint_001_220518-ST_K07_s1_w1.TIF
+    params: {}
+labels:
+  - snippet: png-object-masks-glob
+    urls:
+      - https://zenodo.org/records/8315423/files/masks.zip::masks/Timepoint_001_220518-ST_K07_s1/*/*.png
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-cell-instance
+    segmentation_type: instance
+reasons:
+  - "raw: one channel TIF (w1) of the sample the record names, a member of images.zip (record technical.arrays: yx 2048x2048 uint16; smoke opened it as yx [2048, 2048]). The three channels are separate files and no snippet stacks TIFF files as c, so one channel is bound. The files' own MetaSeries metadata names them: w1 FITC (536 nm, the GFP channel), w2 Texas Red (624 nm, RFP), w3 TL 25 (transmitted light); w1 is bound because the cells are bright in it (mean inside the merged mask 731, outside 162)"
+  - "label: png-object-masks-glob instead of image-tiles-glob, which stacks the 381 per-cell PNGs along z (zcyx [381, 3, 2048, 2048]) and fails against the yx raw. masks.zip holds one 2048x2048 RGB PNG per cell under masks/Timepoint_001_220518-ST_K07_s1/<fed|unfed|Unidentified>/; the snippet merges them into one yx plane on the raw's grid"
+  - "label urls: one glob over all three class folders, so every annotated cell of the image gets an id whatever its class (144 fed, 51 unfed, 186 Unidentified). The glob expands sorted by name, so ids 1-186 are the Unidentified files, 187-330 fed, 331-381 unfed, each folder in name order (_144 before _15); id k is file k of that list, not the <n> of the file name, which counts from 0"
+  - "no params on label: default ids file gives one id per file, an instance segmentation. Where two cells overlap the later file keeps the pixel; in this image that is 9 pixels in all, 8 cells lose 1 or 2 pixels and none is hidden (the merged plane compared with each of the 381 files)"
+  - "label dtype uint16 differs from the record's uint8: the record describes one RGB mask file, the label is the merged plane of ids 0-381"
+  - "pairs_with 0: the mask folder is named after the image stem without _w<c> and the masks have the raw's 2048x2048 size (record alignment same-grid); the merged mask lies on the bright cells of w1 as stored, and flipping or transposing it removes the contrast"
+  - "label_key manual_gt-cell-instance (from the draft): annotations.source manual, one mask per cell, instance-segmentation per record"
+  - "segmentation_type instance: each id is one cell. The class folders (fed = basal autophagy, unfed = activated autophagy, Unidentified = unknown) are not bound as a label here; ids url on one glob per folder would give them as class ids"
