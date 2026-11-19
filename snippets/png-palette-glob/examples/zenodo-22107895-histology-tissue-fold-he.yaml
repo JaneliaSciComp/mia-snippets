@@ -1,0 +1,24 @@
+record: zenodo-22107895-histology-tissue-fold-he
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-glob
+    urls:
+      - "https://zenodo.org/records/22107895/files/images.zip::images/*/tissue_fold/*.jpg"
+    params: {}
+labels:
+  - snippet: png-palette-glob
+    urls:
+      - "https://zenodo.org/records/22107895/files/masks.zip::masks/*/*_mask.png"
+    params: {}
+    pairs_with: 0
+    label_key: manual_gt-tissue_fold-semantic
+    segmentation_type: binary
+reasons:
+  - "image-tiles-glob for raw: the images are RGB JPEGs (record: 2160x3840x3 uint8, axes yxs) inside images.zip, chosen by a member glob; samples become c (zcyx), one image per z plane, a stack of independent 2D fields (record dimensionality 2D)"
+  - "raw glob images/*/tissue_fold/*.jpg: only the 1,228 fold images have a mask (record: clean images have no mask), so the 899 clean images are not bound; a label must match its raw on every axis except c"
+  - "png-palette-glob instead of the draft's image-tiles-glob for the label: the masks are 8-bit palette PNGs (IHDR colour type 3, 3840x2160, all 1,228 of them), which image-tiles-glob and png-channels refuse because a PNG decoder would return each pixel's palette colour as three samples; this snippet returns one uint8 plane per file, zyx (1228, 2160, 3840)"
+  - "no values param: the label is the stored palette index. All 1,228 masks carry the same 256-entry palette, black (0,0,0) for every index but 255, which is white (255,255,255), and store only the indices 0 and 255 (two masks hold 0 only), so the index and the grey level of its colour are the same number, 0 background and 255 tissue fold (record classes); values grey would return the same array"
+  - "label glob masks/*/*_mask.png: 1,228 masks in masks/<Tissue>/ (Brain 218, Kidney 285, Liver 270, Small_Intestine 213, Testis 242; the draft's counts were one higher per tissue because they included the folder entry, which a glob never matches). masks/<Tissue>/<stem>_mask.png belongs to images/<Tissue>/tissue_fold/<stem>.jpg (record; README.md: same filename), and both globs sort by tissue, then stem. Checked name by name on the two zip directories: plane k of the label is the mask of plane k of the raw for all 1,228 planes, and metadata.csv lists the same 1,228 pairs as matched"
+  - "label_key manual_gt-tissue_fold-semantic: fold regions annotated by hand in QuPath (README.md), class 'tissue fold artifact' (record classes, 255), encoding binary -> semantic; segmentation_type binary, so every nonzero pixel (255) is fold"
+  - "voxel size: none in the files or the record (voxel_size_nm null)"

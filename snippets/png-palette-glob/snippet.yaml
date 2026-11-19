@@ -1,0 +1,10 @@
+name: png-palette-glob
+spec_version: 1
+summary: Palette PNGs (colour type 3, 1/2/4/8 bit), one image per file from zip members or an HTTP directory chosen by glob (or plain URLs), stacked along z as uint8; each pixel is its stored palette index, or with values grey the grey level of its palette colour.
+formats: [png]
+containers: [zip, http]
+params:
+  values: {type: str, required: false, doc: "'grey': each pixel is the grey level of its palette colour, for files whose used colours are greys (R = G = B, e.g. a black and white mask whose indices are not the mask values); a used colour that is not a grey raises. Without it each pixel is its stored palette index; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-22107895-histology-tissue-fold-he]
+supersedes: null
