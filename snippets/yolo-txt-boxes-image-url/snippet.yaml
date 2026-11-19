@@ -1,0 +1,12 @@
+name: yolo-txt-boxes-image-url
+spec_version: 1
+summary: YOLO detection label txt files (rows 'class x_center y_center width height', normalised to the image) rasterised as filled boxes on the grid of the JPEG that `images` names by URL for each file, read from that JPEG's header; one file per z plane, no z for a single file. For labels whose image cannot be found by name (a repository serving files under opaque ids). A txt without rows is an all-background plane.
+formats: [jpeg, other]
+containers: [http, zip]
+params:
+  images: {type: list, required: true, doc: "the url of the JPEG each label file was drawn on, one per entry of urls and in their order (plain urls or zip members, no globs). Only its header is read, for the plane's height and width, which YOLO's normalised coordinates need. Normally the urls of the raw array this label pairs with; reason required in binding"}
+  boxes: {type: str, required: true, doc: "how the boxes are painted on the yx grid. 'instance' fills each box with its 1-based row number in its file (ids restart in every file); 'semantic' fills it with the 1-based position of its class id in `classes`. 0 is background; where boxes overlap the smaller one is on top. Reason required in binding"}
+  classes: {type: list, required: true, doc: "every YOLO class id (the first field of a row, a whole number from 0) the files use, in the order of the semantic ids (semantic id = position, from 1). A row whose class id is not listed raises, in both modes. Reason required in binding"}
+requires: [numpy]
+tested_on: [mendeley-457x9c7rp3-fossil-diatom-eucampia-yolo]
+supersedes: null
