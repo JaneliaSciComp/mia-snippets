@@ -1,0 +1,11 @@
+name: tiff-csv-index-shape-i247
+spec_version: 1
+summary: Single-page grey TIFF files at plain URLs that a CSV table names (header row with file_name, width, height; file_name relative to the table's folder), those of one width and height stacked as zyx in row order, for a folder of independent images of differing shape that has no directory index. An optional second url, a Hugging Face repo-info JSON, lists the files that exist; rows it does not list are left out.
+formats: [tiff]
+containers: [http]
+params:
+  width: {type: int, required: true, doc: "the `width` (x size in pixels) of the table rows to read. Together with `height` it selects the files of one shape; one binding entry per shape, taken from the table (open fails, naming the most frequent shapes, when no row matches)"}
+  height: {type: int, required: true, doc: "the `height` (y size in pixels) of the table rows to read; see `width`"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [hf-stemson-ai-warwick-stem-images]
+supersedes: null
