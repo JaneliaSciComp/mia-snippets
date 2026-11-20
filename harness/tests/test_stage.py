@@ -71,7 +71,7 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     plan = plan_input((1, 2, 4), 64, {"train": 4, "val": 1, "test": 1})
     rep = stage(b, SNAP, r, io, plan=plan, voxel=VOXEL, out=tmp_path / "out")
     assert rep["ok"], rep["errors"]
-    assert rep["bytes_fetched"] == source_bytes   # each source fetched once, then read from the cache
+    assert rep["bytes_fetched"] == source_bytes   # this reader reads each source through, once
     attrs = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs.asdict()
     mia = attrs["mia"]
     assert convention_errors(attrs) == []
@@ -124,7 +124,7 @@ def test_stage_refuses_a_plan_over_the_byte_cap(tmp_path, io, server):
     rep = stage(b, SNAP, r, io, plan=plan, voxel=VOXEL, out=tmp_path / "out", stage_bytes=1000)
     assert not rep["ok"] and rep["errors"][0] == f"plan exceeds stage cap: {budget} > 1000 bytes"
     assert not (tmp_path / "out" / "v0.zarr" / "raw" / "s0").exists()
-    assert 0 < io.bytes_fetched <= source_bytes   # the sources once (kept for a rebuild), never twice
+    assert 0 < io.bytes_fetched <= source_bytes   # what opening the arrays read, never twice
 
 
 def test_stage_byte_cap_defaults_to_the_environment(tmp_path, io, server, monkeypatch):
@@ -312,25 +312,53 @@ def test_intensity_sample_is_per_channel_and_reads_only_written_chunks():
     assert {(r["z"], r["y"].start // 64, r["x"].start // 64) for r in reads} <= {k[1:] for k in written}
 
 
-def test_prefetch_expands_member_globs_so_an_offline_stage_reads_the_cache(tmp_path, make_io, server):
-    """The stage job's prefetch takes a `<zip>::<glob>` url the way `harness fetch` does: every member, offline,
-    from the directory and members the fetch cached; a glob no fetch cached fails naming the zip."""
-    import zipfile
-    from mia_harness.binding import load_binding
-    from mia_harness.fetch import fetch
-    from mia_harness.stage import prefetch
-    from test_fetch import write_binding
-    from test_io import zip_bytes
+def test_stage_transfers_what_its_crops_touch_and_keeps_no_whole_file(tmp_path, io, server):
+    """A reader that reads by range decides what a stage transfers: one crop of a 10 MB source costs the blocks
+    of its plane, and nothing lands in the dataset cache but the validators."""
+    b, r = write(tmp_path, (12, 600, 700))
+    source_bytes = served(server, b)
+    d = yaml.safe_load(b.read_text())
+    d["raw"][0]["params"]["lazy"] = True
+    b.write_text(yaml.safe_dump(d))
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 1}), voxel=VOXEL, out=tmp_path / "out")
+    assert rep["ok"], rep["errors"]
+    assert 0 < rep["bytes_fetched"] < source_bytes // 2
+    assert io._local(d["raw"][0]["urls"][0]) is None
+    assert [p.name for p in (tmp_path / "shared").iterdir()] == ["files.json"]
 
-    members = {f"train/{i}.tif": (bytes([i]) * 8, zipfile.ZIP_STORED) for i in range(3)}
-    server.files["/g.zip"] = zip_bytes(members)
-    glob_url = server.url("/g.zip") + "::train/*.tif"
-    binding, record = write_binding(tmp_path, [glob_url], [])
-    assert fetch(binding, record, make_io())["ok"]
-    gets = len(server.gets())
+
+def test_stage_takes_a_file_whole_where_ranges_will_not_do(tmp_path, io, server):
+    b, r = write(tmp_path, SHAPE)
+    source_bytes = served(server, b)
+    server.ignore_range = True
+    url = yaml.safe_load(b.read_text())["raw"][0]["urls"][0]
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 1}), voxel=VOXEL, out=tmp_path / "out")
+    assert rep["ok"], rep["errors"]
+    assert rep["bytes_fetched"] == source_bytes and io._local(url).stat().st_size == source_bytes
+    assert url in json.loads((tmp_path / "shared" / "files.json").read_text())
+
+
+def test_a_whole_file_that_fails_part_way_leaves_no_cache_entry(tmp_path, io, server, monkeypatch):
+    monkeypatch.setattr("mia_harness.io.time.sleep", lambda seconds: None)   # the retries' waits
+    b, r = write(tmp_path, SHAPE)
+    served(server, b)
+    server.ignore_range, server.fail = True, 99        # every body is cut short
+    url = yaml.safe_load(b.read_text())["raw"][0]["urls"][0]
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 1}), voxel=VOXEL, out=tmp_path / "out")
+    assert not rep["ok"] and rep["errors"] and rep["bytes_fetched"] == 0
+    assert io._local(url) is None
+    assert [p.name for p in (tmp_path / "shared").iterdir()] == ["files.json"]   # no half-written file left
+
+
+def test_an_offline_stage_reads_the_cache(tmp_path, make_io, server):
+    """A stage with no hosts (a record whose files are in the raw cache already) makes no request."""
+    from mia_harness.fetch import fetch
+
+    b, r = write(tmp_path, SHAPE, SHAPE)
+    served(server, b)
+    assert fetch(b, r, make_io())["ok"]                # `harness fetch`: how a person fills a cache by hand
+    requests = len(server.requests)
     offline = make_io(hosts=())
-    prefetch(load_binding(binding), offline)   # the stage job: no hosts, every member a cache hit
-    assert offline.bytes_fetched == 0 and len(server.gets()) == gets
-    other, _ = write_binding(tmp_path, [server.url("/g.zip") + "::val/*.tif"], [])
-    with pytest.raises(ValueError, match="no member"):
-        prefetch(load_binding(other), offline)
+    rep = stage(b, SNAP, r, offline, plan=plan_input((1, 2, 4), 64, {"train": 1}), voxel=VOXEL, out=tmp_path / "out")
+    assert rep["ok"], rep["errors"]
+    assert rep["bytes_fetched"] == 0 and len(server.requests) == requests
