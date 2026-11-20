@@ -1,0 +1,95 @@
+record: github-jimut123-rv-pbs-wbc-instance-segmentation
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: f2dbb9e216420b6843a1f11fd46adebb4dd382b8
+raw:
+- snippet: jpeg-png-cvat-xml-polygons-i239
+  urls:
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BAND%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BASOPHILS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BLAST%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/EOSINOPHILS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/LYMPHOCYTES/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/METAMYELOCYTES/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/MONOCYTES/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/MYELOCYTE/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/NEUTROPHILS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/PROMYELOCYTES/annotations.xml
+  params: {width: 4032, height: 3024}
+- snippet: jpeg-png-cvat-xml-polygons-i239
+  urls:
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BAND%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BLAST%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/LYMPHOCYTES/annotations.xml
+  params: {width: 3302, height: 2476}
+labels:
+- snippet: jpeg-png-cvat-xml-polygons-i239
+  urls:
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BAND%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BASOPHILS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BLAST%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/EOSINOPHILS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/LYMPHOCYTES/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/METAMYELOCYTES/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/MONOCYTES/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/MYELOCYTE/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/NEUTROPHILS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/PROMYELOCYTES/annotations.xml
+  params:
+    polygons: instance
+    classes: [band cell, basophil, blast cell, eosinophil, lymphocyte, monocyte, neutrophil, promyelocyte, myelocyte,
+      metamyelocyte]
+    width: 4032
+    height: 3024
+  pairs_with: 0
+  label_key: manual_gt-cell-instance
+  segmentation_type: instance
+- snippet: jpeg-png-cvat-xml-polygons-i239
+  urls:
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BAND%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/BLAST%20CELLS/annotations.xml
+  - https://raw.githubusercontent.com/Jimut123/RV-PBS/main/LYMPHOCYTES/annotations.xml
+  params:
+    polygons: instance
+    classes: [band cell, blast cell, lymphocyte]
+    width: 3302
+    height: 2476
+  pairs_with: 1
+  label_key: manual_gt-cell-instance
+  segmentation_type: instance
+reasons:
+- 'urls are the CVAT annotations.xml of the ten class folders, not image files: raw.githubusercontent.com
+  serves no directory index (harness list of .../BASOPHILS/ is a 404) and github.com is not an allowed
+  host, so no glob can name the photos; each XML names every annotated image of its folder (<image name>),
+  and the snippet reads each one beside its XML. Folders from the record''s layout tree, URLs by the
+  record''s pattern raw.githubusercontent.com/Jimut123/RV-PBS/main/<folder>/<file> (BAND CELLS and BLAST
+  CELLS with %20), on main like the record''s sample urls'
+- 'one raw per image size, params width and height as the <image> elements spell them: the ten files name
+  583 images of two sizes (record: shape_varies), 575 of 4032x3024 (569 JPEG and the 6 PNG slides
+  psb_2_slide_8, psb_2_slide_1, slide_1, slide_4, slide_5, slide_6) and 8 PNG slides of 3302x2476. raw 1
+  lists only the three files that hold 3302x2476 images (BAND CELLS 1, BLAST CELLS 3, LYMPHOCYTES 4).
+  The first 64 KB of all 583 files were read: every header has the size its <image> element says'
+- 'raw is zcyx with c = 3 (record: yxs, 3 channels, uint8): the JPEGs are 3-component, and the 14 PNGs are
+  RGBA (record: 2476x3302x4) whose alpha is 255 at every pixel of every file, so the snippet leaves it
+  out and the 6 large PNG slides stack with the JPEGs of their size. z is the image''s rank among the
+  <image> elements of the size, in url then document order; it has no spatial meaning (record alignment:
+  not-applicable, independent photos)'
+- 'labels: the same urls, width and height as their raw, so label plane k is painted from the <image>
+  element raw plane k is read from (record: same-grid, points in pixel coordinates of that image). All
+  569 JPEGs have Exif orientation 1 or none, so the stored pixels are the picture CVAT showed'
+- 'polygons instance: every polygon outlines one white blood cell (record encoding: polygons, 752 polygons
+  on 583 images), filled with its 1-based number in its image. Read through the snippet, every plane
+  holds exactly the ids 1..n of its n polygons, 752 in all, each equal to a ray-casting test of its points;
+  all z_order are 0, and the outlines of touching cells cross only in slivers (19 polygons give up 1 to
+  391 px, under 0.1%, to a smaller neighbour)'
+- 'classes: the ten cell labels of the record (bg is declared in each XML''s <meta> but no polygon uses
+  it, so it is not listed and a bg polygon would raise); each folder''s polygons use only its own label,
+  so raw 1''s label lists the three of its folders. The class of a cell is its folder''s; polygons:
+  semantic with the same list gives it as ids 1..10 and was read on every plane, but is not bound: the
+  draft''s label is the per-cell instance'
+- 'label_key manual_gt-cell-instance, segmentation_type instance: annotations drawn by hand in CVAT
+  (every polygon source="manual"), one polygon per cell, as in the draft binding'
+- 'not bound: TEST_MIXED (140 photos; the record found no annotation file for them, and without a
+  directory index nothing names them) and the one JPEG of LYMPHOCYTES that its XML does not name (the
+  record''s tree counts 57 JPEGs there, the XML names 56)'
+- 'no voxel size: the record found none (JPEG/PNG headers, README, Figshare record), and
+  imaging.voxel_size_nm is null'
