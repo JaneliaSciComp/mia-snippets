@@ -1,0 +1,12 @@
+name: jpeg-tile-class-csv-i290
+spec_version: 1
+summary: One JPEG image per array (a zip member or a plain URL; RGB samples as c), so images of differing height and width need no padding, or the per-tile class table of that image - a CSV beside it with one row per square tile (columns row, col and one 0/1 column per class) - painted on the image's pixel grid, each tile of `tile` pixels filled with the 1-based position of its class in `classes`, 0 where no row names the tile.
+formats: [jpeg, csv]
+containers: [zip, http]
+params:
+  tile: {type: int, required: false, doc: "makes the array the tile labels instead of the image: the edge of a square tile in pixels. Tile (row, col) covers image rows [row * tile, (row + 1) * tile) and columns [col * tile, (col + 1) * tile), counted from the top left corner; the strip right of and below the last whole tile has no tile. The urls are then the image and its table. The files do not state it: take it from the software that made the table, or measure it (README, 'Choosing tile'). A row whose tile does not lie inside the image raises, which catches a tile that is too large but not one that is too small; reason required in binding"}
+  classes: {type: list, required: false, doc: "with `tile` only, and required then: the table's class columns in class id order (id = position, from 1; at most 255). Every name must be a column of the table. A row with exactly one of them set to 1 paints its tile with that id; a row with none set leaves its tile 0, like a tile without a row; a row with several set raises. 0 means 'no class recorded', so a class such as Background has its own id. From the table's header; reason required in binding"}
+  ignore: {type: list, required: false, doc: "with `tile` only: columns of the table that are not read, e.g. [Question, QuestionComment] for a reviewer's flag and free-text comment. They need not be present. A column that is not row, col, a class or ignored raises, so a class the binding does not know is found rather than dropped. Default: none; reason required in binding"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-17476686-mycorrhizafinder-root-tiles]
+supersedes: null
