@@ -1,0 +1,81 @@
+record: hf-stemson-ai-warwick-stem-images
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 29728b4ef24eaa6bd3dd5a7851ad3b3342daa6f3
+raw:
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 2048, height: 2048}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 1024, height: 1024}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 512, height: 512}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 256, height: 256}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 1024, height: 512}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 2004, height: 1336}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 512, height: 1024}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 2048, height: 1024}
+- snippet: tiff-csv-index-shape-i247
+  urls:
+  - https://huggingface.co/datasets/Stemson-AI/Warwick-STEM/resolve/main/metadata.csv
+  - https://huggingface.co/api/datasets/Stemson-AI/Warwick-STEM
+  params: {width: 1024, height: 1025}
+labels: []
+reasons:
+- 'tiff-csv-index-shape-i247 with metadata.csv as the index: images/ has no directory index (harness list
+  of .../resolve/main/images/ is a 404), so no glob snippet can name its files; metadata.csv (record layout:
+  file_name, original_filename, width, height, dtype, min/max/mean/std) names them, file_name relative
+  to the repository root where the table lies'
+- 'second url, the repository''s file listing (Hugging Face repo-info JSON, 10,171 siblings = the record''s
+  n_files): metadata.csv has 19,769 rows, images/warwick_stem_00000.tif ... 19768.tif (the record''s n_items),
+  but only 9,998 of those files are in images/ (the record''s count for images/), in 4,930 separate runs of
+  the numbering (00002.tif and 00003.tif are already missing), so the table alone would bind 9,771 urls that
+  are 404 and no numbered range is gap-free; the snippet keeps the rows whose file the listing holds'
+- 'one raw entry per shape, params width and height as the table spells them (width is x, height is y:
+  warwick_stem_00385.tif, table 2004 x 1336, is a 1336 x 2004 YX page): the record says shape_varies, and
+  the images of one shape are stacked as zyx with z = the image''s rank among the selected rows; z has no
+  spatial meaning (record alignment: not-applicable, independent 2D images)'
+- 'the nine shapes with 47 or more files in images/ are bound, 9,454 of its 9,998 files: 2048x2048 4,017;
+  1024x1024 3,358; 512x512 1,560; 256x256 117; 1024x512 113; 2004x1336 104; 512x1024 86; 2048x1024 52;
+  1024x1025 47 (width x height, files; counted from the table rows whose file is listed, and equal to
+  the z sizes smoke reports). Not bound: the other 544 files, which have 464 further shapes of at most
+  12 files each (139 of the files are below 256 px on a side)'
+- 'the 170 tar shards (train-0000.tar ... train-0169.tar, the record''s second array) are not bound: this
+  snippet does not read tar members, and the 9,771 images of the table that are not in images/ exist only
+  there. The shards hold the table''s images under their row number (the record''s first member of
+  train-0169.tar, 019701.tif of 16,777,362 B, is exactly the size of images/warwick_stem_19701.tif), so
+  the bound files are a subset of the shard images, about half of them'
+- 'values checked against the table: for 26 planes (first, last and a random one of each stack) the plane
+  read through the snippet has exactly the min_value and max_value of its metadata.csv row and its mean_value;
+  float32, uncompressed, as the record says. The per-image ranges differ widely (record: no common
+  normalization)'
+- 'no voxel size: the TIFFs carry no calibration and metadata.csv has no pixel-size column (record notes);
+  the record''s imaging.voxel_size_nm is null'
+- 'no labels: the dataset is unlabelled (record: raw only, no label arrays)'
