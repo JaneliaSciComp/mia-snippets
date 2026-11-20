@@ -1,0 +1,118 @@
+record: hf-toxoplasma-plaque-assay-masks
+record_commit: 0921a3707f6d9e716fdc22fc9a2187564f708c48
+snippets_commit: 29728b4ef24eaa6bd3dd5a7851ad3b3342daa6f3
+raw:
+  # raw 0: malnio, 17 files, RGB uint8, 258x259 to 330x333
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [330, 333], oversize: skip, count: 17}
+  # raw 1: malnio, 68 files, RGB uint8, 543x561 to 658x669
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [658, 669], larger_than: [330, 333], oversize: skip, count: 68}
+  # raw 2: malnio, 6 files, RGB uint8, 865x882 to 888x911
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [888, 911], larger_than: [658, 669], oversize: skip, count: 6}
+  # raw 3: malnio, 5 files, RGB uint8, 1067x1109 to 1141x1136
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [1141, 1136], larger_than: [888, 911], count: 5}
+  # raw 4: literature, 4 files, grey uint8, 573x581 to 601x520
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: literature}, shape_column: shape, canvas: [601, 581], oversize: skip, count: 4}
+  # raw 5: literature, 197 files, grey uint8, height up to 1200: 1195x1225 to 1200x1445
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: literature}, shape_column: shape, canvas: [1200, 1445], larger_than: [601, 581], oversize: skip, count: 197}
+  # raw 6: literature, 97 files, grey uint8, taller than 1200: 1202x1200 to 1307x1200
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: literature}, shape_column: shape, canvas: [1307, 1200], larger_than: [1200, 1445], count: 97}
+  # raw 7: patrick, 27 files, grey uint16, all 1728x1728: no fill
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: patrick}, shape_column: shape, canvas: [1728, 1728], oversize: skip, count: 27}
+  # raw 8: patrick, 40 files, grey uint16, all 2592x2592: no fill
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: patrick}, shape_column: shape, canvas: [2592, 2592], larger_than: [1728, 1728], count: 40}
+  # raw 9: bigbean, 27 files, grey uint16, all 2592x2592: no fill
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "images/{name}.tif", where: {domain: bigbean}, shape_column: shape, canvas: [2592, 2592], count: 27}
+labels:
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [330, 333], oversize: skip, count: 17}
+    pairs_with: 0
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [658, 669], larger_than: [330, 333], oversize: skip, count: 68}
+    pairs_with: 1
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [888, 911], larger_than: [658, 669], oversize: skip, count: 6}
+    pairs_with: 2
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: malnio}, shape_column: shape, canvas: [1141, 1136], larger_than: [888, 911], count: 5}
+    pairs_with: 3
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: literature}, shape_column: shape, canvas: [601, 581], oversize: skip, count: 4}
+    pairs_with: 4
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: literature}, shape_column: shape, canvas: [1200, 1445], larger_than: [601, 581], oversize: skip, count: 197}
+    pairs_with: 5
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: literature}, shape_column: shape, canvas: [1307, 1200], larger_than: [1200, 1445], count: 97}
+    pairs_with: 6
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: patrick}, shape_column: shape, canvas: [1728, 1728], oversize: skip, count: 27}
+    pairs_with: 7
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: patrick}, shape_column: shape, canvas: [2592, 2592], larger_than: [1728, 1728], count: 40}
+    pairs_with: 8
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+  - snippet: tiff-csv-manifest-canvas-i291
+    urls: ["https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv"]
+    params: {column: name, files: "masks/{name}.tif", where: {domain: bigbean}, shape_column: shape, canvas: [2592, 2592], count: 27}
+    pairs_with: 9
+    label_key: manual_gt-plaque-instance
+    segmentation_type: instance
+reasons:
+  - "tiff-csv-manifest-canvas-i291 instead of the draft's image-tiles-glob: the draft binds the record's sample pair only (1 of 488), because the folders of a HuggingFace dataset repo cannot be listed (the tree/main page is not a directory index and its size differs between requests; resolve/main/images/ answers 404). The repo's manifest.csv has one row per image/mask pair, so this snippet takes the file names from it; all 488 pairs are bound"
+  - "urls: the manifest, https://huggingface.co/datasets/einarolafsson/toxoplasma-plaque-dataset/resolve/main/manifest.csv (92,481 bytes, 488 rows, columns name, domain, orig_stem, queue, split, n_objects, shape, dtype, updated, sha, n_copies; the same bytes as the record's raw/main/manifest.csv). resolve/ rather than raw/ so that the files are below the manifest's folder, as the record's sample urls are (resolve/main/images/malnio__50.tif)"
+  - "column name, files 'images/{name}.tif' on raw and 'masks/{name}.tif' on labels: the record's layout (images/<domain>__<stem>.tif, masks/ same names) and its sample urls; the manifest's name column is <domain>__<stem> without the extension. Every one of the 488 names resolved to an image and a mask"
+  - "pairing: masks/<name>.tif pairs with images/<name>.tif by same file name (record alignment_notes, README). A raw and its label take the same manifest and the same params but `files`, so they hold the same rows in the same order (sorted by name) and plane k of the label is the mask of plane k of the raw. Checked on the data: every mask has its image's height and width (the snippet checks both against the manifest's shape, all 976 files read), and in crop previews the outlines lie on the plaques"
+  - "where {domain: ...}: one group of arrays per domain, because dtype and colour differ between them and an array has one dtype and one set of axes: malnio is RGB uint8 (read as czyx, c = R, G, B; the samples differ in all 96 files, so nothing is collapsed), literature grey uint8, patrick and bigbean grey uint16 (record technical.arrays; manifest dtype column; all files read)"
+  - "shape_column shape: the manifest gives each image's shape ('(1200, 1277)', '(258, 259, 3)'); with it the snippet checks the canvas against every row at open and every file's height and width against its row at read. All 488 images and 488 masks have the manifest's height and width"
+  - "canvas, oversize, larger_than: height and width differ per file in malnio (94 shapes) and literature (154 shapes), and an array has one shape, so each plane is a canvas with the file at its top left and 0 beyond it; the 0 is not data (black in the raw, background in the label). To keep that fill small each domain is divided by size, and every canvas is the largest height and the largest width of its files (from the manifest's shape column): malnio [330, 333] 17 files, [658, 669] 68, [888, 911] 6, [1141, 1136] 5 (files cover 83%, 92%, 97%, 95% of the canvas area); literature [601, 581] 4, [1200, 1445] 197 (height up to 1200), [1307, 1200] 97 (taller than 1200; all 1200 wide) (94%, 86%, 94%); patrick [1728, 1728] 27 and [2592, 2592] 40, bigbean [2592, 2592] 27 (one shape each: no fill). `oversize: skip` leaves the larger files to the next array and `larger_than` (the previous canvas) leaves out the files the previous arrays hold"
+  - "count: the number of rows each array selects, from the manifest; 17 + 68 + 6 + 5 = 96 malnio, 4 + 197 + 97 = 298 literature, 27 + 40 = 67 patrick, 27 bigbean, 488 in all, so the size classes hold every row once. Open fails if the manifest (a file on the repo's main branch) changes these numbers, instead of shifting z"
+  - "label_key manual_gt-plaque-instance and segmentation_type instance (from the draft): annotations.source manual -> manual_gt; class 'plaque' from the record's classes (1..N plaque instances); encoding instance-ids. Checked on all 488 masks: uint16, ids are 1..N without gaps and N equals the manifest's n_objects in every file (largest 232); 31 literature masks are empty, as their n_objects 0 says (record: 0-object fields exist)"
+  - "voxel size: none; record voxel_size_nm is null, the TIFF headers carry no calibration, and the literature crops come from many papers"
+  - "the file urls are made by the snippet and are not binding urls: `harness fetch` and the stage's prefetch stage the manifest only, and the images and masks are staged when they are read (README, Known limits)"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"
