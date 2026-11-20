@@ -1,0 +1,13 @@
+name: jpeg-png-cvat-xml-polygons-i239
+spec_version: 1
+summary: The 8-bit JPEG or PNG images a CVAT for images 1.1 XML names (annotations.xml, <image name width height> elements; each file beside the XML, RGB samples kept as c, an opaque alpha left out), or the <polygon> elements it holds for them filled on each image's grid as instance or class ids, one image per z plane in the XML's order. The urls are the XML files, which stand in for a folder that has no directory index; `width` and `height` choose the images of one size, so a set of several sizes is bound as one array per size.
+formats: [jpeg, png, other]
+containers: [http, zip]
+params:
+  polygons: {type: str, required: false, doc: "what makes the array the label instead of the images: how the polygons are painted on the yx grid. 'instance' fills each polygon with its 1-based number among the polygons of its <image> (ids restart in every image); 'semantic' fills it with the 1-based position of its label in `classes`. 0 is background; where polygons overlap the higher z_order is on top, then the smaller one. Reason required in binding"}
+  classes: {type: list, required: false, doc: "label form only, and required for it: every label string the polygons of the bound images use, in class id order (semantic id = position, from 1). A polygon whose label is not listed raises at open, in both modes. Reason required in binding"}
+  width: {type: int, required: false, doc: "the `width` attribute (x size in pixels) of the <image> elements this array holds; set together with `height`. Required when the images the urls name are of more than one size (open fails, naming the sizes and their counts): one binding entry per size, the same values for the images and their label. Reason required in binding"}
+  height: {type: int, required: false, doc: "the `height` attribute (y size in pixels) of the <image> elements this array holds; see `width`"}
+requires: [numpy, imagecodecs]
+tested_on: [github-jimut123-rv-pbs-wbc-instance-segmentation]
+supersedes: null
