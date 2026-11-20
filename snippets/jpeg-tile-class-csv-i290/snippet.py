@@ -123,7 +123,10 @@ class _Image:
 
 class _Tiles:
     """The class id of every pixel's tile: yx, uint8, made from the tile grid on each read."""
-    access = "chunk"            # a region costs that region: nothing is fetched or decoded after open
+    # A region costs nothing after open, whatever its size. Reported as `plane`, the unit of the image it pairs
+    # with, so that the harness looks for annotated tiles over the whole label instead of testing only the box it
+    # drew: a table may annotate a few percent of a scan, and such boxes are nearly always empty.
+    access = "plane"
     voxel_size_nm = None
     axes = "yx"
     dtype = np.dtype("uint8")

@@ -38,8 +38,11 @@ label per scan.
 - **Access.** An image is `plane`: any region costs fetching the file (`io.fetch`; a zip member comes inflated
   and CRC-checked) and decoding it whole, 3 bytes a pixel. The last decoded image is kept, one for all arrays
   of the snippet, so the three `c` planes of a scan decode it once and a binding with hundreds of scans holds
-  one of them in memory. A label is `chunk`: a region is made from the table's tile grid, nothing is fetched
-  or decoded after open, and the whole plane is never built unless it is asked for.
+  one of them in memory. A label region is made from the table's tile grid: nothing is fetched or decoded
+  after open, and only the region asked for is built. It still reports `plane`, like its image, because the
+  harness then searches the whole label for annotated tiles and places every other crop on one; with `chunk`
+  it tests only the box it drew, and where a table annotates a few percent of a scan (the ErM tables of the
+  example's record: 1.5% of the tiles) every crop came out without a label.
 - **Open.** The frame header is read from the image's first bytes: by range for a plain URL, a stored member
   or a file staged before; a deflated member is inflated from its start through the zip (about 1 MiB of
   network per image, not the image). Labels also fetch the table.
@@ -60,9 +63,10 @@ example binding (its `reasons` give the numbers):
 3. **Check on pixels.** Decode one scan and compare the tiles of a visually distinct class (background against
    tissue) with the image under candidate tile sizes and origins; the right grid separates them best.
 
+Do step 3 on more than one scan, and on scans of every kind in the dataset: in the example's record the
+tables of one model fit 126-pixel tiles on one scan and no single size on another, and step 1 cannot tell.
 A `tile` that is too small still opens (every tile fits) and puts the labels in the wrong place, so step 1
-alone is not enough. Scans of one dataset may use different tiles (the example: 252 pixels for one model's
-tables, 126 for the other's).
+alone is not enough. Scans of one dataset may use different tiles.
 
 ## Known limits
 
@@ -71,8 +75,9 @@ tables, 126 for the other's).
   or stride.
 - One class per tile. A table with multi-class rows needs a decision this snippet does not take.
 - At most 255 classes (`uint8` ids).
-- A raw read decodes the whole scan into memory (3 bytes a pixel; 6.5 GB for a 33519x64554 scan), and the
-  harness keeps the plane it read last while the next is decoded.
+- A raw read decodes the whole scan into memory (3 bytes a pixel; 2.3 GB for the largest scan of the example, 6.5 GB for a 33519x64554 scan), and the
+  harness keeps the plane it read last while the next is decoded. To place a crop on an annotation the harness
+  also reads the label of the whole scan (1 byte a pixel) and builds masks of the same size.
 - No 12-bit or CMYK JPEG, no `samples` selection.
 - The frame-header read of a deflated zip member goes through the zip's directory, so opening such an array
   needs the zip's host (or the zip staged whole); the member alone, staged by `harness fetch`, serves `read`
@@ -80,6 +85,7 @@ tables, 126 for the other's).
 
 ## Example
 
-`examples/zenodo-17476686-mycorrhizafinder-root-tiles.yaml`: 208 scans of stained roots from eight zips on
-Zenodo, each bound as one raw (`cyx`, 70 to 2,164 megapixels) and one semantic label; the AM tables use
-252-pixel tiles and six classes, the ErM tables 126-pixel tiles and ten classes.
+`examples/zenodo-17476686-mycorrhizafinder-root-tiles.yaml`: the 55 micrograph scans of stained roots in
+`am.zip` on Zenodo, each bound as one raw (`cyx`, 70 to 771 megapixels) and one semantic label of six classes
+on 252-pixel tiles. The record's other seven zips (ErM scans) are read by the snippet but not bound: their tile
+size is not one number (the binding's `reasons` say what was measured).
