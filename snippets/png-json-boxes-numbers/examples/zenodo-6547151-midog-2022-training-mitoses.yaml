@@ -1,0 +1,557 @@
+record: zenodo-6547151-midog-2022-training-mitoses
+record_commit: 9fa0b1b286a46aa3b28a8eef1e86f75eab101c87
+snippets_commit: db126cbac2759c1c1ff1a605229c7523bd800546
+raw:
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/151.png/content', 'https://zenodo.org/api/records/6547151/files/152.png/content',
+    'https://zenodo.org/api/records/6547151/files/153.png/content', 'https://zenodo.org/api/records/6547151/files/154.png/content',
+    'https://zenodo.org/api/records/6547151/files/155.png/content', 'https://zenodo.org/api/records/6547151/files/156.png/content',
+    'https://zenodo.org/api/records/6547151/files/157.png/content', 'https://zenodo.org/api/records/6547151/files/158.png/content',
+    'https://zenodo.org/api/records/6547151/files/159.png/content', 'https://zenodo.org/api/records/6547151/files/160.png/content',
+    'https://zenodo.org/api/records/6547151/files/161.png/content', 'https://zenodo.org/api/records/6547151/files/162.png/content',
+    'https://zenodo.org/api/records/6547151/files/163.png/content', 'https://zenodo.org/api/records/6547151/files/164.png/content',
+    'https://zenodo.org/api/records/6547151/files/165.png/content', 'https://zenodo.org/api/records/6547151/files/166.png/content',
+    'https://zenodo.org/api/records/6547151/files/167.png/content', 'https://zenodo.org/api/records/6547151/files/168.png/content',
+    'https://zenodo.org/api/records/6547151/files/169.png/content', 'https://zenodo.org/api/records/6547151/files/170.png/content',
+    'https://zenodo.org/api/records/6547151/files/171.png/content', 'https://zenodo.org/api/records/6547151/files/172.png/content',
+    'https://zenodo.org/api/records/6547151/files/173.png/content', 'https://zenodo.org/api/records/6547151/files/174.png/content',
+    'https://zenodo.org/api/records/6547151/files/175.png/content', 'https://zenodo.org/api/records/6547151/files/176.png/content',
+    'https://zenodo.org/api/records/6547151/files/177.png/content', 'https://zenodo.org/api/records/6547151/files/178.png/content',
+    'https://zenodo.org/api/records/6547151/files/179.png/content', 'https://zenodo.org/api/records/6547151/files/180.png/content',
+    'https://zenodo.org/api/records/6547151/files/181.png/content', 'https://zenodo.org/api/records/6547151/files/182.png/content',
+    'https://zenodo.org/api/records/6547151/files/183.png/content', 'https://zenodo.org/api/records/6547151/files/184.png/content',
+    'https://zenodo.org/api/records/6547151/files/185.png/content', 'https://zenodo.org/api/records/6547151/files/186.png/content',
+    'https://zenodo.org/api/records/6547151/files/187.png/content', 'https://zenodo.org/api/records/6547151/files/188.png/content',
+    'https://zenodo.org/api/records/6547151/files/189.png/content', 'https://zenodo.org/api/records/6547151/files/190.png/content',
+    'https://zenodo.org/api/records/6547151/files/191.png/content', 'https://zenodo.org/api/records/6547151/files/192.png/content',
+    'https://zenodo.org/api/records/6547151/files/193.png/content', 'https://zenodo.org/api/records/6547151/files/194.png/content',
+    'https://zenodo.org/api/records/6547151/files/195.png/content', 'https://zenodo.org/api/records/6547151/files/196.png/content',
+    'https://zenodo.org/api/records/6547151/files/197.png/content', 'https://zenodo.org/api/records/6547151/files/198.png/content',
+    'https://zenodo.org/api/records/6547151/files/199.png/content', 'https://zenodo.org/api/records/6547151/files/200.png/content',
+    'https://zenodo.org/api/records/6547151/files/201.png/content', 'https://zenodo.org/api/records/6547151/files/202.png/content',
+    'https://zenodo.org/api/records/6547151/files/203.png/content', 'https://zenodo.org/api/records/6547151/files/204.png/content',
+    'https://zenodo.org/api/records/6547151/files/205.png/content', 'https://zenodo.org/api/records/6547151/files/206.png/content',
+    'https://zenodo.org/api/records/6547151/files/207.png/content', 'https://zenodo.org/api/records/6547151/files/208.png/content',
+    'https://zenodo.org/api/records/6547151/files/209.png/content', 'https://zenodo.org/api/records/6547151/files/210.png/content',
+    'https://zenodo.org/api/records/6547151/files/211.png/content', 'https://zenodo.org/api/records/6547151/files/212.png/content',
+    'https://zenodo.org/api/records/6547151/files/213.png/content', 'https://zenodo.org/api/records/6547151/files/214.png/content',
+    'https://zenodo.org/api/records/6547151/files/215.png/content', 'https://zenodo.org/api/records/6547151/files/216.png/content',
+    'https://zenodo.org/api/records/6547151/files/217.png/content', 'https://zenodo.org/api/records/6547151/files/218.png/content',
+    'https://zenodo.org/api/records/6547151/files/219.png/content', 'https://zenodo.org/api/records/6547151/files/220.png/content',
+    'https://zenodo.org/api/records/6547151/files/221.png/content', 'https://zenodo.org/api/records/6547151/files/222.png/content',
+    'https://zenodo.org/api/records/6547151/files/223.png/content', 'https://zenodo.org/api/records/6547151/files/224.png/content',
+    'https://zenodo.org/api/records/6547151/files/225.png/content', 'https://zenodo.org/api/records/6547151/files/226.png/content',
+    'https://zenodo.org/api/records/6547151/files/227.png/content', 'https://zenodo.org/api/records/6547151/files/228.png/content',
+    'https://zenodo.org/api/records/6547151/files/229.png/content', 'https://zenodo.org/api/records/6547151/files/230.png/content',
+    'https://zenodo.org/api/records/6547151/files/231.png/content', 'https://zenodo.org/api/records/6547151/files/232.png/content',
+    'https://zenodo.org/api/records/6547151/files/233.png/content', 'https://zenodo.org/api/records/6547151/files/234.png/content',
+    'https://zenodo.org/api/records/6547151/files/235.png/content', 'https://zenodo.org/api/records/6547151/files/236.png/content',
+    'https://zenodo.org/api/records/6547151/files/237.png/content', 'https://zenodo.org/api/records/6547151/files/238.png/content',
+    'https://zenodo.org/api/records/6547151/files/239.png/content', 'https://zenodo.org/api/records/6547151/files/240.png/content',
+    'https://zenodo.org/api/records/6547151/files/241.png/content', 'https://zenodo.org/api/records/6547151/files/242.png/content',
+    'https://zenodo.org/api/records/6547151/files/243.png/content', 'https://zenodo.org/api/records/6547151/files/244.png/content',
+    'https://zenodo.org/api/records/6547151/files/245.png/content', 'https://zenodo.org/api/records/6547151/files/246.png/content',
+    'https://zenodo.org/api/records/6547151/files/247.png/content', 'https://zenodo.org/api/records/6547151/files/248.png/content',
+    'https://zenodo.org/api/records/6547151/files/249.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 99
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/250.png/content', 'https://zenodo.org/api/records/6547151/files/251.png/content',
+    'https://zenodo.org/api/records/6547151/files/252.png/content', 'https://zenodo.org/api/records/6547151/files/253.png/content',
+    'https://zenodo.org/api/records/6547151/files/254.png/content', 'https://zenodo.org/api/records/6547151/files/255.png/content',
+    'https://zenodo.org/api/records/6547151/files/256.png/content', 'https://zenodo.org/api/records/6547151/files/257.png/content',
+    'https://zenodo.org/api/records/6547151/files/258.png/content', 'https://zenodo.org/api/records/6547151/files/259.png/content',
+    'https://zenodo.org/api/records/6547151/files/260.png/content', 'https://zenodo.org/api/records/6547151/files/261.png/content',
+    'https://zenodo.org/api/records/6547151/files/262.png/content', 'https://zenodo.org/api/records/6547151/files/263.png/content',
+    'https://zenodo.org/api/records/6547151/files/264.png/content', 'https://zenodo.org/api/records/6547151/files/265.png/content',
+    'https://zenodo.org/api/records/6547151/files/266.png/content', 'https://zenodo.org/api/records/6547151/files/267.png/content',
+    'https://zenodo.org/api/records/6547151/files/268.png/content', 'https://zenodo.org/api/records/6547151/files/270.png/content',
+    'https://zenodo.org/api/records/6547151/files/271.png/content', 'https://zenodo.org/api/records/6547151/files/272.png/content',
+    'https://zenodo.org/api/records/6547151/files/273.png/content', 'https://zenodo.org/api/records/6547151/files/274.png/content',
+    'https://zenodo.org/api/records/6547151/files/275.png/content', 'https://zenodo.org/api/records/6547151/files/276.png/content',
+    'https://zenodo.org/api/records/6547151/files/277.png/content', 'https://zenodo.org/api/records/6547151/files/278.png/content',
+    'https://zenodo.org/api/records/6547151/files/279.png/content', 'https://zenodo.org/api/records/6547151/files/280.png/content',
+    'https://zenodo.org/api/records/6547151/files/281.png/content', 'https://zenodo.org/api/records/6547151/files/282.png/content',
+    'https://zenodo.org/api/records/6547151/files/283.png/content', 'https://zenodo.org/api/records/6547151/files/284.png/content',
+    'https://zenodo.org/api/records/6547151/files/285.png/content', 'https://zenodo.org/api/records/6547151/files/286.png/content',
+    'https://zenodo.org/api/records/6547151/files/287.png/content', 'https://zenodo.org/api/records/6547151/files/288.png/content',
+    'https://zenodo.org/api/records/6547151/files/289.png/content', 'https://zenodo.org/api/records/6547151/files/290.png/content',
+    'https://zenodo.org/api/records/6547151/files/291.png/content', 'https://zenodo.org/api/records/6547151/files/292.png/content',
+    'https://zenodo.org/api/records/6547151/files/293.png/content', 'https://zenodo.org/api/records/6547151/files/294.png/content',
+    'https://zenodo.org/api/records/6547151/files/295.png/content', 'https://zenodo.org/api/records/6547151/files/296.png/content',
+    'https://zenodo.org/api/records/6547151/files/297.png/content', 'https://zenodo.org/api/records/6547151/files/298.png/content',
+    'https://zenodo.org/api/records/6547151/files/299.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 49
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/003.png/content', 'https://zenodo.org/api/records/6547151/files/004.png/content',
+    'https://zenodo.org/api/records/6547151/files/006.png/content', 'https://zenodo.org/api/records/6547151/files/009.png/content',
+    'https://zenodo.org/api/records/6547151/files/010.png/content', 'https://zenodo.org/api/records/6547151/files/011.png/content',
+    'https://zenodo.org/api/records/6547151/files/013.png/content', 'https://zenodo.org/api/records/6547151/files/015.png/content',
+    'https://zenodo.org/api/records/6547151/files/016.png/content', 'https://zenodo.org/api/records/6547151/files/017.png/content',
+    'https://zenodo.org/api/records/6547151/files/019.png/content', 'https://zenodo.org/api/records/6547151/files/021.png/content',
+    'https://zenodo.org/api/records/6547151/files/022.png/content', 'https://zenodo.org/api/records/6547151/files/023.png/content',
+    'https://zenodo.org/api/records/6547151/files/025.png/content', 'https://zenodo.org/api/records/6547151/files/027.png/content',
+    'https://zenodo.org/api/records/6547151/files/028.png/content', 'https://zenodo.org/api/records/6547151/files/031.png/content',
+    'https://zenodo.org/api/records/6547151/files/037.png/content', 'https://zenodo.org/api/records/6547151/files/038.png/content',
+    'https://zenodo.org/api/records/6547151/files/040.png/content', 'https://zenodo.org/api/records/6547151/files/043.png/content',
+    'https://zenodo.org/api/records/6547151/files/044.png/content', 'https://zenodo.org/api/records/6547151/files/045.png/content',
+    'https://zenodo.org/api/records/6547151/files/047.png/content', 'https://zenodo.org/api/records/6547151/files/302.png/content',
+    'https://zenodo.org/api/records/6547151/files/307.png/content', 'https://zenodo.org/api/records/6547151/files/308.png/content',
+    'https://zenodo.org/api/records/6547151/files/309.png/content', 'https://zenodo.org/api/records/6547151/files/314.png/content',
+    'https://zenodo.org/api/records/6547151/files/317.png/content', 'https://zenodo.org/api/records/6547151/files/318.png/content',
+    'https://zenodo.org/api/records/6547151/files/324.png/content', 'https://zenodo.org/api/records/6547151/files/331.png/content',
+    'https://zenodo.org/api/records/6547151/files/332.png/content', 'https://zenodo.org/api/records/6547151/files/333.png/content',
+    'https://zenodo.org/api/records/6547151/files/336.png/content', 'https://zenodo.org/api/records/6547151/files/337.png/content',
+    'https://zenodo.org/api/records/6547151/files/338.png/content', 'https://zenodo.org/api/records/6547151/files/341.png/content',
+    'https://zenodo.org/api/records/6547151/files/342.png/content', 'https://zenodo.org/api/records/6547151/files/343.png/content',
+    'https://zenodo.org/api/records/6547151/files/346.png/content', 'https://zenodo.org/api/records/6547151/files/351.png/content',
+    'https://zenodo.org/api/records/6547151/files/353.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 45
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/001.png/content', 'https://zenodo.org/api/records/6547151/files/005.png/content',
+    'https://zenodo.org/api/records/6547151/files/012.png/content', 'https://zenodo.org/api/records/6547151/files/014.png/content',
+    'https://zenodo.org/api/records/6547151/files/024.png/content', 'https://zenodo.org/api/records/6547151/files/029.png/content',
+    'https://zenodo.org/api/records/6547151/files/030.png/content', 'https://zenodo.org/api/records/6547151/files/032.png/content',
+    'https://zenodo.org/api/records/6547151/files/033.png/content', 'https://zenodo.org/api/records/6547151/files/036.png/content',
+    'https://zenodo.org/api/records/6547151/files/041.png/content', 'https://zenodo.org/api/records/6547151/files/046.png/content',
+    'https://zenodo.org/api/records/6547151/files/048.png/content', 'https://zenodo.org/api/records/6547151/files/049.png/content',
+    'https://zenodo.org/api/records/6547151/files/301.png/content', 'https://zenodo.org/api/records/6547151/files/303.png/content',
+    'https://zenodo.org/api/records/6547151/files/304.png/content', 'https://zenodo.org/api/records/6547151/files/305.png/content',
+    'https://zenodo.org/api/records/6547151/files/311.png/content', 'https://zenodo.org/api/records/6547151/files/313.png/content',
+    'https://zenodo.org/api/records/6547151/files/316.png/content', 'https://zenodo.org/api/records/6547151/files/319.png/content',
+    'https://zenodo.org/api/records/6547151/files/320.png/content', 'https://zenodo.org/api/records/6547151/files/347.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 24
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/008.png/content', 'https://zenodo.org/api/records/6547151/files/026.png/content',
+    'https://zenodo.org/api/records/6547151/files/034.png/content', 'https://zenodo.org/api/records/6547151/files/039.png/content',
+    'https://zenodo.org/api/records/6547151/files/050.png/content', 'https://zenodo.org/api/records/6547151/files/306.png/content',
+    'https://zenodo.org/api/records/6547151/files/310.png/content', 'https://zenodo.org/api/records/6547151/files/322.png/content',
+    'https://zenodo.org/api/records/6547151/files/326.png/content', 'https://zenodo.org/api/records/6547151/files/345.png/content',
+    'https://zenodo.org/api/records/6547151/files/349.png/content', 'https://zenodo.org/api/records/6547151/files/350.png/content',
+    'https://zenodo.org/api/records/6547151/files/352.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 13
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/002.png/content', 'https://zenodo.org/api/records/6547151/files/007.png/content',
+    'https://zenodo.org/api/records/6547151/files/018.png/content', 'https://zenodo.org/api/records/6547151/files/035.png/content',
+    'https://zenodo.org/api/records/6547151/files/315.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 5
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/321.png/content', 'https://zenodo.org/api/records/6547151/files/323.png/content',
+    'https://zenodo.org/api/records/6547151/files/335.png/content', 'https://zenodo.org/api/records/6547151/files/344.png/content',
+    'https://zenodo.org/api/records/6547151/files/354.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 5
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/330.png/content', 'https://zenodo.org/api/records/6547151/files/339.png/content',
+    'https://zenodo.org/api/records/6547151/files/340.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 3
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/121.png/content', 'https://zenodo.org/api/records/6547151/files/129.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 2
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/020.png/content', 'https://zenodo.org/api/records/6547151/files/312.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 2
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/042.png/content', 'https://zenodo.org/api/records/6547151/files/300.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 2
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/325.png/content', 'https://zenodo.org/api/records/6547151/files/328.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 2
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/358.png/content', 'https://zenodo.org/api/records/6547151/files/363.png/content',
+    'https://zenodo.org/api/records/6547151/files/365.png/content', 'https://zenodo.org/api/records/6547151/files/367.png/content',
+    'https://zenodo.org/api/records/6547151/files/372.png/content', 'https://zenodo.org/api/records/6547151/files/374.png/content',
+    'https://zenodo.org/api/records/6547151/files/378.png/content', 'https://zenodo.org/api/records/6547151/files/379.png/content',
+    'https://zenodo.org/api/records/6547151/files/382.png/content', 'https://zenodo.org/api/records/6547151/files/394.png/content',
+    'https://zenodo.org/api/records/6547151/files/397.png/content', 'https://zenodo.org/api/records/6547151/files/401.png/content',
+    'https://zenodo.org/api/records/6547151/files/402.png/content', 'https://zenodo.org/api/records/6547151/files/405.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 14
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/355.png/content', 'https://zenodo.org/api/records/6547151/files/356.png/content',
+    'https://zenodo.org/api/records/6547151/files/357.png/content', 'https://zenodo.org/api/records/6547151/files/364.png/content',
+    'https://zenodo.org/api/records/6547151/files/369.png/content', 'https://zenodo.org/api/records/6547151/files/370.png/content',
+    'https://zenodo.org/api/records/6547151/files/377.png/content', 'https://zenodo.org/api/records/6547151/files/385.png/content',
+    'https://zenodo.org/api/records/6547151/files/392.png/content', 'https://zenodo.org/api/records/6547151/files/399.png/content',
+    'https://zenodo.org/api/records/6547151/files/400.png/content', 'https://zenodo.org/api/records/6547151/files/404.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 12
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/366.png/content', 'https://zenodo.org/api/records/6547151/files/371.png/content',
+    'https://zenodo.org/api/records/6547151/files/373.png/content', 'https://zenodo.org/api/records/6547151/files/393.png/content',
+    'https://zenodo.org/api/records/6547151/files/395.png/content', 'https://zenodo.org/api/records/6547151/files/396.png/content',
+    'https://zenodo.org/api/records/6547151/files/398.png/content', 'https://zenodo.org/api/records/6547151/files/403.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 8
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/359.png/content', 'https://zenodo.org/api/records/6547151/files/360.png/content',
+    'https://zenodo.org/api/records/6547151/files/361.png/content', 'https://zenodo.org/api/records/6547151/files/362.png/content',
+    'https://zenodo.org/api/records/6547151/files/375.png/content', 'https://zenodo.org/api/records/6547151/files/376.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 6
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/380.png/content', 'https://zenodo.org/api/records/6547151/files/381.png/content',
+    'https://zenodo.org/api/records/6547151/files/390.png/content', 'https://zenodo.org/api/records/6547151/files/391.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 4
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/383.png/content', 'https://zenodo.org/api/records/6547151/files/384.png/content',
+    'https://zenodo.org/api/records/6547151/files/386.png/content', 'https://zenodo.org/api/records/6547151/files/387.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 4
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/388.png/content', 'https://zenodo.org/api/records/6547151/files/389.png/content']
+  params:
+    samples: [0, 1, 2]
+    count: 2
+labels:
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [151-249]
+    count: 99
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 0
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [151-249]
+    count: 99
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 0
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [250-268, 270-299]
+    count: 49
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 1
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [250-268, 270-299]
+    count: 49
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 1
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [3-4, 6, 9-11, 13, 15-17, 19, 21-23, 25, 27-28, 31, 37-38, 40, 43-45, 47, 302, 307-309, 314, 317-318, 324,
+      331-333, 336-338, 341-343, 346, 351, 353]
+    count: 45
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 2
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [3-4, 6, 9-11, 13, 15-17, 19, 21-23, 25, 27-28, 31, 37-38, 40, 43-45, 47, 302, 307-309, 314, 317-318, 324,
+      331-333, 336-338, 341-343, 346, 351, 353]
+    count: 45
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 2
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [1, 5, 12, 14, 24, 29-30, 32-33, 36, 41, 46, 48-49, 301, 303-305, 311, 313, 316, 319-320, 347]
+    count: 24
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 3
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [1, 5, 12, 14, 24, 29-30, 32-33, 36, 41, 46, 48-49, 301, 303-305, 311, 313, 316, 319-320, 347]
+    count: 24
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 3
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [8, 26, 34, 39, 50, 306, 310, 322, 326, 345, 349-350, 352]
+    count: 13
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 4
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [8, 26, 34, 39, 50, 306, 310, 322, 326, 345, 349-350, 352]
+    count: 13
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 4
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [2, 7, 18, 35, 315]
+    count: 5
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 5
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [2, 7, 18, 35, 315]
+    count: 5
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 5
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [321, 323, 335, 344, 354]
+    count: 5
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 6
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [321, 323, 335, 344, 354]
+    count: 5
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 6
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [330, 339-340]
+    count: 3
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 7
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [330, 339-340]
+    count: 3
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 7
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [121, 129]
+    count: 2
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 8
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [121, 129]
+    count: 2
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 8
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [20, 312]
+    count: 2
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 9
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [20, 312]
+    count: 2
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 9
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [42, 300]
+    count: 2
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 10
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [42, 300]
+    count: 2
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 10
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [325, 328]
+    count: 2
+    bbox: corners
+    boxes: instance
+    classes: [mitotic figure]
+  pairs_with: 11
+  label_key: manual_gt-mitotic_figure-instance
+  segmentation_type: instance
+- snippet: png-json-boxes-numbers
+  urls: ['https://zenodo.org/api/records/6547151/files/MIDOG2022_training_png.json/content']
+  params:
+    numbers: [325, 328]
+    count: 2
+    bbox: corners
+    boxes: semantic
+    classes: [mitotic figure, not mitotic figure]
+  pairs_with: 11
+  label_key: manual_gt-mitotic_figure-semantic
+  segmentation_type: semantic
+reasons: ['png-json-boxes-numbers instead of the draft''s image-tiles-glob and jpeg-xml-boxes-numbers: the only annotation
+    file is one COCO-style JSON for all 405 PNGs (record technical.arrays, encoding boxes-table), which no catalog snippet
+    parses; this snippet reads the PNGs and rasterises the JSON''s boxes on each image''s grid, and orders both by file
+    number', 'one raw per image size and pHYs, each listing its files as explicit urls: an array has one shape and one voxel
+    size, and Zenodo has no directory index to glob (record notes: direct files are /api/records/6547151/files/<name>/content).
+    The first 4 KB (IHDR and pHYs) of all 405 PNGs were read while testing and their sizes equal the JSON''s images[].width/height
+    in every file. Groups bound: raw 0: 6577x4933, pHYs 4029567 px/m = 248.17 nm, 99 files (labeled; boxes: 4814 mitotic
+    figure, 5209 not mitotic figure); raw 1: 6447x4835, pHYs 3947874 px/m = 253.30 nm, 49 files (labeled; boxes: 2317 mitotic
+    figure, 1356 not mitotic figure); raw 2: 7215x5412, pHYs 4418504 px/m = 226.32 nm, 45 files (labeled; boxes: 402 mitotic
+    figure, 848 not mitotic figure); raw 3: 7215x5412, pHYs 4396693 px/m = 227.44 nm, 24 files (labeled; boxes: 211 mitotic
+    figure, 583 not mitotic figure); raw 4: 7215x5412, pHYs 4407992 px/m = 226.86 nm, 13 files (labeled; boxes: 337 mitotic
+    figure, 516 not mitotic figure); raw 5: 7215x5412, pHYs 4407087 px/m = 226.91 nm, 5 files (labeled; boxes: 49 mitotic
+    figure, 52 not mitotic figure); raw 6: 7215x5412, pHYs 4408504 px/m = 226.83 nm, 5 files (labeled; boxes: 15 mitotic
+    figure, 149 not mitotic figure); raw 7: 7215x5412, pHYs 4417992 px/m = 226.35 nm, 3 files (labeled; boxes: 26 mitotic
+    figure, 67 not mitotic figure); raw 8: 6463x4837, pHYs 3947874 px/m = 253.30 nm, 2 files (labeled; boxes: 19 mitotic
+    figure, 54 not mitotic figure); raw 9: 7215x5412, pHYs 4418583 px/m = 226.32 nm, 2 files (labeled; boxes: 18 mitotic
+    figure, 17 not mitotic figure); raw 10: 7215x5412, pHYs 4396811 px/m = 227.44 nm, 2 files (labeled; boxes: 4 mitotic
+    figure, 29 not mitotic figure); raw 11: 7215x5412, pHYs 4400512 px/m = 227.25 nm, 2 files (labeled; boxes: 11 mitotic
+    figure, 35 not mitotic figure); raw 12: 7215x5412, pHYs 4418504 px/m = 226.32 nm, 14 files (no annotations; boxes: 0
+    mitotic figure, 0 not mitotic figure); raw 13: 7215x5412, pHYs 4396693 px/m = 227.44 nm, 12 files (no annotations; boxes:
+    0 mitotic figure, 0 not mitotic figure); raw 14: 7215x5412, pHYs 4407992 px/m = 226.86 nm, 8 files (no annotations;
+    boxes: 0 mitotic figure, 0 not mitotic figure); raw 15: 7215x5412, pHYs 4407087 px/m = 226.91 nm, 6 files (no annotations;
+    boxes: 0 mitotic figure, 0 not mitotic figure); raw 16: 7215x5412, pHYs 4408504 px/m = 226.83 nm, 4 files (no annotations;
+    boxes: 0 mitotic figure, 0 not mitotic figure); raw 17: 7215x5412, pHYs 4419016 px/m = 226.29 nm, 4 files (no annotations;
+    boxes: 0 mitotic figure, 0 not mitotic figure); raw 18: 7215x5412, pHYs 4413701 px/m = 226.57 nm, 2 files (no annotations;
+    boxes: 0 mitotic figure, 0 not mitotic figure). The snippet checks every file it reads against its array''s first file
+    (size, bit depth, samples, pHYs) and raises on a difference, so a wrong list cannot give a wrong plane', 'NEEDS A HUMAN
+    DECISION, 104 images not bound: 301 of the 405 files are in the 19 groups above; the other 104 (103 of them annotated)
+    each have a size (and pHYs) no other file has (the record''s ''five image sizes'' is from the files it probed; the JSON
+    lists many more), so each would be its own one-file array, with two labels each. They are left out to keep the binding
+    reviewable and its opens (one HEAD and one range request per array) under Zenodo''s per-minute request limit, which
+    the harness does not wait out; any of them can be added as raw urls [<NNN>.png url] with labels numbers [NNN]', 'samples
+    [0, 1, 2] on every raw: the files are RGBA (colour type 6, 8 bit, in all 405 headers); the record says channels 3, RGB
+    H&E plus an alpha channel, so c is R, G, B and the alpha sample is left out. In 350.png, decoded whole while testing
+    (7215x5412x4), the alpha sample is 255..255 and R, G, B span 0..255', 'count on every raw and label: the number of files
+    in the group, so a changed url list or JSON fails at open instead of shifting z', 'voxel size is not bound; the snippet
+    reports it from each array''s pHYs chunk (pixels per metre, unit 1), equal in x and y: see the groups above. The record
+    has voxel_size_nm null because the files differ (paper: 0.23-0.25 um/px by scanner; pHYs 226.8-253.3 nm), which is why
+    the groups are also split by pHYs', 'labels: the JSON url with numbers = the file numbers of the raw it pairs with (written
+    as runs) and the same count. images[].file_name is NNN.png (record alignment_notes); raw planes are the urls in ascending
+    file number and label planes the JSON''s images in ascending file number, so z index k of a label is the annotation
+    plane of z index k of its raw. Each label plane''s grid is the JSON''s width/height for that image, which the PNG headers
+    confirmed', 'bbox corners: annotations[].bbox is [x1, y1, x2, y2], not COCO xywh (record alignment_notes; x2 - x1 =
+    y2 - y1 = 50 in all 20552 annotations, checked while testing). 2295 boxes have a corner at a half pixel, which the snippet
+    moves outwards (51 px on that side), and 223 reach past an image edge, where they are cut', 'NEEDS A HUMAN DECISION,
+    boxes as two labels per raw: the record''s encoding is boxes-table, which has no segmentation_type. As in the catalog''s
+    other box bindings, boxes instance with classes [mitotic figure] (each mitotic-figure box filled with its number in
+    its image, segmentation_type instance) tells the mitotic figures apart, and boxes semantic with both classes paints
+    the JSON''s category ids (1 mitotic figure, 2 not mitotic figure, the hard negatives; record classes), segmentation_type
+    semantic. Both are filled 50x50 px squares around a cell, not cell outlines: a consumer must not take them for pixel-accurate
+    masks. Where two boxes overlap the smaller is on top, and of two of one size the later one in the JSON', 'label_key manual_gt-mitotic_figure-semantic from
+    the draft (annotations by pathologists'' consensus -> manual_gt) and manual_gt-mitotic_figure-instance beside it; the
+    semantic label also carries class 2, not mitotic figure, so a human may prefer another class word or one key per class
+    (the match agent''s remark)', 'NEEDS A HUMAN DECISION, images without annotations ([''355-405'']): the record says images
+    355-405 have no annotations (unlabeled, not checked and found empty), so their groups are raws without labels rather
+    than all-background label planes, which the snippet would also give. Drop those raws if only annotated images are wanted']
