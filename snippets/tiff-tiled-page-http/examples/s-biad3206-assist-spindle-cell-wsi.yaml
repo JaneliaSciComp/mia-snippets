@@ -1,0 +1,33 @@
+record: s-biad3206-assist-spindle-cell-wsi
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: tiff-tiled-page-http
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/206/S-BIAD3206/Files/WSI/_1_ood/ASSIST_HCUV_0_A.tif"]
+    params: {pixel_size_from_resolution: true}
+  - snippet: tiff-tiled-page-http
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/206/S-BIAD3206/Files/WSI/_1_ood/ASSIST_HCUV_235_A.tif"]
+    params: {pixel_size_from_resolution: true}
+  - snippet: tiff-tiled-page-http
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/206/S-BIAD3206/Files/WSI/_1_ood/ASSIST_UPIGAP_0_A.tif"]
+    params: {pixel_size_from_resolution: true}
+  - snippet: tiff-tiled-page-http
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/206/S-BIAD3206/Files/WSI/2_df/ASSIST_UPIGAP_120_A.tif"]
+    params: {pixel_size_from_resolution: true}
+  - snippet: tiff-tiled-page-http
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/206/S-BIAD3206/Files/WSI/3_dfs/ASSIST_UPIGAP_151_A.tif"]
+    params: {pixel_size_from_resolution: true}
+  - snippet: tiff-tiled-page-http
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/206/S-BIAD3206/Files/WSI/5_afx/ASSIST_UPIGAP_80_A.tif"]
+    params: {pixel_size_from_resolution: true}
+  - snippet: tiff-tiled-page-http
+    urls: ["https://ftp.ebi.ac.uk/pub/databases/biostudies/S-BIAD/206/S-BIAD3206/Files/WSI/6_scc/ASSIST_UPIGAP_104_A.tif"]
+    params: {pixel_size_from_resolution: true}
+labels: []
+reasons:
+  - "tiff-tiled-page-http instead of the draft's tiff-zip-member-2: the slides are tiled (512x512) JPEG/YCbCr pyramid TIFFs of up to 75776x179712x3 pixels; tiff-zip-member-2 decodes page 0 whole for any region (smoke on ASSIST_HCUV_0_A.tif, 100800x88016x3, did not finish in 600 s), this snippet fetches and decodes only the level-0 tiles a region touches and never visits the reduced-resolution pages"
+  - "one raw per slide: the slides differ in shape (record shape_varies: true), so they cannot be stacked into one array, and a snippet opens one array per binding entry"
+  - "seven of the 410 slides, not all: every array is opened before any crop is made, and one open costs 2-3 MiB in 2-3 range requests that took 19-40 s each slide against ftp.ebi.ac.uk when this was tested, so 410 entries would spend hours opening. The seven are the first slide by name of each class folder (2_df, 3_dfs, 5_afx, 6_scc: all UPIGAP) and, from _1_ood, the first slide of each centre (ASSIST_HCUV_0_A, ASSIST_UPIGAP_0_A) plus the record's sample, the smallest slide (ASSIST_HCUV_235_A). The other 403 slides have the same layout by the record's listing and are bound the same way, one entry each"
+  - "pixel_size_from_resolution true: page 0 of each of the seven slides states XResolution = YResolution = 101600 pixels per inch, i.e. 250 nm per pixel, the pixel size of the 40x scans the record describes (notes: 'resolution 101600 px/inch (0.25 um)'), so the resolution tags are the scanner's pixel size and not a print size; the record's voxel_size_nm is null only because it may differ by scanner, and the snippet reads it per file"
+  - "axes yxc from the file (TIFF samples per pixel 3, RGB decoded from YCbCr), the record's yxs; no params.axes exists or is needed"
+  - "no labels: the record's annotations are slide-level diagnoses in ASSIST_Dataset.xlsx (arrays[1] format other, encoding other), not pixel arrays"

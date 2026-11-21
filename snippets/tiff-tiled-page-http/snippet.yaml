@@ -1,0 +1,10 @@
+name: tiff-tiled-page-http
+spec_version: 1
+summary: Page 0 (full resolution) of one tiled TIFF, such as a JPEG-compressed whole-slide pyramid, from a plain URL or a zip member; a region costs only the tiles it touches, fetched by range and decoded one by one. The reduced-resolution pages are ignored. One file per array.
+formats: [tiff]
+containers: [http, zip]
+params:
+  pixel_size_from_resolution: {type: bool, required: false, doc: "true: report voxel_size_nm from page 0's XResolution/YResolution/ResolutionUnit (inch or cm), for a scanner file whose resolution tags are its pixel size. Without it voxel_size_nm is None, since a plain TIFF's resolution usually describes print size; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad3206-assist-spindle-cell-wsi]
+supersedes: null
