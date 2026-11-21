@@ -10,7 +10,7 @@ import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import closing
+from contextlib import contextmanager
 from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import BinaryIO, Callable, Iterator, TypeVar
@@ -21,6 +21,7 @@ import httpx
 from . import remotezip
 from .api import BudgetExceeded, HostNotAllowed, NeedsFetch
 from .cache import DatasetCache
+from .meter import Meter
 
 BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB blocks
 PIECE = 8 * BLOCK        # anything longer (a run of missing blocks, a file, a zip member) is asked for in pieces
@@ -39,11 +40,12 @@ T = TypeVar("T")
 
 class IO:
     def __init__(self, cache: DatasetCache, staging_dir: Path, byte_cap: int, allowed_hosts: set[str],
-                 client: httpx.Client | None = None):
+                 client: httpx.Client | None = None, meter: Meter | None = None):
         self.cache, self.staging_dir, self.byte_cap = cache, Path(staging_dir), byte_cap
         self.allowed_hosts = {h.lower() for h in allowed_hosts}
         self._own_client = client is None
         self._client = client or httpx.Client(follow_redirects=False, timeout=60)
+        self.meter = meter or Meter()            # what each host was asked and answered, per minute
         self.bytes_fetched = 0
         self._counting = threading.Lock()        # pieces and files are fetched on threads
         self._listing = threading.Lock()         # one thread reads a zip's directory or an index page
@@ -56,6 +58,7 @@ class IO:
     def close(self) -> None:
         if self._own_client:
             self._client.close()
+        self.meter.close()
 
     def open(self, url: str) -> BinaryIO:
         """Seekable file whose reads are range GETs, cached on disk in 1 MiB blocks; a long read is several
@@ -262,11 +265,11 @@ class IO:
         """The validators from a HEAD request. A host that refuses HEAD (403 from storage whose redirect is signed
         for GET alone, as figshare's and Dataverse's are; 405) is asked for its first byte instead: the
         Content-Range of that answer gives the size, and its body is not read."""
-        with self._slots, closing(self._send("HEAD", url)) as r:
+        with self._slots, self._answer("HEAD", url) as r:
             if r.status_code not in HEAD_REFUSED:
                 r.raise_for_status()
                 return _validators(r, r.headers.get("content-length"))
-        with self._slots, closing(self._send("GET", url, {"Range": "bytes=0-0"})) as r:
+        with self._slots, self._answer("GET", url, {"Range": "bytes=0-0"}) as r:
             r.raise_for_status()
             if r.status_code == 206:
                 total = re.fullmatch(r"bytes \d+-\d+/(\d+)", r.headers.get("content-range", ""))
@@ -287,7 +290,8 @@ class IO:
         headers = {}
         if start is not None:
             headers["Range"] = f"bytes={start}-{end - 1}"
-        with self._slots, closing(self._send("GET", url, headers)) as r:
+        with self._slots, self._answer("GET", url, headers) as r:
+            host = r.request.url.host.lower()
             r.raise_for_status()
             if start is not None and r.status_code != 206:
                 raise NeedsFetch(f"{url}: server ignored Range (status {r.status_code}); "
@@ -301,6 +305,7 @@ class IO:
             try:
                 for chunk in r.iter_bytes():
                     got += len(chunk)
+                    self.meter.received(host, len(chunk))
                     self._charge(len(chunk))
                     if self.bytes_fetched > self.byte_cap:
                         raise BudgetExceeded(f"{url}: passed the cap of {self.byte_cap} bytes")
@@ -368,19 +373,40 @@ class IO:
             if parts.scheme not in ("http", "https") or host not in self.allowed_hosts:
                 raise HostNotAllowed(host or url, chain)
             if (pause := self._resume.pop(host, 0.0) - time.time()) > 0:
+                self.meter.waited(host, pause, asked=True)
                 time.sleep(pause)   # the host's last answer said its rate limit window is nearly used up
-            r = self._client.send(self._client.build_request(method, url, headers=headers),
-                                  stream=True, follow_redirects=False)
+            self.meter.sent(host)
+            try:
+                r = self._client.send(self._client.build_request(method, url, headers=headers),
+                                      stream=True, follow_redirects=False)
+            except BaseException as error:
+                self.meter.ended(host, _unanswered(error))
+                raise
             remaining = r.headers.get("x-ratelimit-remaining", "")
             if remaining.isdigit() and int(remaining) <= RATE_RESERVE:
                 # the count is the host's, over every job at this address: jobs slow down together, unasked
                 self._resume[host] = time.time() + _until(r.headers.get("x-ratelimit-reset"))
             if not r.is_redirect:
-                return r
+                return r   # `_answer` ends the attempt when its block does
             r.close()
+            self.meter.ended(host, str(r.status_code))
             url = str(r.url.join(r.headers["location"]))
             chain.append(url)
         raise httpx.TooManyRedirects(f"more than {MAX_REDIRECTS} redirects: {' -> '.join(chain)}")
+
+    @contextmanager
+    def _answer(self, method: str, url: str, headers: dict | None = None) -> Iterator[httpx.Response]:
+        """The response of `_send`, closed when the block ends; the meter hears how the attempt ended."""
+        r = self._send(method, url, headers)
+        host, outcome = r.request.url.host.lower(), str(r.status_code)
+        try:
+            yield r
+        except BaseException as error:
+            outcome = _failed_body(error, outcome)
+            raise
+        finally:
+            r.close()
+            self.meter.ended(host, outcome)
 
     # -- block cache (per job, under staging; distinct from the dataset cache)
 
@@ -452,6 +478,22 @@ class _RangeFile(io.RawIOBase):
         return len(data)
 
 
+def _unanswered(error: BaseException) -> str:
+    """The outcome of an attempt that got no status: `timeout`, `connect` or `dropped`."""
+    if isinstance(error, httpx.TimeoutException):
+        return "timeout"
+    return "connect" if isinstance(error, httpx.ConnectError) else "dropped"
+
+
+def _failed_body(error: BaseException, status: str) -> str:
+    """The outcome of an attempt whose block failed: the kind of failure of a body, else the status as text."""
+    if isinstance(error, httpx.TimeoutException):
+        return "timeout"
+    if isinstance(error, (httpx.RemoteProtocolError, OSError)):
+        return "truncated"
+    return "dropped" if isinstance(error, httpx.TransportError) else status
+
+
 def _validators(r: httpx.Response, size: str | None) -> dict:
     """What identifies the file behind an answer: its ETag, its Last-Modified and its size in bytes."""
     return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
@@ -513,4 +555,6 @@ def from_env(work: Path) -> IO:
     shared = Path(env["MIA_HARNESS_CACHE_DIR"]) if env.get("MIA_HARNESS_CACHE_DIR") else private
     hosts = {h.strip() for h in env.get("MIA_HARNESS_ALLOWED_HOSTS", "").split(",") if h.strip()}
     writable = env.get("MIA_HARNESS_CACHE_WRITABLE", "0") == "1"
-    return IO(DatasetCache(shared, private, writable), work / "staging", int(env["MIA_HARNESS_JOB_BYTES"]), hosts)
+    transfers = Path(env["MIA_HARNESS_TRANSFERS_DIR"]) if env.get("MIA_HARNESS_TRANSFERS_DIR") else work / "transfers"
+    return IO(DatasetCache(shared, private, writable), work / "staging", int(env["MIA_HARNESS_JOB_BYTES"]), hosts,
+              meter=Meter(transfers))
