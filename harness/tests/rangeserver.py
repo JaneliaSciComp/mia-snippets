@@ -24,6 +24,8 @@ class RangeServer:
         self.gzip = False                        # serve a gzip variant (own ETag) to clients that accept it
         self.fail = 0                            # answer this many more requests badly, as `fail_mode` says
         self.fail_mode = "truncate"              # "truncate": half the body, then close; "503", "429": that status
+        self.fail_modes: list[str] = []          # while not empty, each request for a file takes its first item as its
+        #                                          fail_mode ("ok": answered normally), before `fail` is looked at
         self.extra_headers: dict[str, str] = {}  # sent with every answer to a file's path (rate limit headers)
         self.requests: list[tuple[str, str]] = []  # (method, path), every request in order
         self.delay = 0.0                         # seconds each request takes before it is answered
@@ -108,10 +110,15 @@ class _Handler(BaseHTTPRequestHandler):
         if m and not s.ignore_range:
             start, end, status = int(m[1]), min(len(data), int(m[2]) + 1 if m[2] else len(data)), 206
             start, end = start + s.range_shift, min(len(data), end + s.range_shift)
-        if s.fail > 0 and (body or s.fail_mode != "truncate"):   # a truncated HEAD is no failure: it has no body
+        mode, failing = s.fail_mode, s.fail > 0 and (body or s.fail_mode != "truncate")   # a truncated HEAD has no body
+        if s.fail_modes:
+            mode = s.fail_modes.pop(0)
+            failing = mode != "ok"
+        elif failing:
             s.fail -= 1
-            if s.fail_mode != "truncate":
-                status, start, end = int(s.fail_mode), 0, 0
+        if failing:
+            if mode != "truncate":
+                status, start, end = int(mode), 0, 0
             self.send_response(status)
             for name, value in s.extra_headers.items():
                 self.send_header(name, value)
