@@ -7,6 +7,7 @@ params:
   path: {type: str, required: false, doc: "absolute local path; when set, urls are ignored and io is not used"}
   axes: {type: str, required: false, doc: "default zyx for 3-D, yx for 2-D"}
   access: {type: str, required: false, doc: "the access the array reports; default chunk"}
+  lazy: {type: bool, required: false, doc: "read urls[0] one z plane per request, by range"}
 requires: [numpy]
 tested_on: []
 supersedes: null

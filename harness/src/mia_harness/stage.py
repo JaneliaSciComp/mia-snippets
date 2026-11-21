@@ -218,20 +218,13 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
                          samples=volume.samples), checks
 
 
-def prefetch(binding, io: IO) -> None:
-    """Every file of the binding into the dataset cache (the raw cache), a `<zip>::<glob>` url as its members, so
-    the snippets then read locally; offline (a stage from the cache) each is a hit, or the error names it."""
-    for b in [*binding.raw, *binding.labels]:
-        for url in b.urls:
-            io.fetch_all(io.expand(url))
-
-
 def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan: PlanInput,
           voxel: dict[str, VoxelAxis], out: Path, seed: int = 0, stage_bytes: int | None = None) -> dict:
-    """Fetch every source once (bounded by the job's byte cap, cached for a rebuild), open the arrays, share the
-    record's crops among its raws, plan each raw that drew one and refuse a plan over `stage_bytes` before any
-    voxel is written; then write v<i>.zarr per planned raw with its labels, check the geometry, write provenance
-    and stage.json."""
+    """Open the arrays, share the record's crops among its raws, plan each raw that drew one and refuse a plan over
+    `stage_bytes` before any voxel is written; then write v<i>.zarr per planned raw with its labels, check the
+    geometry, write provenance and stage.json. Nothing is fetched ahead: each read goes where its reader sends it,
+    `io.open` by range into the job's blocks, `io.fetch` whole into the dataset cache, both within the job's byte
+    cap; with no hosts every read is a cache hit, or the error names the file."""
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     if stage_bytes is None:
@@ -250,7 +243,6 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
                             harness_commit=plan.harness_commit or os.environ.get("MIA_HARNESS_COMMIT", ""),
                             env_digest=plan.env_digest, snippets_commit=binding.snippets_commit,
                             record=binding.record, record_commit=binding.record_commit)
-        prefetch(binding, io)
         raws, labels = open_arrays(binding, Path(snapshot), io)
         # the record's crops shared among its raws by the planes each holds; a raw that drew none is not staged
         shares = share_out(plan.rule, binding.record,
