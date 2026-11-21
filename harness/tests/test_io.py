@@ -678,3 +678,18 @@ def test_any_status_that_names_a_wait_is_waited_for_like_a_429(server, make_io, 
     with pytest.raises(httpx.HTTPStatusError):                       # a third wait would pass 20 s
         g.read(10)
     assert server.gets().count("/e.bin") == 3
+
+
+@pytest.mark.parametrize("headers", [{}, {"Retry-After": "5"}])
+def test_a_3xx_that_reaches_retry_is_final_at_once(make_io, sleeps, headers):
+    """`_send` follows every 3xx as a redirect, so none reaches `_retry` from a server: the rule is tested on it."""
+    request, tried = httpx.Request("GET", "http://127.0.0.1/d.bin"), []
+
+    def attempt():
+        tried.append(1)
+        response = httpx.Response(304, headers=headers, request=request)
+        raise httpx.HTTPStatusError("304", request=request, response=response)
+
+    with pytest.raises(httpx.HTTPStatusError):
+        make_io()._retry(attempt)
+    assert tried == [1] and sleeps == []

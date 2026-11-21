@@ -222,12 +222,14 @@ class IO:
 
     def _retry(self, attempt: Callable[[], T]) -> T:
         """`attempt` again after a failure, by the first of these rules that the failure fits:
-        1. A 404 or 410 is final at once, whatever else the answer carries.
-        2. An answer that names a wait (a Retry-After above 0, on any status; for a 429 also X-RateLimit-Reset),
+        1. A 404 or 410, or a status below 400 (a 3xx that is no followed redirect), is final at once, whatever
+           else the answer carries.
+        2. An answer that names a wait (a Retry-After above 0, on any status of 400 or more; for a 429 also
+           X-RateLimit-Reset),
            or a 429 (Zenodo's rate limit is per address, so every job of a deployment shares it), is asked again
            after the wait it names, at most RATE_WAIT_MAX each and RATE_PATIENCE seconds in all; a 429 that names
            none waits as rule 4 does.
-        3. Any other status under 500 is asked once more after the last RETRY_WAIT, and is final at its second.
+        3. Any other 4xx is asked once more after the last RETRY_WAIT, and is final at its second.
         4. A 5xx, a dropped connection, a timeout or a body cut short (EBI does all of these, to about one request
            in seven, often several in a row) is asked again after each RETRY_WAIT in turn, then is final.
         Anything else (the cap, a host, Range ignored) is final. The repeat of rule 3, the waits of rule 4 and the
@@ -247,7 +249,7 @@ class IO:
                 except (httpx.TransportError, httpx.HTTPStatusError, OSError) as e:
                     status = e.response.status_code if isinstance(e, httpx.HTTPStatusError) else None
                     named, asked = 0.0, False
-                    if status in (404, 410):
+                    if status is not None and (status < 400 or status in (404, 410)):
                         raise
                     if status is not None:
                         headers = e.response.headers
