@@ -680,6 +680,26 @@ def test_any_status_that_names_a_wait_is_waited_for_like_a_429(server, make_io, 
     assert server.gets().count("/e.bin") == 3
 
 
+@pytest.mark.parametrize(
+    "headers",
+    [{"Retry-After": "0"}, {"Retry-After": "soon"}, {"Retry-After": "nan"}, {"X-RateLimit-Reset": "7"}],
+)
+def test_a_403_that_names_no_usable_wait_is_asked_once_more(server, make_io, sleeps, tmp_path, headers):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode, server.extra_headers = 1, "403", headers
+    assert f.read(10) == DATA[:10]
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert sleeps == [16.0] and len(server.gets()) == 2 and host["asked_wait_seconds"] == 0
+
+
+def test_a_named_wait_under_a_second_is_a_second(server, make_io, sleeps, tmp_path):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode, server.extra_headers = 2, "403", {"Retry-After": "0.01"}
+    assert f.read(10) == DATA[:10]
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert sleeps == [1.0, 1.0] and host["asked_wait_seconds"] == 2.0 and host["backoff_seconds"] == 0
+
+
 @pytest.mark.parametrize("headers", [{}, {"Retry-After": "5"}])
 def test_a_3xx_that_reaches_retry_is_final_at_once(make_io, sleeps, headers):
     """`_send` follows every 3xx as a redirect, so none reaches `_retry` from a server: the rule is tested on it."""

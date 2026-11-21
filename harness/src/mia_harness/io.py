@@ -5,6 +5,7 @@ import hashlib
 import io
 import itertools
 import json
+import math
 import os
 import re
 import threading
@@ -225,10 +226,10 @@ class IO:
         1. A 404 or 410, or a status below 400 (a 3xx that is no followed redirect), is final at once, whatever
            else the answer carries.
         2. An answer that names a wait (a Retry-After above 0, on any status of 400 or more; for a 429 also
-           X-RateLimit-Reset),
-           or a 429 (Zenodo's rate limit is per address, so every job of a deployment shares it), is asked again
-           after the wait it names, at most RATE_WAIT_MAX each and RATE_PATIENCE seconds in all; a 429 that names
-           none waits as rule 4 does.
+           X-RateLimit-Reset), or a 429 (Zenodo's rate limit is per address, so every job of a deployment shares
+           it), is asked again after the wait it names, at least 1 second and at most RATE_WAIT_MAX each, and
+           RATE_PATIENCE seconds in all; a 429 that names no wait backs off by RETRY_WAIT, its last value
+           repeated, within the same patience.
         3. Any other 4xx is asked once more after the last RETRY_WAIT, and is final at its second.
         4. A 5xx, a dropped connection, a timeout or a body cut short (EBI does all of these, to about one request
            in seven, often several in a row) is asked again after each RETRY_WAIT in turn, then is final.
@@ -418,8 +419,10 @@ class IO:
                 self._resume[host] = time.time() + _until(r.headers.get("x-ratelimit-reset"))
             if not r.is_redirect:
                 return r, host   # `_answer` ends the attempt when its block does
-            r.close()
-            self._ended(host, str(r.status_code))
+            try:
+                r.close()
+            finally:
+                self._ended(host, str(r.status_code))
             url = str(r.url.join(r.headers["location"]))
             chain.append(url)
         raise httpx.TooManyRedirects(f"more than {MAX_REDIRECTS} redirects: {' -> '.join(chain)}")
@@ -435,8 +438,10 @@ class IO:
             outcome = _failed_body(error, outcome)
             raise
         finally:
-            r.close()
-            self._ended(host, outcome)
+            try:
+                r.close()
+            finally:
+                self._ended(host, outcome)
 
     def _ended(self, host: str, outcome: str) -> None:
         """An attempt closed: the meter hears it, and a failed one is kept for the request's end, or counted as
@@ -542,15 +547,18 @@ def _validators(r: httpx.Response, size: str | None) -> dict:
 
 def _until(value: str | None) -> float:
     """Seconds to wait from a Retry-After or X-RateLimit-Reset header: seconds from now, or an epoch time (Zenodo
-    and GitHub send the reset so); at most RATE_WAIT_MAX, and 0 for a header that is missing or anything else."""
+    and GitHub send the reset so); at least 1 and at most RATE_WAIT_MAX for a wait over 0, and 0 for a header that
+    is missing, not a finite number, or anything else."""
     # ponytail: an epoch reset is compared with this host's clock; use the answer's Date header if clocks drift
     try:
         seconds = float(value)
     except (TypeError, ValueError):
         return 0.0
+    if not math.isfinite(seconds):
+        return 0.0
     if seconds > 1e9:
         seconds -= time.time()
-    return min(max(seconds, 0.0), RATE_WAIT_MAX)
+    return 0.0 if seconds <= 0 else min(max(seconds, 1.0), RATE_WAIT_MAX)
 
 
 def _split(url: str) -> tuple[str, str | None]:
