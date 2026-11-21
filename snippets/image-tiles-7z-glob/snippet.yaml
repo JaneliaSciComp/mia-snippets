@@ -1,0 +1,10 @@
+name: image-tiles-7z-glob
+spec_version: 1
+summary: One image per file (JPEG or PNG, told apart by magic bytes) from the members of a 7z archive (Copy, LZMA or LZMA2 folders, solid or not) chosen by a glob param, stacked along z; a colour file's samples are a c axis (zcyx) and a palette PNG is read as its stored indices (class ids). The archive is staged whole.
+formats: [jpeg, png]
+containers: [http]
+params:
+  members: {type: str, required: true, doc: "glob over the archive's member names (fnmatch syntax, case-sensitive; '*' also crosses '/'), e.g. 'dataset/JPEGImages/*.jpg'; the matching files are the z planes, sorted by name. The url is the plain 7z url: '<url>::<member>' is not accepted, the harness reads it as a zip member"}
+requires: [numpy, imagecodecs]
+tested_on: [zenodo-21501303-rice-stem-cross-sections]
+supersedes: null
