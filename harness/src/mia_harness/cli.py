@@ -55,7 +55,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--plan", type=Path, required=True, help="plan-rule.json: the rule and the artifact id inputs")
     s.add_argument("--voxel-size", type=Path, required=True,
                    help='voxel_size.json: {"<axis>": {"nm", "source", "basis"?, "range"?}}; the file wins per axis')
-    s.add_argument("--out", type=Path, required=True, help="directory for v<i>.zarr and stage.json")
+    s.add_argument("--out", type=Path, required=True, help="directory for v<i>.zarr, v<i>-crops and stage.json")
     s.add_argument("--seed", type=int, default=0)
     s = sub.add_parser("fetch", help="every URL of a binding into the raw cache; fetch.json has per-file outcomes")
     s.add_argument("binding", type=Path)
