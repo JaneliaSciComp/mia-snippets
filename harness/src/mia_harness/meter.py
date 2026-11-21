@@ -30,7 +30,8 @@ class Meter:
     def __init__(self, directory: Path | None = None, clock: Callable[[], float] = time.time, timer: bool = True):
         self.directory = directory
         self._clock = clock
-        self._lock = threading.Lock()
+        self._lock = threading.Lock()                    # guards the counts; never held across file-system calls
+        self._write_lock = threading.Lock()              # orders writes; taken before `_lock`, never by a counter
         self._minutes: dict[int, dict[str, dict]] = {}   # minute -> host -> fields
         self._open: dict[str, int] = {}                  # host -> attempts open now
         self._integrated: dict[str, float] = {}          # host -> time up to which open time is counted
@@ -90,11 +91,13 @@ class Meter:
         """Write every minute that has ended."""
         if self.directory is None:
             return
-        with self._lock:
-            self._integrate()
-            current = max(int(self._clock() // 60), self._written + 1)
-            self._flush(current)
-            self._written = current - 1
+        with self._write_lock:
+            with self._lock:
+                self._integrate()
+                current = max(int(self._clock() // 60), self._written + 1)
+                rows = self._take(current)
+                self._written = current - 1
+            self._append(rows)
 
     def close(self) -> None:
         """Write the open minute too and stop the timer. Harmless a second time."""
@@ -103,12 +106,15 @@ class Meter:
         self._stop.set()
         if self._thread is not None and self._thread is not threading.current_thread():
             self._thread.join()
-        with self._lock:
-            self._integrate()
-            if self._minutes:
-                last = max(self._minutes)
-                self._flush(last + 1)
-                self._written = last
+        with self._write_lock:
+            with self._lock:
+                self._integrate()
+                rows: list[dict] = []
+                if self._minutes:
+                    last = max(self._minutes)
+                    rows = self._take(last + 1)
+                    self._written = last
+            self._append(rows)
             if self._file is not None:
                 self._file.close()
                 self._file = None
@@ -142,24 +148,28 @@ class Meter:
                     fields["peak"] = max(fields["peak"], count)
                 at = end
 
-    def _flush(self, before: int) -> None:
-        """Append every held minute earlier than `before`, oldest first, then forget it."""
+    def _take(self, before: int) -> list[dict]:
+        """Remove every held minute earlier than `before` and return its rows, oldest first."""
+        taken = []
         for minute in sorted(m for m in self._minutes if m < before):
             for host, fields in sorted(self._minutes.pop(minute).items()):
                 row = {"minute": minute, "host": host, **fields,
                        "connection_seconds": round(fields["connection_seconds"], 3)}
                 if any(row[name] for name in row if name not in ("minute", "host")):
-                    self._append(row)
+                    taken.append(row)
+        return taken
 
-    def _append(self, row: dict) -> None:
-        if self._broken:
+    def _append(self, rows: list[dict]) -> None:
+        """Append the rows to the file, flushing each. A failure is logged once and ends all writing."""
+        if self._broken or not rows:
             return
         try:
             if self._file is None:
                 self.directory.mkdir(parents=True, exist_ok=True)
                 self._file = open(self.directory / self._name, "a", encoding="utf-8")
-            self._file.write(json.dumps(row) + "\n")
-            self._file.flush()
+            for row in rows:
+                self._file.write(json.dumps(row) + "\n")
+                self._file.flush()
         except (OSError, ValueError) as error:
             self._broken = True
             log.warning("meter stopped writing to %s: %s", self.directory, error)

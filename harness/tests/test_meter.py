@@ -144,3 +144,33 @@ def test_each_process_writes_its_own_file(tmp_path):
 def test_failed_is_any_outcome_but_2xx_and_3xx():
     assert not any(failed(outcome) for outcome in ("200", "206", "302"))
     assert all(failed(outcome) for outcome in ("403", "503", "timeout", "truncated"))
+
+
+def test_counting_goes_on_while_a_write_is_stalled(tmp_path):
+    clock = Clock()
+    m = Meter(tmp_path / "t", clock, timer=False)
+    m.sent("a.org")
+    m.ended("a.org", "200")
+    clock.now = 6060.0
+    write = m._append
+    stalled, release = threading.Event(), threading.Event()
+
+    def slow_append(rows):
+        stalled.set()
+        release.wait(5)
+        write(rows)
+
+    m._append = slow_append
+    ticker = threading.Thread(target=m.tick)
+    ticker.start()
+    assert stalled.wait(5)
+    counted = threading.Thread(target=lambda: (m.sent("a.org"), m.ended("a.org", "200")))
+    counted.start()
+    counted.join(2)
+    assert not counted.is_alive()              # the counters do not wait for the write
+    closer = threading.Thread(target=m.close)
+    closer.start()                             # its write waits behind the stalled one
+    release.set()
+    ticker.join(5)
+    closer.join(5)
+    assert [r["minute"] for r in rows(tmp_path / "t")] == [100, 101]
