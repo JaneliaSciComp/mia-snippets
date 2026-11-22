@@ -1,6 +1,8 @@
+import json
+
 import pytest
 
-from mia_harness.plan import (PlanRule, derive_samples, planes_per_split, planned_bytes, share_out, split_planes,
+from mia_harness.plan import (PlanRule, derive_samples, load_plan, planes_per_split, planned_bytes, share_out, split_planes,
                               stage_plan, start_index)
 from mia_harness.sample import overlap_frac
 
@@ -164,3 +166,32 @@ def test_plan_digest_golden():   # mia-workflows pins the same hex from its own 
                     split={"policy": "fractions", "fractions": {"train": 0.8, "val": 0.1, "test": 0.1}, "seed": 0},
                     channel_recipe=None)
     assert rule.digest() == "2827e3d249deb0a8bb8ecc10cb579ce0f37c9a4d2667f04af2914388bc04ae74"
+
+
+FILTERS = ({"name": "content"}, {"name": "labelled", "min_fraction": 0.05})
+
+
+def golden_rule(**more) -> PlanRule:
+    return PlanRule(seed=0, patch=256, levels=(1, 2, 4), samples={"train": 1000, "val": 20, "test": 20},
+                    split={"policy": "fractions", "fractions": {"train": 0.8, "val": 0.1, "test": 0.1}, "seed": 0},
+                    channel_recipe=None, **more)
+
+
+def test_a_rule_without_filters_documents_none():   # so its digest and its recorded parameters stay what they were
+    assert "filters" not in golden_rule().document()
+    assert golden_rule().digest() == "2827e3d249deb0a8bb8ecc10cb579ce0f37c9a4d2667f04af2914388bc04ae74"
+
+
+def test_plan_digest_with_filters_golden():   # mia-workflows pins the same hex from its own plan_digest(rule_dict)
+    rule = golden_rule(filters=FILTERS)
+    assert rule.document()["filters"] == list(FILTERS)
+    assert rule.digest() == "38da38f37fee0b1dc5f08cd3b544eab367376ece8c262b1aed2e2b8b2b016ce8"
+
+
+def test_load_plan_reads_filters(tmp_path):
+    rule = {"seed": 0, "patch": 64, "levels": [1, 2], "samples": {"train": 1}, "split": {}, "channel_recipe": None}
+    path = tmp_path / "plan-rule.json"
+    path.write_text(json.dumps({"artifact_id": "a", "levels_key": "k", "rule": rule}))
+    assert load_plan(path).rule.filters == ()
+    path.write_text(json.dumps({"artifact_id": "a", "levels_key": "k", "rule": {**rule, "filters": list(FILTERS)}}))
+    assert load_plan(path).rule.filters == FILTERS

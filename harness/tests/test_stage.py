@@ -78,7 +78,7 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     step, = attrs["provenance:steps"]           # how the group was made: the convention
     assert step["software"] == {"name": "mia-harness", "version": "c" * 40, "uri": HARNESS_URI}
     assert step["outputs"] == [{"id": "a" * 16, "name": "artifact"}] and step["started"] <= step["ended"]
-    assert step["parameters"]["plan"] == json.loads(json.dumps(dataclasses.asdict(plan.rule)))
+    assert step["parameters"]["plan"] == json.loads(json.dumps(plan.rule.document()))
     assert step["parameters"]["binding"]["record_commit"] == "0" * 40
     assert step["parameters"]["voxel_size"]["y"] == {"nm": 8.0, "source": "assumed", "basis": "test", "range": None}
     snippet = {"uri": f"{HARNESS_URI}/blob/{'1' * 40}/snippets/npy-local/snippet.py", "name": "snippet"}

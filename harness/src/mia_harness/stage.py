@@ -1,6 +1,5 @@
 """`harness stage`: a binding's arrays and a plan rule → one sparse OME-Zarr 0.6 image per raw volume, labels
 alongside, provenance under `attributes.mia` and stage.json from the same model (staging spec §4.1, §5, §6)."""
-import dataclasses
 from datetime import datetime, timezone
 import json
 import os
@@ -176,7 +175,7 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
     nm = {a: v.nm for a, v in volume.voxel.items()}
     plan = Plan(samples=volume.samples)
     # the staging step's parameters: what the command received
-    parameters = {"binding": binding.model_dump(mode="json"), "plan": dataclasses.asdict(rule),
+    parameters = {"binding": binding.model_dump(mode="json"), "plan": rule.document(),
                   "voxel_size": {a: VOXEL_AXIS.dump_python(v, mode="json") for a, v in volume.voxel.items()}}
     provenances, sources, checks, infos, sample = [], [], [], [], []
     for group in volume.groups:

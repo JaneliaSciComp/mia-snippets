@@ -12,17 +12,27 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class PlanRule:
-    """What to sample: patch size, pyramid levels, sample counts per split, the plane split and the channel recipe."""
+    """What to sample: patch size, pyramid levels, sample counts per split, the plane split, the channel recipe
+    and the filters a sample must pass (`{"name", **parameters}` each, in name order; see `filters.py`)."""
     seed: int
     patch: int
     levels: tuple[int, ...]
     samples: dict[str, int]
     split: dict
     channel_recipe: dict | None
+    filters: tuple[dict, ...] = ()
+
+    def document(self) -> dict:
+        """The rule as the worker wrote it: `filters` is there only when the rule has some."""
+        document = dataclasses.asdict(self)
+        document["filters"] = list(self.filters)
+        if not self.filters:
+            del document["filters"]
+        return document
 
     def digest(self) -> str:
         """sha256 hex of the rule's canonical JSON; equal rules give equal digests."""
-        canonical = json.dumps(dataclasses.asdict(self), sort_keys=True, separators=(",", ":"))
+        canonical = json.dumps(self.document(), sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(canonical.encode()).hexdigest()
 
 
@@ -38,10 +48,11 @@ class PlanInput:
 
 def load_plan(path: Path) -> PlanInput:
     """Read plan-rule.json: {"artifact_id", "levels_key", "harness_commit"?, "env_digest"?,
-    "rule": {seed, patch, levels, samples, split, channel_recipe}}."""
+    "rule": {seed, patch, levels, samples, split, channel_recipe, filters?}}."""
     document = json.loads(Path(path).read_text())
     rule = dict(document["rule"])
-    return PlanInput(rule=PlanRule(**{**rule, "levels": tuple(rule["levels"])}),
+    return PlanInput(rule=PlanRule(**{**rule, "levels": tuple(rule["levels"]),
+                                      "filters": tuple(rule.get("filters", ()))}),
                      artifact_id=document["artifact_id"], levels_key=document["levels_key"],
                      harness_commit=document.get("harness_commit", ""), env_digest=document.get("env_digest", ""))
 
