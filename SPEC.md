@@ -192,6 +192,17 @@ harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan pl
                                                                        # attributes.mia; geometry check of 8 planned
                                                                        # samples per group; intensity_sample from 8
                                                                        # written level-0 chunks per channel
+                                                                       # a rule with `filters` (`content`: the
+                                                                       # crop job's test; `labelled`: at least
+                                                                       # `min_fraction` of the box annotated, a raw
+                                                                       # without labels passing) tests each draw's
+                                                                       # full-resolution box, labels before raw,
+                                                                       # and draws again until the split's count
+                                                                       # or 2000 rejections in a row; stage.json
+                                                                       # then gives each volume's `selection`
+                                                                       # (wanted, staged, draws, rejected by
+                                                                       # reason) and lists a raw that kept no
+                                                                       # sample under `unstaged`, unwritten
 harness check-stage DIR   # 0.6 schemas, sample coverage and zarr.json digests of a stage output, recorded in it;
                           # loads no snippet code
 harness list    <url>                                                  # the members of a zip or the names of an HTTP
