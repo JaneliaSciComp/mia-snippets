@@ -1,0 +1,31 @@
+record: gigadb-102830-cd47-ihc-nuclei-esophageal
+record_commit: b414290b47076eb61800e60af8ad83ea69e6a5df
+snippets_commit: 45b203dd63bc6fa2a8f75802f44df7cc4a517a53
+raw:
+  - snippet: image-tiles-glob
+    urls: ["https://s3.ap-northeast-1.wasabisys.com/gigadb-datasets/live/pub/10.5524/102000_103000/102830/CD47-IHCNuSC_images.zip::images/*/*.tif"]
+    params: {}
+labels:
+  - snippet: mat5-variable-zip-glob-i302
+    urls: ["https://s3.ap-northeast-1.wasabisys.com/gigadb-datasets/live/pub/10.5524/102000_103000/102830/CD47-IHCNuSC_annotations.zip::annotations/*/*.mat"]
+    params: {key: inst_map}
+    pairs_with: 0
+    label_key: unknown-nucleus-instance
+    segmentation_type: instance
+  - snippet: mat5-variable-zip-glob-i302
+    urls: ["https://s3.ap-northeast-1.wasabisys.com/gigadb-datasets/live/pub/10.5524/102000_103000/102830/CD47-IHCNuSC_annotations.zip::annotations/*/*.mat"]
+    params: {key: type_map}
+    pairs_with: 0
+    label_key: unknown-nucleus-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw (from the draft, unchanged): 86 single-page RGB TIFFs (1024x1024x3 YXS uint8, photometric RGB) in images/train and images/val of the images zip, read by glob with image-tiles-glob as zcyx [86, 3, 1024, 1024], samples as c; the record says the samples are real RGB colour, so no 'samples: grey'"
+  - "labels: mat5-variable-zip-glob-i302 instead of the draft's hdf5-zip-member. The annotations are MATLAB v5 MAT-files (first bytes 'MATLAB 5.0 MAT-file Platform: posix', i.e. written by scipy.io.savemat), not HDF5, and h5py fails on them with 'file signature not found'. The new snippet parses the v5 format with numpy and zlib; scipy is not on the allowlist and is not needed"
+  - "urls: the glob annotations/*/*.mat over the annotations zip instead of the draft's single sample member, so that the label stack has one plane per raw plane (86 members: 70 in train/, 16 in val/)"
+  - "key inst_map and key type_map: the two label variables the record names. Every one of the 86 files holds five compressed variables in this order: inst_map (uint16 1024x1024), inst_uid (int64 1xN), inst_type (int64 1xN), inst_centroid (int64 Nx2), type_map (uint8 1024x1024). One labels entry per variable, both on the same glob; shapes and dtypes are as the record took them from the README (measured here on all 86 files)"
+  - "pairing: images/<split>/<stem>.tif pairs with annotations/<split>/<stem>.mat by identical <split>/<stem> (record alignment_notes, README). Both globs sort by member name and both zips hold the same 86 <split>/<stem> names, so plane k of each label is the annotation of plane k of the raw (compared name by name on the two listings). pairs_with 0 for both"
+  - "orientation: a MAT variable's rows are y and its columns x. Checked on the data, since a 1024x1024 map would also fit transposed: the mean position of each instance's pixels lies a median 0.8 px from the file's own inst_centroid read as [x, y] (18,483 instances; 427 px when x and y are swapped), and in 9 files compared with the raw the pixels under the mask are darker than those outside it and than those under the transposed mask in every file. In crop previews the outlines lie on the nuclei"
+  - "values are the stored ones. Checked on all 86 files: inst_map's nonzero ids are exactly the file's inst_uid (18,483 nuclei, ids up to 735, no file without nuclei; in 3 files some numbers are skipped, so ids are not always 1..N); type_map is nonzero exactly where inst_map is, has one value per instance, and that value is the instance's inst_type; type ids 0..7 occur, 8 (reserved, record) does not"
+  - "label_key and segmentation_type (from the draft): annotations.source is mixed -> unknown; the masks mark nuclei -> nucleus; inst_map is instance-ids -> unknown-nucleus-instance, instance; type_map is semantic-ids (the record's 8 classes, 0 background) -> unknown-nucleus-semantic, semantic"
+  - "voxel size: none from the files. A MAT-file carries no calibration and image-tiles-glob reports none; the record gives 250 nm in x and y"
+  - "snippets_commit is the commit before this snippet's own (a binding can't name the commit that adds it); a binding written by the worker names a commit that contains the snippet"

@@ -1,0 +1,10 @@
+name: mat5-variable-zip-glob-i302
+spec_version: 1
+summary: One real numeric 2-D variable (params.key, e.g. inst_map or type_map) of each MATLAB v5 MAT-file (.mat, as MATLAB -v5/-v7 and scipy.io.savemat write it, compressed or not; not the HDF5-based v7.3), from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane in sorted name order (zyx; yx for one file). Rows are y and columns x; values and the MATLAB class's dtype are returned as stored. Parsed with numpy and zlib, no scipy.
+formats: [other]
+containers: [zip, http]
+params:
+  key: {type: str, required: true, doc: "name of the MAT-file variable to read from every file, e.g. 'inst_map'; it must be a real numeric 2-D array (rows = y, columns = x) of the same shape and class in every file. One array per key: two label variables of the same files are two labels entries; reason required in binding"}
+requires: [numpy]
+tested_on: [gigadb-102830-cd47-ihc-nuclei-esophageal]
+supersedes: null
