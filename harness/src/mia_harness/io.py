@@ -5,12 +5,13 @@ import hashlib
 import io
 import itertools
 import json
+import math
 import os
 import re
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import closing
+from contextlib import contextmanager
 from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import BinaryIO, Callable, Iterator, TypeVar
@@ -21,6 +22,7 @@ import httpx
 from . import remotezip
 from .api import BudgetExceeded, HostNotAllowed, NeedsFetch
 from .cache import DatasetCache
+from .meter import Meter, failed
 
 BLOCK = 1 << 20          # range reads are aligned to, and cached in, 1 MiB blocks
 PIECE = 8 * BLOCK        # anything longer (a run of missing blocks, a file, a zip member) is asked for in pieces
@@ -39,11 +41,12 @@ T = TypeVar("T")
 
 class IO:
     def __init__(self, cache: DatasetCache, staging_dir: Path, byte_cap: int, allowed_hosts: set[str],
-                 client: httpx.Client | None = None):
+                 client: httpx.Client | None = None, meter: Meter | None = None):
         self.cache, self.staging_dir, self.byte_cap = cache, Path(staging_dir), byte_cap
         self.allowed_hosts = {h.lower() for h in allowed_hosts}
         self._own_client = client is None
         self._client = client or httpx.Client(follow_redirects=False, timeout=60)
+        self.meter = meter or Meter()            # what each host was asked and answered, per minute
         self.bytes_fetched = 0
         self._counting = threading.Lock()        # pieces and files are fetched on threads
         self._listing = threading.Lock()         # one thread reads a zip's directory or an index page
@@ -52,10 +55,12 @@ class IO:
         self._zips: dict[str, dict] = {}         # zip url -> members by name
         self._dirs: dict[str, list[str]] = {}    # directory url -> the names its index links to
         self._resume: dict[str, float] = {}      # host -> the time its rate limit window resets, when nearly used up
+        self._request = threading.local()        # `failures`: this thread's request's failed attempts
 
     def close(self) -> None:
         if self._own_client:
             self._client.close()
+        self.meter.close()
 
     def open(self, url: str) -> BinaryIO:
         """Seekable file whose reads are range GETs, cached on disk in 1 MiB blocks; a long read is several
@@ -217,30 +222,59 @@ class IO:
     # -- HTTP
 
     def _retry(self, attempt: Callable[[], T]) -> T:
-        """`attempt` again after each RETRY_WAIT when the server drops the connection, times out, truncates the
-        body or answers 5xx (EBI does all of these, to about one request in seven, often several in a row).
-        A 429 (Zenodo's rate limit is per address, so every job of a deployment shares it) is asked again after
-        the wait the server names, for RATE_PATIENCE seconds in all. Anything else (a 404, the cap, a host, Range
-        ignored) is final."""
+        """`attempt` again after a failure, by the first of these rules that the failure fits:
+        1. A 404 or 410, or a status below 400 (a 3xx that is no followed redirect), is final at once, whatever
+           else the answer carries.
+        2. An answer that names a wait (a Retry-After above 0, on any status of 400 or more; for a 429 also
+           X-RateLimit-Reset), or a 429 (Zenodo's rate limit is per address, so every job of a deployment shares
+           it), is asked again after the wait it names, at least 1 second and at most RATE_WAIT_MAX each, and
+           RATE_PATIENCE seconds in all; a 429 that names no wait backs off by RETRY_WAIT, its last value
+           repeated, within the same patience.
+        3. Any other 4xx is asked once more after the last RETRY_WAIT, and is final at its second.
+        4. A 5xx, a dropped connection, a timeout or a body cut short (EBI does all of these, to about one request
+           in seven, often several in a row) is asked again after each RETRY_WAIT in turn, then is final.
+        Anything else (the cap, a host, Range ignored) is final. The repeat of rule 3, the waits of rule 4 and the
+        patience of rule 2 are the request's own, used up over all its attempts in whatever order they fail.
+        When it ends, each failed attempt is counted once more as recovered (served) or final (not)."""
         # ponytail: the whole request again, not a resume; what is lost is one piece at most (PIECE)
-        waits, refusals, waited = iter(RETRY_WAIT), 0, 0.0
-        while True:
-            try:
-                return attempt()
-            except (httpx.TransportError, httpx.HTTPStatusError, OSError) as e:
-                status = e.response.status_code if isinstance(e, httpx.HTTPStatusError) else None
-                if status == 429:
-                    headers = e.response.headers
-                    pause = (_until(headers.get("retry-after")) or _until(headers.get("x-ratelimit-reset"))
-                             or RETRY_WAIT[min(refusals, len(RETRY_WAIT) - 1)])
-                    refusals, waited = refusals + 1, waited + pause
-                    if waited > RATE_PATIENCE:
+        outer, failures = getattr(self._request, "failures", None), []
+        self._request.failures = failures
+        waits, refusals, waited, repeated, served = iter(RETRY_WAIT), 0, 0.0, False, False
+        try:
+            while True:
+                seen = len(failures)
+                try:
+                    result = attempt()
+                    served = True
+                    return result
+                except (httpx.TransportError, httpx.HTTPStatusError, OSError) as e:
+                    status = e.response.status_code if isinstance(e, httpx.HTTPStatusError) else None
+                    named, asked = 0.0, False
+                    if status is not None and (status < 400 or status in (404, 410)):
                         raise
-                else:
-                    pause = next(waits, None)
-                    if pause is None or (status is not None and status < 500):
-                        raise
+                    if status is not None:
+                        headers = e.response.headers
+                        named = _until(headers.get("retry-after")) or (
+                            _until(headers.get("x-ratelimit-reset")) if status == 429 else 0.0)
+                    if status == 429 or named:
+                        pause, asked = named or RETRY_WAIT[min(refusals, len(RETRY_WAIT) - 1)], bool(named)
+                        refusals, waited = refusals + 1, waited + pause
+                        if waited > RATE_PATIENCE:
+                            raise
+                    elif status is not None and status < 500:
+                        if repeated:
+                            raise
+                        repeated, pause = True, RETRY_WAIT[-1]
+                    else:
+                        pause = next(waits, None)
+                        if pause is None:
+                            raise
+                    if len(failures) > seen:   # a failure that was no attempt (a local OSError) counts no wait
+                        self.meter.waited(failures[-1][0], pause, asked)
                 time.sleep(pause)
+        finally:
+            self._request.failures = outer
+            self.meter.settled(failures, served)
 
     def _head(self, url: str) -> dict:
         """The URL's validators: asked of the host when it is allowed (so a changed upstream file is noticed),
@@ -262,11 +296,11 @@ class IO:
         """The validators from a HEAD request. A host that refuses HEAD (403 from storage whose redirect is signed
         for GET alone, as figshare's and Dataverse's are; 405) is asked for its first byte instead: the
         Content-Range of that answer gives the size, and its body is not read."""
-        with self._slots, closing(self._send("HEAD", url)) as r:
+        with self._slots, self._answer("HEAD", url) as (r, _):
             if r.status_code not in HEAD_REFUSED:
                 r.raise_for_status()
                 return _validators(r, r.headers.get("content-length"))
-        with self._slots, closing(self._send("GET", url, {"Range": "bytes=0-0"})) as r:
+        with self._slots, self._answer("GET", url, {"Range": "bytes=0-0"}) as (r, _):
             r.raise_for_status()
             if r.status_code == 206:
                 total = re.fullmatch(r"bytes \d+-\d+/(\d+)", r.headers.get("content-range", ""))
@@ -287,7 +321,7 @@ class IO:
         headers = {}
         if start is not None:
             headers["Range"] = f"bytes={start}-{end - 1}"
-        with self._slots, closing(self._send("GET", url, headers)) as r:
+        with self._slots, self._answer("GET", url, headers) as (r, host):
             r.raise_for_status()
             if start is not None and r.status_code != 206:
                 raise NeedsFetch(f"{url}: server ignored Range (status {r.status_code}); "
@@ -301,6 +335,7 @@ class IO:
             try:
                 for chunk in r.iter_bytes():
                     got += len(chunk)
+                    self.meter.received(host, len(chunk))
                     self._charge(len(chunk))
                     if self.bytes_fetched > self.byte_cap:
                         raise BudgetExceeded(f"{url}: passed the cap of {self.byte_cap} bytes")
@@ -357,8 +392,9 @@ class IO:
 
         self._together(keep, list(range(start, end, PIECE)))
 
-    def _send(self, method: str, url: str, headers: dict | None = None) -> httpx.Response:
-        """A streamed response; redirects are followed here so every hop's host is checked first."""
+    def _send(self, method: str, url: str, headers: dict | None = None) -> tuple[httpx.Response, str]:
+        """A streamed response and the host it was metered under; redirects are followed here so every hop's host
+        is checked first."""
         # identity on every request, HEAD included, so validators and sizes describe the bytes we get
         headers = {**(headers or {}), "Accept-Encoding": "identity"}
         chain = [url]
@@ -368,19 +404,54 @@ class IO:
             if parts.scheme not in ("http", "https") or host not in self.allowed_hosts:
                 raise HostNotAllowed(host or url, chain)
             if (pause := self._resume.pop(host, 0.0) - time.time()) > 0:
+                self.meter.waited(host, pause, asked=True)
                 time.sleep(pause)   # the host's last answer said its rate limit window is nearly used up
-            r = self._client.send(self._client.build_request(method, url, headers=headers),
-                                  stream=True, follow_redirects=False)
+            self.meter.sent(host)
+            try:
+                r = self._client.send(self._client.build_request(method, url, headers=headers),
+                                      stream=True, follow_redirects=False)
+            except BaseException as error:
+                self._ended(host, _unanswered(error))
+                raise
             remaining = r.headers.get("x-ratelimit-remaining", "")
             if remaining.isdigit() and int(remaining) <= RATE_RESERVE:
                 # the count is the host's, over every job at this address: jobs slow down together, unasked
                 self._resume[host] = time.time() + _until(r.headers.get("x-ratelimit-reset"))
             if not r.is_redirect:
-                return r
-            r.close()
+                return r, host   # `_answer` ends the attempt when its block does
+            try:
+                r.close()
+            finally:
+                self._ended(host, str(r.status_code))
             url = str(r.url.join(r.headers["location"]))
             chain.append(url)
         raise httpx.TooManyRedirects(f"more than {MAX_REDIRECTS} redirects: {' -> '.join(chain)}")
+
+    @contextmanager
+    def _answer(self, method: str, url: str, headers: dict | None = None) -> Iterator[tuple[httpx.Response, str]]:
+        """The response of `_send` and its host, closed when the block ends; the meter hears how the attempt ended."""
+        r, host = self._send(method, url, headers)
+        outcome = str(r.status_code)
+        try:
+            yield r, host
+        except BaseException as error:
+            outcome = _failed_body(error, outcome)
+            raise
+        finally:
+            try:
+                r.close()
+            finally:
+                self._ended(host, outcome)
+
+    def _ended(self, host: str, outcome: str) -> None:
+        """An attempt closed: the meter hears it, and a failed one is kept for the request's end, or counted as
+        final at once when no request is being retried."""
+        self.meter.ended(host, outcome)
+        if failed(outcome):
+            if (failures := getattr(self._request, "failures", None)) is not None:
+                failures.append((host, outcome))
+            else:
+                self.meter.settled([(host, outcome)], served=False)
 
     # -- block cache (per job, under staging; distinct from the dataset cache)
 
@@ -452,6 +523,22 @@ class _RangeFile(io.RawIOBase):
         return len(data)
 
 
+def _unanswered(error: BaseException) -> str:
+    """The outcome of an attempt that got no status: `timeout`, `connect` or `dropped`."""
+    if isinstance(error, httpx.TimeoutException):
+        return "timeout"
+    return "connect" if isinstance(error, httpx.ConnectError) else "dropped"
+
+
+def _failed_body(error: BaseException, status: str) -> str:
+    """The outcome of an attempt whose block failed: the kind of failure of a body, else the status as text."""
+    if isinstance(error, httpx.TimeoutException):
+        return "timeout"
+    if isinstance(error, (httpx.RemoteProtocolError, OSError)):
+        return "truncated"
+    return "dropped" if isinstance(error, httpx.TransportError) else status
+
+
 def _validators(r: httpx.Response, size: str | None) -> dict:
     """What identifies the file behind an answer: its ETag, its Last-Modified and its size in bytes."""
     return {"etag": r.headers.get("etag"), "last_modified": r.headers.get("last-modified"),
@@ -460,15 +547,18 @@ def _validators(r: httpx.Response, size: str | None) -> dict:
 
 def _until(value: str | None) -> float:
     """Seconds to wait from a Retry-After or X-RateLimit-Reset header: seconds from now, or an epoch time (Zenodo
-    and GitHub send the reset so); at most RATE_WAIT_MAX, and 0 for a header that is missing or anything else."""
+    and GitHub send the reset so); at least 1 and at most RATE_WAIT_MAX for a wait over 0, and 0 for a header that
+    is missing, not a finite number, or anything else."""
     # ponytail: an epoch reset is compared with this host's clock; use the answer's Date header if clocks drift
     try:
         seconds = float(value)
     except (TypeError, ValueError):
         return 0.0
+    if not math.isfinite(seconds):
+        return 0.0
     if seconds > 1e9:
         seconds -= time.time()
-    return min(max(seconds, 0.0), RATE_WAIT_MAX)
+    return 0.0 if seconds <= 0 else min(max(seconds, 1.0), RATE_WAIT_MAX)
 
 
 def _split(url: str) -> tuple[str, str | None]:
@@ -513,4 +603,6 @@ def from_env(work: Path) -> IO:
     shared = Path(env["MIA_HARNESS_CACHE_DIR"]) if env.get("MIA_HARNESS_CACHE_DIR") else private
     hosts = {h.strip() for h in env.get("MIA_HARNESS_ALLOWED_HOSTS", "").split(",") if h.strip()}
     writable = env.get("MIA_HARNESS_CACHE_WRITABLE", "0") == "1"
-    return IO(DatasetCache(shared, private, writable), work / "staging", int(env["MIA_HARNESS_JOB_BYTES"]), hosts)
+    transfers = Path(env["MIA_HARNESS_TRANSFERS_DIR"]) if env.get("MIA_HARNESS_TRANSFERS_DIR") else work / "transfers"
+    return IO(DatasetCache(shared, private, writable), work / "staging", int(env["MIA_HARNESS_JOB_BYTES"]), hosts,
+              meter=Meter(transfers))

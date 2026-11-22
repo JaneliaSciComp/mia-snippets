@@ -7,10 +7,12 @@ import zipfile
 
 import httpx
 import pytest
-from rangeserver import server  # noqa: F401  (fixture)
+from rangeserver import RangeServer, server  # noqa: F401  (fixture)
 
+import mia_harness.io as io_module
 from mia_harness.cache import DatasetCache
 from mia_harness.io import BLOCK, IO, BudgetExceeded, HostNotAllowed, NeedsFetch, from_env
+from mia_harness.meter import Meter
 
 DATA = os.urandom(3 * BLOCK + 17)
 
@@ -21,12 +23,30 @@ def make_io(tmp_path):
 
     def make(cap=10 * BLOCK, hosts=("127.0.0.1",), writable=True):
         cache = DatasetCache(tmp_path / "shared", tmp_path / "private", writable)
-        made.append(IO(cache, tmp_path / "staging", cap, set(hosts)))
+        made.append(IO(cache, tmp_path / "staging", cap, set(hosts), meter=Meter(tmp_path / "transfers", timer=False)))
         return made[-1]
 
     yield make
     for i in made:
         i.close()
+
+
+def totals(io, tmp_path):
+    """What the io's meter wrote, added up per host, after closing it."""
+    io.meter.close()
+    out = {}
+    for path in sorted((tmp_path / "transfers").glob("*.jsonl")):
+        for row in map(json.loads, path.read_text().splitlines()):
+            host = out.setdefault(row["host"], {"answers": {}, "recovered": {}, "final": {}})
+            for name, value in row.items():
+                if isinstance(value, dict):
+                    for key, count in value.items():
+                        host[name][key] = host[name].get(key, 0) + count
+                elif name == "peak":
+                    host[name] = max(host.get(name, 0), value)
+                elif name not in ("minute", "host"):
+                    host[name] = host.get(name, 0) + value
+    return out
 
 
 def zip_bytes(members, **kw):
@@ -185,7 +205,7 @@ def test_ftp_and_other_hosts_are_refused(make_io):
 
 def test_from_env(tmp_path, monkeypatch):
     for k in ("MIA_HARNESS_JOB_BYTES", "MIA_HARNESS_ALLOWED_HOSTS", "MIA_HARNESS_CACHE_DIR",
-              "MIA_HARNESS_CACHE_WRITABLE"):
+              "MIA_HARNESS_CACHE_WRITABLE", "MIA_HARNESS_TRANSFERS_DIR"):
         monkeypatch.delenv(k, raising=False)
     with pytest.raises(RuntimeError, match="MIA_HARNESS_JOB_BYTES"):
         from_env(tmp_path)
@@ -193,7 +213,13 @@ def test_from_env(tmp_path, monkeypatch):
     io = from_env(tmp_path)
     assert io.byte_cap == 1000 and io.allowed_hosts == set()
     assert io.cache.shared == io.cache.private == tmp_path / "cache-private" and not io.cache.writable
+    assert io.meter.directory == tmp_path / "transfers"
     io.close()
+    monkeypatch.setenv("MIA_HARNESS_TRANSFERS_DIR", str(tmp_path / "elsewhere"))
+    io = from_env(tmp_path)
+    assert io.meter.directory == tmp_path / "elsewhere"
+    io.close()
+    monkeypatch.delenv("MIA_HARNESS_TRANSFERS_DIR")
     monkeypatch.setenv("MIA_HARNESS_ALLOWED_HOSTS", "A.example.org, b.example.org")
     monkeypatch.setenv("MIA_HARNESS_CACHE_DIR", str(tmp_path / "shared"))
     monkeypatch.setenv("MIA_HARNESS_CACHE_WRITABLE", "1")
@@ -448,11 +474,14 @@ def test_a_429_waits_as_long_as_the_server_says_and_asks_again(server, make_io, 
     assert server.heads().count("/e.bin") == 3
 
 
-def test_a_429_without_a_usable_hint_backs_off(server, make_io, sleeps):
+def test_a_429_without_a_usable_hint_backs_off(server, make_io, sleeps, tmp_path):
     server.files["/d.bin"] = DATA
     server.fail, server.fail_mode, server.extra_headers = 2, "429", {"Retry-After": "Wed, 21 Oct 2015 07:28:00 GMT"}
-    assert make_io().fetch(server.url("/d.bin")).read_bytes() == DATA
+    io = make_io()
+    assert io.fetch(server.url("/d.bin")).read_bytes() == DATA
     assert sleeps == [1.0, 4.0]
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert host["backoff_seconds"] == 5.0 and host["asked_wait_seconds"] == 0
 
 
 def test_requests_pause_until_the_reset_when_the_server_says_few_are_left(server, make_io, sleeps):
@@ -496,7 +525,7 @@ def test_a_small_zip_member_is_one_request_header_and_data_together(server, make
         assert len(server.gets()) - gets == requests, name
 
 
-def test_a_host_that_refuses_head_is_asked_for_its_first_byte(server, make_io):
+def test_a_host_that_refuses_head_is_asked_for_its_first_byte(server, make_io, tmp_path):
     """figshare and Dataverse redirect a download to storage whose URL is signed for GET alone: a HEAD there is
     answered 403, a GET is served. Seventeen datasets stopped on that 403 before a byte was read. The size and
     the validators come from a one-byte ranged GET, and reads and whole-file fetches go on as for any host."""
@@ -512,6 +541,7 @@ def test_a_host_that_refuses_head_is_asked_for_its_first_byte(server, make_io):
     assert server.requests[:4] == [("HEAD", "/files/1"), ("HEAD", "/store/d.bin"), ("GET", "/files/1"),
                                    ("GET", "/store/d.bin")]
     assert io.bytes_fetched == BLOCK   # the first byte asked for the size is not read, so it is not charged
+    assert totals(io, tmp_path)["127.0.0.1"]["recovered"] == {"403": 1}   # the refused HEAD, its request then served
     assert io.fetch(server.url("/store/d.bin")).read_bytes() == DATA
 
 
@@ -522,9 +552,164 @@ def test_a_host_that_refuses_head_and_ignores_range_still_says_its_size(server, 
     assert io._size(server.url("/d.bin")) == len(DATA) and io.bytes_fetched == 0
 
 
-def test_a_host_that_refuses_the_get_too_is_an_error(server, make_io):
+def test_a_host_that_refuses_the_get_too_is_an_error(server, make_io, sleeps, tmp_path):
     server.files["/d.bin"] = DATA
     server.refuse_head = server.refuse_get = 403
+    io = make_io()
     with pytest.raises(httpx.HTTPStatusError) as refused:
-        make_io().open(server.url("/d.bin"))
-    assert refused.value.response.status_code == 403 and server.gets() == ["/d.bin"]
+        io.open(server.url("/d.bin"))
+    assert refused.value.response.status_code == 403 and server.gets() == ["/d.bin"] * 2
+    assert sleeps == [16.0] and totals(io, tmp_path)["127.0.0.1"]["final"] == {"403": 4}   # two HEADs, two GETs
+
+
+def test_requests_bytes_and_answers_are_counted_per_host(server, make_io, tmp_path):
+    server.files["/d.bin"] = DATA
+    io = make_io()
+    io.open(server.url("/d.bin")).read(BLOCK)
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert host["requests"] == len(server.requests) == 2 and host["bytes"] == BLOCK
+    assert host["answers"] == {"200": 1, "206": 1} and host["peak"] == 1 and host["connection_seconds"] > 0
+
+
+def test_a_body_cut_short_is_truncated_and_no_206(server, make_io, tmp_path, monkeypatch):
+    monkeypatch.setattr(io_module, "RETRY_WAIT", (0, 0))
+    server.files["/d.bin"], server.fail = DATA, 1
+    io = make_io()
+    io.open(server.url("/d.bin")).read(BLOCK)
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert host["answers"] == {"200": 1, "truncated": 1, "206": 1}
+    assert BLOCK < host["bytes"] <= BLOCK + BLOCK // 2 and io.bytes_fetched == BLOCK   # delivered, not kept
+
+
+def test_a_redirect_hop_is_an_attempt_at_the_host_that_answered_it(server, make_io, tmp_path):
+    server.files["/d.bin"] = DATA
+    server.redirects["/r.bin"] = f"http://localhost:{server.port}/d.bin"
+    io = make_io(hosts=("127.0.0.1", "localhost"))
+    assert io.fetch(server.url("/r.bin")).read_bytes() == DATA
+    by = totals(io, tmp_path)
+    assert set(by["127.0.0.1"]["answers"]) == {"302"} and by["127.0.0.1"]["bytes"] == 0
+    assert by["localhost"]["bytes"] == len(DATA)
+
+
+def test_counts_are_exact_with_four_requests_at_once(server, make_io, small_pieces, tmp_path):
+    names = [f"/{i}.bin" for i in range(6)]
+    server.files.update(dict.fromkeys(names, DATA))
+    server.delay = 0.02
+    io = make_io(cap=100 * BLOCK)
+    io.fetch_all([server.url(name) for name in names])
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert host["requests"] == len(server.requests) == sum(host["answers"].values())
+    assert host["bytes"] == 6 * len(DATA) and 1 < host["peak"] <= 4
+
+
+def test_a_refused_connection_is_counted_as_connect(make_io, tmp_path, monkeypatch):
+    monkeypatch.setattr(io_module, "RETRY_WAIT", (0, 0))
+    with RangeServer() as quiet:
+        url = quiet.url("/d.bin")             # the port is free again once the server is gone
+    io = make_io()
+    with pytest.raises(httpx.ConnectError):
+        io.open(url)
+    assert totals(io, tmp_path)["127.0.0.1"]["answers"] == {"connect": 3}
+
+
+def test_the_pause_for_a_nearly_used_window_is_an_asked_wait(server, make_io, sleeps, tmp_path):
+    server.files["/d.bin"] = DATA
+    server.extra_headers = {"X-RateLimit-Remaining": "3", "X-RateLimit-Reset": str(int(time.time()) + 30)}
+    io = make_io()
+    io.open(server.url("/d.bin")).read(10)
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert 25 < host["asked_wait_seconds"] <= 30 and host["backoff_seconds"] == 0
+
+
+def opened(server, make_io, path="/d.bin"):
+    """An io and a file of it whose validators are known: what fails from here on is a GET."""
+    server.files[path] = DATA
+    io = make_io()
+    return io, io.open(server.url(path))
+
+
+def test_a_403_is_asked_once_more_and_counted_as_recovered(server, make_io, sleeps, tmp_path):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode = 1, "403"
+    assert f.read(10) == DATA[:10]
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert sleeps == [16.0] and host["recovered"] == {"403": 1} and host["final"] == {}
+    assert host["backoff_seconds"] == 16.0 and host["asked_wait_seconds"] == 0
+
+
+def test_a_403_twice_is_final(server, make_io, sleeps, tmp_path):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode = 2, "403"
+    with pytest.raises(httpx.HTTPStatusError):
+        f.read(10)
+    assert server.gets() == ["/d.bin"] * 2 and totals(io, tmp_path)["127.0.0.1"]["final"] == {"403": 2}
+
+
+def test_the_one_repeat_is_not_renewed_by_another_failure_between(server, make_io, sleeps, tmp_path):
+    io, f = opened(server, make_io)
+    server.fail_modes = ["403", "503", "403"]
+    with pytest.raises(httpx.HTTPStatusError) as refused:
+        f.read(10)
+    assert refused.value.response.status_code == 403 and sleeps == [16.0, 1.0] and len(server.gets()) == 3
+    assert totals(io, tmp_path)["127.0.0.1"]["final"] == {"403": 2, "503": 1}
+
+
+@pytest.mark.parametrize("status", ["404", "410"])
+@pytest.mark.parametrize("headers", [{}, {"Retry-After": "5"}])
+def test_a_404_or_410_is_final_at_once_whatever_it_carries(server, make_io, sleeps, tmp_path, status, headers):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode, server.extra_headers = 3, status, headers
+    with pytest.raises(httpx.HTTPStatusError):
+        f.read(10)
+    assert sleeps == [] and len(server.gets()) == 1
+    assert totals(io, tmp_path)["127.0.0.1"]["final"] == {status: 1}
+
+
+@pytest.mark.parametrize("status", ["403", "503"])
+def test_any_status_that_names_a_wait_is_waited_for_like_a_429(server, make_io, sleeps, tmp_path, monkeypatch, status):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode, server.extra_headers = 5, status, {"Retry-After": "7"}
+    assert f.read(10) == DATA[:10]                                   # five waits: more than either other rule gives
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert sleeps == [7] * 5 and host["asked_wait_seconds"] == 35 and host["recovered"] == {status: 5}
+    monkeypatch.setattr(io_module, "RATE_PATIENCE", 20)
+    _, g = opened(server, make_io, "/e.bin")
+    server.fail = 5
+    with pytest.raises(httpx.HTTPStatusError):                       # a third wait would pass 20 s
+        g.read(10)
+    assert server.gets().count("/e.bin") == 3
+
+
+@pytest.mark.parametrize(
+    "headers",
+    [{"Retry-After": "0"}, {"Retry-After": "soon"}, {"Retry-After": "nan"}, {"X-RateLimit-Reset": "7"}],
+)
+def test_a_403_that_names_no_usable_wait_is_asked_once_more(server, make_io, sleeps, tmp_path, headers):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode, server.extra_headers = 1, "403", headers
+    assert f.read(10) == DATA[:10]
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert sleeps == [16.0] and len(server.gets()) == 2 and host["asked_wait_seconds"] == 0
+
+
+def test_a_named_wait_under_a_second_is_a_second(server, make_io, sleeps, tmp_path):
+    io, f = opened(server, make_io)
+    server.fail, server.fail_mode, server.extra_headers = 2, "403", {"Retry-After": "0.01"}
+    assert f.read(10) == DATA[:10]
+    host = totals(io, tmp_path)["127.0.0.1"]
+    assert sleeps == [1.0, 1.0] and host["asked_wait_seconds"] == 2.0 and host["backoff_seconds"] == 0
+
+
+@pytest.mark.parametrize("headers", [{}, {"Retry-After": "5"}])
+def test_a_3xx_that_reaches_retry_is_final_at_once(make_io, sleeps, headers):
+    """`_send` follows every 3xx as a redirect, so none reaches `_retry` from a server: the rule is tested on it."""
+    request, tried = httpx.Request("GET", "http://127.0.0.1/d.bin"), []
+
+    def attempt():
+        tried.append(1)
+        response = httpx.Response(304, headers=headers, request=request)
+        raise httpx.HTTPStatusError("304", request=request, response=response)
+
+    with pytest.raises(httpx.HTTPStatusError):
+        make_io()._retry(attempt)
+    assert tried == [1] and sleeps == []
