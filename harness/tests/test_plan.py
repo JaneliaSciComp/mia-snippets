@@ -1,7 +1,11 @@
+import dataclasses
+import json
+
 import pytest
 
-from mia_harness.plan import (PlanRule, derive_samples, planes_per_split, planned_bytes, share_out, split_planes,
-                              stage_plan, start_index)
+from mia_harness import plan
+from mia_harness.plan import (PlanRule, derive_samples, load_plan, planes_per_split, planned_bytes, select_samples,
+                              share_out, split_planes, stage_plan, start_index)
 from mia_harness.sample import overlap_frac
 
 RULE = PlanRule(seed=0, patch=64, levels=(1, 2, 4), samples={"train": 10, "val": 3, "test": 3},
@@ -164,3 +168,93 @@ def test_plan_digest_golden():   # mia-workflows pins the same hex from its own 
                     split={"policy": "fractions", "fractions": {"train": 0.8, "val": 0.1, "test": 0.1}, "seed": 0},
                     channel_recipe=None)
     assert rule.digest() == "2827e3d249deb0a8bb8ecc10cb579ce0f37c9a4d2667f04af2914388bc04ae74"
+
+
+FILTERS = ({"name": "content"}, {"name": "labelled", "min_fraction": 0.05})
+
+
+def golden_rule(**more) -> PlanRule:
+    return PlanRule(seed=0, patch=256, levels=(1, 2, 4), samples={"train": 1000, "val": 20, "test": 20},
+                    split={"policy": "fractions", "fractions": {"train": 0.8, "val": 0.1, "test": 0.1}, "seed": 0},
+                    channel_recipe=None, **more)
+
+
+def test_a_rule_without_filters_documents_none():   # its digest and its recorded parameters hold no filters key
+    assert "filters" not in golden_rule().document()
+    assert golden_rule().digest() == "2827e3d249deb0a8bb8ecc10cb579ce0f37c9a4d2667f04af2914388bc04ae74"
+
+
+def test_plan_digest_with_filters_golden():   # mia-workflows pins the same hex from its own plan_digest(rule_dict)
+    rule = golden_rule(filters=FILTERS)
+    assert rule.document()["filters"] == list(FILTERS)
+    assert rule.digest() == "38da38f37fee0b1dc5f08cd3b544eab367376ece8c262b1aed2e2b8b2b016ce8"
+
+
+def test_load_plan_reads_filters(tmp_path):
+    rule = {"seed": 0, "patch": 64, "levels": [1, 2], "samples": {"train": 1}, "split": {}, "channel_recipe": None}
+    path = tmp_path / "plan-rule.json"
+    path.write_text(json.dumps({"artifact_id": "a", "levels_key": "k", "rule": rule}))
+    assert load_plan(path).rule.filters == ()
+    path.write_text(json.dumps({"artifact_id": "a", "levels_key": "k", "rule": {**rule, "filters": list(FILTERS)}}))
+    assert load_plan(path).rule.filters == FILTERS
+
+
+def select(counts, keep=None, shape=(40, 2000, 2000), rule=RULE):
+    return select_samples(rule, "r", 0, "zyx", shape, VOX, counts, keep)
+
+
+def test_select_without_keep_is_derive():
+    counts = {"train": 10, "val": 3, "test": 3}
+    samples, selection = select(counts)
+    assert samples == derive_samples(RULE, "r", 0, "zyx", (40, 2000, 2000), VOX, counts)
+    assert selection["train"] == {"wanted": 10, "staged": 10, "draws": 10, "rejected": {}}
+
+
+def test_keep_rejections_are_redrawn_until_the_count():
+    calls = []
+
+    def every_other(sample):
+        calls.append(sample)
+        return "content" if len(calls) % 2 else None
+
+    samples, selection = select({"train": 10}, every_other)
+    assert len(samples["train"]) == 10
+    assert selection["train"] == {"wanted": 10, "staged": 10, "draws": 20, "rejected": {"content": 10}}
+    assert samples["train"] == calls[1::2]   # the kept ones, in the order they were drawn
+
+
+def test_the_search_gives_up_after_a_run_of_rejections(monkeypatch):
+    monkeypatch.setattr(plan, "GIVE_UP", 7)
+    seen = []
+
+    def third_only(sample):
+        seen.append(sample)
+        return None if len(seen) == 3 else "labelled"
+
+    samples, selection = select({"train": 5}, third_only)
+    assert len(samples["train"]) == 1 and len(seen) == 3 + 7   # the run starts again after the kept one
+    assert selection["train"] == {"wanted": 5, "staged": 1, "draws": 10, "rejected": {"labelled": 9}}
+
+
+def test_a_volume_with_one_position_ends(monkeypatch):
+    monkeypatch.setattr(plan, "GIVE_UP", 50)
+    calls = []
+    samples, selection = select({"train": 4}, lambda sample: calls.append(sample), shape=(1, 256, 256),
+                                rule=dataclasses.replace(RULE, split={**RULE.split, "fractions": {"train": 1.0}}))
+    assert len(samples["train"]) == 1 and len(calls) == 1   # a repeat is rejected unread
+    assert selection["train"] == {"wanted": 4, "staged": 1, "draws": 51, "rejected": {"repeat": 50}}
+
+
+def test_a_larger_count_extends_a_smaller_under_a_keep():
+    def keep(sample):   # depends on the sample alone, as a filter does
+        return "content" if sample["starts"]["1"][0] % 3 == 0 else None
+
+    few, many = select({"train": 6}, keep)[0]["train"], select({"train": 20}, keep)[0]["train"]
+    assert len(few) == 6 and many[:6] == few
+
+
+def test_a_split_without_a_plane_wants_none():
+    samples, selection = select({"train": 4, "val": 4, "test": 4}, lambda sample: None, shape=(1, 2000, 2000))
+    assert sum(len(v) for v in samples.values()) == 4
+    assert sorted(split for split, counts in selection.items() if counts["wanted"]) == sorted(
+        split for split, kept in samples.items() if kept)
