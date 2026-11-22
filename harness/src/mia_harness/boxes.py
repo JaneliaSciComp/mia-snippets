@@ -59,6 +59,7 @@ def write_crop_boxes(out: Path, samples: dict[str, list[dict]], voxel_size_nm: d
     for box in boxes:
         (out / "by_id" / str(box[0])).write_bytes(encode(box))   # no relationships, so the record is the whole file
     random.Random(0).shuffle(boxes)   # the spatial index wants a random order
-    (out / "spatial0" / "0_0").write_bytes(struct.pack("<Q", len(boxes)) + b"".join(encode(b) for b in boxes)
+    cell = "_".join("0" * len(axes))   # the one grid cell, named by a coordinate per axis
+    (out / "spatial0" / cell).write_bytes(struct.pack("<Q", len(boxes)) + b"".join(encode(b) for b in boxes)
                                            + b"".join(struct.pack("<Q", b[0]) for b in boxes))
     return len(boxes)
