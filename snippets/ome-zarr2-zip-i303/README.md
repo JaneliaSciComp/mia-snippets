@@ -59,13 +59,12 @@ It takes no params.
 ## Example
 
 `examples/s-biad3270-fetal-digit-multiplexed-if-cell-tissue-seg.yaml`: the 18 SpatialData objects of
-S-BIAD3270 on `ftp.ebi.ac.uk` (`zarr_obj_SD_NI_2026/*.zarr.zip`, 16.6 GB together; in the zip whose directory was looked through, every
-file member is deflated). In
-each, `images/fluorescence/0` (`cyx`, 5 channels DAPI_INIT, DAPI_FINAL, PI16, PRG4, VWF, uint16, blosc-lz4,
-`/` keys; chunks 5×1024×1024 in 14 stores, up to 5×3663×3663 in four) is the raw and
-`labels/tissue_regions_manual/0` (`yx`, uint16, blosc-lz4, chunks 8192×8192 or thereabouts) its semantic
-label, on the same grid: 7200×18000 to 25400×17000 pixels. All 36 arrays open and every label has its raw's
-yx shape.
+S-BIAD3270 on `ftp.ebi.ac.uk` (`zarr_obj_SD_NI_2026/*.zarr.zip`, 16.6 GB together; in the zip whose directory
+was looked through, every file member is deflated). In each, `images/fluorescence/0` (`cyx`, 5 channels
+DAPI_INIT, DAPI_FINAL, PI16, PRG4, VWF, uint16, blosc-lz4, `/` keys; chunks 5×1024×1024 in 14 stores, up to
+5×3663×3663 in four) is the raw and `labels/tissue_regions_manual/0` (`yx`, uint16, blosc-lz4, chunks
+8192×8192 or thereabouts) its semantic label, on the same grid: 7200×18000 to 25400×17000 pixels. All 36
+arrays open and every label has its raw's yx shape.
 
 What was checked on the data, beyond `harness smoke` and `harness crop --n 4` of the whole binding:
 
