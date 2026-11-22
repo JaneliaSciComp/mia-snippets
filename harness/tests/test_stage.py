@@ -109,7 +109,10 @@ def test_stage_writes_sparse_0_6_volume_with_provenance(tmp_path, io, server, mo
     assert sj["artifact"]["binding_hash"] == binding_hash(b) and sj["artifact"]["harness_commit"] == "c" * 40
     root = zarr.open_group(tmp_path / "out" / "v0.zarr", mode="r").attrs.asdict()
     assert convention_errors(root) == [] and root["ome"]["labels"] == ["gt"]
-    assert root["mia"] == {"schema": 2, "checks": {"geometry": {"samples": 12, "levels": 6, "mismatches": []}}}
+    assert root["mia"] == {"schema": 2, "checks": {"geometry": {"samples": 12, "levels": 6, "mismatches": []}},
+                           "crops": {"path": "../v0-crops", "format": "neuroglancer_annotations_v1"}}
+    crops = json.loads((tmp_path / "out" / "v0-crops" / "info").read_text())   # the planned crops as boxes
+    assert crops["@type"] == "neuroglancer_annotations_v1" and crops["spatial"][0]["limit"] == 6 * 3
     assert [i.get("uri", i.get("id")) for i in root["provenance:steps"][0]["inputs"]] == [
         "r", server.url("/raw0.npy"), server.url("/labels0.npy"), snippet["uri"]]      # the root's inputs are every group's
 

@@ -14,6 +14,7 @@ import zarr
 from .api import Array
 from .binding import ArrayBinding, Binding, LabelBinding, binding_hash, load_binding
 from .io import IO, BudgetExceeded, HostNotAllowed, _split
+from .boxes import write_crop_boxes
 from .plan import (LevelPlan, PlanInput, StagePlan, derive_samples, planes_per_split, planned_bytes, share_out,
                    stage_plan)
 from .provenance import (VOXEL_AXIS, Artifact, Geometry, Plan, Provenance, SourceFile, Verification,
@@ -207,7 +208,10 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
         provenances.append(provenance)
         sources += group_sources
     labels = {g.binding.label_key: g.path for g in volume.groups if isinstance(g.binding, LabelBinding)}
-    write_volume_groups(vdir, list(labels), summary(provenances),
+    crops = f"v{volume.index}-crops"   # the planned crops as boxes a viewer draws over the volume
+    write_crop_boxes(out / crops, volume.samples, nm)
+    mia_root = summary(provenances) | {"crops": {"path": f"../{crops}", "format": "neuroglancer_annotations_v1"}}
+    write_volume_groups(vdir, list(labels), mia_root,
                         convention_attributes([stage_step(artifact, sources, parameters, started=started, ended=_now())]))
     raw_info, raw_plan = infos[0], volume.groups[0].plan
     levels = [{"factor": li.factor, "path": li.path, "shape": list(li.shape), "scale_nm": li.scale_nm,
@@ -221,8 +225,9 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
 def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan: PlanInput,
           voxel: dict[str, VoxelAxis], out: Path, seed: int = 0, stage_bytes: int | None = None) -> dict:
     """Open the arrays, share the record's crops among its raws, plan each raw that drew one and refuse a plan over
-    `stage_bytes` before any voxel is written; then write v<i>.zarr per planned raw with its labels, check the
-    geometry, write provenance and stage.json. Nothing is fetched ahead: each read goes where its reader sends it,
+    `stage_bytes` before any voxel is written; then write v<i>.zarr per planned raw with its labels and v<i>-crops,
+    its crop boxes for a viewer, check the geometry, write provenance and stage.json. Nothing is fetched ahead: each
+    read goes where its reader sends it,
     `io.open` by range into the job's blocks, `io.fetch` whole into the dataset cache, both within the job's byte
     cap; with no hosts every read is a cache hit, or the error names the file."""
     out = Path(out)
