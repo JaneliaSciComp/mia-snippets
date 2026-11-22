@@ -5,6 +5,7 @@ import itertools
 import json
 import random
 from collections import Counter
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -123,38 +124,68 @@ def share_out(rule: PlanRule, record: str, planes: list[dict[str, int]]) -> list
     return shares
 
 
-def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],
-                   voxel_size_nm: dict[str, float], counts: dict[str, int]) -> dict[str, list[dict]]:
-    """Sample descriptors per split from `counts[split]` draws, placed at random: a plane of the split, then a
-    position whose coarsest footprint lies inside the volume (its start a multiple of the coarsest factor, so every
-    level's start lands on its own grid). Crops of a split may overlap, but a position drawn again is not listed
-    twice, so a small volume gives fewer crops than draws; a split without a plane gets none. A larger count
-    extends a smaller count's list; finer levels sit inside their coarsest footprint."""
+# ponytail: a sparse volume costs thousands of draws, each a label read, and a volume with nothing passable costs
+# this many per split before it stops; scan the label coarsely once and draw from where it is annotated.
+GIVE_UP = 2000   # rejected draws in a row after which a split of a volume ends with what it has
+
+
+def select_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],
+                   voxel_size_nm: dict[str, float], counts: dict[str, int],
+                   keep: Callable[[dict], str | None] | None = None) -> tuple[dict[str, list[dict]], dict[str, dict]]:
+    """Sample descriptors per split, placed at random: a plane of the split, then a position whose coarsest
+    footprint lies inside the volume (its start a multiple of the coarsest factor, so every level's start lands on
+    its own grid). Crops of a split may overlap, but a position drawn again is not listed twice; a split without a
+    plane gets none. Finer levels sit inside their coarsest footprint.
+
+    Without `keep` a split takes `counts[split]` draws, so a small volume gives fewer crops than draws. With
+    `keep` (a sample descriptor → the name of the filter that rejects it, or None) it draws until `counts[split]`
+    are kept or `GIVE_UP` draws in a row were rejected, a repeated position being one. Either way the draws come in
+    order from one Random, so a larger count extends a smaller count's list.
+
+    Also the selection, per split: {"wanted", "staged", "draws", "rejected": {"repeat" or a filter's name: count}}."""
     planes = shape[axes.index("z")] if "z" in axes else 1
     extents = [shape[axes.index(axis)] for axis in ("y", "x")]
     coarsest = max(rule.levels)
     footprint = rule.patch * coarsest
     planes_by_split = split_planes(f"{record}/v{volume}.zarr", planes, rule.split)
     out: dict[str, list[dict]] = {}
+    selection: dict[str, dict] = {}
     for split, planes_of_split in planes_by_split.items():
         rng = random.Random(f"{rule.seed}:{record}:v{volume}:{split}")
+        wanted = counts.get(split, 0) if planes_of_split else 0
         accepted: list[dict] = []
         drawn: set[tuple[int, ...]] = set()
-        for _ in range(counts.get(split, 0) if planes_of_split else 0):
+        rejected: Counter[str] = Counter()
+        draws = run = 0
+        while len(accepted) < wanted and (draws < wanted if keep is None else run < GIVE_UP):
+            draws += 1
             z = rng.choice(planes_of_split)
-            plane = {"z": z} if "z" in axes else {}
             first = [rng.randrange((extent - footprint) // coarsest + 1) * coarsest for extent in extents]
-            if (z, *first) in drawn:
-                continue
+            reason = "repeat" if (z, *first) in drawn else None
             drawn.add((z, *first))
-            centre_nm = [(start + footprint / 2) * voxel_size_nm[axis] for start, axis in zip(first, "yx")]
-            starts = {str(factor): [start_index(centre, voxel_size_nm[axis], factor, rule.patch, extent)
-                                    for centre, axis, extent in zip(centre_nm, "yx", extents)]
-                      for factor in rule.levels}
-            accepted.append({"plane": plane, "centre_nm": centre_nm, "levels": list(rule.levels), "patch": rule.patch,
-                             "starts": starts})
+            if reason is None:
+                centre_nm = [(start + footprint / 2) * voxel_size_nm[axis] for start, axis in zip(first, "yx")]
+                starts = {str(factor): [start_index(centre, voxel_size_nm[axis], factor, rule.patch, extent)
+                                        for centre, axis, extent in zip(centre_nm, "yx", extents)]
+                          for factor in rule.levels}
+                sample = {"plane": {"z": z} if "z" in axes else {}, "centre_nm": centre_nm,
+                          "levels": list(rule.levels), "patch": rule.patch, "starts": starts}
+                reason = keep(sample) if keep else None
+            if reason:
+                rejected[reason] += 1
+                run += 1
+                continue
+            run = 0
+            accepted.append(sample)
         out[split] = accepted
-    return out
+        selection[split] = {"wanted": wanted, "staged": len(accepted), "draws": draws, "rejected": dict(rejected)}
+    return out, selection
+
+
+def derive_samples(rule: PlanRule, record: str, volume: int, axes: str, shape: tuple[int, ...],
+                   voxel_size_nm: dict[str, float], counts: dict[str, int]) -> dict[str, list[dict]]:
+    """`select_samples` with no filter: `counts[split]` draws per split."""
+    return select_samples(rule, record, volume, axes, shape, voxel_size_nm, counts)[0]
 
 
 @dataclass(frozen=True)
