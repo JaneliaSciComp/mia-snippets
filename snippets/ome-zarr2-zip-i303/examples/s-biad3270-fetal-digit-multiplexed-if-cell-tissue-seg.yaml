@@ -1,0 +1,178 @@
+record: s-biad3270-fetal-digit-multiplexed-if-cell-tissue-seg
+record_commit: b414290b47076eb61800e60af8ad83ea69e6a5df
+snippets_commit: 45b203dd63bc6fa2a8f75802f44df7cc4a517a53
+raw:
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_001_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_10_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_001_subregion_2_uberon_stratified.zarr.zip::14w_15658_D_10_region_001_subregion_2_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_002_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_10_region_002_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_002_subregion_2_uberon_stratified.zarr.zip::14w_15658_D_10_region_002_subregion_2_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_20_region_002_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_20_region_002_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_20_region_002_subregion_2_uberon_stratified.zarr.zip::14w_15658_D_20_region_002_subregion_2_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_31_region_001_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_31_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_31_region_002_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_31_region_002_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_40_region_001_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_40_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_17825_A_17_region_001_subregion_1_uberon_stratified.zarr.zip::14w_17825_A_17_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_17825_A_17_region_002_subregion_1_uberon_stratified.zarr.zip::14w_17825_A_17_region_002_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_10_region_002_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_10_region_002_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_30_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_30_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_40_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_40_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_50_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_50_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_50_region_002_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_50_region_002_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_60_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_60_region_001_subregion_1_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_60_region_001_subregion_2_uberon_stratified.zarr.zip::15w_15562_B_60_region_001_subregion_2_uberon_stratified.zarr/images/fluorescence/0/.zarray"]
+    params: {}
+labels:
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_001_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_10_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 0
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_001_subregion_2_uberon_stratified.zarr.zip::14w_15658_D_10_region_001_subregion_2_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 1
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_002_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_10_region_002_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 2
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_10_region_002_subregion_2_uberon_stratified.zarr.zip::14w_15658_D_10_region_002_subregion_2_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 3
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_20_region_002_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_20_region_002_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 4
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_20_region_002_subregion_2_uberon_stratified.zarr.zip::14w_15658_D_20_region_002_subregion_2_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 5
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_31_region_001_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_31_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 6
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_31_region_002_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_31_region_002_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 7
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_15658_D_40_region_001_subregion_1_uberon_stratified.zarr.zip::14w_15658_D_40_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 8
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_17825_A_17_region_001_subregion_1_uberon_stratified.zarr.zip::14w_17825_A_17_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 9
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/14w_17825_A_17_region_002_subregion_1_uberon_stratified.zarr.zip::14w_17825_A_17_region_002_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 10
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_10_region_002_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_10_region_002_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 11
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_30_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_30_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 12
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_40_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_40_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 13
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_50_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_50_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 14
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_50_region_002_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_50_region_002_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 15
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_60_region_001_subregion_1_uberon_stratified.zarr.zip::15w_15562_B_60_region_001_subregion_1_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 16
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+  - snippet: ome-zarr2-zip-i303
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/270/S-BIAD3270/Files/zarr_obj_SD_NI_2026/15w_15562_B_60_region_001_subregion_2_uberon_stratified.zarr.zip::15w_15562_B_60_region_001_subregion_2_uberon_stratified.zarr/labels/tissue_regions_manual/0/.zarray"]
+    params: {}
+    pairs_with: 17
+    label_key: unknown-tissue_region-semantic
+    segmentation_type: semantic
+reasons:
+  - "raw and label both come from the same SpatialData zarr.zip (images/fluorescence/0 and labels/tissue_regions_manual/0), one pair per zip, all 18 zips of zarr_obj_SD_NI_2026: in every zip the two arrays have the same yx shape and the same coordinateTransformations (identity to 'global', one affine to 'rotated'), so they pair pixel for pixel. The whole-slide OME-TIFFs are not bound: the offset of each crop in its OME-TIFF is not stated (the draft's reason, unchanged)"
+  - "snippet ome-zarr2-zip-i303 for all 36 arrays, no params: Zarr v2 arrays stored as deflated members of a zip, blosc-lz4 chunks with / keys, which zarr2-zip-jpegxr-cz-markers (JPEG XR chunks) and zarr2-http (plain objects, .zattrs in the array directory) refuse; axes come from the multiscales of the group above each array"
+  - "urls are the arrays' .zarray members, not the draft's array directories (the snippet takes either): .zarray is a member of the zip that harness fetch can fetch, the directory is not"
+  - "raw axes cyx as the store says, 5 channels named DAPI_INIT, DAPI_FINAL, PI16, PRG4, VWF in the group's omero metadata (the record lists DAPI, PI16, PRG4, VWF for 5 channels: DAPI is there twice). c stays a plane axis, so a crop is one channel; every channel's patch costs the whole 5-channel chunk"
+  - "voxel size: none reported. The stores give no unit (axes without unit, scale 1), so the arrays say nothing; the record's 325 nm is the OME-TIFFs' calibration and the snippet does not borrow it"
+  - "label_key unknown-tissue_region-semantic as the draft derived it (annotations.source mixed -> unknown; class tissue_region from the array name; encoding semantic-ids -> semantic). The ids are UBERON term numbers, read from each store's tables/table_intensities/obs (tissue_region_label_id, tissue_region_uberon_term, tissue_region_uberon_label): 2481 bone tissue, 7845 dense regular connective tissue, 11825 loose connective tissue, 19204 skin epithelium in all 18 labels; 2283 nail matrix in 14w_15658_D_10_region_001_subregion_1 only; 1 artefact (ARTEFACT:0000001, not a tissue) in 14w_15658_D_10_region_001_subregion_2, 15w_15562_B_30_region_001_subregion_1 and 15w_15562_B_60_region_001_subregion_2. The record's classes are null; its GeoJSON classes are the same four with tendon where this label has dense regular connective tissue"
+  - "0 is 'no region drawn', 33% to 70% of each label: the empty margin of the rotated crop and tissue the annotators left out, which the array does not tell apart. The table calls cells there 'unassigned'"
+  - "placement check, in all 18 stores: the label read at each cell's centroid (obs x, y, in image pixels) equals that cell's tissue_region_label_id for 99.79% to 99.93% of the 55,037 to 109,776 cells; in 14w_15658_D_31_region_001_subregion_1 a transposed read agrees for 5% and mirrored ones for 14% and 28%, and DAPI_FINAL is 29,581 at the centroids against 7,062 over the same window (details in the snippet README)"
+  - "not bound: the Cellpose cell outlines (shapes/cell_shapes/shapes.parquet) and the QuPath GeoJSON polygons, which this snippet does not read; the affine to the 'rotated' frame is not applied, the arrays are read on their stored grid"
+  - "cost: 14 raws are chunked 5x1024x1024, but 14w_15658_D_31_region_002_subregion_1, 14w_15658_D_40_region_001_subregion_1 and both 15w_15562_B_60_region_001 subregions have chunks up to 5x3663x3663 (134 MB decoded each), and the labels chunks up to 8388x8000; a 256x256 patch across four such raw chunks fetched 314 MB and took four minutes"

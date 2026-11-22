@@ -1,0 +1,9 @@
+name: ome-zarr2-zip-i303
+spec_version: 1
+summary: One resolution level of an NGFF (OME-Zarr v2) image or label whose Zarr store is a directory inside a zip (a SpatialData object zipped as X.zarr.zip), read chunk member by chunk member; axes (from c z y x) and voxel size from the multiscales of the group above the array, which has no .zattrs of its own; null, blosc (any inner codec), zlib, gzip or zstd chunks, keys with / or . separators; a chunk member the zip lacks reads as fill_value.
+formats: [zarr, ome-zarr]
+containers: [zip]
+params: {}
+requires: [numpy, imagecodecs]
+tested_on: [s-biad3270-fetal-digit-multiplexed-if-cell-tissue-seg]
+supersedes: null
