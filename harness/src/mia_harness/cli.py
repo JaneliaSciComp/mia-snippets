@@ -11,6 +11,7 @@ from .describe import PLANES, describe_arrays, describe_file
 from .fetch import fetch
 from .io import _split, from_env
 from .plan import load_plan
+from .png import sample_pngs
 from .preview import preview
 from .provenance import VoxelAxis, add_convention
 from .run import crop, smoke
@@ -84,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--descriptor", required=True, help="JSON text or a path to a JSON file")
     s.add_argument("--params", help="JSON text or a path to a JSON file (default: {})")
     s.add_argument("--out", type=Path, required=True, help="sample .npz; meta goes to the same name .json")
+    s.add_argument("--png", type=Path, help="also write the sample as pictures here: img-<i>.png and "
+                                           "label-<key>-<i>.png per level")
     s = sub.add_parser("verify", help="SPEC §6.4 checks; loads no snippet code")
     s.add_argument("dir", type=Path)
     s.add_argument("--binding", type=Path, required=True)
@@ -122,6 +125,9 @@ def main(argv: list[str] | None = None) -> int:
         import numpy as np
         np.savez(args.out, **{k: v for k, v in sample.items() if k != "meta"})
         args.out.with_suffix(".json").write_text(json.dumps(sample.get("meta", {}), indent=2, default=str) + "\n")
+        if args.png:
+            args.png.mkdir(parents=True, exist_ok=True)
+            sample_pngs(sample, args.png)
         return 0
     if args.cmd == "add-provenance":
         for stage_json in sorted(args.root.rglob("stage.json")):
