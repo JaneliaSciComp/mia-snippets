@@ -137,6 +137,14 @@ def test_bool_label_becomes_uint8_and_float_label_is_refused(tmp_path):
         write_pyramid(NpArray("zyx", np.ones((3, 600, 700), dtype=np.float32)), tmp_path / "f", plan=plan, voxel_size_nm=VOX, kind="label", coordinate_system="r.v0", mia={}, downsampling_metadata={})
 
 
+def test_a_longlong_array_is_written_as_int64(tmp_path):
+    """numpy's `longlong` prints as int64 but is another dtype class, which zarr has no data type for."""
+    plan = plan_for((3, 600, 700), levels=(1,))
+    longlong = NpArray("zyx", np.ones((3, 600, 700), dtype=np.dtype("q")))
+    info = write_pyramid(longlong, tmp_path / "q", plan=plan, voxel_size_nm=VOX, kind="label", coordinate_system="r.v0", mia={}, downsampling_metadata={})
+    assert info.dtype == "int64" and zarr.open_group(tmp_path / "q", mode="r")["s0"].dtype == np.int64
+
+
 def test_volume_root_is_one_0_6_image(tmp_path):
     plan = plan_for((3, 600, 700))
     write_pyramid(volume(), tmp_path / "v0.zarr" / "raw", plan=plan, voxel_size_nm=VOX, kind="raw", coordinate_system="r.v0", mia={}, downsampling_metadata={})
