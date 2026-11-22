@@ -24,7 +24,7 @@ def test_crop_boxes_one_per_sample_and_level_in_nm(tmp_path):
     assert [p["id"] for p in info["properties"]] == ["level", "split", "color"]
     assert info["spatial"] == [{"key": "spatial0", "grid_shape": [1, 1, 1], "limit": 4,
                                 "chunk_size": [u - l for l, u in zip(info["lower_bound"], info["upper_bound"])]}]
-    cell = read_cell(tmp_path / "crops" / "spatial0" / "0_0", 3)
+    cell = read_cell(tmp_path / "crops" / "spatial0" / "0_0_0", 3)   # one coordinate per axis
     assert set(cell) == {1, 2, 3, 4}
     # train sample, level 1: raw pixels [10, 14) × [20, 24) on plane 3, half a voxel in from the centres
     assert struct.unpack("<6f", cell[1][:24]) == (2.5 * 30, 9.5 * 2, 19.5 * 2, 3.5 * 30, 13.5 * 2, 23.5 * 2)
