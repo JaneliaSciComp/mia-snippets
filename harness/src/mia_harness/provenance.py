@@ -269,6 +269,8 @@ class VolumeSummary(_Strict):
     labels: dict[str, str]
     intensity_sample: list[list[float]]
     samples: dict[str, list[dict]]
+    # how the samples were found when the plan rule has filters (plan.select_samples), per split; else absent
+    selection: dict[str, dict] | None = None
 
 
 def stage_json(ok: bool, errors: list[str], artifact: Artifact | None, volumes: list[VolumeSummary],
@@ -276,6 +278,7 @@ def stage_json(ok: bool, errors: list[str], artifact: Artifact | None, volumes: 
     """stage.json: the registry's index over the staged groups, built from the same models as their `mia`."""
     verification = verification or Verification()
     return {"ok": ok, "errors": list(errors), "artifact": artifact.model_dump(mode="json") if artifact else None,
-            "volumes": [v.model_dump(mode="json") for v in volumes], "bytes_fetched": bytes_fetched,
+            "volumes": [v.model_dump(mode="json", exclude={} if v.selection else {"selection"}) for v in volumes],
+            "bytes_fetched": bytes_fetched,
             "zarr_json_sha256": dict(digests), "verification": verification.model_dump(mode="json"),
             "checks": verification.checks}

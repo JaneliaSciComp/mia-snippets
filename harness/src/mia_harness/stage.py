@@ -3,6 +3,7 @@ alongside, provenance under `attributes.mia` and stage.json from the same model 
 from datetime import datetime, timezone
 import json
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -12,10 +13,11 @@ import zarr
 
 from .api import Array
 from .binding import ArrayBinding, Binding, LabelBinding, binding_hash, load_binding
+from .filters import ordered
 from .io import IO, BudgetExceeded, HostNotAllowed, _split
 from .boxes import write_crop_boxes
-from .plan import (LevelPlan, PlanInput, StagePlan, derive_samples, planes_per_split, planned_bytes, share_out,
-                   stage_plan)
+from .plan import (LevelPlan, PlanInput, PlanRule, StagePlan, planes_per_split, planned_bytes, select_samples,
+                   share_out, stage_plan)
 from .provenance import (VOXEL_AXIS, Artifact, Geometry, Plan, Provenance, SourceFile, Verification,
                          convention_attributes, stage_step,
                          VolumeSummary, VoxelAxis, merge_geometry, stage_json, summary)
@@ -42,11 +44,14 @@ class _Group:
 
 @dataclass
 class _Volume:
-    """One raw volume planned for writing: its voxel size, samples and groups, raw first."""
+    """One raw volume planned for writing: its voxel size, samples and groups, raw first. `selection` is how the
+    samples were found when the rule has filters (`select_samples`); a volume none of whose draws passed has no
+    groups and is not written."""
     index: int
     voxel: dict[str, VoxelAxis]
     samples: dict[str, list[dict]]
     groups: list[_Group]
+    selection: dict[str, dict] | None = None
 
 
 def intensity_sample(p: Pyramid, level_plan: LevelPlan, patch: int, rng: np.random.Generator) -> list[list[float]]:
@@ -90,10 +95,52 @@ def _channels(array: Array) -> int:
     return dict(zip(array.axes, array.shape)).get("c", 1)
 
 
+def _box(array: Array, sample: dict, patch: int, last: dict) -> np.ndarray:
+    """The sample's full-resolution box of `array`, channels first. A plane-access array hands back whole planes,
+    so the last one read is kept in `last` (per array), as `write_pyramid` keeps its plane."""
+    y, x = sample["starts"]["1"]
+    rows, cols = slice(y, y + patch), slice(x, x + patch)
+    plane = {"z": sample["plane"]["z"]} if "z" in sample["plane"] else {}
+    blocks = []
+    for channel in range(_channels(array)):
+        outer = plane | ({"c": channel} if "c" in array.axes else {})
+        if getattr(array, "access", None) != "plane":
+            blocks.append(_read_yx(array, outer, rows, cols))
+            continue
+        if last.get(id(array), (None,))[0] != outer:
+            last[id(array)] = (outer, _read_yx(array, outer, slice(None), slice(None)))
+        blocks.append(last[id(array)][1][rows, cols])
+    return np.stack(blocks)
+
+
+def keeper(rule: PlanRule, raw: Array, labels: list[Array]) -> Callable[[dict], str | None] | None:
+    """`select_samples`' `keep` for a raw and the labels paired with it: the name of the first of the rule's filters
+    the sample's full-resolution box fails, or None. A filter's box is read when its turn comes, labels before
+    the raw (`filters.FILTERS`), so a sample a label filter rejects costs no raw read. None for a rule without
+    filters."""
+    tests = ordered(rule.filters)
+    if not tests:
+        return None
+    last: dict = {}
+
+    def keep(sample: dict) -> str | None:
+        boxes: dict = {}
+        for name, test, reads, parameters in tests:
+            if reads not in boxes:
+                boxes[reads] = (_box(raw, sample, rule.patch, last) if reads == "raw"
+                                else [_box(label, sample, rule.patch, last) for label in labels])
+            if not test(boxes[reads], **parameters):
+                return name
+        return None
+
+    return keep
+
+
 def _plan_volume(i: int, raw: Array, binding: Binding, labels: list[Array], rule_input: PlanInput,
                  voxel: dict[str, VoxelAxis], errors: list[str], counts: dict[str, int]) -> _Volume | None:
     """Raw `i`'s samples (`counts` per split, its share of the record's) and its groups' plans, or None after an
-    error line. Reads no voxel."""
+    error line. Reads no voxel unless the rule has filters: then each draw's full-resolution box is read and
+    tested (`keeper`), and a raw none of whose draws passed comes back without groups."""
     rule = rule_input.rule
     vox, missing = _voxel_size(raw, voxel)
     if missing:
@@ -107,7 +154,12 @@ def _plan_volume(i: int, raw: Array, binding: Binding, labels: list[Array], rule
                           f"{list(_shape(raw))}")
             return None
     axes = _canonical(raw.axes)
-    samples = derive_samples(rule, binding.record, i, axes, _shape(raw), {a: v.nm for a, v in vox.items()}, counts)
+    samples, selection = select_samples(rule, binding.record, i, axes, _shape(raw), {a: v.nm for a, v in vox.items()},
+                                        counts, keeper(rule, raw, [arr for _, arr in mine]))
+    if not rule.filters:
+        selection = None
+    elif not any(samples.values()):
+        return _Volume(i, vox, samples, [], selection)
 
     def group(kind: Literal["raw", "label"], array: Array, b: ArrayBinding, path: str, name: str) -> _Group:
         axes = _canonical(array.axes)   # same boxes for every group; a label's chunk tuples lack the raw's c
@@ -121,7 +173,7 @@ def _plan_volume(i: int, raw: Array, binding: Binding, labels: list[Array], rule
     if unrecorded:   # derived_from is the only record of which bytes were staged; it may not be empty
         errors.extend(f"{where}: no source URLs to record" for where in unrecorded)
         return None
-    return _Volume(i, vox, samples, groups)
+    return _Volume(i, vox, samples, groups, selection)
 
 
 def geometry_check(group: _Group, p: Pyramid, samples: dict[str, list[dict]], patch: int,
@@ -218,7 +270,17 @@ def _write_volume(volume: _Volume, out: Path, binding: Binding, artifact: Artifa
               for li, lp in zip(raw_info.levels, raw_plan.levels)]
     return VolumeSummary(path=vdir.name, axes=raw_info.axes, shape=list(raw_info.shape), dtype=raw_info.dtype,
                          voxel_size_nm=nm, levels=levels, labels=labels, intensity_sample=sample,
-                         samples=volume.samples), checks
+                         samples=volume.samples, selection=volume.selection), checks
+
+
+def _nothing_passed(rule: PlanRule, unstaged: list[dict]) -> str:
+    """The error of a record none of whose draws passed its rule's filters: the filters, and per volume and split
+    the draws taken and what rejected them."""
+    searched = [f"{entry['volume'].removesuffix('.zarr')} {split}: {counts['draws']} draws, rejected "
+                + ", ".join(f"{reason} {count}" for reason, count in counts["rejected"].items())
+                for entry in unstaged for split, counts in entry["selection"].items() if counts["wanted"]]
+    return (f"no crop passed the filters ({', '.join(entry['name'] for entry in rule.filters)}): "
+            + "; ".join(searched))
 
 
 def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan: PlanInput,
@@ -234,6 +296,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
     if stage_bytes is None:
         stage_bytes = int(os.environ.get("MIA_HARNESS_STAGE_BYTES", io.byte_cap))
     errors: list[str] = []
+    unstaged: list[dict] = []    # the raws none of whose draws passed the rule's filters, with their selection
     volumes: list[VolumeSummary] = []
     checks: list[dict] = []
     artifact = None
@@ -252,10 +315,12 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
         shares = share_out(plan.rule, binding.record,
                            [planes_per_split(plan.rule, binding.record, i, _canonical(raw.axes), _shape(raw))
                             for i, raw in enumerate(raws)])
-        planned = [v for i, raw in enumerate(raws) if any(shares[i].values())
-                   and (v := _plan_volume(i, raw, binding, labels, plan, voxel, errors, shares[i])) is not None]
+        drew = [v for i, raw in enumerate(raws) if any(shares[i].values())
+                and (v := _plan_volume(i, raw, binding, labels, plan, voxel, errors, shares[i])) is not None]
+        planned = [v for v in drew if v.groups]
+        unstaged = [{"volume": f"v{v.index}.zarr", "selection": v.selection} for v in drew if not v.groups]
         if not planned and not errors:
-            errors.append("no samples planned")
+            errors.append(_nothing_passed(plan.rule, unstaged) if unstaged else "no samples planned")
         budget = sum(planned_bytes(g.plan, np.dtype(g.array.dtype).itemsize, _channels(g.array))
                      for v in planned for g in v.groups)
         if budget > stage_bytes:
@@ -274,5 +339,7 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
         errors.append(f"{type(e).__name__}: {e}")
     report = stage_json(not errors, errors, artifact, volumes, io.bytes_fetched, {},
                         verification=Verification(checks={"geometry": merge_geometry(checks)})) | blocked
+    if unstaged:
+        report["unstaged"] = unstaged
     (out / "stage.json").write_text(json.dumps(report, separators=(",", ":")) + "\n")
     return report

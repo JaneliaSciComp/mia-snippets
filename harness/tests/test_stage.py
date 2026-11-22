@@ -19,7 +19,9 @@ from mia_harness.plan import LevelPlan, PlanInput, PlanRule, derive_samples, pla
 from mia_harness.provenance import HARNESS_URI, VoxelAxis
 from mia_harness.pyramid import open_pyramid
 from test_provenance import convention_errors
-from mia_harness.stage import stage
+from mia_harness import plan as plan_module
+from mia_harness.png import content_ok
+from mia_harness.stage import keeper, stage
 
 VOXEL = {"z": VoxelAxis(300.0, "record"), "y": VoxelAxis(8.0, "assumed", "test"), "x": VoxelAxis(8.0, "assumed", "test")}
 SPLIT = {"policy": "fractions", "fractions": {"train": 0.6, "val": 0.2, "test": 0.2}, "seed": 0}
@@ -365,3 +367,156 @@ def test_an_offline_stage_reads_the_cache(tmp_path, make_io, server):
     rep = stage(b, SNAP, r, offline, plan=plan_input((1, 2, 4), 64, {"train": 1}), voxel=VOXEL, out=tmp_path / "out")
     assert rep["ok"], rep["errors"]
     assert rep["bytes_fetched"] == 0 and len(server.requests) == requests
+
+
+# ---- filters: a sample is staged only if its full-resolution box passes each (sample-filters spec §5.4) ----
+
+BOTH = ({"name": "content"}, {"name": "labelled", "min_fraction": 0.05})
+TISSUE = (slice(None), slice(200, 500), slice(300, 650))   # where the fixture's raw has texture and its label ids
+
+
+def filtered(levels, patch, samples, filters=BOTH) -> PlanInput:
+    plan = plan_input(levels, patch, samples)
+    return dataclasses.replace(plan, rule=dataclasses.replace(plan.rule, filters=filters))
+
+
+def write_tissue(tmp_path, shape=SHAPE, label=True, blank=False):
+    """`write`'s binding and record, with a raw that is one value outside TISSUE and noise inside (nowhere when
+    `blank`), and a label that is 3 inside and 0 outside. Returns (binding, record, raw, label)."""
+    b, r = write(tmp_path, shape, shape if label else None)
+    raw = np.full(shape, 500, np.uint16)
+    if not blank:
+        raw[TISSUE] = np.random.default_rng(0).integers(0, 4000, raw[TISSUE].shape, dtype=np.uint16)
+    lab = np.zeros(shape, np.uint16)
+    if not blank:
+        lab[TISSUE] = 3
+    np.save(tmp_path / "raw.npy", raw)
+    if label:
+        np.save(tmp_path / "label.npy", lab)
+    return b, r, raw, lab
+
+
+def test_stage_without_filters_writes_no_selection(tmp_path, io, server):
+    b, r = write(tmp_path, SHAPE, SHAPE)
+    served(server, b)
+    rep = stage(b, SNAP, r, io, plan=plan_input((1, 2, 4), 64, {"train": 4}), voxel=VOXEL, out=tmp_path / "out")
+    assert rep["ok"] and "unstaged" not in rep and all("selection" not in volume for volume in rep["volumes"])
+    step, = zarr.open_group(tmp_path / "out" / "v0.zarr" / "raw", mode="r").attrs["provenance:steps"]
+    assert "filters" not in step["parameters"]["plan"]
+
+
+def test_filters_keep_only_crops_on_content_and_labels(tmp_path, io, server):
+    b, r, raw, lab = write_tissue(tmp_path)
+    served(server, b)
+    out = tmp_path / "out"
+    rep = stage(b, SNAP, r, io, plan=filtered((1, 2, 4), 64, {"train": 12, "val": 4, "test": 4}), voxel=VOXEL,
+                out=out)
+    assert rep["ok"], rep["errors"]
+    volume, = rep["volumes"]
+    assert {split: len(kept) for split, kept in volume["samples"].items()} == {"train": 12, "val": 4, "test": 4}
+    for kept in volume["samples"].values():
+        for sample in kept:
+            (y, x), z = sample["starts"]["1"], sample["plane"]["z"]
+            assert (lab[z, y:y + 64, x:x + 64] != 0).mean() >= 0.05
+            assert content_ok(raw[z, y:y + 64, x:x + 64])
+    rejected = 0
+    for split, counts in volume["selection"].items():
+        assert counts["staged"] == len(volume["samples"][split]) == counts["wanted"]
+        assert counts["staged"] + sum(counts["rejected"].values()) == counts["draws"]
+        assert set(counts["rejected"]) <= {"repeat", "labelled", "content"}
+        rejected += sum(counts["rejected"].values())
+    assert rejected > 0    # the tissue is a sixth of the plane: some draws fell outside it
+    step, = zarr.open_group(out / "v0.zarr" / "raw", mode="r").attrs["provenance:steps"]
+    assert step["parameters"]["plan"]["filters"] == list(BOTH)
+    assert check_stage(out)["ok"]
+
+
+def test_a_volume_without_labels_passes_labelled(tmp_path, io, server):
+    b, r, raw, _ = write_tissue(tmp_path, label=False)
+    served(server, b)
+    rep = stage(b, SNAP, r, io, plan=filtered((1, 2, 4), 64, {"train": 6}), voxel=VOXEL, out=tmp_path / "out")
+    assert rep["ok"], rep["errors"]
+    selection = rep["volumes"][0]["selection"]["train"]
+    assert selection["staged"] == 6 and "labelled" not in selection["rejected"]
+
+
+def test_a_record_with_nothing_passable_fails_naming_the_filters(tmp_path, io, server, monkeypatch):
+    monkeypatch.setattr(plan_module, "GIVE_UP", 30)
+    b, r, _, _ = write_tissue(tmp_path, blank=True)
+    served(server, b)
+    out = tmp_path / "out"
+    rep = stage(b, SNAP, r, io, plan=filtered((1, 2, 4), 64, {"train": 4}), voxel=VOXEL, out=out)
+    assert not rep["ok"] and rep["volumes"] == [] and not list(out.glob("v*.zarr"))
+    assert rep["errors"] == ["no crop passed the filters (content, labelled): "
+                             "v0 train: 30 draws, rejected labelled 30"]
+    assert rep["unstaged"] == [{"volume": "v0.zarr", "selection": {
+        "train": {"wanted": 4, "staged": 0, "draws": 30, "rejected": {"labelled": 30}},
+        "val": {"wanted": 0, "staged": 0, "draws": 0, "rejected": {}},
+        "test": {"wanted": 0, "staged": 0, "draws": 0, "rejected": {}}}}]
+
+
+def test_a_volume_that_accepted_nothing_is_unstaged_and_check_stage_passes(tmp_path, io, server, monkeypatch):
+    monkeypatch.setattr(plan_module, "GIVE_UP", 30)
+    b, r = write_two(tmp_path, (30, 600, 700), (30, 600, 700))
+    np.save(tmp_path / "raw.npy", np.full((30, 600, 700), 500, np.uint16))    # the first raw is blank slide
+    served(server, b)
+    out = tmp_path / "out"
+    rep = stage(b, SNAP, r, io, plan=filtered((1, 2, 4), 64, {"train": 40}, ({"name": "content"},)), voxel=VOXEL,
+                out=out)
+    assert rep["ok"], rep["errors"]
+    assert [volume["path"] for volume in rep["volumes"]] == ["v1.zarr"] == [d.name for d in out.glob("v*.zarr")]
+    short, = rep["unstaged"]
+    assert short["volume"] == "v0.zarr" and short["selection"]["train"]["rejected"] == {"content": 30}
+    assert check_stage(out)["ok"]
+
+
+def test_an_unknown_filter_is_a_stage_error(tmp_path, io, server):
+    b, r = write(tmp_path, SHAPE, SHAPE)
+    served(server, b)
+    rep = stage(b, SNAP, r, io, plan=filtered((1, 2, 4), 64, {"train": 4}, ({"name": "sharp"},)), voxel=VOXEL,
+                out=tmp_path / "out")
+    assert rep["errors"] == ["ValueError: unknown filter 'sharp'"]
+
+
+class Counted:
+    """A reader over an array in memory that counts its reads."""
+    voxel_size_nm = None
+
+    def __init__(self, data: np.ndarray, axes: str, access: str = "chunk"):
+        self.data, self.axes, self.shape, self.dtype, self.access = data, axes, data.shape, data.dtype, access
+        self.reads = 0
+
+    def read(self, region):
+        self.reads += 1
+        return self.data[tuple(region.get(axis, slice(None)) for axis in self.axes)]
+
+
+def sample_at(y: int, x: int, z: int | None = None) -> dict:
+    return {"plane": {} if z is None else {"z": z}, "starts": {"1": [y, x]}}
+
+
+def test_a_rejected_label_draw_reads_no_raw():
+    raw = Counted(np.random.default_rng(0).integers(0, 255, (3, 200, 200), dtype=np.uint8), "cyx")
+    label = Counted(np.zeros((200, 200), np.uint16), "yx")
+    label.data[:64, :64] = 9
+    keep = keeper(filtered((1,), 64, {}).rule, raw, [label])
+    assert keep(sample_at(100, 100)) == "labelled" and (label.reads, raw.reads) == (1, 0)
+    assert keep(sample_at(0, 0)) is None and (label.reads, raw.reads) == (2, 3)   # one read per channel
+    raw.data[:, :64, :64] = 255
+    assert keep(sample_at(0, 0)) == "content"
+
+
+def test_a_filter_that_reads_no_label_reads_none():
+    raw, label = Counted(np.zeros((200, 200), np.uint8), "yx"), Counted(np.ones((200, 200), np.uint16), "yx")
+    assert keeper(filtered((1,), 64, {}, ({"name": "content"},)).rule, raw, [label])(sample_at(0, 0)) == "content"
+    assert label.reads == 0
+    assert keeper(plan_input((1,), 64, {}).rule, raw, [label]) is None
+
+
+def test_a_plane_reader_is_read_once_per_plane_in_a_row():
+    noise = np.random.default_rng(0).integers(0, 255, (4, 200, 200), dtype=np.uint8)
+    raw, label = Counted(noise, "zyx", "plane"), Counted(np.ones((4, 200, 200), np.uint16), "zyx", "plane")
+    keep = keeper(filtered((1,), 64, {}).rule, raw, [label])
+    assert keep(sample_at(0, 0, z=1)) is None and keep(sample_at(100, 100, z=1)) is None
+    assert (label.reads, raw.reads) == (1, 1)
+    assert keep(sample_at(0, 0, z=2)) is None and (label.reads, raw.reads) == (2, 2)
