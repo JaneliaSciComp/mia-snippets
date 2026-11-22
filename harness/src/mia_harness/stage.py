@@ -97,7 +97,7 @@ def _channels(array: Array) -> int:
 
 def _box(array: Array, sample: dict, patch: int, last: dict) -> np.ndarray:
     """The sample's full-resolution box of `array`, channels first. A plane-access array hands back whole planes,
-    so the last one read is kept in `last` (per array), as `write_pyramid` keeps its plane."""
+    so the last one read is kept in `last` (per array and channel), as `write_pyramid` keeps its plane."""
     y, x = sample["starts"]["1"]
     rows, cols = slice(y, y + patch), slice(x, x + patch)
     plane = {"z": sample["plane"]["z"]} if "z" in sample["plane"] else {}
@@ -107,9 +107,10 @@ def _box(array: Array, sample: dict, patch: int, last: dict) -> np.ndarray:
         if getattr(array, "access", None) != "plane":
             blocks.append(_read_yx(array, outer, rows, cols))
             continue
-        if last.get(id(array), (None,))[0] != outer:
-            last[id(array)] = (outer, _read_yx(array, outer, slice(None), slice(None)))
-        blocks.append(last[id(array)][1][rows, cols])
+        kept = (id(array), channel)
+        if last.get(kept, (None,))[0] != outer:
+            last[kept] = (outer, _read_yx(array, outer, slice(None), slice(None)))
+        blocks.append(last[kept][1][rows, cols])
     return np.stack(blocks)
 
 
@@ -318,7 +319,10 @@ def stage(binding_path: Path, snapshot: Path, record_path: Path, io: IO, *, plan
         drew = [v for i, raw in enumerate(raws) if any(shares[i].values())
                 and (v := _plan_volume(i, raw, binding, labels, plan, voxel, errors, shares[i])) is not None]
         planned = [v for v in drew if v.groups]
-        unstaged = [{"volume": f"v{v.index}.zarr", "selection": v.selection} for v in drew if not v.groups]
+        # with its planes: registration shares the record's weight by planes, the unwritten volumes' included
+        unstaged = [{"volume": f"v{v.index}.zarr", "selection": v.selection,
+                     "planes": dict(zip(_canonical(raws[v.index].axes), _shape(raws[v.index]))).get("z", 1)}
+                    for v in drew if not v.groups]
         if not planned and not errors:
             errors.append(_nothing_passed(plan.rule, unstaged) if unstaged else "no samples planned")
         budget = sum(planned_bytes(g.plan, np.dtype(g.array.dtype).itemsize, _channels(g.array))

@@ -202,7 +202,8 @@ harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan pl
                                                                        # then gives each volume's `selection`
                                                                        # (wanted, staged, draws, rejected by
                                                                        # reason) and lists a raw that kept no
-                                                                       # sample under `unstaged`, unwritten
+                                                                       # sample under `unstaged`, unwritten, with
+                                                                       # its selection and its planes
 harness check-stage DIR   # 0.6 schemas, sample coverage and zarr.json digests of a stage output, recorded in it;
                           # loads no snippet code
 harness list    <url>                                                  # the members of a zip or the names of an HTTP

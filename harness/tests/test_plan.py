@@ -179,7 +179,7 @@ def golden_rule(**more) -> PlanRule:
                     channel_recipe=None, **more)
 
 
-def test_a_rule_without_filters_documents_none():   # so its digest and its recorded parameters stay what they were
+def test_a_rule_without_filters_documents_none():   # its digest and its recorded parameters hold no filters key
     assert "filters" not in golden_rule().document()
     assert golden_rule().digest() == "2827e3d249deb0a8bb8ecc10cb579ce0f37c9a4d2667f04af2914388bc04ae74"
 

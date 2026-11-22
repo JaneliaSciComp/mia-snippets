@@ -449,7 +449,7 @@ def test_a_record_with_nothing_passable_fails_naming_the_filters(tmp_path, io, s
     assert not rep["ok"] and rep["volumes"] == [] and not list(out.glob("v*.zarr"))
     assert rep["errors"] == ["no crop passed the filters (content, labelled): "
                              "v0 train: 30 draws, rejected labelled 30"]
-    assert rep["unstaged"] == [{"volume": "v0.zarr", "selection": {
+    assert rep["unstaged"] == [{"volume": "v0.zarr", "planes": 5, "selection": {
         "train": {"wanted": 4, "staged": 0, "draws": 30, "rejected": {"labelled": 30}},
         "val": {"wanted": 0, "staged": 0, "draws": 0, "rejected": {}},
         "test": {"wanted": 0, "staged": 0, "draws": 0, "rejected": {}}}}]
@@ -467,6 +467,7 @@ def test_a_volume_that_accepted_nothing_is_unstaged_and_check_stage_passes(tmp_p
     assert [volume["path"] for volume in rep["volumes"]] == ["v1.zarr"] == [d.name for d in out.glob("v*.zarr")]
     short, = rep["unstaged"]
     assert short["volume"] == "v0.zarr" and short["selection"]["train"]["rejected"] == {"content": 30}
+    assert short["planes"] == 30    # what registration needs to keep the written volume's share of the record
     assert check_stage(out)["ok"]
 
 
@@ -520,3 +521,12 @@ def test_a_plane_reader_is_read_once_per_plane_in_a_row():
     assert keep(sample_at(0, 0, z=1)) is None and keep(sample_at(100, 100, z=1)) is None
     assert (label.reads, raw.reads) == (1, 1)
     assert keep(sample_at(0, 0, z=2)) is None and (label.reads, raw.reads) == (2, 2)
+
+
+def test_a_plane_reader_with_channels_is_read_once_per_channel():
+    noise = np.random.default_rng(0).integers(0, 255, (3, 200, 200), dtype=np.uint8)
+    raw, label = Counted(noise, "cyx", "plane"), Counted(np.ones((2, 200, 200), np.uint16), "cyx", "plane")
+    keep = keeper(filtered((1,), 64, {}).rule, raw, [label])
+    for corner in (0, 40, 80, 120):
+        assert keep(sample_at(corner, corner)) is None
+    assert (label.reads, raw.reads) == (2, 3)   # each channel's plane once, however many draws
