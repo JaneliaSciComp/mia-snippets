@@ -191,7 +191,7 @@ def test_tensorize_cli_writes_a_png_per_level_and_label(staged, planned, tmp_pat
 
 def test_sample_pngs_colours_and_channel_counts(tmp_path):
     lab = np.zeros((1, 4, 4), np.int32)
-    lab[0, 0, 0], lab[0, 1, 1], lab[0, 2, 2] = 7, 7, 8
+    lab[0, 0, 0], lab[0, 1, 1], lab[0, 2, 2], lab[0, 0, 3] = 7, 7, 8, 207
     for channels, planes in ((1, 1), (3, 3), (2, 1), (5, 1)):
         img = np.full((1, channels, 4, 4), 2.0, np.float32)            # above 1: clipped, not wrapped
         assert sample_pngs({"img": img, "label/a": lab, "meta": {}}, tmp_path) == ["img-0.png", "label-a-0.png"]
@@ -199,7 +199,7 @@ def test_sample_pngs_colours_and_channel_counts(tmp_path):
         assert info["planes"] == planes and set(pixels.ravel()) == {255}
     rgb = _picture(tmp_path / "label-a-0.png")[2].reshape(4, 4, 3)
     assert not rgb[3, 3].any() and rgb[0, 0].any()
-    assert (rgb[0, 0] == rgb[1, 1]).all() and (rgb[0, 0] != rgb[2, 2]).any()
+    assert (rgb[0, 0] == rgb[1, 1]).all() and (rgb[0, 0] != rgb[2, 2]).any() and (rgb[0, 0] != rgb[0, 3]).any()
 
 
 def _muvit():

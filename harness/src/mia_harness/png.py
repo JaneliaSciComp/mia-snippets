@@ -49,7 +49,9 @@ def write_png(path: Path, a: np.ndarray, bitdepth: int) -> None:
         png.Writer(a.shape[1], a.shape[0], greyscale=not rgb, bitdepth=bitdepth).write(f, a.reshape(a.shape[0], -1).tolist())
 
 
-LABEL_HUES = (67, 131, 197)   # an id's colour is (id * hue) % 200 + 55 per channel: the same id, the same colour
+# an id's colour is (id * step) % span + 56 per channel: the same id, the same colour, and with three spans that
+# share no factor, two ids share a colour only when they are 199 * 197 * 193 apart
+LABEL_HUES = ((67, 199), (131, 197), (89, 193))
 
 
 def sample_pngs(sample: dict, out: Path) -> list[str]:
@@ -63,7 +65,7 @@ def sample_pngs(sample: dict, out: Path) -> list[str]:
         write_png(Path(out) / names[-1], np.round(np.clip(shown, 0, 1) * 255).astype(np.uint8), 8)
     for key in sorted(k for k in sample if k.startswith("label/")):
         for i, level in enumerate(np.asarray(sample[key], np.int64)):
-            rgb = np.stack([(level * hue) % 200 + 55 for hue in LABEL_HUES], axis=-1).astype(np.uint8)
+            rgb = np.stack([(level * step) % span + 56 for step, span in LABEL_HUES], axis=-1).astype(np.uint8)
             rgb[level == 0] = 0
             names.append(f"label-{key.removeprefix('label/')}-{i}.png")
             write_png(Path(out) / names[-1], rgb, 8)
