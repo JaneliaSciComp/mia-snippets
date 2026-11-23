@@ -1,0 +1,13 @@
+name: svs-coco-boxes-i308
+spec_version: 1
+summary: One Aperio SVS whole-slide image at a plain URL, its full-resolution level read tile by tile as yxc uint8; or, for a url that holds an MS COCO JSON (a plain URL or a zip member), the `bbox` entries of the one image named by `file_name` (no `segmentation` needed), as filled boxes on that image's width x height grid, yx. `bbox` says whether the four numbers are corners [x1, y1, x2, y2] (SlideRunner's MITOS_WSI export) or COCO's [x, y, width, height]. Each box is filled with its 1-based number among the image's annotations (instance, uint32) or with its category id (semantic); 0 is background, and where boxes overlap the smaller one is on top.
+formats: [svs, json]
+containers: [http, zip]
+params:
+  file_name: {type: str, required: false, doc: "COCO JSON only, and required for it: the images[].file_name of the slide this label is for (the paired raw's file name, e.g. 2efb541724b5c017c503.svs). Exactly one images[] entry must have it. Reason required in binding"}
+  boxes: {type: str, required: false, doc: "COCO JSON only, and required for it: 'instance' fills each box with its 1-based number among the image's annotations, in annotations[] order; 'semantic' fills it with its category_id, the file's own id (an annotation of the image without a positive id of categories[] raises). 0 is background; where boxes overlap the smaller one is on top, the later one among equals. Reason required in binding"}
+  bbox: {type: str, required: false, doc: "COCO JSON only, and required for it: how an annotation's four bbox numbers are read. 'xyxy' = corners [x1, y1, x2, y2], the pixels [y1, y2) x [x1, x2); 'xywh' = COCO's own [x, y, width, height]. Full-resolution pixels, x right and y down. The file does not say which it uses; reason required in binding"}
+  count: {type: int, required: false, doc: "COCO JSON only: the number of annotations the image must have. Open fails on another number, so a changed file is noticed instead of renumbering the instance ids; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [figshare-c-4552445-canine-mast-cell-tumor-mitosis]
+supersedes: null
