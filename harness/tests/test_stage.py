@@ -371,7 +371,7 @@ def test_an_offline_stage_reads_the_cache(tmp_path, make_io, server):
 
 # ---- filters: a sample is staged only if its full-resolution box passes each (sample-filters spec §5.4) ----
 
-BOTH = ({"name": "content"}, {"name": "labelled", "min_fraction": 0.05})
+BOTH = ({"name": "content"}, {"name": "labelled"})
 TISSUE = (slice(None), slice(200, 500), slice(300, 650))   # where the fixture's raw has texture and its label ids
 
 
@@ -417,7 +417,7 @@ def test_filters_keep_only_crops_on_content_and_labels(tmp_path, io, server):
     for kept in volume["samples"].values():
         for sample in kept:
             (y, x), z = sample["starts"]["1"], sample["plane"]["z"]
-            assert (lab[z, y:y + 64, x:x + 64] != 0).mean() >= 0.05
+            assert lab[z, y:y + 64, x:x + 64].any()
             assert content_ok(raw[z, y:y + 64, x:x + 64])
     rejected = 0
     for split, counts in volume["selection"].items():
@@ -431,13 +431,14 @@ def test_filters_keep_only_crops_on_content_and_labels(tmp_path, io, server):
     assert check_stage(out)["ok"]
 
 
-def test_a_volume_without_labels_passes_labelled(tmp_path, io, server):
+def test_a_volume_without_labels_keeps_nothing_under_labelled(tmp_path, io, server, monkeypatch):
+    monkeypatch.setattr(plan_module, "GIVE_UP", 30)
     b, r, raw, _ = write_tissue(tmp_path, label=False)
     served(server, b)
     rep = stage(b, SNAP, r, io, plan=filtered((1, 2, 4), 64, {"train": 6}), voxel=VOXEL, out=tmp_path / "out")
-    assert rep["ok"], rep["errors"]
-    selection = rep["volumes"][0]["selection"]["train"]
-    assert selection["staged"] == 6 and "labelled" not in selection["rejected"]
+    assert not rep["ok"] and rep["volumes"] == []
+    assert rep["errors"] == ["no crop passed the filters (content, labelled): "
+                             "v0 train: 30 draws, rejected labelled 30"]
 
 
 def test_a_record_with_nothing_passable_fails_naming_the_filters(tmp_path, io, server, monkeypatch):

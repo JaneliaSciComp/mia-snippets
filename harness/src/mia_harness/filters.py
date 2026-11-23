@@ -7,13 +7,10 @@ import numpy as np
 from .png import content_ok
 
 
-def labelled(labels: list[np.ndarray], *, min_fraction: float) -> bool:
-    """Whether at least `min_fraction` of the box's pixels are annotated: nonzero in any of `labels`, the label
-    boxes paired with the sample's raw, on any of their channels. A raw without labels passes."""
-    if not labels:
-        return True
-    annotated = np.any([np.asarray(label).reshape(-1, *np.shape(label)[-2:]).any(axis=0) for label in labels], axis=0)
-    return float(annotated.mean()) >= min_fraction
+def labelled(labels: list[np.ndarray]) -> bool:
+    """Whether the box holds any annotation: a nonzero pixel, a single point being enough, in one of `labels`, the
+    label boxes paired with the sample's raw. A raw without labels holds none."""
+    return any(np.asarray(label).any() for label in labels)
 
 
 def content(raw: np.ndarray) -> bool:
