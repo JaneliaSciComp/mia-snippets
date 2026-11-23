@@ -1,0 +1,32 @@
+record: figshare-c-4552445-canine-mast-cell-tumor-mitosis
+record_commit: b414290b47076eb61800e60af8ad83ea69e6a5df
+snippets_commit: 830dcbbc47a9252a24a7a97f42fece300d6bb50e
+raw:
+  - snippet: svs-coco-boxes-i308
+    urls: ["https://ndownloader.figshare.com/files/16261520"]
+    params: {}
+labels:
+  - snippet: svs-coco-boxes-i308
+    urls: &json ["https://ndownloader.figshare.com/files/16261568"]
+    params: &boxes {file_name: 2efb541724b5c017c503.svs, bbox: xyxy, count: 2891, boxes: semantic}
+    pairs_with: 0
+    label_key: unknown-cell-semantic
+    segmentation_type: semantic
+  - snippet: svs-coco-boxes-i308
+    urls: *json
+    params: {<<: *boxes, boxes: instance}
+    pairs_with: 0
+    label_key: unknown-cell-instance
+    segmentation_type: instance
+reasons:
+  - "raw (the draft's url, with this snippet's copy of the svs-coco-polygons reader, since a binding names one snippet): the record's sample slide 2efb541724b5c017c503.svs (files/16261520), the only slide whose url the record gives. Page 0 of the Aperio SVS, the full-resolution level, opened as yxc 76964 x 23399 x 3 uint8 (record: axes yxs, shape [76964, 23399, 3], uint8), 240x240 JPEG 2000 tiles with RGB samples (compression 33005), read by range (access chunk). Two 500x613 regions are identical to tifffile's own read of the same pixels. Voxel size 253.3 nm from the file's 'MPP = 0.2533' (the record's notes give this header value; its voxel_size_nm 250 is the paper's rounded figure)"
+  - "label url: MITOS_WSI_CCMCT_MEL.json (files/16261568, the record's technical.sample.urls[1]), a plain 20,817,320-byte COCO JSON read whole at open. svs-coco-boxes-i308 instead of the draft's svs-coco-polygons because the annotations hold no segmentation at all (keys are only bbox, category_id, image_id, id), so there is no polygon to read; the boxes are the label"
+  - "file_name 2efb541724b5c017c503.svs: the sample slide's name from the record's technical.sample.description. images[] has exactly one entry with it (id 22, width 23399, height 76964, the raw's x and y), and count 2891 is the number of annotations with that image_id, so a changed file fails at open instead of renumbering the instance ids"
+  - "bbox xyxy, not COCO's [x, y, width, height]: the record's alignment_notes say so and the numbers confirm it. In all 238,357 annotations of the file bbox[2] - bbox[0] and bbox[3] - bbox[1] are exactly 50 (the 50 px boxes around cell centres), while read as xywh the 'widths' would be tens of thousands of pixels. Checked on the pixels of this slide, 300 sampled boxes, mean of 255 - min(R, G, B) over the central 16x16: 162.8 as read; 70.0 with y flipped, 82.0 with x mirrored, 53.6 with x and y exchanged (the 42 that stay on the slide), 23.9 at the centres an xywh reading gives, and 122 to 124 at the boxes' own corners 25 px away. Laid over three 512x512 windows, every box frames a nucleus and the mitotic-figure boxes frame mitotic figures"
+  - "label 0, boxes semantic: each box filled with its category_id, the file's own ids, which are the record's classes: 1 granulocyte, 2 mitotic figure, 3 tumor cell, 4 non-mitotic cell, 5 binucleated cell, 6 multinukleated cell, 7 tumor region, 8 necrosis/hemorrhage region; 0 = no box. This slide has 645, 66, 557, 1559 and 64 boxes of ids 1 to 5 and none of 6; ids 7 and 8 have no box in the whole file. uint8"
+  - "label 1, boxes instance: each box filled with its 1-based number among this slide's annotations in annotations[] order (uint32, ids 1..2891, all of which keep pixels). It tells apart boxes that touch: 927 of the 2,891 boxes overlap another one"
+  - "the 17 annotations 'without category' of the record's notes also have image_id null: they belong to no image, so they are in no slide's label and the semantic form never meets them. Nothing was dropped from this slide"
+  - "NEEDS A HUMAN DECISION, boxes as labels: the record's encoding is boxes-table, which has no segmentation_type and no label-key kind. As in the catalog's other box bindings (csv-box-rows-tiff-grid, png-csv-boxes-table, jpeg-xml-boxes-numbers), each raw gets the boxes twice: semantic (class id) and instance (box number). Both are filled 50x50 px squares (12.7 um) centred on a cell, not cell outlines: a consumer must not take them for pixel-accurate masks. All boxes are one size, so where two overlap the later one in annotations[] is on top; no box of this slide is wholly hidden. The boxes cover 0.39% of the slide (6,993,505 of 1,800,880,636 pixels) and the annotation is not a census of cells: in the windows looked at most nuclei have no box, so background 0 means 'no box', not 'no cell'. The dataset's claim of completeness is for mitotic figures (the record's title)"
+  - "label_key unknown-cell-semantic is the draft's (annotations.source mixed -> unknown; boxes mark cells of several classes -> cell); unknown-cell-instance follows it for the instance form. Not checked here, so only a pointer for the reviewer: MEL is, by the dataset's paper as the author of this binding recalls it, the manually expert-labelled variant (HEAEL and ODAEL being the model-augmented ones), which would make the source of this file's boxes manual rather than mixed. A human should confirm both keys"
+  - "other slides and variants: each of the other 31 slides binds the same way (its .svs url as a raw, this JSON url with its file_name and count as the two labels) once the record names its url; all 32 images of the JSON open in both modes. One box of f26e9fcef24609b988be.svs (annotation 85935, y 62401..62451 on a slide 50491 high) lies below its grid and is clipped away. The HEAEL and ODAEL JSONs have no url in the record and were not read"
+  - "label dtypes uint8 and uint32; the record's label dtype is 'unknown' because boxes have none, which smoke reports as a warning"
