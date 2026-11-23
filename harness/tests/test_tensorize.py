@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import png
 import pytest
 import zarr
 from test_pyramid import write_sparse
@@ -13,6 +14,7 @@ from mia_harness import cli
 from mia_harness.cache import DatasetCache
 from mia_harness.io import IO
 from mia_harness.loader import load_snippet
+from mia_harness.png import sample_pngs
 from mia_harness.pyramid import NotStaged, block_mean, open_pyramid
 from mia_harness.stage import stage
 from mia_harness.tensor_api import bbox_of, check_sample
@@ -166,6 +168,38 @@ def test_tensorize_cli(staged, planned, tmp_path):
     assert json.loads(out.with_suffix(".json").read_text())["levels"] == [1, 2, 4]
     assert cli.main(["tensorize", str(staged), "--tensorizers", str(TEST_TENSORIZERS), "--name", "bad-shape",
                      "--descriptor", json.dumps(planned), "--out", str(tmp_path / "bad.npz")]) == 1
+
+
+def _picture(path):
+    """(width, height, pixels, info) of a PNG, the file closed again."""
+    with open(path, "rb") as f:
+        width, height, rows, info = png.Reader(file=f).read()
+        return width, height, np.array(list(rows)), info
+
+
+def test_tensorize_cli_writes_a_png_per_level_and_label(staged, planned, tmp_path):
+    code = cli.main(["tensorize", str(staged), "--tensorizers", str(TENSORIZERS), "--name", "muvit-2d",
+                     "--descriptor", json.dumps(planned), "--out", str(tmp_path / "s.npz"),
+                     "--png", str(tmp_path / "p")])
+    assert code == 0
+    assert sorted(f.name for f in (tmp_path / "p").iterdir()) == sorted(
+        [f"img-{i}.png" for i in range(3)] + [f"label-gt-{i}.png" for i in range(3)])
+    width, height, _, info = _picture(tmp_path / "p" / "img-0.png")
+    assert (width, height, info["bitdepth"], info["greyscale"]) == (64, 64, 8, True)
+    assert _picture(tmp_path / "p" / "label-gt-0.png")[3]["planes"] == 3
+
+
+def test_sample_pngs_colours_and_channel_counts(tmp_path):
+    lab = np.zeros((1, 4, 4), np.int32)
+    lab[0, 0, 0], lab[0, 1, 1], lab[0, 2, 2], lab[0, 0, 3] = 7, 7, 8, 207
+    for channels, planes in ((1, 1), (3, 3), (2, 1), (5, 1)):
+        img = np.full((1, channels, 4, 4), 2.0, np.float32)            # above 1: clipped, not wrapped
+        assert sample_pngs({"img": img, "label/a": lab, "meta": {}}, tmp_path) == ["img-0.png", "label-a-0.png"]
+        _, _, pixels, info = _picture(tmp_path / "img-0.png")
+        assert info["planes"] == planes and set(pixels.ravel()) == {255}
+    rgb = _picture(tmp_path / "label-a-0.png")[2].reshape(4, 4, 3)
+    assert not rgb[3, 3].any() and rgb[0, 0].any()
+    assert (rgb[0, 0] == rgb[1, 1]).all() and (rgb[0, 0] != rgb[2, 2]).any() and (rgb[0, 0] != rgb[0, 3]).any()
 
 
 def _muvit():

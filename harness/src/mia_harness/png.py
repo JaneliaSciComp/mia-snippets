@@ -49,6 +49,29 @@ def write_png(path: Path, a: np.ndarray, bitdepth: int) -> None:
         png.Writer(a.shape[1], a.shape[0], greyscale=not rgb, bitdepth=bitdepth).write(f, a.reshape(a.shape[0], -1).tolist())
 
 
+# an id's colour is (id * step) % span + 56 per channel: the same id, the same colour, and with three spans that
+# share no factor, two ids share a colour only when they are 199 * 197 * 193 apart
+LABEL_HUES = ((67, 199), (131, 197), (89, 193))
+
+
+def sample_pngs(sample: dict, out: Path) -> list[str]:
+    """A tensorized sample as 8-bit pictures in `out`, one per level: `img-<i>.png` (one channel grey, three RGB,
+    any other count its first channel; values clipped to [0, 1]) and `label-<key>-<i>.png` (each id a colour of
+    its own, 0 black). Returns the names written."""
+    names = []
+    for i, level in enumerate(np.nan_to_num(np.asarray(sample["img"], np.float64))):
+        shown = np.moveaxis(level, 0, -1) if level.shape[0] == 3 else level[0]
+        names.append(f"img-{i}.png")
+        write_png(Path(out) / names[-1], np.round(np.clip(shown, 0, 1) * 255).astype(np.uint8), 8)
+    for key in sorted(k for k in sample if k.startswith("label/")):
+        for i, level in enumerate(np.asarray(sample[key], np.int64)):
+            rgb = np.stack([(level * step) % span + 56 for step, span in LABEL_HUES], axis=-1).astype(np.uint8)
+            rgb[level == 0] = 0
+            names.append(f"label-{key.removeprefix('label/')}-{i}.png")
+            write_png(Path(out) / names[-1], rgb, 8)
+    return names
+
+
 def read_png(path: Path, edge: int = CROP) -> tuple[np.ndarray, int]:
     """An edge x edge PNG; any other size is refused from the header, before a row is decoded."""
     with open(path, "rb") as f:

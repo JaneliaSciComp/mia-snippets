@@ -97,7 +97,8 @@ def write_pyramid(array: Array, out: Path, *, plan: StagePlan, voxel_size_nm: di
     missing = [a for a in axes if a != "c" and a not in voxel_size_nm]
     if missing:
         raise ValueError(f"voxel size unknown for axes {missing}")
-    dtype = np.dtype(array.dtype)
+    # by its type string: numpy's `longlong` prints as int64 but is a dtype class zarr has no data type for
+    dtype = np.dtype(np.dtype(array.dtype).str)
     if kind == "label" and dtype == np.bool_:
         dtype = np.dtype(np.uint8)
     elif kind == "label" and not np.issubdtype(dtype, np.integer):
