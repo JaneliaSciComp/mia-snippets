@@ -193,9 +193,9 @@ harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan pl
                                                                        # samples per group; intensity_sample from 8
                                                                        # written level-0 chunks per channel
                                                                        # a rule with `filters` (`content`: the
-                                                                       # crop job's test; `labelled`: at least
-                                                                       # `min_fraction` of the box annotated, a raw
-                                                                       # without labels passing) tests each draw's
+                                                                       # crop job's test; `labelled`: a nonzero
+                                                                       # pixel in a label paired with the raw, a
+                                                                       # raw without labels failing) tests each draw's
                                                                        # full-resolution box, labels before raw,
                                                                        # and draws again until the split's count
                                                                        # or 2000 rejections in a row; stage.json

@@ -170,7 +170,7 @@ def test_plan_digest_golden():   # mia-workflows pins the same hex from its own 
     assert rule.digest() == "2827e3d249deb0a8bb8ecc10cb579ce0f37c9a4d2667f04af2914388bc04ae74"
 
 
-FILTERS = ({"name": "content"}, {"name": "labelled", "min_fraction": 0.05})
+FILTERS = ({"name": "content"}, {"name": "labelled"})
 
 
 def golden_rule(**more) -> PlanRule:
@@ -187,7 +187,7 @@ def test_a_rule_without_filters_documents_none():   # its digest and its recorde
 def test_plan_digest_with_filters_golden():   # mia-workflows pins the same hex from its own plan_digest(rule_dict)
     rule = golden_rule(filters=FILTERS)
     assert rule.document()["filters"] == list(FILTERS)
-    assert rule.digest() == "38da38f37fee0b1dc5f08cd3b544eab367376ece8c262b1aed2e2b8b2b016ce8"
+    assert rule.digest() == "543be40667f56b2ed78ee2da2472d6bf56a12649a3711589d3db493e1d5dbc5d"
 
 
 def test_load_plan_reads_filters(tmp_path):
