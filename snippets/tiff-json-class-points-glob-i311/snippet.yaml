@@ -1,0 +1,12 @@
+name: tiff-json-class-points-glob-i311
+spec_version: 1
+summary: "A set of single-page TIFF images (grey, or RGB with the samples kept as c; uint8 or uint16 as stored), or of the per-image JSON point annotations written for them (BreCaHAD's layout: one object per file whose keys are class names, each a list of {x, y} centroids as fractions of the image's width and height) marked on the grid of the TIFF of the same stem as class ids (a points table, not masks), from zip members or an HTTP directory chosen by glob (or plain URLs), one file per z plane. Label planes follow the images in the order the binding gives them."
+formats: [tiff, json]
+containers: [zip, http]
+params:
+  classes: {type: list, required: false, doc: "annotation files only, and what makes the array a label: the class keys of the JSON files in id order, e.g. [mitosis, apoptosis, tumor]; a point's pixel holds the 1-based position of its key in this list (uint8, uint16 from 256 classes), every other pixel 0. A key of a file that is not listed raises, so every key is named in the binding; a listed key a file does not have marks nothing there. Reason required in binding"}
+  images: {type: list, required: false, doc: "annotation files only, and required for them: the urls (globs included) of the TIFFs the annotation files were written for, exactly as the image array's binding lists them. The planes are these images in that order, each with the annotation file of its stem (the name without folders and extension) and on the grid its own TIFF header gives; an image without an annotation file, or an annotation file without an image, raises. Reason required in binding"}
+  radius: {type: int, required: false, doc: "annotation files only. Pixels, >= 0; default 0: each point marks exactly the pixel that holds it. With radius r every pixel whose centre is within r pixels of a point's pixel is marked too (a disc 2r + 1 pixels across), a pixel in reach of several points taking the nearest. The files state no size, so a disc is a drawing aid, not the object's extent. Reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [figshare-7379186-brecahad-breast-histopathology]
+supersedes: null

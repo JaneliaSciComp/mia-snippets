@@ -1,0 +1,88 @@
+record: figshare-7379186-brecahad-breast-histopathology
+record_commit: b414290b47076eb61800e60af8ad83ea69e6a5df
+snippets_commit: 74d709b41782a4d04d28b098e1998b23c8776b63
+raw:
+- snippet: tiff-json-class-points-glob-i311
+  urls:
+  - https://ndownloader.figshare.com/files/14062469::images/Case_[1-6]-*.tif
+  params: {}
+- snippet: tiff-json-class-points-glob-i311
+  urls:
+  - https://ndownloader.figshare.com/files/14062469::images/Case_[7-9]-*.tif
+  - https://ndownloader.figshare.com/files/14062469::images/Case_1[0-7]-*.tif
+  params: {}
+labels:
+- snippet: tiff-json-class-points-glob-i311
+  urls:
+  - https://ndownloader.figshare.com/files/14062469::groundTruth/Case_[1-6]-*.json
+  params:
+    classes: [mitosis, non_mitosis, apoptosis, tumor, non_tumor, lumen, non_lumen]
+    images:
+    - https://ndownloader.figshare.com/files/14062469::images/Case_[1-6]-*.tif
+  pairs_with: 0
+  label_key: manual_gt-nucleus-points
+  segmentation_type: semantic
+- snippet: tiff-json-class-points-glob-i311
+  urls:
+  - https://ndownloader.figshare.com/files/14062469::groundTruth/Case_[7-9]-*.json
+  - https://ndownloader.figshare.com/files/14062469::groundTruth/Case_1[0-7]-*.json
+  params:
+    classes: [mitosis, non_mitosis, apoptosis, tumor, non_tumor, lumen, non_lumen]
+    images:
+    - https://ndownloader.figshare.com/files/14062469::images/Case_[7-9]-*.tif
+    - https://ndownloader.figshare.com/files/14062469::images/Case_1[0-7]-*.tif
+  pairs_with: 1
+  label_key: manual_gt-nucleus-points
+  segmentation_type: semantic
+reasons:
+- >-
+  tiff-json-class-points-glob-i311 for the raws instead of the draft's image-tiles-glob: the draft's raws pass
+  smoke as they are, but an example binding names the snippet it tests throughout, and this snippet's image
+  form reads the same members (single-page RGB TIFF, 1024x1360x3, LZW; record axes yxs) into the same arrays,
+  zcyx with the samples R, G, B as c 0..2, one image per z plane. z is a stack of independent fields of view,
+  not depth (record dimensionality 2D)
+- >-
+  raw split in two arrays by dtype, kept from the draft: one array holds one dtype and a pure reader does not
+  rescale. Checked on every file while testing, not only by file size as in the record: all 162 TIFFs were read;
+  the 51 of Cases 1-6 are uint16 (values 3..65535) and the 111 of Cases 7-17 uint8 (0..255), all 1024x1360x3.
+  Raw 1 takes the draft's two globs, Case_[7-9]-* then Case_1[0-7]-*, which together are Cases 7-17 and leave
+  out Case_1-*; its planes are Cases 7, 8, 9, then 10 to 17, each glob sorted by name
+- >-
+  one label per raw from groundTruth/Case_*.json, with the same case globs as its raw: one JSON per image, an
+  object of class keys each holding {x, y} centroids as fractions of the image (record encoding points-table,
+  alignment same-grid). The draft's label (png-mask-csv-points-tiff-grid on one file pair) is replaced: that
+  snippet reads CSV tables in pixels on a single grey TIFF
+- >-
+  images on each label: the urls of the raw it pairs with, exactly as that raw lists them. The label's planes
+  are those images in that order, each with the JSON of its stem (record alignment_notes:
+  images/Case_10-01.tif <-> groundTruth/Case_10-01.json), so z index k of a label is the annotation of z index
+  k of its raw; the snippet refuses to open unless images and JSON files pair one to one (51 and 111 pairs).
+  Each plane is on the grid its own TIFF header gives, since the coordinates are fractions of that image
+- >-
+  classes [mitosis, non_mitosis, apoptosis, tumor, non_tumor, lumen, non_lumen]: the seven keys every one of the
+  162 files has, in the files' own order, which is the order of the record's classes, so ids 1..7 are the
+  record's classes in turn. The files spell the last two lumen and non_lumen where the dataset's README and
+  the record say tubule and non_tubule (ids 6 and 7); the snippet takes the keys as the files have them and
+  refuses a key that is not listed. non_mitosis (id 2, not among the README's six classes) is an empty list in
+  every file, so id 2 never occurs
+- >-
+  placement checked on the data: a point marks pixel (floor(y * 1024), floor(x * 1360)) (record: multiply by
+  1360 and 1024 for pixels). All 23,549 points lie inside their image, each in a pixel of its own (per class:
+  mitosis 115, apoptosis 271, tumor 20,155, non_tumor 1,905, lumen 493, non_lumen 610). The mean of the three
+  samples is 32,680 at the nucleus points of the uint16 files against 35,547 to 39,077 with the points moved
+  15 px, 45,523 to 45,896 mirrored, 45,592 with x and y exchanged and 46,121 over the images (uint8 files:
+  137.7 against 153.0 to 165.9, 185.7 to 187.5 and 190.7), and the points of Case_10-01 fall on the dots of
+  groundTruth_display/Case_10-01.png, so there is no flip, transpose or offset
+- >-
+  segmentation_type semantic: a pixel holds a class id, not an object id. The label is a points table, not a
+  mask: one pixel per object at its centroid (radius left at 0, since the files give no outlines or sizes and
+  a disc would invent an extent), so 0 means no point here, not background
+- >-
+  label_key manual_gt-nucleus-points, the draft's key kept on both labels (one per raw): source manual and
+  encoding points-table are the record's. The class word is the match agent's and still needs a human's
+  confirmation: 22,446 of the 23,549 points (ids 1 to 5) mark nuclei, but ids 6 and 7 (lumen and non_lumen,
+  1,103 points) mark tubule lumens and their negatives, which the same files and the same label carry
+- >-
+  no voxel size bound: the TIFFs have no resolution tags and the JSON has none (the record's 514 x 527 nm is
+  from the paper). groundTruth_display/*.png are renderings of the same points and are left unbound, as the
+  record says
