@@ -195,8 +195,9 @@ harness stage   <binding.yaml> --snippets <dir> --record <record.yaml> --plan pl
                                                                        # a rule with `filters` (`content`: the
                                                                        # crop job's test; `labelled`: a nonzero
                                                                        # pixel in a label paired with the raw, a
-                                                                       # raw without labels failing) tests each draw's
-                                                                       # full-resolution box, labels before raw,
+                                                                       # raw without labels failing) tests each draw:
+                                                                       # the labels over its whole footprint, then
+                                                                       # the raw's full-resolution box,
                                                                        # and draws again until the split's count
                                                                        # or 2000 rejections in a row; stage.json
                                                                        # then gives each volume's `selection`
