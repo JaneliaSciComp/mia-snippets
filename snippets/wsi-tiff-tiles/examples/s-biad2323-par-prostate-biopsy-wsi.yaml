@@ -1,0 +1,23 @@
+record: s-biad2323-par-prostate-biopsy-wsi
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: wsi-tiff-tiles
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/323/S-BIAD2323/Files/bia_prostate_wsi/component_A_grundium_svs/c021b_grundium.svs"]
+    params: {}
+  - snippet: wsi-tiff-tiles
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/323/S-BIAD2323/Files/bia_prostate_wsi/component_A_grundium_svs/c001a_grundium.svs"]
+    params: {}
+  - snippet: wsi-tiff-tiles
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/323/S-BIAD2323/Files/bia_prostate_wsi/component_C_leica_svs/c021b_leica.svs"]
+    params: {}
+  - snippet: wsi-tiff-tiles
+    urls: ["https://ftp.ebi.ac.uk/biostudies/fire/S-BIAD/323/S-BIAD2323/Files/bia_prostate_wsi/component_B_hamamatsu_ndpi/c021b_hamamatsu.ndpi"]
+    params: {}
+labels: []
+reasons:
+  - "wsi-tiff-tiles instead of the draft's tiff-zip-member-2: each slide is a tiled JPEG/YCbCr pyramid of 2.4 GB (c021b_grundium) to 73 GB (c021b_hamamatsu) decoded at level 0, and tiff-zip-member-2 decodes the whole page for any region (the match report: 34.7 MB fetched for one patch of the smallest slide, no result in 540 s on c001a_grundium). This snippet fetches and decodes only the tiles a region touches"
+  - "one raw per slide, each a plain file url with no params: the slides differ in yx shape (record shape_varies true), so a folder of them is not one array. Bound are the record's sample slide c021b_grundium.svs, the same biopsy from the other two scanners (c021b_leica.svs, c021b_hamamatsu.ndpi) so that every file kind of the record is read, and c001a_grundium.svs, the typical slide the match agent could not read. The other 1,013 slides read the same way and are added as further raw entries (or as the component's `<dir>/::*.svs` glob with params.index)"
+  - "axes cyx, c = the 3 colour samples (R, G, B) of the first IFD, the level-0 page of each pyramid: the record gives yxs uint8 with the pages as pyramid levels; shapes 3x28672x28672, 3x81920x57344 (the record's c001a level 0), 3x30002x34281 and 3x110336x222208 (harness describe's c021b_hamamatsu shape in the match report)"
+  - "no labels bound: the record's only annotation is slide_labels.tsv, slide-level Gleason/ISUP grades (encoding other, no region masks), which is not a label array"
+  - "no voxel size bound: record imaging.voxel_size_nm is null (it differs per scanner); the snippet reports what each file states (the Aperio MPP field, the NDPI resolution tags)"

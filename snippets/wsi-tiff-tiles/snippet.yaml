@@ -1,0 +1,10 @@
+name: wsi-tiff-tiles
+spec_version: 1
+summary: The full-resolution level (first IFD) of one whole-slide image stored as a tiled TIFF at a plain URL, as cyx (colour samples as c) or yx - Aperio SVS, also as BigTIFF (Grundium, Leica), and Hamamatsu NDPI, whose single JPEG stream is read by its restart intervals. Only the tiles a region touches are fetched by range and decoded, so a 256 px patch of a multi-gigabyte slide costs a few MiB; the page is never decoded whole and the other pyramid levels are never visited. One slide per array (slides differ in shape) - the url is one file, or a `<dir>/::<glob>` with `index` naming the match.
+formats: [svs, ndpi, tiff]
+containers: [http]
+params:
+  index: {type: int, required: false, doc: "only with a glob url (`<dir>/::<glob>`): the 0-based position, in name order, of the one matching file this array is. Required when the glob matches more than one file; bind one raw per slide. Without it the url must stand for exactly one file; reason required in binding"}
+requires: [numpy, tifffile, imagecodecs]
+tested_on: [s-biad2323-par-prostate-biopsy-wsi]
+supersedes: null
