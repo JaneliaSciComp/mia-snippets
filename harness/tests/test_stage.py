@@ -508,6 +508,21 @@ def test_a_rejected_label_draw_reads_no_raw():
     assert keep(sample_at(0, 0)) == "content"
 
 
+def test_labelled_tests_the_whole_footprint_and_content_the_full_resolution_box():
+    """A crop is its coarsest footprint: annotation in a corner of it, outside the full-resolution box at its
+    centre, is annotation in the crop (three datasets of buffer 28161271 had theirs only there)."""
+    raw = Counted(np.random.default_rng(0).integers(0, 255, (200, 200), dtype=np.uint8), "yx")
+    label = Counted(np.zeros((200, 200), np.uint16), "yx")
+    label.data[:8, :8] = 9
+    keep = keeper(filtered((1, 2, 4), 32, {}).rule, raw, [label])
+    corner = {"plane": {}, "starts": {"1": [48, 48], "2": [16, 16], "4": [0, 0]}}   # footprint 0..128, centre 48..80
+    assert keep(corner) is None
+    beside = {"plane": {}, "starts": {"1": [56, 56], "2": [20, 20], "4": [2, 2]}}   # footprint 8..136: no label in it
+    assert keep(beside) == "labelled"
+    raw.data[48:80, 48:80] = 7      # blank where the full-resolution box is, texture around it
+    assert keep(corner) == "content"
+
+
 def test_a_filter_that_reads_no_label_reads_none():
     raw, label = Counted(np.zeros((200, 200), np.uint8), "yx"), Counted(np.ones((200, 200), np.uint16), "yx")
     assert keeper(filtered((1,), 64, {}, ({"name": "content"},)).rule, raw, [label])(sample_at(0, 0)) == "content"

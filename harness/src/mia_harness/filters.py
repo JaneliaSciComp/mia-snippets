@@ -1,4 +1,5 @@
-"""The filters a plan rule may name: what a sample's full-resolution box must hold to be staged."""
+"""The filters a plan rule may name: what a sample must hold to be staged. A raw filter is given the sample's
+full-resolution box, a label filter the labels over its whole footprint (`stage.keeper`)."""
 from collections.abc import Callable
 from typing import Literal
 
@@ -8,8 +9,8 @@ from .png import content_ok
 
 
 def labelled(labels: list[np.ndarray]) -> bool:
-    """Whether the box holds any annotation: a nonzero pixel, a single point being enough, in one of `labels`, the
-    label boxes paired with the sample's raw. A raw without labels holds none."""
+    """Whether the crop holds any annotation: a nonzero pixel, a single point being enough, in one of `labels`, the
+    footprints of the labels paired with the sample's raw. A raw without labels holds none."""
     return any(np.asarray(label).any() for label in labels)
 
 

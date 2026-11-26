@@ -95,11 +95,12 @@ def _channels(array: Array) -> int:
     return dict(zip(array.axes, array.shape)).get("c", 1)
 
 
-def _box(array: Array, sample: dict, patch: int, last: dict) -> np.ndarray:
-    """The sample's full-resolution box of `array`, channels first. A plane-access array hands back whole planes,
-    so the last one read is kept in `last` (per array and channel), as `write_pyramid` keeps its plane."""
-    y, x = sample["starts"]["1"]
-    rows, cols = slice(y, y + patch), slice(x, x + patch)
+def _box(array: Array, sample: dict, patch: int, last: dict, factor: int = 1) -> np.ndarray:
+    """The raw pixels of `array` under the sample's box at level `factor`, channels first: its full-resolution box
+    at 1, its whole footprint at the coarsest. A plane-access array hands back whole planes, so the last one read
+    is kept in `last` (per array and channel), as `write_pyramid` keeps its plane."""
+    y, x = (start * factor for start in sample["starts"][str(factor)])
+    rows, cols = slice(y, y + patch * factor), slice(x, x + patch * factor)
     plane = {"z": sample["plane"]["z"]} if "z" in sample["plane"] else {}
     blocks = []
     for channel in range(_channels(array)):
@@ -116,20 +117,22 @@ def _box(array: Array, sample: dict, patch: int, last: dict) -> np.ndarray:
 
 def keeper(rule: PlanRule, raw: Array, labels: list[Array]) -> Callable[[dict], str | None] | None:
     """`select_samples`' `keep` for a raw and the labels paired with it: the name of the first of the rule's filters
-    the sample's full-resolution box fails, or None. A filter's box is read when its turn comes, labels before
-    the raw (`filters.FILTERS`), so a sample a label filter rejects costs no raw read. None for a rule without
-    filters."""
+    the sample fails, or None. A raw filter is given the sample's full-resolution box, a label filter the labels
+    over its whole footprint (the coarsest level's box): annotation anywhere in the crop is annotation. A filter's
+    box is read when its turn comes, labels before the raw (`filters.FILTERS`), so a sample a label filter rejects
+    costs no raw read. None for a rule without filters."""
     tests = ordered(rule.filters)
     if not tests:
         return None
     last: dict = {}
+    coarsest = max(rule.levels)
 
     def keep(sample: dict) -> str | None:
         boxes: dict = {}
         for name, test, reads, parameters in tests:
             if reads not in boxes:
                 boxes[reads] = (_box(raw, sample, rule.patch, last) if reads == "raw"
-                                else [_box(label, sample, rule.patch, last) for label in labels])
+                                else [_box(label, sample, rule.patch, last, coarsest) for label in labels])
             if not test(boxes[reads], **parameters):
                 return name
         return None
@@ -140,8 +143,8 @@ def keeper(rule: PlanRule, raw: Array, labels: list[Array]) -> Callable[[dict], 
 def _plan_volume(i: int, raw: Array, binding: Binding, labels: list[Array], rule_input: PlanInput,
                  voxel: dict[str, VoxelAxis], errors: list[str], counts: dict[str, int]) -> _Volume | None:
     """Raw `i`'s samples (`counts` per split, its share of the record's) and its groups' plans, or None after an
-    error line. Reads no voxel unless the rule has filters: then each draw's full-resolution box is read and
-    tested (`keeper`), and a raw none of whose draws passed comes back without groups."""
+    error line. Reads no voxel unless the rule has filters: then each draw's boxes are read and tested (`keeper`),
+    and a raw none of whose draws passed comes back without groups."""
     rule = rule_input.rule
     vox, missing = _voxel_size(raw, voxel)
     if missing:
