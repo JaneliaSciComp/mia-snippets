@@ -1,0 +1,26 @@
+record: zenodo-21501303-rice-stem-cross-sections
+record_commit: 209795d252de12cb42b7ed23372e1026fda18337
+snippets_commit: 153d94301841aa0b23e0257ae0c626723d565a5f
+raw:
+  - snippet: image-tiles-7z-glob
+    urls:
+      - https://zenodo.org/records/21501303/files/dataset.7z
+    params:
+      members: "dataset/JPEGImages/*.jpg"
+labels:
+  - snippet: image-tiles-7z-glob
+    urls:
+      - https://zenodo.org/records/21501303/files/dataset.7z
+    params:
+      members: "dataset/SegmentationClass/*.png"
+    pairs_with: 0
+    label_key: manual_gt-stem_cavity_vascular_bundle-semantic
+    segmentation_type: semantic
+reasons:
+  - "image-tiles-7z-glob instead of the draft's image-tiles-glob: the record's only data file is dataset.7z, one solid LZMA2 folder of 1,372 files (264,779,427 decoded bytes), and image-tiles-glob and io.expand read '<archive>::<glob>' as a zip (BadZipFile). This snippet parses the 7z header and decodes the folder with the standard library's lzma; every member's CRC-32 was checked on a full pass"
+  - "the url is the plain archive and the member glob is params.members, not the draft's '<7z>::<glob>' url: harness stage prefetches every binding url through io.expand, which would read a '::' url as a zip member; a plain url is fetched whole, which is also what the snippet needs (a solid archive has no smaller unit)"
+  - "raw members 'dataset/JPEGImages/*.jpg': 686 baseline JPEGs, every one 2748 x 3584 with 3 samples, 8 bit (SOF header of all 686 read), so raw is zcyx (686, 3, 2748, 3584) uint8 with c = R, G, B as the record says (brightfield, 3 channels). z is the file index sorted by name, a stack of independent 2D sections (record dimensionality 2D), not a volume"
+  - "label members 'dataset/SegmentationClass/*.png': 686 8-bit palette PNGs, 3584 x 2748, all with the same VOC palette (IHDR and PLTE of all 686 read); the snippet returns the stored palette indices, so the label is zyx (686, 2748, 3584) uint8 on the raw's yx grid. The two globs match the same 686 stems in the same sorted order (checked on the archive's file list), so z index k of the label is the mask of z index k of the raw"
+  - "labels are bound although the draft left them out: with the 7z readable the masks were measured. All 686 masks hold exactly the ids 0..4. The record names four classes without ids; from the masks' geometry (7 masks, every 98th): id 4 is the only id that borders the background 0 and it borders ids 1, 2 and 3, so it is the stem section ('out'); id 2 borders only id 4 and lies at the centre (mean distance from the section's centroid 507 px against 896 to 1028 for the others), so it is the cavity ('in'); ids 1 and 3 are islands inside id 4, id 1 the smaller and outermost (22.5 M pixels over all masks, mean distance 1028 px), so the small vascular bundles, id 3 the larger and further in (66.4 M pixels, 912 px), so the large vascular bundles. 0 is everything outside the section. harness describe agrees: the central 1024 x 1024 of planes 343 and 480 is id 2 alone, where the raw is the empty light path (p1 to p99 216 to 227 in all three channels). This id-to-name table is inferred, not stated by the dataset; a human should confirm it"
+  - "label_key manual_gt-stem_cavity_vascular_bundle-semantic: the masks were rasterised from hand-drawn LabelMe polygons with the LabelMe script (record alignment_notes, paper Methods), so the source is manual; the class word names the classes of the one multi-class map and is this binding's choice, to be confirmed by a human"
+  - "segmentation_type semantic: the ids are classes; the vascular bundles of one class share one id (harness describe on the central 1024 x 1024 of 5 planes: 1 to 4 ids, up to 10 components per id) and are not numbered as instances"
